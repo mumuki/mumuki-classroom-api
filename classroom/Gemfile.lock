@@ -46,6 +46,7 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     arel (7.0.0)
+    bson (4.0.0)
     builder (3.2.2)
     byebug (8.2.1)
     celluloid (0.17.2)
@@ -96,6 +97,8 @@ GEM
     mime-types (2.99)
     mini_portile2 (2.0.0)
     minitest (5.8.3)
+    mongo (2.2.1)
+      bson (~> 4.0)
     nokogiri (1.6.7.1)
       mini_portile2 (~> 2.0.0.rc2)
     puma (2.15.3)
@@ -155,6 +158,7 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
+  mongo
   puma
   rails (>= 5.0.0.beta1, < 5.1)
   spring
