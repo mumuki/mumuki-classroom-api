@@ -21,3 +21,4 @@
 
 en:
   hello: "Hello world"
+  student_not_found: "Student not found"
