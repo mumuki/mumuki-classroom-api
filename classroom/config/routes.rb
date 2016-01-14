@@ -7,4 +7,6 @@ Rails.application.routes.draw do
   # mount ActionCable.server => '/cable'
 
   root to: 'home#index'
+
+  resources :submissions, only: :create
 end
