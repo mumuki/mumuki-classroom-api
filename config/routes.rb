@@ -8,5 +8,7 @@ Rails.application.routes.draw do
 
   root to: 'home#index'
 
-  resources :submissions, only: :create
+  namespace :events do
+    resources :submissions, only: :create
+  end
 end
