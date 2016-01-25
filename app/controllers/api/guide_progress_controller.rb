@@ -1,7 +1,7 @@
 class Api::GuideProgressController < ApplicationController
 
   def show
-    result = GuideProgress.by_id params[:id].to_i, env
+    result = GuideProgress.by_slug params[:slug], env
     render json: { guide_progress: result.as_json }
   end
 

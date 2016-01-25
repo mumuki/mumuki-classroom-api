@@ -2,8 +2,8 @@ class GuideProgress
 
   extend WithMongo
 
-  def self.by_id(id, env)
-    guides_progress_collection(env).find("guide.id" => id)
+  def self.by_slug(slug, env)
+    guides_progress_collection(env).find("guide.slug" => slug)
   end
 
   def self.all(env)
@@ -23,8 +23,10 @@ class GuideProgress
   def self.process_params(data)
     params = {}
     %w(guide submitter).each do |model|
-      params[model] = { id: data[model]['id'], name: data[model]['name']}
+      params[model] = { name: data[model]['name']}
     end
+    params['guide']['slug'] = data['guide']['slug']
+    params['submitter']['id'] = data['submitter']['id']
     params['exercise'] = {
       id: data['exercise']['id'],
       name: data['exercise']['name'],
