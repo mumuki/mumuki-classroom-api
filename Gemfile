@@ -7,7 +7,7 @@ gem 'rails', '>= 5.0.0.beta1', '< 5.1'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.0'
 # Use Unicorn as the app server
-gem 'unicorn-rails'
+gem 'thin'
 gem 'mongo'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -18,9 +18,11 @@ gem 'mongo'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 # gem 'rack-cors'
 
-group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug'
+group :test do
+  gem 'rspec-rails', '~> 2.14'
+  gem 'factory_girl_rails'
+  gem 'rake', '10.4.2'
+  gem 'faker', '~> 1.5'
 end
 
 group :development do
