@@ -3,7 +3,7 @@ class GuideProgress
   extend WithMongo
 
   def self.by_id(id, env)
-    guides_progress_collection(env).where(id: id)
+    guides_progress_collection(env).find("guide.id" => id)
   end
 
   def self.all(env)

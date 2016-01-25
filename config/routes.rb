@@ -11,4 +11,8 @@ Rails.application.routes.draw do
   namespace :events do
     resources :submissions, only: :create
   end
+
+  namespace :api do
+    resources :guide_progress, only: :show
+  end
 end
