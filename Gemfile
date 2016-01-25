@@ -9,6 +9,7 @@ gem 'rails', '>= 5.0.0.beta1', '< 5.1'
 # Use Unicorn as the app server
 gem 'thin'
 gem 'mongo'
+gem 'mumukit-auth', github: 'mumuki/mumukit-auth', branch: 'master'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
