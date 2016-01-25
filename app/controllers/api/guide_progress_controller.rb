@@ -1,4 +1,7 @@
 class Api::GuideProgressController < ApplicationController
+  include WithAuthenthication
+
+  before_action :authenticate, only: :show
 
   def show
     result = GuideProgress.by_slug "#{params[:org]}/#{params[:repo]}", env
