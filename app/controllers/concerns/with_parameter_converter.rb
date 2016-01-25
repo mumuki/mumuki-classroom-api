@@ -1,6 +1,6 @@
 module WithParameterConverter
 
-  def convert parameters
+  def convert(parameters)
     parameters.as_json['parameters']
   end
 

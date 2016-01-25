@@ -1,26 +1,26 @@
-class ProgressGuide
+class GuideProgress
 
-  extend WithQueries
+  extend WithMongo
 
-  def self.by_id id,
-   env
-    self.where :progress_guides, { id: id }, env
+  def self.by_id(id, env)
+    guides_progress_collection(env).where(id: id)
   end
 
-  def self.all env
-    self.find :progress_guides
+  def self.all(env)
+    guides_progress_collection(env).find
   end
 
-  def self.update! data, env
+  def self.update!(data, env)
     params = process_params data
-    self.upsert :progress_guides, params, env
+    collection = guides_progress_collection(env)
+    collection.upsert params
   end
 
-  def self.exists? id, env
+  def self.exists?(id, env)
     self.by_id(id, env).count > 0
   end
 
-  def self.process_params data
+  def self.process_params(data)
     params = {}
     %w(guide submitter).each do |model|
       params[model] = { id: data[model]['id'], name: data[model]['name']}
