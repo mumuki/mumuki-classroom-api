@@ -25,11 +25,13 @@ class GuideProgress
     %w(guide submitter).each do |model|
       params[model] = { name: data[model]['name']}
     end
-    params['guide']['slug'] = data['guide']['slug']
-    params['submitter']['id'] = data['submitter']['id']
+    params['guide'] = data['guide']
+    params['submitter'] = data['submitter']
+
     params['exercise'] = {
       id: data['exercise']['id'],
       name: data['exercise']['name'],
+      number: data['exercise']['number'],
       submission: {
         status: data['status'],
         result: data['result'],
