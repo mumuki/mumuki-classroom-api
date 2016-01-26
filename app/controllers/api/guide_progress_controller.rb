@@ -1,5 +1,5 @@
 class Api::GuideProgressController < ApplicationController
-  include WithAuthenthication
+  include WithAuthentication
 
   before_action :authenticate, only: :show
 
