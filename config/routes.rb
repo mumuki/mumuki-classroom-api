@@ -12,6 +12,6 @@ Rails.application.routes.draw do
     resources :submissions, only: :create
   end
 
-  get 'api/guide_progress', :to => 'api/guide_progress#show'
+  get 'api/guide_progress/:org/:repo', :to => 'api/guide_progress#show'
 
 end
