@@ -1,11 +1,13 @@
 class Api::GuideProgressController < ApplicationController
   include WithAuthentication
 
-  before_action :authenticate, only: :show
+  before_action :protect!, only: :show
 
   def show
-    result = GuideProgress.by_slug "#{params[:org]}/#{params[:repo]}", env
+    result = GuideProgress.by_slug slug, env
     render json: { guide_progress: result.as_json }
   end
+
+  private
 
 end
