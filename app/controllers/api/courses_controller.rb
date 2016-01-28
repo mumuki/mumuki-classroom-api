@@ -1,11 +1,17 @@
 class Api::CoursesController < ApplicationController
   include WithAuthentication
 
-  before_action :protect_course!, only: :index
+  before_action :protect!, only: :show
+  before_action :permissions, only: :index
+
 
   def index
     grants = @permissions.to_s.gsub(/[:]/, '|')
-    render json: { guides_progress: GuideProgress.by_course(grants, env) }
+    render json: { courses: Course.all(grants, env) }
+  end
+
+  def show
+    render json: { course_guides: GuideProgress.by_course(slug(:course), env) }
   end
 
 

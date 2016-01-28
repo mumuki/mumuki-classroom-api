@@ -30,6 +30,10 @@ module WithMongo
       find({ "course.slug" => { "$regex" => grants } })
     end
 
+    def by_course_slug(slug)
+      find({ "course.slug" => slug })
+    end
+
     def get_exercise(slug, student_id)
       find("guide.slug" => slug, "student.id" => student_id).first
     end

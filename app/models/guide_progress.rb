@@ -14,8 +14,8 @@ class GuideProgress
     end
   end
 
-  def self.by_course(grants, env)
-    guides_progress_collection(env).by_course grants
+  def self.by_course(slug, env)
+    guides_progress_collection(env).by_course_slug slug
   end
 
   def self.all(env)
