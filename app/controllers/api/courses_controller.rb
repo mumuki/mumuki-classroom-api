@@ -4,7 +4,8 @@ class Api::CoursesController < ApplicationController
   before_action :protect_course!, only: :index
 
   def index
-    render json: { guides_progress: GuideProgress.by_slug('course', slug, env) }
+    grants = @permissions.to_s.gsub(/[:]/, '|')
+    render json: { guides_progress: GuideProgress.by_course(grants, env) }
   end
 
 

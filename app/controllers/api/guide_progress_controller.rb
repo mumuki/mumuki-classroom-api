@@ -1,7 +1,7 @@
 class Api::GuideProgressController < ApplicationController
   include WithAuthentication
 
-  before_action :protect!, only: :show
+  before_action :protect_guide!, only: :show
 
   def show
     result = GuideProgress.by_slug slug, env

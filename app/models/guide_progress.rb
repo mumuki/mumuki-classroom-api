@@ -6,6 +6,10 @@ class GuideProgress
     guides_progress_collection(env).find("guide.slug" => slug)
   end
 
+  def self.by_course(grants, env)
+    guides_progress_collection(env).find({ "course.slug" => { "$regex" => grants } })
+  end
+
   def self.all(env)
     guides_progress_collection(env).find
   end
