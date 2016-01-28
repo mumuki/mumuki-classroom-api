@@ -3,11 +3,19 @@ class GuideProgress
   extend WithMongo
 
   def self.by_slug(slug, env)
-    guides_progress_collection(env).find("guide.slug" => slug)
+    guides_progress_collection(env).by_slug slug
+  end
+
+  def self.exercise_by_student(slug, student_id, exercise_id, env)
+    guide_progress = guides_progress_collection(env).get_exercise slug, student_id
+    guide_progress.tap do |gp|
+      gp['exercise'] = gp['exercises'].detect { |exercise| exercise['id'] == exercise_id }
+      gp.delete 'exercises'
+    end
   end
 
   def self.by_course(grants, env)
-    guides_progress_collection(env).find({ "course.slug" => { "$regex" => grants } })
+    guides_progress_collection(env).by_course grants
   end
 
   def self.all(env)

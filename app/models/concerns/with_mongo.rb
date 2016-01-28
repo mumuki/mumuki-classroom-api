@@ -21,6 +21,18 @@ module WithMongo
         end
       end
     end
+
+    def by_slug(slug)
+      find("guide.slug" => slug)
+    end
+
+    def by_course(grants)
+      find({ "course.slug" => { "$regex" => grants } })
+    end
+
+    def get_exercise(slug, student_id)
+      find("guide.slug" => slug, "student.id" => student_id).first
+    end
   end
 
   def method_missing(name, *args, &block)
