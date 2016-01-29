@@ -11,7 +11,7 @@ class Api::GuideProgressController < ApplicationController
   end
 
   def student_exercise
-    render json: { guide_progress: GuideProgress.exercise_by_student(slug(:repo), params[:student_id].to_i, params[:exercise_id].to_i, env) }
+    render json: { exercise_progress: GuideProgress.exercise_by_student(slug(:repo), params[:student_id].to_i, params[:exercise_id].to_i, env) }
   end
 
   private
