@@ -4,7 +4,7 @@ class Course
 
   def self.all(grants, env)
     courses = guides_progress_collection(env).by_course grants
-    courses.as_json.map { |a| a['course'] }
+    courses.as_json.map { |a| a['course'] }.to_set
   end
 
 end
