@@ -11,7 +11,9 @@ class Api::CoursesController < ApplicationController
   end
 
   def show
-    render json: { course_guides: GuideProgress.by_course(slug(:course), env) }
+    guide = GuideProgress.by_course(slug(:course), env)
+    guide = guide.as_json.map { |guide| guide['guide']}.to_set
+    render json: { course_guides: guide }
   end
 
 
