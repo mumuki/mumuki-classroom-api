@@ -4,9 +4,10 @@ class Api::GuideProgressController < ApplicationController
   before_action :permissions, only: [:show, :student_exercise]
 
   def show
-    guide = GuideProgress.by_slug(slug(:repo), env).first
-    @permissions.protect! guide['course']['slug']
-    render json: { guide_progress: guide}
+    guide = GuideProgress.by_slug(slug(:repo), env).select do |guide|
+      @permissions.allows? guide['course']['slug']
+    end
+    render json: { guides_progress: guide}
   end
 
   def student_exercise
