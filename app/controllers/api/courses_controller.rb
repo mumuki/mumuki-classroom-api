@@ -6,7 +6,7 @@ class Api::CoursesController < ApplicationController
 
 
   def index
-    grants = @permissions.to_s.gsub(/[:]/, '|')
+    grants = @permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
     render json: { courses: Course.all(grants, env) }
   end
 
