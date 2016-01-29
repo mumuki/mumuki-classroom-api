@@ -47,6 +47,8 @@ class GuideProgress
       submission: {
         status: data['status'],
         result: data['result'],
+        expectation_results: data['expectation_results'],
+        test_results: data['test_results'],
         feedback: data['feedback'],
         submissions_count: data['submissions_count'],
         created_at: data['created_at'],
