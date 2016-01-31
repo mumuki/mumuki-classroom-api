@@ -21,7 +21,7 @@ subdomain do
       @json_body ||= JSON.parse(request.body.read) rescue nil
     end
 
-    def set_permissions
+    def permissions
       @permissions ||= parse_token.permissions 'classroom'
     end
 
@@ -35,7 +35,7 @@ subdomain do
     end
 
     def protect!
-      @permissions.protect!(slug(:course))
+      permissions.protect!(slug(:course))
     end
 
     def slug(type)
@@ -90,8 +90,7 @@ subdomain do
   end
 
   get '/api/courses' do
-    set_permissions
-    grants = @permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+    grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
     { courses: Course.all(grants, env) }
   end
 
@@ -102,13 +101,11 @@ subdomain do
   end
 
   get '/api/guide_progress/:org/:repo/:student_id/:exercise_id' do
-    set_permissions
     { exercise_progress: GuideProgress.exercise_by_student(slug('repo'), params['student_id'].to_i, params['exercise_id'].to_i, env) }
   end
 
   get '/api/guide_progress/:org/:repo' do
-    set_permissions
-    { guides_progress: GuideProgress.by_slug(slug('repo'), env).select { |guide| @permissions.allows? guide['course']['slug'] } }
+    { guides_progress: GuideProgress.by_slug(slug('repo'), env).select { |guide| permissions.allows? guide['course']['slug'] } }
   end
 
   post '/events/submissions' do
