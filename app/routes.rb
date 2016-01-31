@@ -92,23 +92,23 @@ subdomain do
   get '/api/courses' do
     set_permissions
     grants = @permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
-    Course.all(grants, env)
+    { courses: Course.all(grants, env) }
   end
 
   get '/api/courses/:org/:course' do
     protect!
     guides = GuideProgress.by_course(slug('course'), env)
-    guides.as_json.map { |guide| guide['guide']}.to_set
+    { course_guides: guides.as_json.map { |guide| guide['guide']}.to_set }
   end
 
   get '/api/guide_progress/:org/:repo/:student_id/:exercise_id' do
     set_permissions
-    GuideProgress.exercise_by_student(slug('repo'), params['student_id'].to_i, params['exercise_id'].to_i, env)
+    { exercise_progress: GuideProgress.exercise_by_student(slug('repo'), params['student_id'].to_i, params['exercise_id'].to_i, env) }
   end
 
   get '/api/guide_progress/:org/:repo' do
     set_permissions
-    GuideProgress.by_slug(slug('repo'), env).select { |guide| @permissions.allows? guide['course']['slug'] }
+    { guides_progress: GuideProgress.by_slug(slug('repo'), env).select { |guide| @permissions.allows? guide['course']['slug'] } }
   end
 
   post '/events/submissions' do
