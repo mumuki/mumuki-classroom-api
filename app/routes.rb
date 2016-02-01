@@ -19,12 +19,11 @@ helpers do
   end
 
   def permissions
-    @permissions ||= parse_token.permissions 'classroom'
+    @permissions ||= token.permissions 'classroom'
   end
 
-  def parse_token
-    token = Mumukit::Auth::Token.decode_header(authorization_header)
-    token.tap &:verify_client!
+  def token
+    @token ||= Mumukit::Auth::Token.decode_header(authorization_header).tap(&:verify_client!)
   end
 
   def authorization_header
@@ -126,7 +125,8 @@ post '/api/courses/:course/students' do
 
   Classroom::CourseStudent.insert!(
       student: {first_name: json_body['first_name'],
-                last_name: json_body['last_name']},
+                last_name: json_body['last_name'],
+                id: token.jwt['sub']},
       course: {slug: slug})
 
   {status: :created}

@@ -30,6 +30,13 @@ end
 
 Classroom::Database.tenant = 'example'
 
-def build_auth_header(permissions_string)
-  Mumukit::Auth::Token.encode_dummy_auth_header(classroom: {permissions: permissions_string})
+def build_auth_header(permissions_string, sub='github|user123456')
+  metadata = {classroom: {permissions: permissions_string}}
+
+  encoded_token = JWT.encode(
+      {aud: Mumukit::Auth.config.client_id,
+       sub: sub,
+       app_metadata: metadata},
+      Mumukit::Auth::Token.decoded_secret)
+  'dummy token ' + encoded_token
 end

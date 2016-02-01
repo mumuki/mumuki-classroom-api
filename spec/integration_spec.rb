@@ -91,12 +91,15 @@ describe 'routes' do
       end
 
       context 'when authenticated' do
+        let(:created_course_student) { Classroom::CourseStudent.first.to_h.deep_symbolize_keys }
         before { header 'Authorization', build_auth_header('*') }
         before { post '/api/courses/foo/students', student_json }
 
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to json_eq status: 'created' }
         it { expect(Classroom::CourseStudent.count).to eq 1 }
+        it { expect(created_course_student).to eq(student: {first_name: 'Jon', last_name: 'Doe', id: 'github|user123456'},
+                                                  course: {slug: 'example/foo'}) }
       end
     end
 
