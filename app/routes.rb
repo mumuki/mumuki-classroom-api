@@ -5,7 +5,7 @@ require 'sinatra/subdomain'
 require 'mumukit/auth'
 
 require_relative '../lib/classroom'
- configure do
+configure do
   enable :cross_origin
   set :allow_methods, [:get, :put, :post, :options, :delete]
   set :show_exceptions, false
@@ -43,7 +43,7 @@ subdomain do
     end
 
     def org
-     params['org']
+      params['org']
     end
 
     def set_mongo_connection
