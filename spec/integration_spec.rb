@@ -7,6 +7,10 @@ describe 'routes' do
     Sinatra::Application
   end
 
+  after do
+    Classroom::Database.clean!
+  end
+
   describe 'get /courses/' do
     before { header 'Authorization', build_auth_header('*') }
 
@@ -18,7 +22,7 @@ describe 'routes' do
     end
 
     context 'when there are courses' do
-      before { Course.insert!(name: 'foo', slug: 'test/foo', description: 'baz') }
+      before { Classroom::Course.insert!(name: 'foo', slug: 'test/foo', description: 'baz') }
       before { get '/courses' }
 
       it { expect(last_response).to be_ok }
@@ -29,7 +33,7 @@ describe 'routes' do
   describe 'post /courses' do
     let(:course_json) { {name: 'my-new-course',
                          description: 'haskell'}.to_json }
-    let(:created_slug) { Course.find_by(name: 'my-new-course').slug }
+    let(:created_slug) { Classroom::Course.find_by(name: 'my-new-course').slug }
 
     context 'when is normal teacher' do
       it 'rejects course creation' do
@@ -38,7 +42,7 @@ describe 'routes' do
         post '/courses', course_json
 
         expect(last_response).to_not be_ok
-        expect(Course.count).to eq 0
+        expect(Classroom::Course.count).to eq 0
       end
     end
 
@@ -49,7 +53,7 @@ describe 'routes' do
         post '/courses', course_json
 
         expect(last_response).to be_ok
-        expect(Course.count).to eq 1
+        expect(Classroom::Course.count).to eq 1
         expect(created_slug).to eq 'test/my-new-coure'
       end
     end
@@ -61,7 +65,7 @@ describe 'routes' do
         post '/courses', course_json
 
         expect(last_response).to be_ok
-        expect(Course.count).to eq 1
+        expect(Classroom::Course.count).to eq 1
         expect(created_slug).to eq 'test/my-new-coure'
       end
     end
@@ -71,7 +75,7 @@ describe 'routes' do
     let(:valid_student) { {name: 'Jon Doe'} }
 
     context 'when course exists' do
-      Course.insert!(name: 'foo', slug: 'test/foo')
+      Classroom::Course.insert!(name: 'foo', slug: 'test/foo')
 
       it 'rejects user creation when not authenticated' do
         header 'Authorization', build_auth_header('*')
@@ -79,7 +83,7 @@ describe 'routes' do
         post '/courses/foo/students', valid_student
 
         expect(last_response).to_not be_ok
-        expect(CourseStudents.count).to eq 0
+        expect(Classroom::CourseStudents.count).to eq 0
       end
 
       it 'creates a user when authenticated' do
@@ -88,7 +92,7 @@ describe 'routes' do
         post '/courses/foo/students', valid_student
 
         expect(last_response).to be_ok
-        expect(CourseStudent.count).to eq 1
+        expect(Classroom::CourseStudent.count).to eq 1
       end
     end
 
@@ -99,7 +103,7 @@ describe 'routes' do
         post '/courses/foo/students', valid_student
 
         expect(last_response).to_not be_ok
-        expect(CourseStudent.count).to eq 0
+        expect(Classroom::CourseStudent.count).to eq 0
       end
     end
   end

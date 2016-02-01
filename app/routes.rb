@@ -47,8 +47,7 @@ subdomain do
     end
 
     def set_mongo_connection
-      tenant = subdomain.present?? subdomain : 'central'
-      env['mongo_client'] = Mongo::Client.new([ '127.0.0.1:27017' ], database: tenant)
+      Classroom::Database.tenant = subdomain.present? ? subdomain : 'central'
     end
 
     def convert(parameters)
@@ -91,24 +90,24 @@ subdomain do
 
   get '/api/courses' do
     grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
-    { courses: Course.all(grants, env) }
+    {courses: Course.all(grants)}
   end
 
   get '/api/courses/:org/:course' do
     protect!
-    guides = GuideProgress.by_course(slug('course'), env)
-    { course_guides: guides.as_json.map { |guide| guide['guide']}.to_set }
+    guides = GuideProgress.by_course(slug('course'))
+    {course_guides: guides.as_json.map { |guide| guide['guide'] }.to_set}
   end
 
   get '/api/guide_progress/:org/:repo/:student_id/:exercise_id' do
-    { exercise_progress: GuideProgress.exercise_by_student(slug('repo'), params['student_id'].to_i, params['exercise_id'].to_i, env) }
+    {exercise_progress: GuideProgress.exercise_by_student(slug('repo'), params['student_id'].to_i, params['exercise_id'].to_i)}
   end
 
   get '/api/guide_progress/:org/:repo' do
-    { guides_progress: GuideProgress.by_slug(slug('repo'), env).select { |guide| permissions.allows? guide['course']['slug'] } }
+    {guides_progress: GuideProgress.by_slug(slug('repo')).select { |guide| permissions.allows? guide['course']['slug'] }}
   end
 
   post '/events/submissions' do
-    GuideProgress.update! json_body, env
+    GuideProgress.update! json_body
   end
 end

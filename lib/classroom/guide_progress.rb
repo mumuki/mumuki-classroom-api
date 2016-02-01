@@ -1,35 +1,34 @@
-class GuideProgress
+class Classroom::GuideProgress
+  extend Classroom::WithMongo
 
-  extend WithMongo
-
-  def self.by_slug(slug, env)
-    guides_progress_collection(env).by_slug slug
+  def self.by_slug(slug)
+    guides_progress_collection.by_slug slug
   end
 
-  def self.exercise_by_student(slug, student_id, exercise_id, env)
-    guide_progress = guides_progress_collection(env).get_exercise slug, student_id
+  def self.exercise_by_student(slug, student_id, exercise_id)
+    guide_progress = guides_progress_collection.get_exercise slug, student_id
     guide_progress.tap do |gp|
       gp['exercise'] = gp['exercises'].detect { |exercise| exercise['id'] == exercise_id }
       gp.delete 'exercises'
     end
   end
 
-  def self.by_course(slug, env)
-    guides_progress_collection(env).by_course_slug slug
+  def self.by_course(slug)
+    guides_progress_collection.by_course_slug slug
   end
 
-  def self.all(env)
-    guides_progress_collection(env).find
+  def self.all
+    guides_progress_collection.find
   end
 
-  def self.update!(data, env)
+  def self.update!(data)
     params = process_params data
-    collection = guides_progress_collection(env)
+    collection = guides_progress_collection
     collection.upsert params
   end
 
-  def self.exists?(id, env)
-    self.by_id(id, env).count > 0
+  def self.exists?(id)
+    self.by_id(id).count > 0
   end
 
   def self.process_params(data)
