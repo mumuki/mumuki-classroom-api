@@ -33,7 +33,7 @@ describe 'routes' do
   describe 'post /api/courses' do
     let(:course_json) { {name: 'my-new-course',
                          description: 'haskell'}.to_json }
-    let(:created_slug) { Classroom::Course.find_by(name: 'my-new-course').slug }
+    let(:created_slug) { Classroom::Course.find_by(name: 'my-new-course')['slug'] }
 
     context 'when is normal teacher' do
       it 'rejects course creation' do
@@ -47,27 +47,23 @@ describe 'routes' do
     end
 
     context 'when is org admin' do
-      it 'accepts course creation' do
-        header 'Authorization', build_auth_header('test/*')
+      before { header 'Authorization', build_auth_header('example/*') }
+      before { post '/api/courses', course_json }
 
-        post '/api/courses', course_json
-
-        expect(last_response).to be_ok
-        expect(Classroom::Course.count).to eq 1
-        expect(created_slug).to eq 'test/my-new-coure'
-      end
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq status: 'created' }
+      it { expect(Classroom::Course.count).to eq 1 }
+      it { expect(created_slug).to eq 'example/my-new-course' }
     end
 
     context 'when is global admin' do
-      it 'accepts course creation' do
-        header 'Authorization', build_auth_header('*')
+      before { header 'Authorization', build_auth_header('*') }
+      before { post '/api/courses', course_json }
 
-        post '/api/courses', course_json
-
-        expect(last_response).to be_ok
-        expect(Classroom::Course.count).to eq 1
-        expect(created_slug).to eq 'test/my-new-coure'
-      end
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq status: 'created' }
+      it { expect(Classroom::Course.count).to eq 1 }
+      it { expect(created_slug).to eq 'example/my-new-course' }
     end
   end
 
@@ -77,22 +73,19 @@ describe 'routes' do
     context 'when course exists' do
       before { Classroom::Course.insert!(name: 'foo', slug: 'test/foo') }
 
-      it 'rejects user creation when not authenticated' do
-        header 'Authorization', build_auth_header('*')
+      context 'when not authenticated' do
+        before { post '/api/courses/foo/students', valid_student }
 
-        post '/api/courses/foo/students', valid_student
-
-        expect(last_response).to_not be_ok
-        expect(Classroom::CourseStudent.count).to eq 0
+        it { expect(last_response).to_not be_ok }
+        it { expect(Classroom::CourseStudent.count).to eq 0 }
       end
 
-      it 'creates a user when authenticated' do
-        header 'Authorization', build_auth_header('*')
+      context 'when authenticated' do
+        before { header 'Authorization', build_auth_header('*') }
+        before { post '/api/courses/foo/students', valid_student }
 
-        post '/api/courses/foo/students', valid_student
-
-        expect(last_response).to be_ok
-        expect(Classroom::CourseStudent.count).to eq 1
+        it { expect(last_response).to be_ok }
+        it { expect(Classroom::CourseStudent.count).to eq 1 }
       end
     end
 

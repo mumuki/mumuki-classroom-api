@@ -71,6 +71,11 @@ error JSON::ParserError do
   halt 400
 end
 
+error Classroom::CourseExistsError do
+  halt 400
+end
+
+
 error Mumukit::Auth::InvalidTokenError do
   halt 400
 end
@@ -88,6 +93,20 @@ end
 get '/api/courses' do
   grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   {courses: Classroom::Course.all(grants)}
+end
+
+post '/api/courses' do
+  slug = "#{request.first_subdomain}/#{json_body['name']}"
+  permissions.protect!(slug)
+
+  Classroom::Course.ensure_new! slug
+
+  Classroom::Course.insert!(
+      name: json_body['name'],
+      description: json_body['description'],
+      slug: slug)
+
+  {status: :created}
 end
 
 get '/api/courses/:org/:course' do

@@ -2,6 +2,14 @@ module Classroom::Course
   extend Classroom::WithMongo
 
   class << self
+    def where(criteria)
+      courses_collection.find(criteria).projection(_id: 0)
+    end
+
+    def find_by(criteria)
+      where(criteria).first
+    end
+
     def count
       courses_collection.count
     end
@@ -11,7 +19,14 @@ module Classroom::Course
     end
 
     def all(grants_pattern)
-      courses_collection.find(slug: {'$regex' => grants_pattern}).projection(_id: 0)
+      where slug: {'$regex' => grants_pattern}
+    end
+
+    def ensure_new!(name)
+      raise Classroom::CourseExistsError if courses_collection.count(name: name) > 0
     end
   end
+end
+
+class Classroom::CourseExistsError < StandardError
 end

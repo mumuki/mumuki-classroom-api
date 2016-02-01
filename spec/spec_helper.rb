@@ -28,8 +28,8 @@ Mumukit::Auth.configure do |c|
   c.client_secret = Base64.encode64 'bar'
 end
 
-Classroom::Database.tenant = 'test'
+Classroom::Database.tenant = 'example'
 
 def build_auth_header(permissions_string)
-  Mumukit::Auth::Token.encode_dummy_auth_header(bibliotheca: {permissions: permissions_string})
+  Mumukit::Auth::Token.encode_dummy_auth_header(classroom: {permissions: permissions_string})
 end
