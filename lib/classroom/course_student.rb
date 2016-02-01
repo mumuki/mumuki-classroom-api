@@ -1,6 +1,10 @@
 class Classroom::CourseStudent
   extend Classroom::WithMongo
 
+  def self.find_by(criteria)
+    course_students_collection.find(criteria).projection(_id: 0).first
+  end
+
   def self.first
     course_students_collection.find.projection(_id: 0).first
   end

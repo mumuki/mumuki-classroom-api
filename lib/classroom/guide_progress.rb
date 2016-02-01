@@ -23,8 +23,7 @@ class Classroom::GuideProgress
 
   def self.update!(data)
     params = process_params data
-    collection = guides_progress_collection
-    collection.upsert params
+    guides_progress_collection.upsert params
   end
 
   def self.exists?(id)
@@ -33,11 +32,9 @@ class Classroom::GuideProgress
 
   def self.process_params(data)
     params = {}
-    %w(guide submitter).each do |model|
-      params[model] = { name: data[model]['name']}
-    end
     params['guide'] = data['guide']
     params['submitter'] = data['submitter']
+    params['course'] = CourseStudent.find_by('student.id' => data['submitter']['id'])['course']
 
     params['exercise'] = {
       id: data['exercise']['id'],
