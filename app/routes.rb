@@ -126,7 +126,7 @@ post '/api/courses/:course/students' do
   Classroom::CourseStudent.insert!(
       student: {first_name: json_body['first_name'],
                 last_name: json_body['last_name'],
-                id: token.jwt['sub']},
+                social_id: token.jwt['sub']},
       course: {slug: slug})
 
   {status: :created}

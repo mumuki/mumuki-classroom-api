@@ -98,7 +98,7 @@ describe 'routes' do
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to json_eq status: 'created' }
         it { expect(Classroom::CourseStudent.count).to eq 1 }
-        it { expect(created_course_student).to eq(student: {first_name: 'Jon', last_name: 'Doe', id: 'github|user123456'},
+        it { expect(created_course_student).to eq(student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|user123456'},
                                                   course: {slug: 'example/foo'}) }
       end
     end
