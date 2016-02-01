@@ -75,7 +75,7 @@ describe 'routes' do
     let(:valid_student) { {name: 'Jon Doe'} }
 
     context 'when course exists' do
-      Classroom::Course.insert!(name: 'foo', slug: 'test/foo')
+      before { Classroom::Course.insert!(name: 'foo', slug: 'test/foo') }
 
       it 'rejects user creation when not authenticated' do
         header 'Authorization', build_auth_header('*')
