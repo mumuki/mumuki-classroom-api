@@ -9,14 +9,14 @@ class Mongo::Collection
     else
       result2 = find({:guide => json[:guide], :student => json[:submitter], 'exercises.id' => json[:exercise][:id]})
 
-      unless result2.count.zero?
-        update_one(
-            {guide: json[:guide], student: json[:submitter], 'exercises.id' => json[:exercise][:id]},
-            {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]}})
-      else
+      if result2.count.zero?
         update_one(
             {guide: json[:guide], student: json[:submitter]},
             {'$push' => {'exercises' => {id: json[:exercise][:id], name: json[:exercise][:name], submissions: [json[:exercise][:submission]]}}})
+      else
+        update_one(
+            {guide: json[:guide], student: json[:submitter], 'exercises.id' => json[:exercise][:id]},
+            {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]}})
       end
     end
   end
