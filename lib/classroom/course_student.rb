@@ -1,3 +1,3 @@
-class Classroom::CourseStudents
+class Classroom::CourseStudent
   extend Classroom::WithMongo
 end
