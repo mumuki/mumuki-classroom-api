@@ -65,16 +65,26 @@ describe 'routes' do
       it { expect(Classroom::Course.count).to eq 1 }
       it { expect(created_slug).to eq 'example/my-new-course' }
     end
+
+    context 'when course already exists' do
+      before { Classroom::Course.insert!(name: 'my-new-course', slug: 'example/my-new-course') }
+      before { header 'Authorization', build_auth_header('*') }
+      before { post '/api/courses', course_json }
+
+      it { expect(last_response).to_not be_ok }
+      it { expect(last_response.body).to json_eq message: 'example/my-new-course does already exist' }
+
+    end
   end
 
   describe 'post /api/courses/:course/students/' do
-    let(:valid_student) { {name: 'Jon Doe'} }
+    let(:student_json) { {first_name: 'Jon', last_name: 'Doe'}.to_json }
 
     context 'when course exists' do
-      before { Classroom::Course.insert!(name: 'foo', slug: 'test/foo') }
+      before { Classroom::Course.insert!(name: 'foo', slug: 'example/foo') }
 
       context 'when not authenticated' do
-        before { post '/api/courses/foo/students', valid_student }
+        before { post '/api/courses/foo/students', student_json }
 
         it { expect(last_response).to_not be_ok }
         it { expect(Classroom::CourseStudent.count).to eq 0 }
@@ -82,9 +92,10 @@ describe 'routes' do
 
       context 'when authenticated' do
         before { header 'Authorization', build_auth_header('*') }
-        before { post '/api/courses/foo/students', valid_student }
+        before { post '/api/courses/foo/students', student_json }
 
         it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_eq status: 'created' }
         it { expect(Classroom::CourseStudent.count).to eq 1 }
       end
     end
@@ -93,7 +104,7 @@ describe 'routes' do
       it 'rejects creating a student' do
         header 'Authorization', build_auth_header('*')
 
-        post '/api/courses/foo/students', valid_student
+        post '/api/courses/foo/students', student_json
 
         expect(last_response).to_not be_ok
         expect(Classroom::CourseStudent.count).to eq 0

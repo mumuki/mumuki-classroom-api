@@ -22,11 +22,18 @@ module Classroom::Course
       where slug: {'$regex' => grants_pattern}
     end
 
-    def ensure_new!(name)
-      raise Classroom::CourseExistsError if courses_collection.count(name: name) > 0
+    def ensure_new!(slug)
+      raise Classroom::CourseExistsError, "#{slug} does already exist" if courses_collection.count(slug: slug) > 0
+    end
+
+    def ensure_exist!(slug)
+      raise Classroom::CourseNotExistsError, "#{slug} does not exist" if courses_collection.count(slug: slug) == 0
     end
   end
 end
 
 class Classroom::CourseExistsError < StandardError
+end
+
+class Classroom::CourseNotExistsError < StandardError
 end

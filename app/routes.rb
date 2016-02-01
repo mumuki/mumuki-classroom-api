@@ -75,6 +75,9 @@ error Classroom::CourseExistsError do
   halt 400
 end
 
+error Classroom::CourseNotExistsError do
+  halt 400
+end
 
 error Mumukit::Auth::InvalidTokenError do
   halt 400
@@ -115,6 +118,20 @@ get '/api/courses/:org/:course' do
   {course_guides: guides.as_json.map { |guide| guide['guide'] }.to_set}
 end
 
+post '/api/courses/:course/students' do
+  protect!
+
+  slug = "#{request.first_subdomain}/#{params['course']}"
+  Classroom::Course.ensure_exist! slug
+
+  Classroom::CourseStudent.insert!(
+      student: {first_name: json_body['first_name'],
+                last_name: json_body['last_name']},
+      course: {slug: slug})
+
+  {status: :created}
+end
+
 get '/api/guide_progress/:org/:repo/:student_id/:exercise_id' do
   {exercise_progress: Classroom::GuideProgress.exercise_by_student(slug('repo'), params['student_id'].to_i, params['exercise_id'].to_i)}
 end
@@ -122,6 +139,7 @@ end
 get '/api/guide_progress/:org/:repo' do
   {guides_progress: Classroom::GuideProgress.by_slug(slug('repo')).select { |guide| permissions.allows? guide['course']['slug'] }}
 end
+
 
 post '/events/submissions' do
   Classroom::GuideProgress.update! json_body
