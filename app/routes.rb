@@ -118,8 +118,6 @@ get '/api/courses/:org/:course' do
 end
 
 post '/api/courses/:course/students' do
-  protect!
-
   slug = "#{request.first_subdomain}/#{params['course']}"
   Classroom::Course.ensure_exist! slug
 
