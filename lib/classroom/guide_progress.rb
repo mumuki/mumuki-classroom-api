@@ -34,7 +34,7 @@ class Classroom::GuideProgress
     params = {}
     params['guide'] = data['guide']
     params['submitter'] = data['submitter']
-    params['course'] = CourseStudent.find_by('student.social_id' => data['submitter']['social_id'])['course']
+    params['course'] = Classroom::CourseStudent.find_by('student.social_id' => data['submitter']['social_id'])['course']
 
     params['exercise'] = {
       id: data['exercise']['id'],
