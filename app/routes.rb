@@ -131,7 +131,7 @@ post '/api/courses/:course/students' do
 end
 
 get '/api/guide_progress/:org/:repo/:student_id/:exercise_id' do
-  {exercise_progress: Classroom::GuideProgress.exercise_by_student(slug('repo'), params['student_id'].to_i, params['exercise_id'].to_i)}
+  {exercise_progress: Classroom::GuideProgress.exercise_by_student(slug('repo'), params['student_id'], params['exercise_id'].to_i)}
 end
 
 get '/api/guide_progress/:org/:repo' do
