@@ -4,7 +4,7 @@ class Classroom::Database
   end
 
   def self.config
-    @config ||= YAML.load(ERB.new(File.read('config/database.yml')).result).
+    @config ||= YAML.load(ERB.new(File.read(File.expand_path '../../../config/database.yml', __FILE__)).result).
         with_indifferent_access[ENV['RACK_ENV'] || 'development']
   end
 
