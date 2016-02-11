@@ -1,5 +1,5 @@
 class Classroom::Database
-  
+
   class << self
 
     include Mumukit::Service::Database
@@ -22,6 +22,11 @@ class Classroom::Database
       end
     end
 
+    def with(organization, &block)
+      self.organization = organization
+      block.call
+      @client.try(:close)
+    end
   end
 
 end

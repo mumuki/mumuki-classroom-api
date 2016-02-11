@@ -20,20 +20,21 @@ module Classroom::FailedSubmission
   end
 
   def self.reprocess_central(social_id, destination, logger)
-    Classroom::Database.organization = :central
-    Classroom::Collection::FailedSubmissions.find_by_social_id(social_id).raw.each do |it|
-      Classroom::Database.organization = :central
-      Classroom::Collection::FailedSubmissions.delete! it.id
-      Classroom::Database.client.try(:close)
-      begin
-        Classroom::Database.organization = destination
-        Classroom::Submission.process! it.raw
-        Classroom::Database.client.try(:close)
-      rescue => e
-        logger.warn "Resubmission failed #{e}. it was: #{it.raw}" if logger.present?
-        Classroom::Database.organization = :central
-        Classroom::Collection::FailedSubmissions.insert! it
-        Classroom::Database.client.try(:close)
+    Classroom::Database.with :central do
+      Classroom::Collection::FailedSubmissions.find_by_social_id(social_id).raw.each do |it|
+        Classroom::Database.with :central do
+          Classroom::Collection::FailedSubmissions.delete! it.id
+        end
+        begin
+          Classroom::Database.with destination do
+            Classroom::Submission.process! it.raw
+          end
+        rescue => e
+          Classroom::Database.with :central do
+            logger.warn "Resubmission failed #{e}. it was: #{it.raw}" if logger.present?
+            Classroom::Collection::FailedSubmissions.insert! it
+          end
+        end
       end
     end
   end
