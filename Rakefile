@@ -40,7 +40,7 @@ namespace :resubmissions do
 
         logger.info "Processing resubmission #{social_id}"
 
-        Classroom::FailedSubmission.reprocess!(social_id, destination, logger)
+        Classroom::FailedSubmission.reprocess! social_id, destination
       rescue => e
         logger.error "Resubmission couldn't be processed #{e}. it was: #{body}"
       ensure
