@@ -92,12 +92,12 @@ options '*' do
   200
 end
 
-get '/api/courses' do
+get '/courses' do
   grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   {courses: Classroom::Course.all(grants)}
 end
 
-post '/api/courses' do
+post '/courses' do
   slug = "#{request.first_subdomain}/#{json_body['name']}"
   permissions.protect!(slug)
 
@@ -111,13 +111,13 @@ post '/api/courses' do
   {status: :created}
 end
 
-get '/api/courses/:org/:course' do
+get '/courses/:org/:course' do
   protect!
   guides = Classroom::GuideProgress.by_course(slug('course'))
   {course_guides: guides.as_json.map { |guide| guide['guide'] }.to_set}
 end
 
-post '/api/courses/:course/students' do
+post '/courses/:course/students' do
   slug = "#{request.first_subdomain}/#{params['course']}"
   Classroom::Course.ensure_exist! slug
 
@@ -130,11 +130,11 @@ post '/api/courses/:course/students' do
   {status: :created}
 end
 
-get '/api/guide_progress/:org/:repo/:student_id/:exercise_id' do
+get '/guide_progress/:org/:repo/:student_id/:exercise_id' do
   {exercise_progress: Classroom::GuideProgress.exercise_by_student(slug('repo'), params['student_id'], params['exercise_id'].to_i)}
 end
 
-get '/api/guide_progress/:org/:repo' do
+get '/guide_progress/:org/:repo' do
   {guides_progress: Classroom::GuideProgress.by_slug(slug('repo')).select { |guide| permissions.allows? guide['course']['slug'] }}
 end
 
