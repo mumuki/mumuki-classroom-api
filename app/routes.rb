@@ -138,7 +138,10 @@ get '/guide_progress/:org/:repo' do
   {guides_progress: Classroom::GuideProgress.by_slug(slug('repo')).select { |guide| permissions.allows? guide['course']['slug'] }}
 end
 
-
 post '/events/submissions' do
   Classroom::GuideProgress.update! json_body
+end
+
+get '/ping' do
+  {message: 'pong!'}
 end
