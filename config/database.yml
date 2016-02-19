@@ -1,9 +1,9 @@
 production:
-  host: <%=ENV['OPENSHIFT_MONGODB_DB_HOST']%>
-  port: <%=ENV['OPENSHIFT_MONGODB_DB_PORT']%>
-  user: <%=ENV['OPENSHIFT_MONGODB_DB_USERNAME']%>
-  password: <%=ENV['OPENSHIFT_MONGODB_DB_PASSWORD']%>
-  database: <%=ENV['OPENSHIFT_APP_NAME']%>
+  host: <%=ENV['MUMUKI_MONGODB_HOST']%>
+  port: <%=ENV['MUMUKI_MONGODB_PORT']%>
+  user: <%=ENV['MUMUKI_MONGODB_USERNAME']%>
+  password: <%=ENV['MUMUKI_MONGODB_PASSWORD']%>
+  database: <%=ENV['MUMUKI_MONGODB_DATABASE']%>
 
 development:
   host: localhost
