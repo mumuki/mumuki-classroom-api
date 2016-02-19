@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gem 'rake'
 
+gem 'thin'
+
 gem 'sinatra'
 gem 'sinatra-cross_origin', '~> 0.3.1'
 
