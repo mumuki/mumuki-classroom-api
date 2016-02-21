@@ -58,6 +58,10 @@ before do
 end
 
 after do
+  Classroom::Database.client.close
+end
+
+after do
   error_message = env['sinatra.error']
   if error_message.blank?
     response.body = response.body.to_json
