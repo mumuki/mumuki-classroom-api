@@ -34,7 +34,7 @@ class Classroom::GuideProgress
     params = {}
     params['guide'] = data['guide']
     params['submitter'] = data['submitter']
-    params['course'] = Classroom::CourseStudent.find_by('student.social_id' => data['submitter']['social_id'])['course']
+    params['course'] = course_for(data['submitter']['social_id'])
 
     params['exercise'] = {
       id: data['exercise']['id'],
@@ -54,4 +54,9 @@ class Classroom::GuideProgress
     params.symbolize_keys
   end
 
+  private
+
+  def self.course_for(social_id)
+    Classroom::CourseStudent.find_by('student.social_id' => social_id)['course']
+  end
 end

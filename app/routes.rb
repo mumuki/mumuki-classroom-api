@@ -82,6 +82,10 @@ error Classroom::CourseNotExistsError do
   halt 400
 end
 
+error Classroom::CourseStudentNotExistsError do
+  halt 400
+end
+
 error Mumukit::Auth::InvalidTokenError do
   halt 400
 end
@@ -144,6 +148,7 @@ end
 
 post '/events/submissions' do
   Classroom::GuideProgress.update! json_body
+  {status: :created}
 end
 
 get '/ping' do

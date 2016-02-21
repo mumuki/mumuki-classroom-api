@@ -11,6 +11,50 @@ describe 'routes' do
     Classroom::Database.clean!
   end
 
+  describe 'post /events/submissions' do
+    let(:submission) {
+      {status: :passed,
+       result: 'all right',
+       expectation_results: nil,
+       feedback: nil,
+       test_results: nil,
+       submissions_count: 2,
+       exercise: {
+           id: 10,
+           name: 'First Steps 1',
+           number: 1},
+       guide: {
+           slug: 'pdep-utn/foo',
+           name: 'Foo',
+           language: {name: 'haskell'}},
+       submitter: {
+           social_id: 'github|gh1234',
+           name: 'foo',
+           email: nil,
+           image_url: nil},
+       id: 'abcd1234',
+       content: 'x = 2'}.to_json }
+
+    context 'when student exists' do
+      before do
+        Classroom::CourseStudent.insert!(
+            student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|gh1234'},
+            course: {slug: 'example/foo'})
+      end
+
+      before { post '/events/submissions', submission }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq status: 'created' }
+    end
+    context 'when student does not exist' do
+      before { post '/events/submissions', submission }
+
+      it { expect(last_response.status).to eq 400}
+      it { expect(last_response.body).to json_eq message: 'Unknown course student {"student.social_id"=>"github|gh1234"}' }
+    end
+  end
+
   describe 'get /courses/' do
     before { header 'Authorization', build_auth_header('*') }
 
