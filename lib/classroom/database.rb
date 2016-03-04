@@ -1,4 +1,5 @@
 class Classroom::Database
+
   def self.client
     @client
   end
