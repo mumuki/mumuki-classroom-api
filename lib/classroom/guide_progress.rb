@@ -5,6 +5,10 @@ class Classroom::GuideProgress
     guides_progress_collection.by_slug slug
   end
 
+  def self.by_slug_and_course(slug, course)
+    guides_progress_collection.by_slug_and_course slug, course
+  end
+
   def self.exercise_by_student(slug, student_id, exercise_id)
     guide_progress = guides_progress_collection.get_exercise slug, student_id
     guide_progress.tap do |gp|
