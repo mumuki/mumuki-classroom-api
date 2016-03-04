@@ -1,4 +1,8 @@
 class Classroom::Database
+<<<<<<< HEAD
+=======
+  attr_accessor :tenant
+>>>>>>> Fix course slug
 
   def self.client
     @client
