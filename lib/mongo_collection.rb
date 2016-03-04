@@ -29,6 +29,10 @@ class Mongo::Collection
     find({'course.slug' => {'$regex' => grants}})
   end
 
+  def by_slug_and_course(slug, course)
+    find('course.slug' => course, 'guide.slug' => slug)
+  end
+
   def by_course_slug(slug)
     find({'course.slug' => slug})
   end

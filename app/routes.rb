@@ -142,8 +142,8 @@ get '/guide_progress/:org/:repo/:student_id/:exercise_id' do
   {exercise_progress: Classroom::GuideProgress.exercise_by_student(slug('repo'), params['student_id'], params['exercise_id'].to_i)}
 end
 
-get '/guide_progress/:org/:repo' do
-  {guides_progress: Classroom::GuideProgress.by_slug(slug('repo')).select { |guide| permissions.allows? guide['course']['slug'] }}
+get '/guide_progress/:org/:course/:repo' do
+  {guides_progress: Classroom::GuideProgress.by_slug_and_course(slug('repo'), slug('course')).select { |guide| permissions.allows? guide['course']['slug']}}
 end
 
 post '/events/submissions' do
