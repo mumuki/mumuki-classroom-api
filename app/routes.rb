@@ -121,8 +121,7 @@ end
 
 get '/courses/:org/:course' do
   protect!
-  guides = Classroom::GuideProgress.by_course(slug('course'))
-  {course_guides: guides.as_json.map { |guide| guide['guide'] }.to_set}
+  {course_guides: Classroom::GuideProgress.by_course(slug('course'))}
 end
 
 post '/courses/:course/students' do
