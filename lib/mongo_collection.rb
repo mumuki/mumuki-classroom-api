@@ -40,7 +40,7 @@ class Mongo::Collection
   end
 
   def by_course_slug(slug)
-    find({'course.slug' => slug})
+    distinct('guide', {'course.slug' => slug})
   end
 
   def get_exercise(slug, student_id)
