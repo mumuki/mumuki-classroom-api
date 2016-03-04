@@ -9,6 +9,10 @@ class Classroom::GuideProgress
     guides_progress_collection.by_slug_and_course slug, course
   end
 
+  def self.guide_data(slug, course)
+    guides_progress_collection.guide_data slug, course
+  end
+
   def self.exercise_by_student(slug, student_id, exercise_id)
     guide_progress = guides_progress_collection.get_exercise slug, student_id
     guide_progress.tap do |gp|

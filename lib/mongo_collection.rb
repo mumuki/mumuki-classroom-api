@@ -31,6 +31,12 @@ class Mongo::Collection
 
   def by_slug_and_course(slug, course)
     find('course.slug' => course, 'guide.slug' => slug)
+      .projection("guide" => 0, "exercises.submissions" => {"$slice" => -1})
+  end
+
+  def guide_data(slug, course)
+    find('course.slug' => course, 'guide.slug' => slug)
+      .projection("guide" => 1).limit(1).first
   end
 
   def by_course_slug(slug)
