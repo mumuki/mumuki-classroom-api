@@ -143,7 +143,11 @@ get '/guide_progress/:org/:repo/:student_id/:exercise_id' do
 end
 
 get '/guide_progress/:org/:course/:repo' do
-  {guides_progress: Classroom::GuideProgress.by_slug_and_course(slug('repo'), "#{request.first_subdomain}/#{params['course']}").select { |guide| permissions.allows? guide['course']['slug']}}
+  course = "#{request.first_subdomain}/#{params['course']}"
+  {
+    guide: Classroom::GuideProgress.guide_data(slug('repo'), course)['guide'],
+    progress: Classroom::GuideProgress.by_slug_and_course(slug('repo'), course).select { |guide| permissions.allows? guide['course']['slug']}
+  }
 end
 
 post '/events/submissions' do
