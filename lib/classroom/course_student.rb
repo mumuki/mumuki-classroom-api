@@ -2,7 +2,7 @@ class Classroom::CourseStudent
   extend Classroom::WithMongo
 
   def self.find_by(criteria)
-    course_students_collection.find(criteria).projection(_id: 0).first || (raise Classroom::CourseStudentNotExistsError, "Unknown course student #{criteria}")
+    course_students_collection.find(criteria).sort({ _id: -1 }).projection(_id: 0).first || (raise Classroom::CourseStudentNotExistsError, "Unknown course student #{criteria}")
   end
 
   def self.first
