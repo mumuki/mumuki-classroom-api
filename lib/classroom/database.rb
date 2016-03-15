@@ -18,7 +18,7 @@ class Classroom::Database
   end
 
   def self.clean!
-    client[:guide_progress].drop
+    client[:guides_progress].drop
     client[:courses].drop
     client[:course_students].drop
   end

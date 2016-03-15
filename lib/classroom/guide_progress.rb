@@ -38,6 +38,10 @@ class Classroom::GuideProgress
     self.by_id(id).count > 0
   end
 
+  def self.insert!(course_json)
+    guides_progress_collection.insert_one(course_json)
+  end
+
   def self.process_params(data)
     params = {}
     params['guide'] = data['guide']

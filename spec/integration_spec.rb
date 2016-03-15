@@ -121,6 +121,40 @@ describe 'routes' do
     end
   end
 
+  describe 'get /courses/:org/:course' do
+    let(:guide_progress1) {{
+      guide: { name: 'Bar', slug: 'pdep-utn/bar', language: { name: 'haskell' } },
+      course: { slug: 'pdep-utn/foo' } }}
+
+    let(:guide_progress2) {{
+      guide: { name: 'Baz', slug: 'pdep-utn/baz', language: { name: 'haskell' } },
+      course: { slug: 'pdep-utn/foo' } }}
+
+    let(:guide_progress3) {{
+      guide: { name: 'Foo', slug: 'pdep-utn/foo', language: { name: 'haskell' } },
+      course: { slug: 'pdep-utn/test' } }}
+
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when no guides in a course yet' do
+      before { get '/courses/pdep-utn/foo' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq course_guides: [] }
+    end
+
+    context 'when guides already exists in a course' do
+      before { Classroom::GuideProgress.insert!(guide_progress1) }
+      before { Classroom::GuideProgress.insert!(guide_progress2) }
+      before { Classroom::GuideProgress.insert!(guide_progress3) }
+      before { get '/courses/pdep-utn/foo' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq course_guides: [guide_progress1[:guide], guide_progress2[:guide]] }
+    end
+
+  end
+
   describe 'post /courses/:course/students/' do
     let(:student_json) { {first_name: 'Jon', last_name: 'Doe'}.to_json }
 
