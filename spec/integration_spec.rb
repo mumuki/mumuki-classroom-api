@@ -204,7 +204,7 @@ describe 'routes' do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when student change course and sent an old exercise' do
-      before { get '/guide_progress/example/foo/github%7c123456/177' }
+      before { get '/guide_progress/example/k2048/foo/github%7c123456/177' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq({ exercise_progress: {
@@ -216,7 +216,7 @@ describe 'routes' do
     end
 
     context 'when student change course and sent a new exercise' do
-      before { get '/guide_progress/example/foo/github%7c123456/178' }
+      before { get '/guide_progress/example/k2048/foo/github%7c123456/178' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq({ exercise_progress: {

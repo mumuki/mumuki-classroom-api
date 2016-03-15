@@ -43,7 +43,7 @@ class Mongo::Collection
     distinct('guide', {'course.slug' => slug})
   end
 
-  def get_exercise(slug, student_id)
-    find('guide.slug' => slug, 'student.social_id' => student_id).sort(_id: -1).projection(_id: 0).first
+  def get_exercise(slug, student_id, course_slug)
+    find('guide.slug' => slug, 'student.social_id' => student_id, 'course.slug' => course_slug).projection(_id: 0).first
   end
 end
