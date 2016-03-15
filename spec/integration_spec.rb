@@ -124,20 +124,20 @@ describe 'routes' do
   describe 'get /courses/:org/:course' do
     let(:guide_progress1) {{
       guide: { name: 'Bar', slug: 'pdep-utn/bar', language: { name: 'haskell' } },
-      course: { slug: 'pdep-utn/foo' } }}
+      course: { slug: 'example/foo' } }}
 
     let(:guide_progress2) {{
       guide: { name: 'Baz', slug: 'pdep-utn/baz', language: { name: 'haskell' } },
-      course: { slug: 'pdep-utn/foo' } }}
+      course: { slug: 'example/foo' } }}
 
     let(:guide_progress3) {{
       guide: { name: 'Foo', slug: 'pdep-utn/foo', language: { name: 'haskell' } },
-      course: { slug: 'pdep-utn/test' } }}
+      course: { slug: 'example/test' } }}
 
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when no guides in a course yet' do
-      before { get '/courses/pdep-utn/foo' }
+      before { get '/courses/example/foo' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq course_guides: [] }
@@ -147,10 +147,41 @@ describe 'routes' do
       before { Classroom::GuideProgress.insert!(guide_progress1) }
       before { Classroom::GuideProgress.insert!(guide_progress2) }
       before { Classroom::GuideProgress.insert!(guide_progress3) }
-      before { get '/courses/pdep-utn/foo' }
+      before { get '/courses/example/foo' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq course_guides: [guide_progress1[:guide], guide_progress2[:guide]] }
+    end
+
+  end
+
+  describe 'get /guide_progress/:org/:course/:repo' do
+    let(:guide_progress1) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k1024' } }}
+
+    let(:guide_progress2) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k2048' } }}
+
+    let(:guide_progress3) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k2048' } }}
+
+    before { Classroom::GuideProgress.insert!(guide_progress1) }
+    before { Classroom::GuideProgress.insert!(guide_progress2) }
+    before { Classroom::GuideProgress.insert!(guide_progress3) }
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when guide_progres exist' do
+      before { get '/guide_progress/example/k2048/foo' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq({ guide: guide_progress2[:guide],
+                                                   progress: [
+                                                     { course: guide_progress2[:course] },
+                                                     { course: guide_progress3[:course] }
+                                                   ] }) }
     end
 
   end
