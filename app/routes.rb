@@ -137,8 +137,9 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
-get '/guide_progress/:org/:repo/:student_id/:exercise_id' do
-  {exercise_progress: Classroom::GuideProgress.exercise_by_student(slug('repo'), params['student_id'], params['exercise_id'].to_i)}
+get '/guide_progress/:org/:course/:repo/:student_id/:exercise_id' do
+  course = "#{request.first_subdomain}/#{params['course']}"
+  {exercise_progress: Classroom::GuideProgress.exercise_by_student(course, slug('repo'), params['student_id'], params['exercise_id'].to_i)}
 end
 
 get '/guide_progress/:org/:course/:repo' do

@@ -121,6 +121,114 @@ describe 'routes' do
     end
   end
 
+  describe 'get /courses/:org/:course' do
+    let(:guide_progress1) {{
+      guide: { name: 'Bar', slug: 'pdep-utn/bar', language: { name: 'haskell' } },
+      course: { slug: 'example/foo' } }}
+
+    let(:guide_progress2) {{
+      guide: { name: 'Baz', slug: 'pdep-utn/baz', language: { name: 'haskell' } },
+      course: { slug: 'example/foo' } }}
+
+    let(:guide_progress3) {{
+      guide: { name: 'Foo', slug: 'pdep-utn/foo', language: { name: 'haskell' } },
+      course: { slug: 'example/test' } }}
+
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when no guides in a course yet' do
+      before { get '/courses/example/foo' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq course_guides: [] }
+    end
+
+    context 'when guides already exists in a course' do
+      before { Classroom::GuideProgress.insert!(guide_progress1) }
+      before { Classroom::GuideProgress.insert!(guide_progress2) }
+      before { Classroom::GuideProgress.insert!(guide_progress3) }
+      before { get '/courses/example/foo' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq course_guides: [guide_progress1[:guide], guide_progress2[:guide]] }
+    end
+
+  end
+
+  describe 'get /guide_progress/:org/:course/:repo' do
+    let(:guide_progress1) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k1024' } }}
+
+    let(:guide_progress2) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k2048' } }}
+
+    let(:guide_progress3) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k2048' } }}
+
+    before { Classroom::GuideProgress.insert!(guide_progress1) }
+    before { Classroom::GuideProgress.insert!(guide_progress2) }
+    before { Classroom::GuideProgress.insert!(guide_progress3) }
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when guide_progres exist' do
+      before { get '/guide_progress/example/k2048/foo' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq({ guide: guide_progress2[:guide],
+                                                   progress: [
+                                                     { course: guide_progress2[:course] },
+                                                     { course: guide_progress3[:course] }
+                                                   ] }) }
+    end
+
+  end
+
+  describe 'get /guide_progress/:org/:repo/student_id/exercise_id' do
+    let(:guide_progress1) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k1024' },
+      student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
+      exercises: [ { id: 177 } ] }}
+
+    let(:guide_progress2) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k2048' },
+      student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
+      exercises: [ { id: 177 }, { id: 178 }, { id: 179 }, { id: 180 } ]}}
+
+    before { Classroom::GuideProgress.insert!(guide_progress1) }
+    before { Classroom::GuideProgress.insert!(guide_progress2) }
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when student change course and sent an old exercise' do
+      before { get '/guide_progress/example/k2048/foo/github%7c123456/177' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq({ exercise_progress: {
+        guide: guide_progress2[:guide],
+        course: guide_progress2[:course],
+        student: guide_progress2[:student],
+        exercise: guide_progress2[:exercises].first,
+      }}) }
+    end
+
+    context 'when student change course and sent a new exercise' do
+      before { get '/guide_progress/example/k2048/foo/github%7c123456/178' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq({ exercise_progress: {
+        guide: guide_progress2[:guide],
+        course: guide_progress2[:course],
+        student: guide_progress2[:student],
+        exercise: guide_progress2[:exercises].second,
+      }}) }
+    end
+
+  end
+
   describe 'post /courses/:course/students/' do
     let(:student_json) { {first_name: 'Jon', last_name: 'Doe'}.to_json }
 

@@ -31,19 +31,19 @@ class Mongo::Collection
 
   def by_slug_and_course(slug, course)
     find('course.slug' => course, 'guide.slug' => slug)
-      .projection("guide" => 0, "exercises.submissions" => {"$slice" => -1})
+      .projection("_id" => 0, "guide" => 0, "exercises.submissions" => {"$slice" => -1})
   end
 
   def guide_data(slug, course)
     find('course.slug' => course, 'guide.slug' => slug)
-      .projection("guide" => 1).limit(1).first
+      .projection("guide" => 1, "_id" => 0).limit(1).first
   end
 
   def by_course_slug(slug)
     distinct('guide', {'course.slug' => slug})
   end
 
-  def get_exercise(slug, student_id)
-    find('guide.slug' => slug, 'student.social_id' => student_id).first
+  def get_exercise(slug, student_id, course_slug)
+    find('guide.slug' => slug, 'student.social_id' => student_id, 'course.slug' => course_slug).projection(_id: 0).first
   end
 end

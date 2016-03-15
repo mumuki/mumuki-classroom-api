@@ -13,8 +13,8 @@ class Classroom::GuideProgress
     guides_progress_collection.guide_data slug, course
   end
 
-  def self.exercise_by_student(slug, student_id, exercise_id)
-    guide_progress = guides_progress_collection.get_exercise slug, student_id
+  def self.exercise_by_student(course_slug, slug, student_id, exercise_id)
+    guide_progress = guides_progress_collection.get_exercise slug, student_id, course_slug
     guide_progress.tap do |gp|
       gp['exercise'] = gp['exercises'].detect { |exercise| exercise['id'] == exercise_id }
       gp.delete 'exercises'
@@ -36,6 +36,10 @@ class Classroom::GuideProgress
 
   def self.exists?(id)
     self.by_id(id).count > 0
+  end
+
+  def self.insert!(course_json)
+    guides_progress_collection.insert_one(course_json)
   end
 
   def self.process_params(data)
