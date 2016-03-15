@@ -44,6 +44,6 @@ class Mongo::Collection
   end
 
   def get_exercise(slug, student_id)
-    find('guide.slug' => slug, 'student.social_id' => student_id).first
+    find('guide.slug' => slug, 'student.social_id' => student_id).sort(_id: -1).projection(_id: 0).first
   end
 end

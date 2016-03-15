@@ -186,6 +186,49 @@ describe 'routes' do
 
   end
 
+  describe 'get /guide_progress/:org/:repo/student_id/exercise_id' do
+    let(:guide_progress1) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k1024' },
+      student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
+      exercises: [ { id: 177 } ] }}
+
+    let(:guide_progress2) {{
+      guide: { slug: 'example/foo' },
+      course: { slug: 'example/k2048' },
+      student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
+      exercises: [ { id: 177 }, { id: 178 }, { id: 179 }, { id: 180 } ]}}
+
+    before { Classroom::GuideProgress.insert!(guide_progress1) }
+    before { Classroom::GuideProgress.insert!(guide_progress2) }
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when student change course and sent an old exercise' do
+      before { get '/guide_progress/example/foo/github%7c123456/177' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq({ exercise_progress: {
+        guide: guide_progress2[:guide],
+        course: guide_progress2[:course],
+        student: guide_progress2[:student],
+        exercise: guide_progress2[:exercises].first,
+      }}) }
+    end
+
+    context 'when student change course and sent a new exercise' do
+      before { get '/guide_progress/example/foo/github%7c123456/178' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq({ exercise_progress: {
+        guide: guide_progress2[:guide],
+        course: guide_progress2[:course],
+        student: guide_progress2[:student],
+        exercise: guide_progress2[:exercises].second,
+      }}) }
+    end
+
+  end
+
   describe 'post /courses/:course/students/' do
     let(:student_json) { {first_name: 'Jon', last_name: 'Doe'}.to_json }
 
