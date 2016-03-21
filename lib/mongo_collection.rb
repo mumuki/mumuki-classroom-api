@@ -1,22 +1,33 @@
 class Mongo::Collection
   def upsert(json)
-    result = find({guide: json[:guide], student: json[:submitter], course: json[:course]})
+
+    json.deep_symbolize_keys!
+
+    result = find('guide' => json[:guide], 'student.social_id' => json[:submitter][:social_id], 'course' => json[:course])
+
+    course_student = Classroom::CourseStudent.find_by('student.social_id' => json[:submitter][:social_id])
+    course_student.deep_symbolize_keys!
+
+    json[:submitter][:first_name] = course_student[:student][:first_name]
+    json[:submitter][:last_name] = course_student[:student][:last_name]
 
     if result.count.zero?
+
       insert_one({guide: json[:guide], student: json[:submitter], course: json[:course],
                   exercises: [{id: json[:exercise][:id], name: json[:exercise][:name], submissions: [json[:exercise][:submission]]}]})
 
     else
-      result2 = find({:guide => json[:guide], :student => json[:submitter], course: json[:course], 'exercises.id' => json[:exercise][:id]})
+      result2 = find({ 'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id] })
 
       if result2.count.zero?
         update_one(
-            {guide: json[:guide], student: json[:submitter], course: json[:course]},
-            {'$push' => {'exercises' => {id: json[:exercise][:id], name: json[:exercise][:name], submissions: [json[:exercise][:submission]]}}})
+            { 'guide' => json[:guide], 'student' => json[:submitter], 'course' => json[:course] },
+            { '$push' => {'exercises' => { id: json[:exercise][:id], name: json[:exercise][:name], submissions: [json[:exercise][:submission]] } } },
+            { 'upsert' => true })
       else
         update_one(
-            {guide: json[:guide], student: json[:submitter], course: json[:course], 'exercises.id' => json[:exercise][:id]},
-            {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]}})
+            { 'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id] },
+            { '$push' => { 'exercises.$.submissions' => json[:exercise][:submission] }, '$set' => { student: json[:submitter] }})
       end
     end
   end
