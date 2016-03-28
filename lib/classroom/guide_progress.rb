@@ -53,6 +53,7 @@ class Classroom::GuideProgress
       name: data['exercise']['name'],
       number: data['exercise']['number'],
       submission: {
+        id: data['id'],
         status: data['status'],
         result: data['result'],
         expectation_results: data['expectation_results'],
