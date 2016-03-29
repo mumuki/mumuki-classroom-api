@@ -102,7 +102,11 @@ end
 
 get '/courses' do
   grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
-  {courses: Classroom::Course.all(grants)}
+  if grants.to_s == ''
+    return {courses: []}
+  else
+    {courses: Classroom::Course.all(grants)}
+  end
 end
 
 post '/courses' do
