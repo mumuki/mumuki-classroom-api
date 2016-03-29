@@ -266,4 +266,15 @@ describe 'routes' do
       end
     end
   end
+
+  describe 'post /comment' do
+    let(:comment_json) {{submission_id: 1, comment: {content: 'hola', type: 'good'}}.to_json}
+
+    context 'when authenticated' do
+      before { post '/comment', comment_json }
+
+      it { expect(Classroom::Comment.where(submission_id: 1).first.to_json).to eq(comment_json)}
+    end
+
+  end
 end

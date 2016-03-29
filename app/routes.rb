@@ -155,6 +155,18 @@ post '/events/submissions' do
   {status: :created}
 end
 
+post '/comment' do
+  protect!
+  Classroom::Comment.insert! json_body
+  # Post atheneum!
+  {status: :created}
+end
+
+get '/comments/:submission_id' do
+  protect!
+  {comments: Classroom::Comment.where(submission_id: params[:submission_id].to_i)}
+end
+
 get '/ping' do
   {message: 'pong!'}
 end
