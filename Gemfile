@@ -10,6 +10,8 @@ gem 'sinatra-cross_origin', '~> 0.3.1'
 gem 'mongo', '~> 2.1'
 gem 'bson_ext'
 
+gem 'bunny'
+
 gem 'activesupport', '~> 4.2'
 
 gem 'mumukit-auth', github: 'mumuki/mumukit-auth', branch: 'master'

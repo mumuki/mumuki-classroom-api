@@ -16,8 +16,11 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    amq-protocol (2.0.1)
     bson (4.0.1)
     bson_ext (1.5.1)
+    bunny (2.3.1)
+      amq-protocol (>= 2.0.1)
     codeclimate-test-reporter (0.4.8)
       simplecov (>= 0.7.1, < 1.0.0)
     daemons (1.2.3)
@@ -71,6 +74,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 4.2)
   bson_ext
+  bunny
   codeclimate-test-reporter
   factory_girl
   mongo (~> 2.1)
