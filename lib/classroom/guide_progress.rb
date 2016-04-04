@@ -21,6 +21,10 @@ class Classroom::GuideProgress
     end
   end
 
+  def self.students_by_course_slug(course)
+    guides_progress_collection.students_by_course_slug(course)
+  end
+
   def self.by_course(slug)
     guides_progress_collection.by_course_slug slug
   end
