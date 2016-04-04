@@ -22,10 +22,7 @@ class Classroom::GuideProgress
   end
 
   def self.students_by_course_slug(course)
-    guides_progress_collection
-      .students_by_course_slug(course)
-      .map { |progress| progress['student'] }
-      .uniq { |student| student['social_id'] }
+    guides_progress_collection.students_by_course_slug(course)
   end
 
   def self.by_course(slug)

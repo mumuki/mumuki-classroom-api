@@ -46,7 +46,7 @@ class Mongo::Collection
   end
 
   def students_by_course_slug(course)
-    find('course.slug' => course).projection("student" => 1)
+    distinct('student', 'course.slug' => course)
   end
 
   def guide_data(slug, course)
