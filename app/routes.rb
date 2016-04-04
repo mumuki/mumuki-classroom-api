@@ -154,6 +154,11 @@ get '/guide_progress/:org/:course/:repo' do
   }
 end
 
+get '/students/:org/:course' do
+  protect!
+  { students: Classroom::GuideProgress.students_by_course_slug(slug(:course)) }
+end
+
 post '/events/submissions' do
   Classroom::GuideProgress.update! json_body
   {status: :created}

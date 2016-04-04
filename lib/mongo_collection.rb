@@ -45,6 +45,10 @@ class Mongo::Collection
       .projection("_id" => 0, "guide" => 0, "exercises.submissions" => {"$slice" => -1})
   end
 
+  def students_by_course_slug(course)
+    find('course.slug' => course).projection("student" => 1)
+  end
+
   def guide_data(slug, course)
     find('course.slug' => course, 'guide.slug' => slug)
       .projection("guide" => 1, "_id" => 0).limit(1).first
