@@ -155,6 +155,29 @@ describe 'routes' do
 
   end
 
+  describe 'get /students/:org/:course' do
+
+    let(:student) {{ email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar' }}
+    let(:course) {{ slug: 'example/foo' }}
+
+    let(:guide_progress1) {{ student: student, course: course, guide: { slug: 'foo' } }}
+    let(:guide_progress2) {{ student: student, course: course, guide: { slug: 'bar' } }}
+    let(:guide_progress3) {{ student: student, course: { slug: 'example/test' }, guide: { slug: 'baz' } }}
+
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when guides already exists in a course' do
+      before { Classroom::GuideProgress.insert!(guide_progress1) }
+      before { Classroom::GuideProgress.insert!(guide_progress2) }
+      before { Classroom::GuideProgress.insert!(guide_progress3) }
+      before { get '/students/example/foo' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq students: [student] }
+    end
+
+  end
+
   describe 'get /guide_progress/:org/:course/:repo' do
     let(:guide_progress1) {{
       guide: { slug: 'example/foo' },
