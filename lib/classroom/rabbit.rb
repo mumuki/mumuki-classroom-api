@@ -10,7 +10,7 @@ class Classroom::Rabbit
     channel = conn.start.create_channel
     channel.tap { |ch| ch.queue(queue_name, durable: true) }
       .default_exchange
-      .publish(data.to_json, :routing_key => queue_name)
+      .publish(data.to_json, :routing_key => queue_name, persistent: true)
     conn.close
   end
 
