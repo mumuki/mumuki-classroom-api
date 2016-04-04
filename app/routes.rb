@@ -162,7 +162,7 @@ end
 post '/comment' do
   protect!
   Classroom::Comment.insert! json_body
-  # Post atheneum!
+  Classroom::Rabbit.publish_comments json_body
   {status: :created}
 end
 

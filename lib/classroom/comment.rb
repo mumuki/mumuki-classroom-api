@@ -6,8 +6,8 @@ module Classroom::Comment
       comments_collection.find(criteria).projection(_id: 0)
     end
 
-    def insert!(course_json)
-      comments_collection.insert_one(course_json)
+    def insert!(comment_json)
+      comments_collection.insert_one(comment_json)
     end
 
   end
