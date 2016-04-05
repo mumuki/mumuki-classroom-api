@@ -16,7 +16,6 @@ class Classroom::Rabbit
 
   def self.connection
     Bunny.new(host: config[:host],
-              port: config[:port],
               user: config[:user],
               password: config[:password])
   end
