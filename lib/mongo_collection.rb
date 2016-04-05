@@ -46,7 +46,7 @@ class Mongo::Collection
   end
 
   def students_by_course_slug(course)
-    distinct('student', 'course.slug' => course)
+    uniq('student', { 'course.slug' => course }, 'social_id')
   end
 
   def guide_data(slug, course)
@@ -55,10 +55,15 @@ class Mongo::Collection
   end
 
   def by_course_slug(slug)
-    distinct('guide', {'course.slug' => slug})
+    uniq('guide', { 'course.slug' => slug }, 'slug')
   end
 
   def get_exercise(slug, student_id, course_slug)
     find('guide.slug' => slug, 'student.social_id' => student_id, 'course.slug' => course_slug).projection(_id: 0).first
   end
+
+  def uniq(key, filter, uniq_value)
+    distinct(key, filter).uniq { |result| result[uniq_value] }
+  end
+
 end
