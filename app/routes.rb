@@ -110,13 +110,16 @@ get '/courses' do
 end
 
 post '/courses' do
-  slug = "#{request.first_subdomain}/#{json_body['name']}"
+  slug = json_body['slug']
   permissions.protect!(slug)
 
   Classroom::Course.ensure_new! slug
 
   Classroom::Course.insert!(
-      name: json_body['name'],
+      code: json_body['code'],
+      days: json_body['days'],
+      period: json_body['period'],
+      shifts: json_body['shifts'],
       description: json_body['description'],
       slug: slug)
 
