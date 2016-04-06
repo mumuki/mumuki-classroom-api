@@ -75,9 +75,13 @@ describe 'routes' do
   end
 
   describe 'post /courses' do
-    let(:course_json) { {name: 'my-new-course',
-                         description: 'haskell'}.to_json }
-    let(:created_slug) { Classroom::Course.find_by(name: 'my-new-course')['slug'] }
+    let(:course_json) { {code: 'K2001',
+                         days: ['monday', 'saturday'],
+                         period: '2016',
+                         shifts: ['morning'],
+                         description: 'haskell',
+                         slug: 'example/2016-K2001'}.to_json }
+    let(:created_slug) { Classroom::Course.find_by(slug: 'example/2016-K2001')['slug'] }
 
     context 'when is normal teacher' do
       it 'rejects course creation' do
@@ -97,7 +101,7 @@ describe 'routes' do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Classroom::Course.count).to eq 1 }
-      it { expect(created_slug).to eq 'example/my-new-course' }
+      it { expect(created_slug).to eq 'example/2016-K2001' }
     end
 
     context 'when is global admin' do
@@ -107,16 +111,16 @@ describe 'routes' do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Classroom::Course.count).to eq 1 }
-      it { expect(created_slug).to eq 'example/my-new-course' }
+      it { expect(created_slug).to eq 'example/2016-K2001' }
     end
 
     context 'when course already exists' do
-      before { Classroom::Course.insert!(name: 'my-new-course', slug: 'example/my-new-course') }
+      before { Classroom::Course.insert!(slug: 'example/2016-K2001') }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses', course_json }
 
       it { expect(last_response).to_not be_ok }
-      it { expect(last_response.body).to json_eq message: 'example/my-new-course does already exist' }
+      it { expect(last_response.body).to json_eq message: 'example/2016-K2001 does already exist' }
 
     end
   end
