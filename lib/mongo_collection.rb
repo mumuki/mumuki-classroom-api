@@ -66,4 +66,11 @@ class Mongo::Collection
     distinct(key, filter).uniq { |result| result[uniq_value] }
   end
 
+  def update_follower(email, follower, action)
+    update_one(
+      { "email" => email },
+      { action => { "social_ids" => follower }},
+      { :upsert => true })
+  end
+
 end
