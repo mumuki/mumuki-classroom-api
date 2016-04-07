@@ -187,9 +187,9 @@ post '/follower' do
   {status: :created}
 end
 
-delete '/follower/:email/:social_id' do
+delete '/follower/:course/:email/:social_id' do
   protect!
-  Classroom::Follower.remove_follower "email" => params[:email], "social_id" => params[:social_id]
+  Classroom::Follower.remove_follower "course" => params[:course], "email" => params[:email], "social_id" => params[:social_id]
   {status: :created}
 end
 
