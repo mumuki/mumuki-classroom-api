@@ -292,12 +292,51 @@ describe 'routes' do
 
   describe 'post /comment' do
     let(:comment_json) {{submission_id: 1, comment: {content: 'hola', type: 'good'}}.to_json}
+    before { expect(Classroom::Rabbit).to receive(:publish_comments) }
 
     context 'when authenticated' do
+      before { header 'Authorization', build_auth_header('*') }
       before { post '/comment', comment_json }
 
-      xit { expect(Classroom::Comment.where(submission_id: 1).first.to_json).to eq(comment_json)}
+      it { expect(Classroom::Comment.where(submission_id: 1).first.to_json).to eq(comment_json)}
     end
+
+  end
+
+  describe 'post /follower' do
+    let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
+    context 'when authenticated' do
+      before { header 'Authorization', build_auth_header('*') }
+      before { post '/follower', follower_json }
+
+      it { expect(Classroom::Follower.where(course: "curso", email: "aguspina87@gmail.com").first.to_json).to eq({course: "curso",social_ids: ["social|1"]}.to_json)}
+    end
+
+    context 'when repeat follower' do
+      before { header 'Authorization', build_auth_header('*') }
+      before { post '/follower', follower_json }
+      before { post '/follower', follower_json }
+
+      it { expect(Classroom::Follower.where(course: "curso", email: "aguspina87@gmail.com").first["social_ids"].count).to eq(1)}
+    end
+
+    context 'when not authenticated' do
+      let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
+      before { post '/follower', follower_json }
+
+      it { expect(last_response).to_not be_ok }
+      it { expect(Classroom::Follower.count).to eq 0 }
+    end
+
+  end
+
+  describe 'delete /comments' do
+    let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
+    before { header 'Authorization', build_auth_header('*') }
+    before { post '/follower', follower_json }
+    before { delete '/follower/curso/aguspina87@gmail.com/social%7c1', follower_json }
+
+    it { expect(Classroom::Follower.count).to eq 0 }
 
   end
 end
