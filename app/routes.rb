@@ -179,6 +179,23 @@ get '/comments/:exercise_id' do
   {comments: Classroom::Comment.where(exercise_id: params[:exercise_id].to_i)}
 end
 
+get '/followers/:email' do
+  protect!
+  {followers: Classroom::Follower.where(email: params[:email])}
+end
+
+post '/follower' do
+  protect!
+  Classroom::Follower.add_follower json_body
+  {status: :created}
+end
+
+delete '/follower/:course/:email/:social_id' do
+  protect!
+  Classroom::Follower.remove_follower "course" => params[:course], "email" => params[:email], "social_id" => params[:social_id]
+  {status: :created}
+end
+
 get '/ping' do
   {message: 'pong!'}
 end
