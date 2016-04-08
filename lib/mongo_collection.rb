@@ -1,9 +1,8 @@
 class Mongo::Collection
-  def upsert(json)
-    json.deep_symbolize_keys!
+  def upsert(data)
+    json = data.deep_symbolize_keys
 
-    course_student = Classroom::CourseStudent.find_by('student.social_id' => json[:submitter][:social_id])
-    course_student.deep_symbolize_keys!
+    course_student = Classroom::CourseStudent.find_by('student.social_id' => json[:submitter][:social_id]).deep_symbolize_keys
 
     json[:submitter][:first_name] = course_student[:student][:first_name]
     json[:submitter][:last_name] = course_student[:student][:last_name]
