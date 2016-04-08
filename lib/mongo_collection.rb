@@ -12,10 +12,7 @@ class Mongo::Collection
     json[:submitter][:last_name] = course_student[:student][:last_name]
 
     if result.count.zero?
-
-      insert_one({guide: json[:guide], student: json[:submitter], course: json[:course],
-                  exercises: [{id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}]})
-
+      insert_one({guide: json[:guide], student: json[:submitter], course: json[:course], exercises: [make_exercise_json(json)]})
     else
       exercise_query = {'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id]}
 
@@ -73,11 +70,15 @@ class Mongo::Collection
   def insert_new_exercise(json)
     update_one(
       {'guide' => json[:guide], 'student' => json[:submitter], 'course' => json[:course]},
-      {'$push' => {'exercises' => {id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}}},
+      {'$push' => {'exercises' => make_exercise_json(json)}},
       {'upsert' => true})
   end
 
   def add_submission_to_exercise(exercise_query, json)
     update_one(exercise_query, {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]}})
+  end
+
+  def make_exercise_json(json)
+    {id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}
   end
 end
