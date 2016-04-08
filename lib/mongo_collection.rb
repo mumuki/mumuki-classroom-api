@@ -17,17 +17,12 @@ class Mongo::Collection
                   exercises: [{id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}]})
 
     else
-      result2 = find({ 'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id] })
+      exercise_query = {'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id]}
 
-      if result2.count.zero?
-        update_one(
-            { 'guide' => json[:guide], 'student' => json[:submitter], 'course' => json[:course] },
-            { '$push' => {'exercises' => { id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]] } } },
-            { 'upsert' => true })
+      if find(exercise_query).count.zero?
+        insert_new_exercise(json)
       else
-        update_one(
-            { 'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id] },
-            { '$push' => { 'exercises.$.submissions' => json[:exercise][:submission] }, '$set' => { student: json[:submitter] }})
+        add_submission_to_exercise(exercise_query, json)
       end
     end
   end
@@ -73,4 +68,16 @@ class Mongo::Collection
       { :upsert => true })
   end
 
+  private
+
+  def insert_new_exercise(json)
+    update_one(
+      {'guide' => json[:guide], 'student' => json[:submitter], 'course' => json[:course]},
+      {'$push' => {'exercises' => {id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}}},
+      {'upsert' => true})
+  end
+
+  def add_submission_to_exercise(exercise_query, json)
+    update_one(exercise_query, {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]}, '$set' => {student: json[:submitter]}})
+  end
 end
