@@ -1,25 +1,4 @@
 class Mongo::Collection
-  def upsert(data)
-    json = data.deep_symbolize_keys
-
-    course_student = Classroom::CourseStudent.find_by('student.social_id' => json[:submitter][:social_id]).deep_symbolize_keys
-
-    json[:submitter][:first_name] = course_student[:student][:first_name]
-    json[:submitter][:last_name] = course_student[:student][:last_name]
-
-    if find(make_guide_query json).count.zero?
-      insert_one({guide: json[:guide], student: json[:submitter], course: json[:course], exercises: [make_exercise_json(json)]})
-    else
-      exercise_query = make_guide_query(json).merge('exercises.id' => json[:exercise][:id])
-
-      if find(exercise_query).count.zero?
-        insert_new_exercise(json)
-      else
-        add_submission_to_exercise(exercise_query, json)
-      end
-    end
-  end
-
   def by_slug(slug)
     find('guide.slug' => slug)
   end
@@ -59,26 +38,5 @@ class Mongo::Collection
       { "email" => email, "course" => course },
       { action => { "social_ids" => follower }},
       { :upsert => true })
-  end
-
-  private
-
-  def insert_new_exercise(json)
-    update_one(make_guide_query(json), {'$push' => {'exercises' => make_exercise_json(json)}})
-  end
-
-  def add_submission_to_exercise(exercise_query, json)
-    update_one(exercise_query, {
-      '$push' => {'exercises.$.submissions' => json[:exercise][:submission]},
-      '$set' => {'exercises.$.name' => json[:exercise][:name], 'exercises.$.number' => json[:exercise][:number]}
-    })
-  end
-
-  def make_exercise_json(json)
-    {id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}
-  end
-
-  def make_guide_query(json)
-    {'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug]}
   end
 end
