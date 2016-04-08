@@ -14,10 +14,6 @@ module Classroom::Course
       where(criteria).first
     end
 
-    def insert!(course_json)
-      insert_one(course_json)
-    end
-
     def all(grants_pattern)
       where slug: {'$regex' => grants_pattern}
     end

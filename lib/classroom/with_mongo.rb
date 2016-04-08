@@ -6,4 +6,8 @@ module Classroom::WithMongo
   def find_one(*args)
     find(*args).first
   end
+
+  def insert!(json)
+    insert_one(json)
+  end
 end

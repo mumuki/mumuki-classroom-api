@@ -12,10 +12,6 @@ class Classroom::CourseStudent
   def self.first
     find.projection(_id: 0).first
   end
-
-  def self.insert!(course_student_json)
-    insert_one(course_student_json)
-  end
 end
 
 class Classroom::CourseStudentNotExistsError < StandardError
