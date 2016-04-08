@@ -10,4 +10,8 @@ module Classroom::WithMongo
   def insert!(json)
     insert_one(json)
   end
+
+  def uniq(key, filter, uniq_value)
+    distinct(key, filter).uniq { |result| result[uniq_value] }
+  end
 end
