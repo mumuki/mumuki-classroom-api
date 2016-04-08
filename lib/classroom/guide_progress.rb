@@ -7,6 +7,28 @@ class Classroom::GuideProgress
     'guides_progress'
   end
 
+  def self.by_slug(slug)
+    find('guide.slug' => slug)
+  end
+
+  def self.by_course_slug(slug)
+    uniq('guide', { 'course.slug' => slug }, 'slug')
+  end
+
+  def self.guide_data(slug, course)
+    find('course.slug' => course, 'guide.slug' => slug)
+      .projection("guide" => 1, "_id" => 0).limit(1).first
+  end
+
+  def self.by_slug_and_course(slug, course)
+    find('course.slug' => course, 'guide.slug' => slug)
+      .projection("_id" => 0, "guide" => 0, "exercises.submissions" => {"$slice" => -1})
+  end
+
+  def self.students_by_course_slug(course)
+    uniq('student', { 'course.slug' => course }, 'social_id')
+  end
+
   def self.exercise_by_student(course_slug, slug, student_id, exercise_id)
     guide_progress = get_exercise slug, student_id, course_slug
     guide_progress.tap do |gp|
@@ -78,6 +100,10 @@ class Classroom::GuideProgress
   end
 
   private
+
+  def self.get_exercise(slug, student_id, course_slug)
+    find('guide.slug' => slug, 'student.social_id' => student_id, 'course.slug' => course_slug).projection(_id: 0).first
+  end
 
   def self.course_for(social_id)
     Classroom::CourseStudent.find_by('student.social_id' => social_id)['course']
