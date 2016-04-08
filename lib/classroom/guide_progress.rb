@@ -52,17 +52,15 @@ module Classroom::GuideProgress
       json[:submitter][:first_name] = course_student[:student][:first_name]
       json[:submitter][:last_name] = course_student[:student][:last_name]
 
-      unless guide_exist?(json)
-        insert_one({guide: json[:guide], student: json[:submitter], course: json[:course], exercises: [make_exercise_json(json)]})
+      unless guide_exist? json
+        create_guide! json
         return
       end
 
-      exercise_query = make_guide_query(json).merge('exercises.id' => json[:exercise][:id])
-
-      if find(exercise_query).count.zero?
-        insert_new_exercise(json)
+      if exercise_exist? json
+        add_submission_to_exercise! json
       else
-        add_submission_to_exercise(exercise_query, json)
+        create_exercise! json
       end
     end
 
@@ -105,19 +103,12 @@ module Classroom::GuideProgress
       Classroom::CourseStudent.find_by('student.social_id' => social_id)['course']
     end
 
-    def insert_new_exercise(json)
-      update_one(make_guide_query(json), {'$push' => {'exercises' => make_exercise_json(json)}})
-    end
-
-    def add_submission_to_exercise(exercise_query, json)
-      update_one(exercise_query, {
-                                 '$push' => {'exercises.$.submissions' => json[:exercise][:submission]},
-                                 '$set' => {'exercises.$.name' => json[:exercise][:name], 'exercises.$.number' => json[:exercise][:number]}
-                               })
-    end
-
     def make_exercise_json(json)
       {id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}
+    end
+
+    def make_exercise_query(json)
+      make_guide_query(json).merge('exercises.id' => json[:exercise][:id])
     end
 
     def make_guide_query(json)
@@ -126,6 +117,25 @@ module Classroom::GuideProgress
 
     def guide_exist?(json)
       !find(make_guide_query json).count.zero?
+    end
+
+    def exercise_exist?(json)
+      !find(make_exercise_query(json)).count.zero?
+    end
+
+    def create_guide!(submission_json)
+      insert_one({guide: submission_json[:guide], student: submission_json[:submitter], course: submission_json[:course], exercises: [make_exercise_json(submission_json)]})
+    end
+
+    def create_exercise!(json)
+      update_one(make_guide_query(json), {'$push' => {'exercises' => make_exercise_json(json)}})
+    end
+
+    def add_submission_to_exercise!(json)
+      update_one(
+        make_exercise_query(json),
+        {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]},
+         '$set' => {'exercises.$.name' => json[:exercise][:name], 'exercises.$.number' => json[:exercise][:number]}})
     end
   end
 end
