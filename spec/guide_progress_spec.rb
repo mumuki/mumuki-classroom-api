@@ -31,17 +31,38 @@ describe Classroom::GuideProgress do
       Classroom::GuideProgress.update!(submission)
     end
 
-    context 'when student starts a new guide' do
-      let(:guide_progress) { Classroom::GuideProgress.find('guide.slug' => 'pdep-utn/foo', 'course.slug' => 'example/foo').first }
+    let(:guide_progress) { Classroom::GuideProgress.find('guide.slug' => 'pdep-utn/foo', 'course.slug' => 'example/foo') }
+    let(:first_guide_progress) { guide_progress.first }
 
+    context 'when student starts a new guide' do
       let(:expected_guide) { {'slug' => 'pdep-utn/foo', 'name' => 'Foo', 'language' => {'name' => 'haskell'}} }
-      it { expect(guide_progress['guide']).to eq expected_guide }
+      it { expect(first_guide_progress['guide']).to eq expected_guide }
 
       let(:expected_exercise) { {'id' => 10, 'name' => 'First Steps 1', 'number' => 7} }
-      it { expect(guide_progress['exercises'].first).to include expected_exercise }
+      it { expect(first_guide_progress['exercises'].first).to include expected_exercise }
 
       let(:expected_submissions) { [{'id' => 'abcd1234', 'status' => 'passed', 'result' => 'all right', 'expectation_results' => nil, 'test_results' => nil, 'feedback' => nil, 'submissions_count' => nil, 'created_at' => nil, 'content' => 'x = 2'}] }
-      it { expect(guide_progress['exercises'].first['submissions']).to eq expected_submissions }
+      it { expect(first_guide_progress['exercises'].first['submissions']).to eq expected_submissions }
+    end
+
+    context 'when new exercise is submitted for existing guide' do
+      before do
+        Classroom::GuideProgress.update! submission.merge({'id' => 'abc1235', 'exercise' => {'id' => 25, 'name' => 'Second Steps', 'number' => 8}})
+      end
+
+      it { expect(guide_progress.count).to eq 1 }
+      it { expect(first_guide_progress['exercises'].size).to eq 2 }
+      it { expect(first_guide_progress['exercises'].second['submissions'].size).to eq 1 }
+    end
+
+    context 'when new submission is submitted for existing exercise' do
+      before do
+        Classroom::GuideProgress.update! submission.merge({'id' => 'abc1235'})
+      end
+
+      it { expect(guide_progress.count).to eq 1 }
+      it { expect(first_guide_progress['exercises'].size).to eq 1 }
+      it { expect(first_guide_progress['exercises'].first['submissions'].size).to eq 2 }
     end
   end
 end
