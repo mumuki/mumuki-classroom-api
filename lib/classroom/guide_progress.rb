@@ -1,6 +1,10 @@
 class Classroom::GuideProgress
   extend Classroom::WithMongo
 
+  def self.find(criteria)
+    guides_progress_collection.find(criteria)
+  end
+
   def self.by_slug(slug)
     guides_progress_collection.by_slug slug
   end

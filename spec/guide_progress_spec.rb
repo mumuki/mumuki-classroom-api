@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe Classroom::GuideProgress do
-  let(:guide_progress) { Classroom::GuideProgress }
-
   before do
     Classroom::CourseStudent.insert!(
       student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|gh1234'},
@@ -13,33 +11,37 @@ describe Classroom::GuideProgress do
     Classroom::Database.clean!
   end
 
+  let(:submission) {
+    {status: :passed,
+     result: 'all right',
+     exercise: {
+       id: 10,
+       name: 'First Steps 1',
+       number: 7},
+     guide: { slug: 'pdep-utn/foo',
+              name: 'Foo',
+              language: {name: 'haskell'}},
+     submitter: {
+       social_id: 'github|gh1234'},
+     id: 'abcd1234',
+     content: 'x = 2'}.as_json }
+
   describe '#update!' do
-    context 'stores exercise data' do
-      let(:submission) {
-        {status: :passed,
-         result: 'all right',
-         submissions_count: 2,
-         exercise: {
-           id: 10,
-           name: 'First Steps 1',
-           number: 7},
-         guide: { slug: 'pdep-utn/foo',
-           name: 'Foo',
-           language: {name: 'haskell'}},
-         submitter: {
-           social_id: 'github|gh1234'},
-         id: 'abcd1234',
-         content: 'x = 2'}.as_json }
+    before do
+      Classroom::GuideProgress.update!(submission)
+    end
 
-      before do
-        guide_progress.update!(submission)
-      end
+    context 'when student starts a new guide' do
+      let(:guide_progress) { Classroom::GuideProgress.find('guide.slug' => 'pdep-utn/foo', 'course.slug' => 'example/foo').first }
 
-      let(:exercise) { guide_progress.exercise_by_student('example/foo', 'pdep-utn/foo', 'github|gh1234', 10)['exercise'] }
+      let(:expected_guide) { {'slug' => 'pdep-utn/foo', 'name' => 'Foo', 'language' => {'name' => 'haskell'}} }
+      it { expect(guide_progress['guide']).to eq expected_guide }
 
-      it { expect(exercise['id']).to eq 10 }
-      it { expect(exercise['name']).to eq 'First Steps 1' }
-      it { expect(exercise['number']).to eq 7 }
+      let(:expected_exercise) { {'id' => 10, 'name' => 'First Steps 1', 'number' => 7} }
+      it { expect(guide_progress['exercises'].first).to include expected_exercise }
+
+      let(:expected_submissions) { [{'id' => 'abcd1234', 'status' => 'passed', 'result' => 'all right', 'expectation_results' => nil, 'test_results' => nil, 'feedback' => nil, 'submissions_count' => nil, 'created_at' => nil, 'content' => 'x = 2'}] }
+      it { expect(guide_progress['exercises'].first['submissions']).to eq expected_submissions }
     end
   end
 end
