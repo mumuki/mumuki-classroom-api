@@ -32,11 +32,4 @@ class Mongo::Collection
   def uniq(key, filter, uniq_value)
     distinct(key, filter).uniq { |result| result[uniq_value] }
   end
-
-  def update_follower(course, email, follower, action)
-    update_one(
-      { "email" => email, "course" => course },
-      { action => { "social_ids" => follower }},
-      { :upsert => true })
-  end
 end
