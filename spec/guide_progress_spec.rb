@@ -13,28 +13,21 @@ describe Classroom::GuideProgress do
     Classroom::Database.clean!
   end
 
-  describe '#upsert' do
+  describe '#update!' do
     context 'stores exercise data' do
       let(:submission) {
         {status: :passed,
          result: 'all right',
-         expectation_results: nil,
-         feedback: nil,
-         test_results: nil,
          submissions_count: 2,
          exercise: {
            id: 10,
            name: 'First Steps 1',
            number: 7},
-         guide: {
-           slug: 'pdep-utn/foo',
+         guide: { slug: 'pdep-utn/foo',
            name: 'Foo',
            language: {name: 'haskell'}},
          submitter: {
-           social_id: 'github|gh1234',
-           name: 'foo',
-           email: nil,
-           image_url: nil},
+           social_id: 'github|gh1234'},
          id: 'abcd1234',
          content: 'x = 2'}.as_json }
 
