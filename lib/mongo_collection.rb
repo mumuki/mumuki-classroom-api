@@ -68,8 +68,7 @@ class Mongo::Collection
   def insert_new_exercise(json)
     update_one(
       {'guide' => json[:guide], 'student' => json[:submitter], 'course' => json[:course]},
-      {'$push' => {'exercises' => make_exercise_json(json)}},
-      {'upsert' => true})
+      {'$push' => {'exercises' => make_exercise_json(json)}})
   end
 
   def add_submission_to_exercise(exercise_query, json)
