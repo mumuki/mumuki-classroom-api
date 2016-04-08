@@ -31,23 +31,16 @@ helpers do
   end
 
   def protect!
-    permissions.protect!(slug(:course))
+    permissions.protect!(course_slug)
   end
 
-  def slug(type)
-    "#{org}/#{params[type]}"
-  end
 
   def course_slug
-    @course_slug ||= slug(:course)
+    @course_slug ||= "#{request.first_subdomain}/#{params['course']}"
   end
 
   def repo_slug
-    @repo_slug ||= slug(:repo)
-  end
-
-  def org
-    params['org'] || request.first_subdomain
+    @repo_slug ||= "#{params['org']}/#{params['repo']}"
   end
 
   def set_mongo_connection
@@ -118,6 +111,7 @@ get '/courses' do
 end
 
 post '/courses' do
+  course_slug = json_body['slug']
   permissions.protect!(course_slug)
 
   Classroom::Course.ensure_new! course_slug
@@ -150,11 +144,11 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
-get '/guide_progress/:course/:repo/:student_id/:exercise_id' do
+get '/guide_progress/:course/:org/:repo/:student_id/:exercise_id' do
   {exercise_progress: Classroom::GuideProgress.exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
 end
 
-get '/guide_progress/:course/:repo' do
+get '/guide_progress/:course/:org/:repo' do
   {
       guide: Classroom::GuideProgress.guide_data(repo_slug, course_slug)['guide'],
       progress: Classroom::GuideProgress.by_slug_and_course(repo_slug, course_slug).select { |guide| permissions.allows? guide['course']['slug'] }

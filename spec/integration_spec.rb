@@ -85,7 +85,7 @@ describe 'routes' do
 
   describe 'post /courses' do
     let(:course_json) { {code: 'K2001',
-                         days: ['monday', 'saturday'],
+                         days: %w(monday saturday),
                          period: '2016',
                          shifts: ['morning'],
                          description: 'haskell',
@@ -134,7 +134,7 @@ describe 'routes' do
     end
   end
 
-  describe 'get /courses/:org/:course' do
+  describe 'get /courses/:course' do
     let(:guide_progress1) {{
       guide: { name: 'Bar', slug: 'pdep-utn/bar', language: { name: 'haskell' } },
       course: { slug: 'example/foo' } }}
@@ -150,7 +150,7 @@ describe 'routes' do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when no guides in a course yet' do
-      before { get '/courses/example/foo' }
+      before { get '/courses/foo' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq course_guides: [] }
@@ -160,7 +160,7 @@ describe 'routes' do
       before { Classroom::GuideProgress.insert!(guide_progress1) }
       before { Classroom::GuideProgress.insert!(guide_progress2) }
       before { Classroom::GuideProgress.insert!(guide_progress3) }
-      before { get '/courses/example/foo' }
+      before { get '/courses/foo' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq course_guides: [guide_progress1[:guide], guide_progress2[:guide]] }
@@ -168,7 +168,7 @@ describe 'routes' do
 
   end
 
-  describe 'get /students/:org/:course' do
+  describe 'get /students/:course' do
 
     let(:student) {{ email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar' }}
     let(:course) {{ slug: 'example/foo' }}
@@ -183,7 +183,7 @@ describe 'routes' do
       before { Classroom::GuideProgress.insert!(guide_progress1) }
       before { Classroom::GuideProgress.insert!(guide_progress2) }
       before { Classroom::GuideProgress.insert!(guide_progress3) }
-      before { get '/students/example/foo' }
+      before { get '/students/foo' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq students: [student] }
@@ -191,7 +191,7 @@ describe 'routes' do
 
   end
 
-  describe 'get /guide_progress/:org/:course/:repo' do
+  describe 'get /guide_progress:course/:repo' do
     let(:guide_progress1) {{
       guide: { slug: 'example/foo' },
       course: { slug: 'example/k1024' } }}
@@ -210,7 +210,7 @@ describe 'routes' do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when guide_progres exist' do
-      before { get '/guide_progress/example/k2048/foo' }
+      before { get '/guide_progress/k2048/example/foo' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq({ guide: guide_progress2[:guide],
@@ -222,7 +222,7 @@ describe 'routes' do
 
   end
 
-  describe 'get /guide_progress/:org/:repo/student_id/exercise_id' do
+  describe 'get /guide_progress/:repo/student_id/exercise_id' do
     let(:guide_progress1) {{
       guide: { slug: 'example/foo' },
       course: { slug: 'example/k1024' },
@@ -240,7 +240,7 @@ describe 'routes' do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when student change course and sent an old exercise' do
-      before { get '/guide_progress/example/k2048/foo/github%7c123456/177' }
+      before { get '/guide_progress/k2048/example/foo/github%7c123456/177' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq({ exercise_progress: {
@@ -252,7 +252,7 @@ describe 'routes' do
     end
 
     context 'when student change course and sent a new exercise' do
-      before { get '/guide_progress/example/k2048/foo/github%7c123456/178' }
+      before { get '/guide_progress/k2048/example/foo/github%7c123456/178' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq({ exercise_progress: {
@@ -309,16 +309,16 @@ describe 'routes' do
     context 'when authenticated' do
       before { expect(Classroom::Rabbit).to receive(:publish_comments) }
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/comment/foo/bar', comment_json }
+      before { post '/comment/bar', comment_json }
 
       it { expect(Classroom::Comment.where(submission_id: 1).first.to_json).to eq(comment_json)}
     end
 
     context 'reject unauthorized requests' do
       before { header 'Authorization', build_auth_header('foo/bar') }
-      before { post '/comment/foo/baz', comment_json }
+      before { post '/comment/baz', comment_json }
 
-      it { expect(last_response.body).to eq({message: 'Unauthorized access to foo/baz. Permissions are foo/bar'}.to_json) }
+      it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are foo/bar'}.to_json) }
     end
 
   end
@@ -327,24 +327,24 @@ describe 'routes' do
     let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
     context 'when authenticated' do
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/follower/foo/bar', follower_json }
+      before { post '/follower/bar', follower_json }
 
       it { expect(Classroom::Follower.where(course: "curso", email: "aguspina87@gmail.com").first.to_json).to eq({course: "curso",social_ids: ["social|1"]}.to_json)}
     end
 
     context 'when repeat follower' do
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/follower/foo/bar', follower_json }
-      before { post '/follower/foo/bar', follower_json }
+      before { post '/follower/bar', follower_json }
+      before { post '/follower/bar', follower_json }
 
       it { expect(Classroom::Follower.where(course: "curso", email: "aguspina87@gmail.com").first["social_ids"].count).to eq(1)}
     end
 
     context 'reject unauthorized requests' do
       before { header 'Authorization', build_auth_header('foo/bar') }
-      before { post '/follower/foo/baz', follower_json }
+      before { post '/follower/baz', follower_json }
 
-      it { expect(last_response.body).to eq({message: 'Unauthorized access to foo/baz. Permissions are foo/bar'}.to_json) }
+      it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are foo/bar'}.to_json) }
     end
 
     context 'when not authenticated' do
@@ -357,7 +357,7 @@ describe 'routes' do
 
   end
 
-  describe 'delete /comment/foo/bars' do
+  describe 'delete /comment/bars' do
     let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
     before { header 'Authorization', build_auth_header('*') }
     before { post '/follower', follower_json }
