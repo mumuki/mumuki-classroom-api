@@ -52,16 +52,17 @@ module Classroom::GuideProgress
       json[:submitter][:first_name] = course_student[:student][:first_name]
       json[:submitter][:last_name] = course_student[:student][:last_name]
 
-      if find(make_guide_query json).count.zero?
+      unless guide_exist?(json)
         insert_one({guide: json[:guide], student: json[:submitter], course: json[:course], exercises: [make_exercise_json(json)]})
-      else
-        exercise_query = make_guide_query(json).merge('exercises.id' => json[:exercise][:id])
+        return
+      end
 
-        if find(exercise_query).count.zero?
-          insert_new_exercise(json)
-        else
-          add_submission_to_exercise(exercise_query, json)
-        end
+      exercise_query = make_guide_query(json).merge('exercises.id' => json[:exercise][:id])
+
+      if find(exercise_query).count.zero?
+        insert_new_exercise(json)
+      else
+        add_submission_to_exercise(exercise_query, json)
       end
     end
 
@@ -121,6 +122,10 @@ module Classroom::GuideProgress
 
     def make_guide_query(json)
       {'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug]}
+    end
+
+    def guide_exist?(json)
+      !find(make_guide_query json).count.zero?
     end
   end
 end
