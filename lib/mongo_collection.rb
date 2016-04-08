@@ -1,15 +1,14 @@
 class Mongo::Collection
   def upsert(json)
-
     json.deep_symbolize_keys!
-
-    result = find('guide' => json[:guide], 'student.social_id' => json[:submitter][:social_id], 'course' => json[:course])
 
     course_student = Classroom::CourseStudent.find_by('student.social_id' => json[:submitter][:social_id])
     course_student.deep_symbolize_keys!
 
     json[:submitter][:first_name] = course_student[:student][:first_name]
     json[:submitter][:last_name] = course_student[:student][:last_name]
+
+    result = find('guide' => json[:guide], 'student.social_id' => json[:submitter][:social_id], 'course' => json[:course])
 
     if result.count.zero?
       insert_one({guide: json[:guide], student: json[:submitter], course: json[:course], exercises: [make_exercise_json(json)]})
