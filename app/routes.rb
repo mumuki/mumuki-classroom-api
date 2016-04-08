@@ -167,7 +167,7 @@ post '/events/submissions' do
   {status: :created}
 end
 
-post '/comment' do
+post '/comment/:org/:course' do
   protect!
   Classroom::Comment.insert! json_body
   Classroom::Rabbit.publish_comments json_body.merge(tenant: request.first_subdomain)
@@ -184,7 +184,7 @@ get '/followers/:email' do
   {followers: Classroom::Follower.where(email: params[:email])}
 end
 
-post '/follower' do
+post '/follower/:org/:course' do
   protect!
   Classroom::Follower.add_follower json_body
   {status: :created}

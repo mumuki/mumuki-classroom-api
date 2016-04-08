@@ -294,15 +294,22 @@ describe 'routes' do
     end
   end
 
-  describe 'post /comment' do
+  describe 'post /comment/foo/bar' do
     let(:comment_json) {{submission_id: 1, comment: {content: 'hola', type: 'good'}}.to_json}
-    before { expect(Classroom::Rabbit).to receive(:publish_comments) }
 
     context 'when authenticated' do
+      before { expect(Classroom::Rabbit).to receive(:publish_comments) }
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/comment', comment_json }
+      before { post '/comment/foo/bar', comment_json }
 
       it { expect(Classroom::Comment.where(submission_id: 1).first.to_json).to eq(comment_json)}
+    end
+
+    context 'reject unauthorized requests' do
+      before { header 'Authorization', build_auth_header('foo/bar') }
+      before { post '/comment/foo/baz', comment_json }
+
+      it { expect(last_response.body).to eq({message: 'Unauthorized access to foo/baz. Permissions are foo/bar'}.to_json) }
     end
 
   end
@@ -311,17 +318,24 @@ describe 'routes' do
     let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
     context 'when authenticated' do
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/follower', follower_json }
+      before { post '/follower/foo/bar', follower_json }
 
       it { expect(Classroom::Follower.where(course: "curso", email: "aguspina87@gmail.com").first.to_json).to eq({course: "curso",social_ids: ["social|1"]}.to_json)}
     end
 
     context 'when repeat follower' do
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/follower', follower_json }
-      before { post '/follower', follower_json }
+      before { post '/follower/foo/bar', follower_json }
+      before { post '/follower/foo/bar', follower_json }
 
       it { expect(Classroom::Follower.where(course: "curso", email: "aguspina87@gmail.com").first["social_ids"].count).to eq(1)}
+    end
+
+    context 'reject unauthorized requests' do
+      before { header 'Authorization', build_auth_header('foo/bar') }
+      before { post '/follower/foo/baz', follower_json }
+
+      it { expect(last_response.body).to eq({message: 'Unauthorized access to foo/baz. Permissions are foo/bar'}.to_json) }
     end
 
     context 'when not authenticated' do
@@ -334,7 +348,7 @@ describe 'routes' do
 
   end
 
-  describe 'delete /comments' do
+  describe 'delete /comment/foo/bars' do
     let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
     before { header 'Authorization', build_auth_header('*') }
     before { post '/follower', follower_json }
