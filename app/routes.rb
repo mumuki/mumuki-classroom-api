@@ -38,8 +38,16 @@ helpers do
     "#{org}/#{params[type]}"
   end
 
+  def course_slug
+    @course_slug ||= slug(:course)
+  end
+
+  def repo_slug
+    @repo_slug ||= slug(:repo)
+  end
+
   def org
-    params['org']
+    params['org'] || request.first_subdomain
   end
 
   def set_mongo_connection
@@ -110,10 +118,9 @@ get '/courses' do
 end
 
 post '/courses' do
-  slug = json_body['slug']
-  permissions.protect!(slug)
+  permissions.protect!(course_slug)
 
-  Classroom::Course.ensure_new! slug
+  Classroom::Course.ensure_new! course_slug
 
   Classroom::Course.insert!(
       code: json_body['code'],
@@ -121,45 +128,42 @@ post '/courses' do
       period: json_body['period'],
       shifts: json_body['shifts'],
       description: json_body['description'],
-      slug: slug)
+      slug: course_slug)
 
   {status: :created}
 end
 
-get '/courses/:org/:course' do
+get '/courses/:course' do
   protect!
-  {course_guides: Classroom::GuideProgress.by_course(slug('course'))}
+  {course_guides: Classroom::GuideProgress.by_course(course_slug)}
 end
 
 post '/courses/:course/students' do
-  slug = "#{request.first_subdomain}/#{params['course']}"
-  Classroom::Course.ensure_exist! slug
+  Classroom::Course.ensure_exist! course_slug
 
   Classroom::CourseStudent.insert!(
       student: {first_name: json_body['first_name'],
                 last_name: json_body['last_name'],
                 social_id: token.jwt['sub']},
-      course: {slug: slug})
+      course: {slug: course_slug})
 
   {status: :created}
 end
 
-get '/guide_progress/:org/:course/:repo/:student_id/:exercise_id' do
-  course = "#{request.first_subdomain}/#{params['course']}"
-  {exercise_progress: Classroom::GuideProgress.exercise_by_student(course, slug('repo'), params['student_id'], params['exercise_id'].to_i)}
+get '/guide_progress/:course/:repo/:student_id/:exercise_id' do
+  {exercise_progress: Classroom::GuideProgress.exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
 end
 
-get '/guide_progress/:org/:course/:repo' do
-  course = "#{request.first_subdomain}/#{params['course']}"
+get '/guide_progress/:course/:repo' do
   {
-    guide: Classroom::GuideProgress.guide_data(slug('repo'), course)['guide'],
-    progress: Classroom::GuideProgress.by_slug_and_course(slug('repo'), course).select { |guide| permissions.allows? guide['course']['slug']}
+      guide: Classroom::GuideProgress.guide_data(repo_slug, course_slug)['guide'],
+      progress: Classroom::GuideProgress.by_slug_and_course(repo_slug, course_slug).select { |guide| permissions.allows? guide['course']['slug'] }
   }
 end
 
-get '/students/:org/:course' do
+get '/students/:course' do
   protect!
-  { students: Classroom::GuideProgress.students_by_course_slug(slug(:course)) }
+  {students: Classroom::GuideProgress.students_by_course_slug(course_slug)}
 end
 
 post '/events/submissions' do
@@ -167,7 +171,7 @@ post '/events/submissions' do
   {status: :created}
 end
 
-post '/comment/:org/:course' do
+post '/comment/:course' do
   protect!
   Classroom::Comment.insert! json_body
   Classroom::Rabbit.publish_comments json_body.merge(tenant: request.first_subdomain)
@@ -184,7 +188,7 @@ get '/followers/:email' do
   {followers: Classroom::Follower.where(email: params[:email])}
 end
 
-post '/follower/:org/:course' do
+post '/follower/:course' do
   protect!
   Classroom::Follower.add_follower json_body
   {status: :created}
