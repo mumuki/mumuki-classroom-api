@@ -14,7 +14,7 @@ class Mongo::Collection
     if result.count.zero?
 
       insert_one({guide: json[:guide], student: json[:submitter], course: json[:course],
-                  exercises: [{id: json[:exercise][:id], name: json[:exercise][:name], submissions: [json[:exercise][:submission]]}]})
+                  exercises: [{id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}]})
 
     else
       result2 = find({ 'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id] })
@@ -22,7 +22,7 @@ class Mongo::Collection
       if result2.count.zero?
         update_one(
             { 'guide' => json[:guide], 'student' => json[:submitter], 'course' => json[:course] },
-            { '$push' => {'exercises' => { id: json[:exercise][:id], name: json[:exercise][:name], submissions: [json[:exercise][:submission]] } } },
+            { '$push' => {'exercises' => { id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]] } } },
             { 'upsert' => true })
       else
         update_one(

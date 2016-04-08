@@ -46,7 +46,16 @@ describe 'routes' do
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
+
+      describe 'exercise data' do
+        let(:exercise) { Classroom::GuideProgress.exercise_by_student('example/foo', 'pdep-utn/foo', 'github|gh1234', 10)['exercise'] }
+
+        it { expect(exercise['id']).to eq 10 }
+        it { expect(exercise['name']).to eq 'First Steps 1' }
+        it { expect(exercise['number']).to eq 1 }
+      end
     end
+
     context 'when student does not exist' do
       before { post '/events/submissions', submission }
 
