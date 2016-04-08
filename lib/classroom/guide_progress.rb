@@ -116,11 +116,11 @@ module Classroom::GuideProgress
     end
 
     def guide_exist?(json)
-      !find(make_guide_query json).count.zero?
+      any? make_guide_query(json)
     end
 
     def exercise_exist?(json)
-      !find(make_exercise_query(json)).count.zero?
+      any? make_exercise_query(json)
     end
 
     def create_guide!(submission_json)
