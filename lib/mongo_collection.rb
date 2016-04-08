@@ -68,7 +68,10 @@ class Mongo::Collection
   end
 
   def add_submission_to_exercise(exercise_query, json)
-    update_one(exercise_query, {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]}})
+    update_one(exercise_query, {
+      '$push' => {'exercises.$.submissions' => json[:exercise][:submission]},
+      '$set' => {'exercises.$.name' => json[:exercise][:name], 'exercises.$.number' => json[:exercise][:number]}
+    })
   end
 
   def make_exercise_json(json)

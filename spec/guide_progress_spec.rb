@@ -64,5 +64,30 @@ describe Classroom::GuideProgress do
       it { expect(first_guide_progress['exercises'].size).to eq 1 }
       it { expect(first_guide_progress['exercises'].first['submissions'].size).to eq 2 }
     end
+
+    context 'when exercise has changed, a new submission updates it' do
+      let(:submission) {
+        {status: :passed,
+         result: 'all right',
+         exercise: {
+           id: 10,
+           name: 'First Steps 1'},
+         guide: { slug: 'pdep-utn/foo',
+                  name: 'Foo',
+                  language: {name: 'haskell'}},
+         submitter: {
+           social_id: 'github|gh1234'},
+         id: 'abcd1234',
+         content: 'x = 2'}.as_json }
+
+      before do
+        Classroom::GuideProgress.update! submission.merge({'exercise' => {'id' => 10, 'name' => 'New name', 'number' => 3}})
+      end
+
+      it { expect(guide_progress.count).to eq 1 }
+      it { expect(first_guide_progress['exercises'].size).to eq 1 }
+      it { expect(first_guide_progress['exercises'].first['submissions'].size).to eq 2 }
+      it { expect(first_guide_progress['exercises'].first).to include({'id' => 10, 'name' => 'New name', 'number' => 3}) }
+    end
   end
 end
