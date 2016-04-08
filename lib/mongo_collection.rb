@@ -7,12 +7,10 @@ class Mongo::Collection
     json[:submitter][:first_name] = course_student[:student][:first_name]
     json[:submitter][:last_name] = course_student[:student][:last_name]
 
-    result = find('guide' => json[:guide], 'student.social_id' => json[:submitter][:social_id], 'course' => json[:course])
-
-    if result.count.zero?
+    if find(make_guide_query json).count.zero?
       insert_one({guide: json[:guide], student: json[:submitter], course: json[:course], exercises: [make_exercise_json(json)]})
     else
-      exercise_query = {'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug], 'exercises.id' => json[:exercise][:id]}
+      exercise_query = make_guide_query(json).merge('exercises.id' => json[:exercise][:id])
 
       if find(exercise_query).count.zero?
         insert_new_exercise(json)
@@ -66,9 +64,7 @@ class Mongo::Collection
   private
 
   def insert_new_exercise(json)
-    update_one(
-      {'guide' => json[:guide], 'student' => json[:submitter], 'course' => json[:course]},
-      {'$push' => {'exercises' => make_exercise_json(json)}})
+    update_one(make_guide_query(json), {'$push' => {'exercises' => make_exercise_json(json)}})
   end
 
   def add_submission_to_exercise(exercise_query, json)
@@ -77,5 +73,9 @@ class Mongo::Collection
 
   def make_exercise_json(json)
     {id: json[:exercise][:id], name: json[:exercise][:name], number: json[:exercise][:number], submissions: [json[:exercise][:submission]]}
+  end
+
+  def make_guide_query(json)
+    {'guide.slug' => json[:guide][:slug], 'student.social_id' => json[:submitter][:social_id], 'course.slug' => json[:course][:slug]}
   end
 end
