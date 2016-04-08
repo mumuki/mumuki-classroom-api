@@ -52,6 +52,10 @@ module Classroom::GuideProgress
       json[:submitter][:first_name] = course_student[:student][:first_name]
       json[:submitter][:last_name] = course_student[:student][:last_name]
 
+      if submission_exist? json
+        return
+      end
+
       unless guide_exist? json
         create_guide! json
         return
@@ -121,6 +125,10 @@ module Classroom::GuideProgress
 
     def exercise_exist?(json)
       any? make_exercise_query(json)
+    end
+
+    def submission_exist?(json)
+      any? make_exercise_query(json).merge('exercises.submissions' => {'$elemMatch' => {'id' => json[:exercise][:submission][:id]}})
     end
 
     def create_guide!(submission_json)
