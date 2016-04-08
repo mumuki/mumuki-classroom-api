@@ -1,7 +1,5 @@
 class Classroom::GuideProgress
-  def self.method_missing(name, *args, &block)
-    Classroom::Database.client[collection_name].send(name, *args, &block)
-  end
+  extend Classroom::WithMongo
 
   def self.collection_name
     'guides_progress'
