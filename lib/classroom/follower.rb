@@ -7,11 +7,11 @@ module Classroom::Follower
     end
 
     def add_follower(data)
-      update_follower(data['course'], data['email'], data['social_id'], '$addToSet')
+      update_follower(data, '$addToSet')
     end
 
     def remove_follower(data)
-      update_follower(data['course'], data['email'], data['social_id'], '$pull')
+      update_follower(data, '$pull')
     end
 
     def where(criteria)
@@ -20,10 +20,10 @@ module Classroom::Follower
 
     private
 
-    def update_follower(course, email, follower, action)
+    def update_follower(data, action)
       update_one(
-        { 'email' => email, 'course' => course },
-        { action => { 'social_ids' => follower }},
+        { 'email' => data['email'], 'course' => data['course'] },
+        { action => { 'social_ids' => data['social_id'] }},
         { :upsert => true })
     end
   end
