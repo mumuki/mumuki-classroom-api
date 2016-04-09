@@ -65,6 +65,14 @@ describe Classroom::GuideProgress do
       it { expect(first_guide_progress['exercises'].first['submissions'].size).to eq 2 }
     end
 
+    context "when same submission is sent twice, it's ignored" do
+      before do
+        Classroom::GuideProgress.update! submission
+      end
+
+      it { expect(first_guide_progress['exercises'].first['submissions'].size).to eq 1 }
+    end
+
     context 'when exercise has changed, a new submission updates it' do
       let(:submission) {
         {status: :passed,
@@ -81,7 +89,7 @@ describe Classroom::GuideProgress do
          content: 'x = 2'}.as_json }
 
       before do
-        Classroom::GuideProgress.update! submission.merge({'exercise' => {'id' => 10, 'name' => 'New name', 'number' => 3}})
+        Classroom::GuideProgress.update! submission.merge({'id' => 'abcd1235', 'exercise' => {'id' => 10, 'name' => 'New name', 'number' => 3}})
       end
 
       it { expect(guide_progress.count).to eq 1 }
