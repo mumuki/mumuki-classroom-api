@@ -52,9 +52,7 @@ module Classroom::GuideProgress
       json[:submitter][:first_name] = course_student[:student][:first_name]
       json[:submitter][:last_name] = course_student[:student][:last_name]
 
-      if submission_exist? json
-        return
-      end
+      return if submission_exist? json
 
       unless guide_exist? json
         create_guide! json
