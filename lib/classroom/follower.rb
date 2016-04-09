@@ -1,20 +1,30 @@
-class Classroom::Follower
+module Classroom::Follower
   extend Classroom::WithMongo
 
-  def self.add_follower(data)
-    followers_collection.update_follower(data["course"], data["email"], data["social_id"], "$addToSet")
-  end
+  class << self
+    def collection_name
+      'followers'
+    end
 
-  def self.remove_follower(data)
-    followers_collection.update_follower(data["course"], data["email"], data["social_id"], "$pull")
-  end
+    def add_follower(data)
+      update_follower(data, '$addToSet')
+    end
 
-  def self.count
-    courses_collection.count
-  end
+    def remove_follower(data)
+      update_follower(data, '$pull')
+    end
 
-  def self.where(criteria)
-    followers_collection.find(criteria).projection(_id: 0, email: 0)
-  end
+    def where(criteria)
+      find(criteria).projection(_id: 0, email: 0)
+    end
 
+    private
+
+    def update_follower(data, action)
+      update_one(
+        { 'email' => data['email'], 'course' => data['course'] },
+        { action => { 'social_ids' => data['social_id'] }},
+        { :upsert => true })
+    end
+  end
 end
