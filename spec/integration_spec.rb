@@ -299,7 +299,7 @@ describe 'routes' do
     let(:comment_json) {{submission_id: 1, comment: {content: 'hola', type: 'good'}}.to_json}
 
     context 'when authenticated' do
-      before { expect(Classroom::Rabbit).to receive(:publish_comments) }
+      before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/comment/bar', comment_json }
 
