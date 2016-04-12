@@ -16,6 +16,8 @@ gem 'activesupport', '~> 4.2'
 
 gem 'mumukit-auth', github: 'mumuki/mumukit-auth', branch: 'master'
 
+gem 'mumukit-nuntius', github: 'mumuki/mumukit-nuntius', branch: 'master'
+
 group :test do
   gem 'rspec', '~> 2.99'
   gem 'rack-test'
