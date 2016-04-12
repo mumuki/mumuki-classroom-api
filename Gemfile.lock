@@ -16,6 +16,19 @@ GIT
       activesupport (~> 4.2)
       bunny (~> 2.3)
 
+GIT
+  remote: git://github.com/mumuki/mumukit-service.git
+  revision: 60913b4439f5470349063e40c5f214ebb344bd0d
+  tag: v0.1.0
+  specs:
+    mumukit-service (0.1.0)
+      activesupport (~> 4.2)
+      bson_ext
+      mongo (~> 2.1)
+      puma
+      sinatra
+      sinatra-cross_origin (~> 0.3.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -44,6 +57,7 @@ GEM
     minitest (5.8.4)
     mongo (2.2.2)
       bson (~> 4.0)
+    puma (3.4.0)
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
@@ -89,6 +103,7 @@ DEPENDENCIES
   mongo (~> 2.1)
   mumukit-auth!
   mumukit-nuntius!
+  mumukit-service!
   rack-test
   rake
   rspec (~> 2.99)
