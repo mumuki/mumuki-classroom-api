@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'sinatra/cross_origin'
 require 'mumukit/auth'
-require 'mumukit/nuntius'
 
 require_relative './request'
 require_relative '../lib/classroom'
@@ -169,7 +168,7 @@ end
 post '/comment/:course' do
   protect!
   Classroom::Comment.insert! json_body
-  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: request.first_subdomain)
+  Classroom::Rabbit.publish_comments json_body.merge(tenant: request.first_subdomain)
   {status: :created}
 end
 
