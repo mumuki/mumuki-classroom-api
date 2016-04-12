@@ -172,9 +172,9 @@ post '/comment/:course' do
   {status: :created}
 end
 
-get '/comments/:submission_id' do
+get '/comments/:exercise_id' do
   protect!
-  {comments: Classroom::Comment.where(submission_id: params[:submission_id].to_i)}
+  {comments: Classroom::Comment.where(exercise_id: params[:exercise_id].to_i)}
 end
 
 get '/followers/:email' do
