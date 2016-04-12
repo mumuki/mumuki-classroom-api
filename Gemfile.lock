@@ -7,14 +7,6 @@ GIT
       activesupport
       jwt
 
-GIT
-  remote: git://github.com/mumuki/mumukit-nuntius.git
-  revision: 9ea870f777ba45d5055a6b422803aee7e85eadeb
-  branch: master
-  specs:
-    mumukit-nuntius (0.1.0)
-      bunny
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -87,7 +79,6 @@ DEPENDENCIES
   factory_girl
   mongo (~> 2.1)
   mumukit-auth!
-  mumukit-nuntius!
   rack-test
   rake
   rspec (~> 2.99)
