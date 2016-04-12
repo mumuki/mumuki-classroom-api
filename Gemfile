@@ -14,7 +14,9 @@ gem 'bunny'
 
 gem 'activesupport', '~> 4.2'
 
-gem 'mumukit-auth', github: 'mumuki/mumukit-auth', branch: 'master'
+gem 'mumukit-auth', github: 'mumuki/mumukit-auth', tag: 'v0.0.1'
+
+gem 'mumukit-nuntius', github: 'mumuki/mumukit-nuntius', tag: 'v0.0.1'
 
 group :test do
   gem 'rspec', '~> 2.99'
