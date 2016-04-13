@@ -161,11 +161,6 @@ get '/students/:course' do
   {students: Classroom::GuideProgress.students_by_course_slug(course_slug)}
 end
 
-post '/events/submissions' do
-  Classroom::GuideProgress.update! json_body
-  {status: :created}
-end
-
 post '/comment/:course' do
   protect!
   Classroom::Comment.insert! json_body
