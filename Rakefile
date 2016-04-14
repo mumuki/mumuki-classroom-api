@@ -8,8 +8,13 @@ namespace :submission do
 
       Classroom::Database.tenant = data.delete('tenant')
 
-      Classroom::GuideProgress.update! data
-
+      begin
+        Classroom::GuideProgress.update! data
+      rescue Classroom::CourseStudentNotExistsError => e
+        puts "Submission failed #{e}. Data was:"
+        puts data
+        Classroom::FailedSubmission.insert! data
+      end
       Classroom::Database.client.close
     end
   end
