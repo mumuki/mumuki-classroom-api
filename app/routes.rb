@@ -34,10 +34,6 @@ helpers do
     Classroom::Database.tenant = request.first_subdomain
   end
 
-  def convert(parameters)
-    parameters.as_json['parameters']
-  end
-
 end
 
 before do
