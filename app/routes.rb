@@ -23,11 +23,11 @@ helpers do
   end
 
   def course_slug
-    @course_slug ||= "#{request.first_subdomain}/#{params['course']}"
+    @course_slug ||= "#{request.first_subdomain}/#{params[:course]}"
   end
 
   def repo_slug
-    @repo_slug ||= "#{params['org']}/#{params['repo']}"
+    @repo_slug ||= "#{params[:organization]}/#{params[:repository]}"
   end
 
   def set_mongo_connection
@@ -99,11 +99,11 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
-get '/guide_progress/:course/:org/:repo/:student_id/:exercise_id' do
+get '/guide_progress/:course/:organization/:repository/:student_id/:exercise_id' do
   {exercise_progress: Classroom::GuideProgress.exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
 end
 
-get '/guide_progress/:course/:org/:repo' do
+get '/guide_progress/:course/:organization/:repository' do
   {
       guide: Classroom::GuideProgress.guide_data(repo_slug, course_slug)['guide'],
       progress: Classroom::GuideProgress.by_slug_and_course(repo_slug, course_slug).select { |guide| permissions.allows? guide['course']['slug'] }
