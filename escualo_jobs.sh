@@ -1,3 +1,3 @@
 #/bin/bash
 
-rake submission:listen
+bundle exec rake submission:listen
