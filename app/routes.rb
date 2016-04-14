@@ -2,43 +2,25 @@ require 'sinatra'
 require 'sinatra/cross_origin'
 require 'mumukit/auth'
 require 'mumukit/nuntius'
+require 'mumukit/service/routes'
+require 'mumukit/service/routes/auth'
 
 require_relative './request'
 require_relative '../lib/classroom'
 
 configure do
-  enable :cross_origin
-  set :allow_methods, [:get, :put, :post, :options, :delete]
-  set :show_exceptions, false
-
-  Mongo::Logger.logger = ::Logger.new('mongo.log')
+  set :app_name, 'classroom'
 end
 
 helpers do
-  def json_body
-    @json_body ||= JSON.parse(request.body.read) rescue nil
-  end
-
-  def permissions
-    @permissions ||= token.permissions 'classroom'
-  end
 
   def permissions_to_regex
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
 
-  def token
-    @token ||= Mumukit::Auth::Token.decode_header(authorization_header).tap(&:verify_client!)
-  end
-
-  def authorization_header
-    env['HTTP_AUTHORIZATION']
-  end
-
   def protect!
     permissions.protect!(course_slug)
   end
-
 
   def course_slug
     @course_slug ||= "#{request.first_subdomain}/#{params['course']}"
@@ -59,25 +41,11 @@ helpers do
 end
 
 before do
-  content_type 'application/json', 'charset' => 'utf-8'
   set_mongo_connection
 end
 
 after do
   Classroom::Database.client.close
-end
-
-after do
-  error_message = env['sinatra.error']
-  if error_message.blank?
-    response.body = response.body.to_json
-  else
-    response.body = {message: env['sinatra.error'].message}.to_json
-  end
-end
-
-error JSON::ParserError do
-  halt 400
 end
 
 error Classroom::CourseExistsError do
@@ -92,27 +60,9 @@ error Classroom::CourseStudentNotExistsError do
   halt 400
 end
 
-error Mumukit::Auth::InvalidTokenError do
-  halt 400
-end
-
-error Mumukit::Auth::UnauthorizedAccessError do
-  halt 403
-end
-
-options '*' do
-  response.headers['Allow'] = settings.allow_methods.map { |it| it.to_s.upcase }.join(',')
-  response.headers['Access-Control-Allow-Headers'] = 'X-Mumuki-Auth-Token, X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept, Authorization'
-  200
-end
-
 get '/courses' do
   grants = permissions_to_regex
-  if grants.to_s == ''
-    return {courses: []}
-  else
-    {courses: Classroom::Course.all(grants)}
-  end
+  { courses: grants.to_s.blank? ? [] : Classroom::Course.all(grants) }
 end
 
 post '/courses' do

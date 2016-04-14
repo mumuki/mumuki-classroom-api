@@ -1,6 +1,8 @@
 module Classroom
 end
 
+require 'mumukit/service'
+
 require 'active_support/all'
 require 'mongo'
 require 'bunny'
