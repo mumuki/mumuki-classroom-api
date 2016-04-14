@@ -47,6 +47,7 @@ module Classroom::GuideProgress
     def update!(data)
       json = process_params(data).deep_symbolize_keys
 
+
       course_student = Classroom::CourseStudent.find_by('student.social_id' => json[:submitter][:social_id]).deep_symbolize_keys
 
       json[:submitter][:first_name] = course_student[:student][:first_name]
