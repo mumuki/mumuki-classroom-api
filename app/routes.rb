@@ -23,11 +23,11 @@ helpers do
   end
 
   def course_slug
-    @course_slug ||= "#{request.first_subdomain}/#{params[:course]}"
+    @course_slug ||= Mumukit::Service::Slug.new(request.first_subdomain, params[:course]).to_s
   end
 
   def repo_slug
-    @repo_slug ||= "#{params[:organization]}/#{params[:repository]}"
+    @repo_slug ||= Mumukit::Service::Slug.new(params[:organization], params[:repository]).to_s
   end
 
   def set_mongo_connection
