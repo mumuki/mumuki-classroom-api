@@ -18,8 +18,8 @@ helpers do
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
 
-  def protect!
-    permissions.protect!(course_slug)
+  def route_slug_parts
+    [request.first_subdomain, params[:course]].compact
   end
 
   def course_slug

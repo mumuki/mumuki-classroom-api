@@ -18,10 +18,10 @@ GIT
 
 GIT
   remote: git://github.com/mumuki/mumukit-service.git
-  revision: 60913b4439f5470349063e40c5f214ebb344bd0d
-  tag: v0.1.0
+  revision: 638bdbcb7712d4395f5f44c909158810acd5b3fc
+  tag: v0.1.1
   specs:
-    mumukit-service (0.1.0)
+    mumukit-service (0.1.1)
       activesupport (~> 4.2)
       bson_ext
       mongo (~> 2.1)
@@ -39,7 +39,7 @@ GEM
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
     amq-protocol (2.0.1)
-    bson (4.0.1)
+    bson (4.1.0)
     bson_ext (1.5.1)
     bunny (2.3.1)
       amq-protocol (>= 2.0.1)
@@ -53,7 +53,7 @@ GEM
     json (1.8.3)
     jwt (1.5.4)
     minitest (5.8.4)
-    mongo (2.2.2)
+    mongo (2.2.4)
       bson (~> 4.0)
     puma (3.4.0)
     rack (1.6.4)
