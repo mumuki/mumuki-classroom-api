@@ -294,8 +294,8 @@ describe 'routes' do
       it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are foo/bar'}.to_json) }
     end
 
-    skip 'when not authenticated' do
-      let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
+    context 'when not authenticated' do
+      let(:follower_json) {{email: "aguspina87@gmail.com", course: "test/curso", social_id: "social|1"}.to_json}
       before { post '/follower', follower_json }
 
       it { expect(last_response).to_not be_ok }
@@ -304,11 +304,11 @@ describe 'routes' do
 
   end
 
-  skip 'delete /follower' do
-    let(:follower_json) {{email: "aguspina87@gmail.com", course: "curso", social_id: "social|1"}.to_json}
+  context 'delete /follower' do
+    let(:follower_json) {{email: "aguspina87@gmail.com", course: "test/curso", social_id: "social|1"}.to_json}
     before { header 'Authorization', build_auth_header('*') }
     before { post '/follower', follower_json }
-    before { delete '/follower/curso/aguspina87@gmail.com/social%7c1', follower_json }
+    before { delete '/follower/test%2Fcurso/aguspina87@gmail.com/social%7C1', follower_json }
 
     it { expect(Classroom::Follower.count).to eq 0 }
   end
