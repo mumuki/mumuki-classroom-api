@@ -11,18 +11,21 @@ logger.info 'Listening to submissions'
 namespace :submission do
   task :listen do
     Mumukit::Nuntius::Consumer.start 'submissions' do |delivery_info, properties, body|
-      data = JSON.parse(body)
-
-      Classroom::Database.tenant = data.delete('tenant')
-
       begin
-        logger.info 'Processing new submission'
-        Classroom::GuideProgress.update! data
-      rescue Classroom::CourseStudentNotExistsError => e
-        logger.warn "Submission failed #{e}. Data was: #{data}"
-        Classroom::FailedSubmission.insert! data
+        data = JSON.parse(body)
+
+        Classroom::Database.tenant = data.delete('tenant')
+
+        begin
+          logger.info 'Processing new submission'
+          Classroom::GuideProgress.update! data
+        rescue Classroom::CourseStudentNotExistsError => e
+          logger.warn "Submission failed #{e}. Data was: #{data}"
+          Classroom::FailedSubmission.insert! data
+        end
+      ensure
+        Classroom::Database.client.try(:close)
       end
-      Classroom::Database.client.close
     end
   end
 end
