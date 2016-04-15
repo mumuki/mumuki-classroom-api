@@ -174,8 +174,8 @@ get '/comments/:exercise_id' do
 end
 
 get '/followers/:email' do
-  protect!
-  {followers: Classroom::Follower.where(email: params[:email])}
+  grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+  { followers: grants.to_s.blank? ? [] : Classroom::Follower.where('email' => params[:email], 'course' => { '$regex' => grants}) }
 end
 
 post '/follower/:course' do
