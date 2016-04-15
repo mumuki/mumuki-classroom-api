@@ -23,6 +23,10 @@ helpers do
     @permissions ||= token.permissions 'classroom'
   end
 
+  def permissions_to_regex
+    permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+  end
+
   def token
     @token ||= Mumukit::Auth::Token.decode_header(authorization_header).tap(&:verify_client!)
   end
@@ -103,7 +107,7 @@ options '*' do
 end
 
 get '/courses' do
-  grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+  grants = permissions_to_regex
   if grants.to_s == ''
     return {courses: []}
   else
@@ -174,12 +178,13 @@ get '/comments/:exercise_id' do
 end
 
 get '/followers/:email' do
-  grants = permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+  grants = permissions_to_regex
   { followers: grants.to_s.blank? ? [] : Classroom::Follower.where('email' => params[:email], 'course' => { '$regex' => grants}) }
 end
 
 post '/follower/:course' do
   protect!
+  json_body['course'] = course_slug
   Classroom::Follower.add_follower json_body
   {status: :created}
 end
