@@ -21,5 +21,6 @@ class Classroom::Database
     client[:guides_progress].drop
     client[:courses].drop
     client[:course_students].drop
+    client[:followers].drop
   end
 end
