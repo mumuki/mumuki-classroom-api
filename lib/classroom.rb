@@ -2,10 +2,8 @@ module Classroom
 end
 
 require 'mumukit/service'
-
 require 'active_support/all'
-require 'mongo'
-require 'bunny'
+
 require_relative './classroom/with_mongo'
 require_relative './classroom/database'
 require_relative './classroom/course'
