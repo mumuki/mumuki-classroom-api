@@ -117,14 +117,15 @@ end
 
 post '/comment/:course' do
   protect!
-  Classroom::Comment.insert! json_body
-  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
-  {status: :created}
+  json = json_body.wrap_json
+  Classroom::Collection::Comments.insert!(json)
+  Mumukit::Nuntius::Publisher.publish_comments json.merge(tenant: tenant)
+  { status: :created }
 end
 
-get '/comments/:exercise_id' do
+get '/comments/:course/:exercise_id' do
   protect!
-  {comments: Classroom::Comment.where(exercise_id: params[:exercise_id].to_i)}
+  Classroom::Collection::Comments.where(exercise_id: params[:exercise_id].to_i).as_json
 end
 
 get '/followers/:email' do

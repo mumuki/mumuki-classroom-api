@@ -1,13 +1,7 @@
-module Classroom::Comment
-  extend Classroom::WithMongo
+class Classroom::Comment < Mumukit::Service::JsonWrapper
 
-  class << self
-    def collection_name
-      'comments'
-    end
-
-    def where(criteria)
-      find(criteria).projection(_id: 0)
-    end
+  def initialize(it)
+    super(it.except(:id))
   end
+
 end

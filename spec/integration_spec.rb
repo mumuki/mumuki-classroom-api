@@ -250,15 +250,17 @@ describe 'routes' do
     end
   end
 
-  describe 'post /comment/foo/bar' do
-    let(:comment_json) {{submission_id: 1, comment: {content: 'hola', type: 'good'}}.to_json}
+  describe 'post /comment/bar' do
+    let(:comment_json) {{exercise_id: 1, submission_id: 1, comment: {content: 'hola', type: 'good'}}.to_json}
 
     context 'when authenticated' do
       before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/comment/bar', comment_json }
 
-      it { expect(Classroom::Comment.where(submission_id: 1).first.to_json).to eq(comment_json)}
+      let(:comment) { Classroom::Collection::Comments.find_by(submission_id: 1) }
+
+      it { expect(comment.to_json).to eq(comment_json)}
     end
 
     context 'reject unauthorized requests' do
@@ -266,6 +268,33 @@ describe 'routes' do
       before { post '/comment/baz', comment_json }
 
       it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are foo/bar'}.to_json) }
+    end
+
+  end
+
+  describe 'get /comments/:course/:exercise_id' do
+    let(:comment1) { {exercise_id: 1, submission_id: 1, comment: {content: 'hola', type: 'bad'}} }
+    let(:comment2) { {exercise_id: 1, submission_id: 2, comment: {content: 'hola', type: 'good'}} }
+    let(:comment3) { {exercise_id: 2, submission_id: 3, comment: {content: 'hola', type: 'warning'}} }
+
+    before do
+      Classroom::Collection::Comments.insert!(comment1.wrap_json)
+      Classroom::Collection::Comments.insert!(comment2.wrap_json)
+      Classroom::Collection::Comments.insert!(comment3.wrap_json)
+    end
+
+    context 'when authenticated' do
+      before { header 'Authorization', build_auth_header('example/baz') }
+      before { get '/comments/baz/1' }
+
+      it { expect(last_response.body).to eq({comments: [comment1, comment2]}.to_json)}
+    end
+
+    context 'reject unauthorized requests' do
+      before { header 'Authorization', build_auth_header('foo/baz') }
+      before { get '/comments/baz/1' }
+
+      it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are foo/baz'}.to_json) }
     end
 
   end
