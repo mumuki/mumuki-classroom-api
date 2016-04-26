@@ -130,19 +130,23 @@ end
 
 get '/followers/:email' do
   grants = permissions_to_regex
-  { followers: grants.to_s.blank? ? [] : Classroom::Follower.where('email' => params[:email], 'course' => { '$regex' => grants}) }
+  if grants.to_s.blank?
+    { followers: [] }
+  else
+    Classroom::Collection::Followers.where(email: params[:email], course: { '$regex' => grants }).as_json
+  end
 end
 
 post '/follower/:course' do
   protect!
   json_body['course'] = course_slug
-  Classroom::Follower.add_follower json_body
+  Classroom::Collection::Followers.add_follower json_body
   {status: :created}
 end
 
 delete '/follower/:course/:email/:social_id' do
   protect!
-  Classroom::Follower.remove_follower "course" => course_slug, "email" => params[:email], "social_id" => params[:social_id]
+  Classroom::Collection::Followers.remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
   {status: :created}
 end
 

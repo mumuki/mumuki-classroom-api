@@ -3,3 +3,5 @@ end
 
 require_relative './collection/comments'
 require_relative './collection/comment_array'
+require_relative './collection/followers'
+require_relative './collection/follower_array'
