@@ -18,12 +18,16 @@ helpers do
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
 
+  def tenant
+    request.first_subdomain
+  end
+
   def route_slug_parts
-    [request.first_subdomain, params[:course]].compact
+    [tenant, params[:course]].compact
   end
 
   def course_slug
-    @course_slug ||= Mumukit::Service::Slug.new(request.first_subdomain, params[:course]).to_s
+    @course_slug ||= Mumukit::Service::Slug.new(tenant, params[:course]).to_s
   end
 
   def repo_slug
@@ -31,7 +35,7 @@ helpers do
   end
 
   def set_mongo_connection
-    Classroom::Database.tenant = request.first_subdomain
+    Classroom::Database.tenant = tenant
   end
 
 end
@@ -114,7 +118,7 @@ end
 post '/comment/:course' do
   protect!
   Classroom::Comment.insert! json_body
-  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: request.first_subdomain)
+  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
   {status: :created}
 end
 
