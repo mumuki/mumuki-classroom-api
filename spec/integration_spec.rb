@@ -22,7 +22,7 @@ describe 'routes' do
     end
 
     context 'when there are courses' do
-      before { Classroom::Course.insert!(name: 'foo', slug: 'test/foo', description: 'baz') }
+      before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'test/foo', description: 'baz'}.wrap_json) }
       before { get '/courses' }
 
       it { expect(last_response).to be_ok }
@@ -37,7 +37,7 @@ describe 'routes' do
                          shifts: ['morning'],
                          description: 'haskell',
                          slug: 'example/2016-K2001'}.to_json }
-    let(:created_slug) { Classroom::Course.find_by(slug: 'example/2016-K2001')['slug'] }
+    let(:created_slug) { Classroom::Collection::Courses.find_by(slug: 'example/2016-K2001').slug }
 
     context 'when is normal teacher' do
       it 'rejects course creation' do
@@ -46,7 +46,7 @@ describe 'routes' do
         post '/courses', course_json
 
         expect(last_response).to_not be_ok
-        expect(Classroom::Course.count).to eq 0
+        expect(Classroom::Collection::Courses.count).to eq 0
       end
     end
 
@@ -56,7 +56,7 @@ describe 'routes' do
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
-      it { expect(Classroom::Course.count).to eq 1 }
+      it { expect(Classroom::Collection::Courses.count).to eq 1 }
       it { expect(created_slug).to eq 'example/2016-K2001' }
     end
 
@@ -66,12 +66,12 @@ describe 'routes' do
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
-      it { expect(Classroom::Course.count).to eq 1 }
+      it { expect(Classroom::Collection::Courses.count).to eq 1 }
       it { expect(created_slug).to eq 'example/2016-K2001' }
     end
 
     context 'when course already exists' do
-      before { Classroom::Course.insert!(slug: 'example/2016-K2001') }
+      before { Classroom::Collection::Courses.insert!({slug: 'example/2016-K2001'}.wrap_json) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses', course_json }
 
@@ -216,7 +216,7 @@ describe 'routes' do
     let(:student_json) { {first_name: 'Jon', last_name: 'Doe'}.to_json }
 
     context 'when course exists' do
-      before { Classroom::Course.insert!(name: 'foo', slug: 'example/foo') }
+      before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
 
       context 'when not authenticated' do
         before { post '/courses/foo/students', student_json }

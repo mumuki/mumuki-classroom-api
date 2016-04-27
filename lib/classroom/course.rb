@@ -1,35 +1,7 @@
-module Classroom::Course
-  extend Classroom::WithMongo
+class Classroom::Course < Mumukit::Service::JsonWrapper
 
-  class << self
-    def collection_name
-      'courses'
-    end
-
-    def where(criteria)
-      find(criteria).projection(_id: 0)
-    end
-
-    def find_by(criteria)
-      where(criteria).first
-    end
-
-    def all(grants_pattern)
-      where slug: {'$regex' => grants_pattern}
-    end
-
-    def ensure_new!(slug)
-      raise Classroom::CourseExistsError, "#{slug} does already exist" if count(slug: slug) > 0
-    end
-
-    def ensure_exist!(slug)
-      raise Classroom::CourseNotExistsError, "#{slug} does not exist" if count(slug: slug) == 0
-    end
+  def initialize(it)
+    super(it.except(:id))
   end
-end
 
-class Classroom::CourseExistsError < StandardError
-end
-
-class Classroom::CourseNotExistsError < StandardError
 end

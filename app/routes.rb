@@ -62,22 +62,27 @@ end
 
 get '/courses' do
   grants = permissions_to_regex
-  { courses: grants.to_s.blank? ? [] : Classroom::Course.all(grants) }
+  if grants.to_s.blank?
+    { courses: [] }
+  else
+    Classroom::Collection::Courses.all(grants).as_json
+  end
 end
 
 post '/courses' do
   course_slug = json_body['slug']
   permissions.protect!(course_slug)
 
-  Classroom::Course.ensure_new! course_slug
+  Classroom::Collection::Courses.ensure_new! course_slug
 
-  Classroom::Course.insert!(
-      code: json_body['code'],
-      days: json_body['days'],
-      period: json_body['period'],
-      shifts: json_body['shifts'],
-      description: json_body['description'],
-      slug: course_slug)
+  json = {code: json_body['code'],
+    days: json_body['days'],
+    period: json_body['period'],
+    shifts: json_body['shifts'],
+    description: json_body['description'],
+    slug: course_slug}
+
+  Classroom::Collection::Courses.insert!(json.wrap_json)
 
   {status: :created}
 end
@@ -88,7 +93,7 @@ get '/courses/:course' do
 end
 
 post '/courses/:course/students' do
-  Classroom::Course.ensure_exist! course_slug
+  Classroom::Collection::Courses.ensure_exist! course_slug
 
   Classroom::CourseStudent.insert!(
       student: {first_name: json_body['first_name'],
