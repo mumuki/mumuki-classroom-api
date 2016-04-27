@@ -27,4 +27,9 @@ module Mumukit::Service::Collection
     raw = mongo_collection.find(args).projection(_id: 0).map { |it| wrap it }
     wrap_array raw
   end
+
+  def order_by(args, options)
+    mongo_collection.find(args).sort(options).projection(_id: 0).first.try{ |it| wrap(it) }
+  end
+
 end
