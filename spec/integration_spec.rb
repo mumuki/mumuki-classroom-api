@@ -222,19 +222,19 @@ describe 'routes' do
         before { post '/courses/foo/students', student_json }
 
         it { expect(last_response).to_not be_ok }
-        it { expect(Classroom::CourseStudent.count).to eq 0 }
+        it { expect(Classroom::Collection::CourseStudents.count).to eq 0 }
       end
 
       context 'when authenticated' do
-        let(:created_course_student) { Classroom::CourseStudent.first.to_h.deep_symbolize_keys }
+        let(:created_course_student) { Classroom::Collection::CourseStudents.first.as_json }
         before { header 'Authorization', build_auth_header('*') }
         before { post '/courses/foo/students', student_json }
 
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to json_eq status: 'created' }
-        it { expect(Classroom::CourseStudent.count).to eq 1 }
-        it { expect(created_course_student).to eq(student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|user123456'},
-                                                  course: {slug: 'example/foo'}) }
+        it { expect(Classroom::Collection::CourseStudents.count).to eq 1 }
+        it { expect(created_course_student.deep_symbolize_keys).to eq(student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|user123456'},
+                                                                      course: {slug: 'example/foo'}) }
       end
     end
 
@@ -245,7 +245,7 @@ describe 'routes' do
         post '/courses/foo/students', student_json
 
         expect(last_response).to_not be_ok
-        expect(Classroom::CourseStudent.count).to eq 0
+        expect(Classroom::Collection::CourseStudents.count).to eq 0
       end
     end
   end

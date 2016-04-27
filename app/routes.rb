@@ -95,11 +95,12 @@ end
 post '/courses/:course/students' do
   Classroom::Collection::Courses.ensure_exist! course_slug
 
-  Classroom::CourseStudent.insert!(
-      student: {first_name: json_body['first_name'],
-                last_name: json_body['last_name'],
-                social_id: token.jwt['sub']},
-      course: {slug: course_slug})
+  json ={student: {first_name: json_body['first_name'],
+                   last_name: json_body['last_name'],
+                   social_id: token.jwt['sub']},
+         course: {slug: course_slug}}
+
+  Classroom::Collection::CourseStudents.insert!(json.wrap_json)
 
   {status: :created}
 end
