@@ -1,14 +1,7 @@
-module Classroom::FailedSubmission
-  extend Classroom::WithMongo
+class Classroom::FailedSubmission < Mumukit::Service::JsonWrapper
 
-  class << self
-    def collection_name
-      'failed_submissions'
-    end
-
-    def insert!(data)
-      insert_one data
-    end
+  def initialize(it)
+    super(it.except(:id))
   end
 
 end

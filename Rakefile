@@ -18,7 +18,7 @@ namespace :submission do
           Classroom::GuideProgress.update! data
         rescue => e
           logger.warn "Submission failed #{e}. Data was: #{data}"
-          Classroom::FailedSubmission.insert! data
+          Classroom::Collection::FailedSubmissions.insert! data.wrap_json
         end
       rescue => e
         logger.error "Submission malformed #{e}. Data was: #{data}"
