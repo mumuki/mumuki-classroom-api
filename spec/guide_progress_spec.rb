@@ -28,10 +28,10 @@ describe Classroom::GuideProgress do
 
   describe '#update!' do
     before do
-      Classroom::GuideProgress.update!(submission)
+      Classroom::Collection::GuidesProgress.update!(submission)
     end
 
-    let(:guide_progress) { Classroom::GuideProgress.find('guide.slug' => 'pdep-utn/foo', 'course.slug' => 'example/foo') }
+    let(:guide_progress) { Classroom::Collection::GuidesProgress.where('guide.slug' => 'pdep-utn/foo', 'course.slug' => 'example/foo').as_json[:guides_progress] }
     let(:first_guide_progress) { guide_progress.first }
 
     context 'when student starts a new guide' do
@@ -47,7 +47,7 @@ describe Classroom::GuideProgress do
 
     context 'when new exercise is submitted for existing guide' do
       before do
-        Classroom::GuideProgress.update! submission.merge({'id' => 'abc1235', 'exercise' => {'id' => 25, 'name' => 'Second Steps', 'number' => 8}})
+        Classroom::Collection::GuidesProgress.update! submission.merge({'id' => 'abc1235', 'exercise' => {'id' => 25, 'name' => 'Second Steps', 'number' => 8}})
       end
 
       it { expect(guide_progress.count).to eq 1 }
@@ -57,7 +57,7 @@ describe Classroom::GuideProgress do
 
     context 'when new submission is submitted for existing exercise' do
       before do
-        Classroom::GuideProgress.update! submission.merge({'id' => 'abc1235'})
+        Classroom::Collection::GuidesProgress.update! submission.merge({'id' => 'abc1235'})
       end
 
       it { expect(guide_progress.count).to eq 1 }
@@ -67,7 +67,7 @@ describe Classroom::GuideProgress do
 
     context "when same submission is sent twice, it's ignored" do
       before do
-        Classroom::GuideProgress.update! submission
+        Classroom::Collection::GuidesProgress.update! submission
       end
 
       it { expect(first_guide_progress['exercises'].first['submissions'].size).to eq 1 }
@@ -89,7 +89,7 @@ describe Classroom::GuideProgress do
          content: 'x = 2'}.as_json }
 
       before do
-        Classroom::GuideProgress.update! submission.merge({'id' => 'abcd1235', 'exercise' => {'id' => 10, 'name' => 'New name', 'number' => 3}})
+        Classroom::Collection::GuidesProgress.update! submission.merge({'id' => 'abcd1235', 'exercise' => {'id' => 10, 'name' => 'New name', 'number' => 3}})
       end
 
       it { expect(guide_progress.count).to eq 1 }
