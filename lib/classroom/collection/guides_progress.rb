@@ -148,7 +148,7 @@ module Classroom::Collection::GuidesProgress
   end
 
   def self.wrap(it)
-    Classroom::GuideProgress.new(it)
+    Classroom::JsonWrapper.new(it)
   end
 
   def self.wrap_array(it)

@@ -17,7 +17,7 @@ module Classroom::Collection::CourseStudents
   end
 
   def self.wrap(it)
-    Classroom::CourseStudent.new(it)
+    Classroom::JsonWrapper.new(it)
   end
 
 end

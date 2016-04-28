@@ -1,7 +1,7 @@
-class Classroom::Follower < Mumukit::Service::JsonWrapper
+class Classroom::Follower < Classroom::JsonWrapper
 
   def initialize(it)
-    super(it.except(:id, :email))
+    super(it.except(:email))
   end
 
 end

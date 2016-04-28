@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::GuideProgress do
+describe 'Classroom::GuideProgress' do
   before do
     Classroom::Collection::CourseStudents.insert!({
       student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|gh1234'},

@@ -13,7 +13,7 @@ module Classroom::Collection::FailedSubmissions
   end
 
   def self.wrap(it)
-    Classroom::FailedSubmissions.new(it)
+    Classroom::JsonWrapper.new(it)
   end
 
 end

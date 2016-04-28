@@ -13,7 +13,7 @@ module Classroom::Collection::Comments
   end
 
   def self.wrap(it)
-    Classroom::Comment.new(it)
+    Classroom::JsonWrapper.new(it)
   end
 
   def self.wrap_array(it)
