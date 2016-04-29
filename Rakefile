@@ -1,4 +1,3 @@
-
 require './lib/classroom'
 require 'mumukit/nuntius'
 
