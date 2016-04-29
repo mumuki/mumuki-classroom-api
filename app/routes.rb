@@ -2,82 +2,50 @@ require 'sinatra'
 require 'sinatra/cross_origin'
 require 'mumukit/auth'
 require 'mumukit/nuntius'
+require 'mumukit/service/routes'
+require 'mumukit/service/routes/auth'
 
 require_relative './request'
 require_relative '../lib/classroom'
 
 configure do
-  enable :cross_origin
-  set :allow_methods, [:get, :put, :post, :options, :delete]
-  set :show_exceptions, false
-
-  Mongo::Logger.logger = ::Logger.new('mongo.log')
+  set :app_name, 'classroom'
 end
 
 helpers do
-  def json_body
-    @json_body ||= JSON.parse(request.body.read) rescue nil
-  end
-
-  def permissions
-    @permissions ||= token.permissions 'classroom'
-  end
 
   def permissions_to_regex
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
 
-  def token
-    @token ||= Mumukit::Auth::Token.decode_header(authorization_header).tap(&:verify_client!)
+  def tenant
+    request.first_subdomain
   end
 
-  def authorization_header
-    env['HTTP_AUTHORIZATION']
+  def route_slug_parts
+    [tenant, params[:course]].compact
   end
-
-  def protect!
-    permissions.protect!(course_slug)
-  end
-
 
   def course_slug
-    @course_slug ||= "#{request.first_subdomain}/#{params['course']}"
+    @course_slug ||= Mumukit::Service::Slug.new(tenant, params[:course]).to_s
   end
 
   def repo_slug
-    @repo_slug ||= "#{params['org']}/#{params['repo']}"
+    @repo_slug ||= Mumukit::Service::Slug.new(params[:organization], params[:repository]).to_s
   end
 
   def set_mongo_connection
-    Classroom::Database.tenant = request.first_subdomain
-  end
-
-  def convert(parameters)
-    parameters.as_json['parameters']
+    Classroom::Database.tenant = tenant
   end
 
 end
 
 before do
-  content_type 'application/json', 'charset' => 'utf-8'
   set_mongo_connection
 end
 
 after do
   Classroom::Database.client.close
-end
-
-after do
-  error_message = env['sinatra.error']
-  if error_message.blank?
-    response.body = response.body.to_json
-  else
-    response.body = {message: env['sinatra.error'].message}.to_json
-  end
-end
-
-error JSON::ParserError do
-  halt 400
 end
 
 error Classroom::CourseExistsError do
@@ -92,26 +60,12 @@ error Classroom::CourseStudentNotExistsError do
   halt 400
 end
 
-error Mumukit::Auth::InvalidTokenError do
-  halt 400
-end
-
-error Mumukit::Auth::UnauthorizedAccessError do
-  halt 403
-end
-
-options '*' do
-  response.headers['Allow'] = settings.allow_methods.map { |it| it.to_s.upcase }.join(',')
-  response.headers['Access-Control-Allow-Headers'] = 'X-Mumuki-Auth-Token, X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept, Authorization'
-  200
-end
-
 get '/courses' do
   grants = permissions_to_regex
-  if grants.to_s == ''
-    return {courses: []}
+  if grants.to_s.blank?
+    { courses: [] }
   else
-    {courses: Classroom::Course.all(grants)}
+    Classroom::Collection::Courses.all(grants).as_json
   end
 end
 
@@ -119,79 +73,86 @@ post '/courses' do
   course_slug = json_body['slug']
   permissions.protect!(course_slug)
 
-  Classroom::Course.ensure_new! course_slug
+  Classroom::Collection::Courses.ensure_new! course_slug
 
-  Classroom::Course.insert!(
-      code: json_body['code'],
-      days: json_body['days'],
-      period: json_body['period'],
-      shifts: json_body['shifts'],
-      description: json_body['description'],
-      slug: course_slug)
+  json = {code: json_body['code'],
+    days: json_body['days'],
+    period: json_body['period'],
+    shifts: json_body['shifts'],
+    description: json_body['description'],
+    slug: course_slug}
+
+  Classroom::Collection::Courses.insert!(json.wrap_json)
 
   {status: :created}
 end
 
 get '/courses/:course' do
   protect!
-  {course_guides: Classroom::GuideProgress.by_course(course_slug)}
+  {course_guides: Classroom::Collection::GuidesProgress.by_course(course_slug)}
 end
 
 post '/courses/:course/students' do
-  Classroom::Course.ensure_exist! course_slug
+  Classroom::Collection::Courses.ensure_exist! course_slug
 
-  Classroom::CourseStudent.insert!(
-      student: {first_name: json_body['first_name'],
-                last_name: json_body['last_name'],
-                social_id: token.jwt['sub']},
-      course: {slug: course_slug})
+  json ={student: {first_name: json_body['first_name'],
+                   last_name: json_body['last_name'],
+                   social_id: token.jwt['sub']},
+         course: {slug: course_slug}}
+
+  Classroom::Collection::CourseStudents.insert!(json.wrap_json)
 
   {status: :created}
 end
 
-get '/guide_progress/:course/:org/:repo/:student_id/:exercise_id' do
-  {exercise_progress: Classroom::GuideProgress.exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
+get '/guide_progress/:course/:organization/:repository/:student_id/:exercise_id' do
+  {exercise_progress: Classroom::Collection::GuidesProgress.exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
 end
 
-get '/guide_progress/:course/:org/:repo' do
+get '/guide_progress/:course/:organization/:repository' do
   {
-      guide: Classroom::GuideProgress.guide_data(repo_slug, course_slug)['guide'],
-      progress: Classroom::GuideProgress.by_slug_and_course(repo_slug, course_slug).select { |guide| permissions.allows? guide['course']['slug'] }
+      guide: Classroom::Collection::GuidesProgress.guide_data(repo_slug, course_slug).guide,
+      progress: Classroom::Collection::GuidesProgress.by_slug_and_course(repo_slug, course_slug).
+        as_json[:guides_progress].select { |guide| permissions.allows? guide['course']['slug'] }
   }
 end
 
 get '/students/:course' do
   protect!
-  {students: Classroom::GuideProgress.students_by_course_slug(course_slug)}
+  { students: Classroom::Collection::GuidesProgress.students_by_course_slug(course_slug) }
 end
 
 post '/comment/:course' do
   protect!
-  Classroom::Comment.insert! json_body
-  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: request.first_subdomain)
-  {status: :created}
+  Classroom::Collection::Comments.insert!(json_body.wrap_json)
+  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
+  { status: :created }
 end
 
-get '/comments/:exercise_id' do
+get '/comments/:course/:exercise_id' do
   protect!
-  {comments: Classroom::Comment.where(exercise_id: params[:exercise_id].to_i)}
+  Classroom::Collection::Comments.where(exercise_id: params[:exercise_id].to_i).as_json
 end
 
 get '/followers/:email' do
   grants = permissions_to_regex
-  { followers: grants.to_s.blank? ? [] : Classroom::Follower.where('email' => params[:email], 'course' => { '$regex' => grants}) }
+  if grants.to_s.blank?
+    { followers: [] }
+  else
+    Classroom::Collection::Followers.where(email: params[:email], course: { '$regex' => grants }).as_json
+  end
 end
 
 post '/follower/:course' do
   protect!
   json_body['course'] = course_slug
-  Classroom::Follower.add_follower json_body
+  Classroom::Collection::Followers.add_follower json_body
   {status: :created}
 end
 
 delete '/follower/:course/:email/:social_id' do
   protect!
-  Classroom::Follower.remove_follower "course" => course_slug, "email" => params[:email], "social_id" => params[:social_id]
+  Classroom::Collection::Followers.remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
   {status: :created}
 end
 

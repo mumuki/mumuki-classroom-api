@@ -1,4 +1,3 @@
-
 require './lib/classroom'
 require 'mumukit/nuntius'
 
@@ -15,10 +14,10 @@ namespace :submission do
 
         begin
           logger.info 'Processing new submission'
-          Classroom::GuideProgress.update! data
+          Classroom::Collection::GuidesProgress.update! data
         rescue => e
           logger.warn "Submission failed #{e}. Data was: #{data}"
-          Classroom::FailedSubmission.insert! data
+          Classroom::Collection::FailedSubmissions.insert! data.wrap_json
         end
       rescue => e
         logger.error "Submission malformed #{e}. Data was: #{data}"

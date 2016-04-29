@@ -2,8 +2,6 @@ source 'https://rubygems.org'
 
 gem 'rake'
 
-gem 'thin'
-
 gem 'sinatra'
 gem 'sinatra-cross_origin', '~> 0.3.1'
 
@@ -17,6 +15,7 @@ gem 'activesupport', '~> 4.2'
 gem 'mumukit-auth', github: 'mumuki/mumukit-auth', tag: 'v0.0.1'
 
 gem 'mumukit-nuntius', github: 'mumuki/mumukit-nuntius', tag: 'v0.2.0'
+gem 'mumukit-service', github: 'mumuki/mumukit-service', tag: 'v0.2.1'
 
 group :test do
   gem 'rspec', '~> 2.99'
