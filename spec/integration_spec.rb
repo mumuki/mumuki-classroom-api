@@ -226,7 +226,7 @@ describe 'routes' do
       end
 
       context 'when authenticated' do
-        let(:created_course_student) { Classroom::Collection::CourseStudents.first.as_json }
+        let(:created_course_student) { Classroom::Collection::CourseStudents.find_by({}).as_json }
         before { header 'Authorization', build_auth_header('*') }
         before { post '/courses/foo/students', student_json }
 

@@ -2,8 +2,8 @@ module Classroom::Collection::CourseStudents
 
   extend Mumukit::Service::Collection
 
-  def self.first
-    order_by({}, { _id: -1 })
+  def self.find_by(args)
+    order_by(args, { _id: -1 })
   end
 
   private
