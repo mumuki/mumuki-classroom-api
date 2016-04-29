@@ -124,9 +124,8 @@ end
 
 post '/comment/:course' do
   protect!
-  json = json_body.wrap_json
-  Classroom::Collection::Comments.insert!(json)
-  Mumukit::Nuntius::Publisher.publish_comments json.merge(tenant: tenant)
+  Classroom::Collection::Comments.insert!(json_body.wrap_json)
+  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
   { status: :created }
 end
 
