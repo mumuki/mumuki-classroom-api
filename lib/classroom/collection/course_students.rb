@@ -3,7 +3,7 @@ module Classroom::Collection::CourseStudents
   extend Mumukit::Service::Collection
 
   def self.find_by(args)
-    order_by(args, { _id: -1 })
+    first_by(args, { _id: -1 })
   end
 
   private
