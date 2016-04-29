@@ -15,7 +15,7 @@ namespace :submission do
 
         begin
           logger.info 'Processing new submission'
-          Classroom::GuideProgress.update! data
+          Classroom::Collection::GuidesProgress.update! data
         rescue => e
           logger.warn "Submission failed #{e}. Data was: #{data}"
           Classroom::Collection::FailedSubmissions.insert! data.wrap_json
