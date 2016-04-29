@@ -1,11 +1,8 @@
-require 'logger'
-
-logger = Logger.new('/var/www/classroom-api/submissions-job.log')
-logger.level = Logger::INFO
 
 require './lib/classroom'
 require 'mumukit/nuntius'
 
+logger = Mumukit::Nuntius::Logger
 logger.info 'Listening to submissions'
 
 namespace :submission do
@@ -19,13 +16,16 @@ namespace :submission do
         begin
           logger.info 'Processing new submission'
           Classroom::GuideProgress.update! data
-        rescue Classroom::CourseStudentNotExistsError => e
+        rescue => e
           logger.warn "Submission failed #{e}. Data was: #{data}"
           Classroom::FailedSubmission.insert! data
         end
+      rescue => e
+        logger.error "Submission malformed #{e}. Data was: #{data}"
       ensure
         Classroom::Database.client.try(:close)
       end
     end
   end
 end
+
