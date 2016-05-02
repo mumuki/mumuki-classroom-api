@@ -14,6 +14,10 @@ end
 
 helpers do
 
+  def course
+    params[:course]
+  end
+
   def permissions_to_regex
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
@@ -126,14 +130,14 @@ end
 
 post '/comment/:course' do
   protect!
-  Classroom::Collection::Comments.insert!(json_body.wrap_json)
+  Classroom::Collection::Comments.for(course).insert!(json_body.wrap_json)
   Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
   { status: :created }
 end
 
 get '/comments/:course/:exercise_id' do
   protect!
-  Classroom::Collection::Comments.where(exercise_id: params[:exercise_id].to_i).as_json
+  Classroom::Collection::Comments.for(course).where(exercise_id: params[:exercise_id].to_i).as_json
 end
 
 get '/followers/:email' do

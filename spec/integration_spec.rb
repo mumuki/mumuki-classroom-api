@@ -261,7 +261,7 @@ describe 'routes' do
       before { header 'Authorization', build_auth_header('*') }
       before { post '/comment/bar', comment_json }
 
-      let(:comment) { Classroom::Collection::Comments.find_by(submission_id: 1) }
+      let(:comment) { Classroom::Collection::Comments.for('bar').find_by(submission_id: 1) }
 
       it { expect(comment.to_json).to eq(comment_json)}
     end
@@ -281,9 +281,9 @@ describe 'routes' do
     let(:comment3) { {exercise_id: 2, submission_id: 3, comment: {content: 'hola', type: 'warning'}} }
 
     before do
-      Classroom::Collection::Comments.insert!(comment1.wrap_json)
-      Classroom::Collection::Comments.insert!(comment2.wrap_json)
-      Classroom::Collection::Comments.insert!(comment3.wrap_json)
+      Classroom::Collection::Comments.for('baz').insert!(comment1.wrap_json)
+      Classroom::Collection::Comments.for('baz').insert!(comment2.wrap_json)
+      Classroom::Collection::Comments.for('baz').insert!(comment3.wrap_json)
     end
 
     context 'when authenticated' do
