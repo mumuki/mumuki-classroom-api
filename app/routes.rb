@@ -27,11 +27,11 @@ helpers do
   end
 
   def route_slug_parts
-    [tenant, params[:course]].compact
+    [tenant, course].compact
   end
 
   def course_slug
-    @course_slug ||= Mumukit::Service::Slug.new(tenant, params[:course]).to_s
+    @course_slug ||= Mumukit::Service::Slug.new(tenant, course).to_s
   end
 
   def repo_slug
