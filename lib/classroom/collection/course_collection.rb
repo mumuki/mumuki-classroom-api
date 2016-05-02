@@ -10,6 +10,10 @@ class Classroom::Collection::CourseCollection
     @course = course.underscore
   end
 
+  def course
+    @course
+  end
+
   private
 
   def mongo_collection_name

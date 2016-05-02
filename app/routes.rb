@@ -104,7 +104,7 @@ post '/courses/:course/students' do
                    social_id: token.jwt['sub']},
          course: {slug: course_slug}}
 
-  Classroom::Collection::CourseStudents.insert!(json.wrap_json)
+  Classroom::Collection::CourseStudents.for(course).insert!(json.wrap_json)
 
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
 

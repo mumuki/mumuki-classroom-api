@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'Classroom::GuideProgress' do
   before do
-    Classroom::Collection::CourseStudents.insert!({
+    Classroom::Collection::CourseStudents.for('foo').insert!({
       student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|gh1234'},
       course: {slug: 'example/foo'}}.wrap_json)
   end
