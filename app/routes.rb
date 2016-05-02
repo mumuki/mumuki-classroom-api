@@ -103,7 +103,9 @@ post '/courses/:course/students' do
     student: {
       first_name: json_body['first_name'],
       last_name: json_body['last_name'],
-      social_id: token.jwt['sub']
+      image_url: json_body['image_url'],
+      social_id: token.jwt['sub'],
+      email: json_body['email']
     },
     course: {
       slug: course_slug

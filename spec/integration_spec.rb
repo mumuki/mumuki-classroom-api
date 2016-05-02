@@ -213,10 +213,11 @@ describe 'routes' do
   end
 
   describe 'post /courses/:course/students/' do
-    let(:student_json) { {first_name: 'Jon', last_name: 'Doe'}.to_json }
     let(:auth0) {double('auth0')}
     before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
     before { allow(auth0).to receive(:update_permissions) }
+    let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+    let(:student_json) { student.to_json }
 
     context 'when course exists' do
       before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
@@ -236,7 +237,7 @@ describe 'routes' do
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to json_eq status: 'created' }
         it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
-        it { expect(created_course_student.deep_symbolize_keys).to eq(student: {first_name: 'Jon', last_name: 'Doe', social_id: 'github|user123456'},
+        it { expect(created_course_student.deep_symbolize_keys).to eq(student: student.merge(social_id: 'github|user123456'),
                                                                       course: {slug: 'example/foo'}) }
       end
     end
