@@ -104,9 +104,9 @@ describe 'routes' do
     end
 
     context 'when guides already exists in a course' do
-      before { Classroom::Collection::GuidesProgress.insert!(guide_progress1.wrap_json) }
-      before { Classroom::Collection::GuidesProgress.insert!(guide_progress2.wrap_json) }
-      before { Classroom::Collection::GuidesProgress.insert!(guide_progress3.wrap_json) }
+      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress1.wrap_json) }
+      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress2.wrap_json) }
+      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress3.wrap_json) }
       before { get '/courses/foo' }
 
       it { expect(last_response).to be_ok }
@@ -127,9 +127,9 @@ describe 'routes' do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when guides already exists in a course' do
-      before { Classroom::Collection::GuidesProgress.insert!(guide_progress1.wrap_json) }
-      before { Classroom::Collection::GuidesProgress.insert!(guide_progress2.wrap_json) }
-      before { Classroom::Collection::GuidesProgress.insert!(guide_progress3.wrap_json) }
+      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress1.wrap_json) }
+      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress2.wrap_json) }
+      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress3.wrap_json) }
       before { get '/students/foo' }
 
       it { expect(last_response).to be_ok }
@@ -151,9 +151,9 @@ describe 'routes' do
       guide: { slug: 'example/foo' },
       course: { slug: 'example/k2048' } }}
 
-    before { Classroom::Collection::GuidesProgress.insert!(guide_progress1.wrap_json) }
-    before { Classroom::Collection::GuidesProgress.insert!(guide_progress2.wrap_json) }
-    before { Classroom::Collection::GuidesProgress.insert!(guide_progress3.wrap_json) }
+    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress1.wrap_json) }
+    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress2.wrap_json) }
+    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress3.wrap_json) }
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when guide_progres exist' do
@@ -182,8 +182,8 @@ describe 'routes' do
       student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
       exercises: [ { id: 177 }, { id: 178 }, { id: 179 }, { id: 180 } ]}}
 
-    before { Classroom::Collection::GuidesProgress.insert!(guide_progress1.wrap_json) }
-    before { Classroom::Collection::GuidesProgress.insert!(guide_progress2.wrap_json) }
+    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress1.wrap_json) }
+    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress2.wrap_json) }
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when student change course and sent an old exercise' do

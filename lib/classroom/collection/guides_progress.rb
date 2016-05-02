@@ -1,27 +1,25 @@
-module Classroom::Collection::GuidesProgress
+class Classroom::Collection::GuidesProgress < Classroom::Collection::CourseCollection
 
-  extend Mumukit::Service::Collection
-
-  def self.by_course_slug(slug)
+  def by_course_slug(slug)
     uniq('guide', { 'course.slug' => slug }, 'slug')
   end
 
-  def self.guide_data(slug, course)
+  def guide_data(slug, course)
     mongo_collection.find('course.slug' => course, 'guide.slug' => slug).
       projection('guide' => 1, '_id' => 0).limit(1).first.
       try { |it| wrap it }
   end
 
-  def self.by_slug_and_course(slug, course)
+  def by_slug_and_course(slug, course)
     where({ 'course.slug' => course, 'guide.slug' => slug},
           { 'guide' => 0, 'exercises.submissions' => { '$slice' => -1 }})
   end
 
-  def self.students_by_course_slug(course)
+  def students_by_course_slug(course)
     uniq('student', { 'course.slug' => course }, 'social_id')
   end
 
-  def self.exercise_by_student(course_slug, slug, student_id, exercise_id)
+  def exercise_by_student(course_slug, slug, student_id, exercise_id)
     guide_progress = get_exercise(slug, student_id, course_slug).as_json
     guide_progress.tap do |gp|
       gp['exercise'] = gp['exercises'].detect { |exercise| exercise['id'] == exercise_id }
@@ -29,11 +27,11 @@ module Classroom::Collection::GuidesProgress
     end
   end
 
-  def self.by_course(slug)
+  def by_course(slug)
     by_course_slug slug
   end
 
-  def self.update!(data)
+  def update!(data)
     json = process_params(data).deep_symbolize_keys
 
     course_student = Classroom::Collection::CourseStudents.find_by('student.social_id' => json[:submitter][:social_id]).as_json.deep_symbolize_keys
@@ -55,7 +53,7 @@ module Classroom::Collection::GuidesProgress
     end
   end
 
-  def self.process_params(data)
+  def process_params(data)
     params = {}
     params['guide'] = data['guide']
     params['submitter'] = data['submitter']
@@ -82,43 +80,43 @@ module Classroom::Collection::GuidesProgress
 
   private
 
-  def self.get_exercise(slug, student_id, course_slug)
+  def get_exercise(slug, student_id, course_slug)
     find_by('guide.slug' => slug, 'student.social_id' => student_id, 'course.slug' => course_slug)
   end
 
-  def self.course_for(social_id)
+  def course_for(social_id)
     Classroom::Collection::CourseStudents.find_by('student.social_id' => social_id).course
   end
 
-  def self.make_exercise_json(json)
+  def make_exercise_json(json)
     json[:exercise].tap do |it|
       it[:submissions] = [ it[:submission] ]
     end
   end
 
-  def self.make_exercise_query(json)
+  def make_exercise_query(json)
     make_guide_query(json).merge('exercises.id' => json[:exercise][:id])
   end
 
-  def self.make_guide_query(json)
+  def make_guide_query(json)
     {'guide.slug' => json[:guide][:slug],
      'student.social_id' => json[:submitter][:social_id],
      'course.slug' => json[:course][:slug]}
   end
 
-  def self.guide_exist?(json)
+  def guide_exist?(json)
     any? make_guide_query(json)
   end
 
-  def self.exercise_exist?(json)
+  def exercise_exist?(json)
     any? make_exercise_query(json)
   end
 
-  def self.submission_exist?(json)
+  def submission_exist?(json)
     any? make_exercise_query(json).merge('exercises.submissions' => {'$elemMatch' => {'id' => json[:exercise][:submission][:id]}})
   end
 
-  def self.create_guide!(submission_json)
+  def create_guide!(submission_json)
     guide = {guide: submission_json[:guide],
              student: submission_json[:submitter],
              course: submission_json[:course],
@@ -126,11 +124,11 @@ module Classroom::Collection::GuidesProgress
     insert!(guide.wrap_json)
   end
 
-  def self.create_exercise!(json)
+  def create_exercise!(json)
     mongo_collection.update_one(make_guide_query(json), {'$push' => {'exercises' => make_exercise_json(json)}})
   end
 
-  def self.add_submission_to_exercise!(json)
+  def add_submission_to_exercise!(json)
     mongo_collection.update_one(
       make_exercise_query(json),
       {'$push' => {'exercises.$.submissions' => json[:exercise][:submission]},
@@ -139,19 +137,7 @@ module Classroom::Collection::GuidesProgress
 
   private
 
-  def self.mongo_collection_name
-    :guides_progress
-  end
-
-  def self.mongo_database
-    Classroom::Database
-  end
-
-  def self.wrap(it)
-    Classroom::JsonWrapper.new(it)
-  end
-
-  def self.wrap_array(it)
+  def wrap_array(it)
     Classroom::Collection::GuideProgressArray.new(it)
   end
 

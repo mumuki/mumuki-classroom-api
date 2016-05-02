@@ -93,7 +93,7 @@ end
 
 get '/courses/:course' do
   protect!
-  {course_guides: Classroom::Collection::GuidesProgress.by_course(course_slug)}
+  {course_guides: Classroom::Collection::GuidesProgress.for(course).by_course(course_slug)}
 end
 
 post '/courses/:course/students' do
@@ -112,20 +112,20 @@ post '/courses/:course/students' do
 end
 
 get '/guide_progress/:course/:organization/:repository/:student_id/:exercise_id' do
-  {exercise_progress: Classroom::Collection::GuidesProgress.exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
+  {exercise_progress: Classroom::Collection::GuidesProgress.for(course).exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
 end
 
 get '/guide_progress/:course/:organization/:repository' do
   {
-      guide: Classroom::Collection::GuidesProgress.guide_data(repo_slug, course_slug).guide,
-      progress: Classroom::Collection::GuidesProgress.by_slug_and_course(repo_slug, course_slug).
+      guide: Classroom::Collection::GuidesProgress.for(course).guide_data(repo_slug, course_slug).guide,
+      progress: Classroom::Collection::GuidesProgress.for(course).by_slug_and_course(repo_slug, course_slug).
         as_json[:guides_progress].select { |guide| permissions.allows? guide['course']['slug'] }
   }
 end
 
 get '/students/:course' do
   protect!
-  { students: Classroom::Collection::GuidesProgress.students_by_course_slug(course_slug) }
+  { students: Classroom::Collection::GuidesProgress.for(course).students_by_course_slug(course_slug) }
 end
 
 post '/comment/:course' do
