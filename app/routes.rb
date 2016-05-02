@@ -140,25 +140,25 @@ get '/comments/:course/:exercise_id' do
   Classroom::Collection::Comments.for(course).where(exercise_id: params[:exercise_id].to_i).as_json
 end
 
-get '/followers/:email' do
+get '/followers/:course/:email' do
   grants = permissions_to_regex
   if grants.to_s.blank?
     { followers: [] }
   else
-    Classroom::Collection::Followers.where(email: params[:email], course: { '$regex' => grants }).as_json
+    Classroom::Collection::Followers.for(course).where(email: params[:email], course: { '$regex' => grants }).as_json
   end
 end
 
 post '/follower/:course' do
   protect!
   json_body['course'] = course_slug
-  Classroom::Collection::Followers.add_follower json_body
+  Classroom::Collection::Followers.for(course).add_follower json_body
   {status: :created}
 end
 
 delete '/follower/:course/:email/:social_id' do
   protect!
-  Classroom::Collection::Followers.remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
+  Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
   {status: :created}
 end
 

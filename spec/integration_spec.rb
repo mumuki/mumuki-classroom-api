@@ -309,7 +309,7 @@ describe 'routes' do
       before { header 'Authorization', build_auth_header('*') }
       before { post '/follower/bar', follower_json }
 
-      it { expect(Classroom::Collection::Followers.find_by(course: 'example/bar', email: 'aguspina87@gmail.com').to_json).to eq({course: 'example/bar', social_ids: ['social|1']}.to_json)}
+      it { expect(Classroom::Collection::Followers.for('bar').find_by(course: 'example/bar', email: 'aguspina87@gmail.com').to_json).to eq({course: 'example/bar', social_ids: ['social|1']}.to_json)}
     end
 
     context 'when repeat follower' do
@@ -317,7 +317,7 @@ describe 'routes' do
       before { post '/follower/bar', follower_json }
       before { post '/follower/bar', follower_json }
 
-      it { expect(Classroom::Collection::Followers.find_by(course: 'example/bar', email: 'aguspina87@gmail.com').social_ids.count).to eq(1)}
+      it { expect(Classroom::Collection::Followers.for('bar').find_by(course: 'example/bar', email: 'aguspina87@gmail.com').social_ids.count).to eq(1)}
     end
 
     context 'reject unauthorized requests' do
@@ -332,7 +332,7 @@ describe 'routes' do
       before { post '/follower/bar', follower_json }
 
       it { expect(last_response).to_not be_ok }
-      it { expect(Classroom::Collection::Followers.count).to eq 0 }
+      it { expect(Classroom::Collection::Followers.for('bar').count).to eq 0 }
     end
 
   end
@@ -343,15 +343,16 @@ describe 'routes' do
     before { post '/follower/bar', follower_json }
     before { delete '/follower/bar/aguspina87@gmail.com/social%7c1', follower_json }
 
-    it { expect(Classroom::Collection::Followers.find_by(course: 'example/bar', email: 'aguspina87@gmail.com').social_ids).to eq([]) }
+    it { expect(Classroom::Collection::Followers.for('bar').find_by(course: 'example/bar', email: 'aguspina87@gmail.com').social_ids).to eq([]) }
   end
 
   context 'get /follower' do
     let(:follower_json) {{email: 'aguspina87@gmail.com', course: 'bar', social_id: 'social|1'}.to_json}
     before { header 'Authorization', build_auth_header('*') }
     before { post '/follower/bar', follower_json }
-    before { get '/followers/aguspina87@gmail.com' }
+    before { get '/followers/bar/aguspina87@gmail.com' }
 
     it { expect(last_response.body).to be_truthy }
+    it { expect(last_response.body).to eq({followers: [{course: 'example/bar', social_ids: ['social|1']}]}.to_json)}
   end
 end
