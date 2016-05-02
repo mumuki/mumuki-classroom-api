@@ -34,7 +34,7 @@ class Classroom::Collection::GuidesProgress < Classroom::Collection::CourseColle
   def update!(data)
     json = process_params(data).deep_symbolize_keys
 
-    course_student = Classroom::Collection::CourseStudents.for(course).find_by('student.social_id' => json[:submitter][:social_id]).as_json.deep_symbolize_keys
+    course_student = Classroom::Collection::Students.for(course).find_by('student.social_id' => json[:submitter][:social_id]).as_json.deep_symbolize_keys
 
     json[:submitter][:first_name] = course_student[:student][:first_name]
     json[:submitter][:last_name] = course_student[:student][:last_name]
@@ -85,7 +85,7 @@ class Classroom::Collection::GuidesProgress < Classroom::Collection::CourseColle
   end
 
   def course_for(social_id)
-    Classroom::Collection::CourseStudents.for(course).find_by('student.social_id' => social_id).course
+    Classroom::Collection::Students.for(course).find_by('student.social_id' => social_id).course
   end
 
   def make_exercise_json(json)

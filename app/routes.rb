@@ -60,7 +60,7 @@ error Classroom::CourseNotExistsError do
   halt 400
 end
 
-error Classroom::CourseStudentNotExistsError do
+error Classroom::StudentNotExistsError do
   halt 400
 end
 
@@ -99,12 +99,18 @@ end
 post '/courses/:course/students' do
   Classroom::Collection::Courses.ensure_exist! course_slug
 
-  json ={student: {first_name: json_body['first_name'],
-                   last_name: json_body['last_name'],
-                   social_id: token.jwt['sub']},
-         course: {slug: course_slug}}
+  json = {
+    student: {
+      first_name: json_body['first_name'],
+      last_name: json_body['last_name'],
+      social_id: token.jwt['sub']
+    },
+    course: {
+      slug: course_slug
+    }
+  }
 
-  Classroom::Collection::CourseStudents.for(course).insert!(json.wrap_json)
+  Classroom::Collection::Students.for(course).insert!(json.wrap_json)
 
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
 
