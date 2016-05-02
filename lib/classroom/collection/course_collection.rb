@@ -17,7 +17,11 @@ class Classroom::Collection::CourseCollection
   private
 
   def mongo_collection_name
-    "#{@course}_#{self.class.name.demodulize.underscore}".to_sym
+    "#{course}_#{underscore_class_name}".to_sym
+  end
+
+  def underscore_class_name
+    self.class.name.demodulize.underscore
   end
 
   def mongo_database
