@@ -60,6 +60,10 @@ error Classroom::CourseNotExistsError do
   halt 400
 end
 
+error Classroom::StudentExistsError do
+  halt 400
+end
+
 error Classroom::StudentNotExistsError do
   halt 400
 end
@@ -97,14 +101,17 @@ get '/courses/:course' do
 end
 
 post '/courses/:course/students' do
+  social_id = token.jwt['sub']
+
   Classroom::Collection::Courses.ensure_exist! course_slug
+  Classroom::Collection::Students.for(course).ensure_new! social_id
 
   json = {
     student: {
       first_name: json_body['first_name'],
       last_name: json_body['last_name'],
       image_url: json_body['image_url'],
-      social_id: token.jwt['sub'],
+      social_id: social_id,
       email: json_body['email']
     },
     course: {
@@ -133,7 +140,7 @@ end
 
 get '/students/:course' do
   protect!
-  { students: Classroom::Collection::GuidesProgress.for(course).students_by_course_slug(course_slug) }
+  Classroom::Collection::Students.for(course).all.as_json
 end
 
 post '/comment/:course' do
