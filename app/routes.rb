@@ -97,7 +97,7 @@ end
 
 get '/courses/:course' do
   protect!
-  {course_guides: Classroom::Collection::GuidesProgress.for(course).by_course(course_slug)}
+  Classroom::Collection::Guides.for(course).all.as_json
 end
 
 post '/courses/:course/students' do

@@ -82,17 +82,10 @@ describe 'routes' do
   end
 
   describe 'get /courses/:course' do
-    let(:guide_progress1) {{
-      guide: { name: 'Bar', slug: 'pdep-utn/bar', language: { name: 'haskell' } },
-      course: { slug: 'example/foo' } }}
-
-    let(:guide_progress2) {{
-      guide: { name: 'Baz', slug: 'pdep-utn/baz', language: { name: 'haskell' } },
-      course: { slug: 'example/foo' } }}
-
-    let(:guide_progress3) {{
-      guide: { name: 'Foo', slug: 'pdep-utn/foo', language: { name: 'haskell' } },
-      course: { slug: 'example/test' } }}
+    let(:haskell) {{ name: 'haskell', devicon: 'haskell' }}
+    let(:guide1) {{ slug: 'pdep-utn/foo', name: 'Foo', language: haskell }}
+    let(:guide2) {{ slug: 'pdep-utn/bar', name: 'Bar', language: haskell }}
+    let(:guide3) {{ slug: 'pdep-utn/baz', name: 'Baz', language: haskell }}
 
     before { header 'Authorization', build_auth_header('*') }
 
@@ -100,17 +93,17 @@ describe 'routes' do
       before { get '/courses/foo' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq course_guides: [] }
+      it { expect(last_response.body).to json_eq guides: [] }
     end
 
     context 'when guides already exists in a course' do
-      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress1.wrap_json) }
-      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress2.wrap_json) }
-      before { Classroom::Collection::GuidesProgress.for('foo').insert!(guide_progress3.wrap_json) }
+      before { Classroom::Collection::Guides.for('foo').insert!(guide1.wrap_json) }
+      before { Classroom::Collection::Guides.for('foo').insert!(guide2.wrap_json) }
+      before { Classroom::Collection::Guides.for('bar').insert!(guide3.wrap_json) }
       before { get '/courses/foo' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq course_guides: [guide_progress1[:guide], guide_progress2[:guide]] }
+      it { expect(last_response.body).to json_eq guides: [guide1, guide2] }
     end
 
   end
