@@ -126,8 +126,23 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
+get '/guide_progress/:course/:organization/:repository/:student_id' do
+  Classroom::Collection::ExerciseStudentProgress
+    .for(course)
+    .where({
+      'guide.slug' => repo_slug,
+      'student.social_id' => params['student_id']
+    }).as_json
+end
+
 get '/guide_progress/:course/:organization/:repository/:student_id/:exercise_id' do
-  {exercise_progress: Classroom::Collection::GuidesProgress.for(course).exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
+  Classroom::Collection::ExerciseStudentProgress
+    .for(course)
+    .find_by({
+               'exercise.id' => params['exercise_id'].to_i,
+               'guide.slug' => repo_slug,
+               'student.social_id' => params['student_id']
+             }).as_json
 end
 
 get '/guide_progress/:course/:organization/:repository' do
