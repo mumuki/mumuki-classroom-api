@@ -96,19 +96,10 @@ get '/courses' do
 end
 
 post '/courses' do
-  course_slug = json_body['slug']
-  permissions.protect!(course_slug)
+  permissions.protect! json_body['slug']
 
-  Classroom::Collection::Courses.ensure_new! course_slug
-
-  json = {code: json_body['code'],
-    days: json_body['days'],
-    period: json_body['period'],
-    shifts: json_body['shifts'],
-    description: json_body['description'],
-    slug: course_slug}
-
-  Classroom::Collection::Courses.insert!(json.wrap_json)
+  Classroom::Collection::Courses.ensure_new! json_body['slug']
+  Classroom::Collection::Courses.insert! json_body.wrap_json
 
   {status: :created}
 end
@@ -124,19 +115,7 @@ post '/courses/:course/students' do
   Classroom::Collection::Courses.ensure_exist! course_slug
   Classroom::Collection::Students.for(course).ensure_new! social_id
 
-  json = {
-    student: {
-      first_name: json_body['first_name'],
-      last_name: json_body['last_name'],
-      image_url: json_body['image_url'],
-      social_id: social_id,
-      email: json_body['email']
-    },
-    course: {
-      slug: course_slug
-    }
-  }
-
+  json = { student: json_body.merge(social_id: social_id), course: { slug: course_slug } }
   Classroom::Collection::Students.for(course).insert!(json.wrap_json)
 
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
