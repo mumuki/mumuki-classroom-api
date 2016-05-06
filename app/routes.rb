@@ -30,6 +30,15 @@ helpers do
     { 'guide.slug' => repo_slug, 'student.social_id' => student_id }
   end
 
+  def by_permissions(key, &query)
+    grants = permissions_to_regex
+    if grants.to_s.blank?
+      {}.tap { |it| it[key] = [] }
+    else
+      query.call(grants)
+    end
+  end
+
   def permissions_to_regex
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
@@ -81,10 +90,7 @@ error Classroom::StudentNotExistsError do
 end
 
 get '/courses' do
-  grants = permissions_to_regex
-  if grants.to_s.blank?
-    { courses: [] }
-  else
+  by_permissions :courses do | grants |
     Classroom::Collection::Courses.all(grants).as_json
   end
 end
@@ -176,10 +182,7 @@ get '/comments/:course/:exercise_id' do
 end
 
 get '/followers/:course/:email' do
-  grants = permissions_to_regex
-  if grants.to_s.blank?
-    { followers: [] }
-  else
+  by_permissions :followers do | grants |
     Classroom::Collection::Followers.for(course).where(email: params[:email], course: { '$regex' => grants }).as_json
   end
 end
