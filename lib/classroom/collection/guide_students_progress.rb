@@ -1,4 +1,4 @@
-class Classroom::Collection::GuidesProgress < Classroom::Collection::CourseCollection
+class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::CourseCollection
 
   def by_course_slug(slug)
     uniq('guide', { 'course.slug' => slug }, 'slug')
@@ -138,7 +138,7 @@ class Classroom::Collection::GuidesProgress < Classroom::Collection::CourseColle
   private
 
   def wrap_array(it)
-    Classroom::Collection::GuideProgressArray.new(it)
+    Classroom::Collection::GuideStudentsProgressArray.new(it)
   end
 
 end

@@ -128,7 +128,7 @@ describe 'routes' do
 
   end
 
-  describe 'get /guide_progress:course/:repo' do
+  describe 'get /guide_progress/:course/:repo' do
     let(:guide_progress1) {{
       guide: { slug: 'example/foo' },
       course: { slug: 'example/k1024' } }}
@@ -141,12 +141,12 @@ describe 'routes' do
       guide: { slug: 'example/foo' },
       course: { slug: 'example/k2048' } }}
 
-    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress1.wrap_json) }
-    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress2.wrap_json) }
-    before { Classroom::Collection::GuidesProgress.for('k2048').insert!(guide_progress3.wrap_json) }
+    before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress1.wrap_json) }
+    before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress2.wrap_json) }
+    before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress3.wrap_json) }
     before { header 'Authorization', build_auth_header('*') }
 
-    context 'when guide_progres exist' do
+    context 'when guide_progress exist' do
       before { get '/guide_progress/k2048/example/foo' }
 
       it { expect(last_response).to be_ok }
