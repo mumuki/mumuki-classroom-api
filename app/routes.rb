@@ -18,6 +18,18 @@ helpers do
     params[:course]
   end
 
+  def student_id
+    params[:student_id]
+  end
+
+  def exercise_id
+    params[:exercise_id].to_i
+  end
+
+  def exercise_student_progress_query
+    { 'guide.slug' => repo_slug, 'student.social_id' => student_id }
+  end
+
   def permissions_to_regex
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
@@ -129,20 +141,13 @@ end
 get '/guide_progress/:course/:organization/:repository/:student_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
-    .where({
-      'guide.slug' => repo_slug,
-      'student.social_id' => params['student_id']
-    }).as_json
+    .where(exercise_student_progress_query).as_json
 end
 
 get '/guide_progress/:course/:organization/:repository/:student_id/:exercise_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
-    .find_by({
-               'exercise.id' => params['exercise_id'].to_i,
-               'guide.slug' => repo_slug,
-               'student.social_id' => params['student_id']
-             }).as_json
+    .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
 end
 
 get '/guide_progress/:course/:organization/:repository' do
@@ -167,7 +172,7 @@ end
 
 get '/comments/:course/:exercise_id' do
   protect!
-  Classroom::Collection::Comments.for(course).where(exercise_id: params[:exercise_id].to_i).as_json
+  Classroom::Collection::Comments.for(course).where(exercise_id: exercise_id).as_json
 end
 
 get '/followers/:course/:email' do
