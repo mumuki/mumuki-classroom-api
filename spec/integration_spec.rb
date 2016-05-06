@@ -128,18 +128,28 @@ describe 'routes' do
 
   end
 
-  describe 'get /guide_progress/:course/:repo' do
+  describe 'get /guide_progress/:course/:org/:repo' do
+
     let(:guide_progress1) {{
       guide: { slug: 'example/foo' },
-      course: { slug: 'example/k1024' } }}
+      student: { first_name: 'jon' },
+      stats: { passed: 0, warnings: 0, failed: 1 },
+      last_assignment: { exercise: { id: 1}, submission: {status: :failure} }
+    }}
 
     let(:guide_progress2) {{
       guide: { slug: 'example/foo' },
-      course: { slug: 'example/k2048' } }}
+      student: { first_name: 'bar' },
+      stats: { passed: 1, warnings: 0, failed: 0 },
+      last_assignment: { exercise: { id: 2}, submission: {status: :passed} }
+    }}
 
     let(:guide_progress3) {{
-      guide: { slug: 'example/foo' },
-      course: { slug: 'example/k2048' } }}
+      guide: { slug: 'example/bar' },
+      student: { first_name: 'baz' },
+      stats: { passed: 0, passed_with_warnings: 1, failed: 0 },
+      last_assignment: { exercise: { id: 1}, submission: {status: :passed_with_warnings} }
+    }}
 
     before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress1.wrap_json) }
     before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress2.wrap_json) }
@@ -150,11 +160,8 @@ describe 'routes' do
       before { get '/guide_progress/k2048/example/foo' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq({ guide: guide_progress2[:guide],
-                                                   progress: [
-                                                     { course: guide_progress2[:course] },
-                                                     { course: guide_progress3[:course] }
-                                                   ] }) }
+      it { expect(last_response.body).to eq({ guide_students_progress: [guide_progress1,
+                                                                        guide_progress2]}.to_json) }
     end
 
   end
