@@ -32,4 +32,8 @@ class Classroom::Collection::CourseCollection
     Classroom::JsonWrapper.new(it)
   end
 
+  def wrap_array(it)
+    Classroom::JsonArrayWrapper.new(it, underscore_class_name)
+  end
+
 end

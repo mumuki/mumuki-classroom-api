@@ -21,8 +21,4 @@ class Classroom::Collection::Followers < Classroom::Collection::CourseCollection
     Classroom::Follower.new(it)
   end
 
-  def wrap_array(it)
-    Classroom::Collection::FollowerArray.new(it)
-  end
-
 end

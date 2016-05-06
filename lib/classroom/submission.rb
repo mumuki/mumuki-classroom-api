@@ -23,7 +23,7 @@ module Classroom::Submission
   end
 
   def find_student_from(json)
-    Students.for(course_prefix json).find_by(social_id: social_id json).as_json
+    Students.for(course_prefix json).find_by(social_id: social_id(json)).as_json
   end
 
   def social_id(json)

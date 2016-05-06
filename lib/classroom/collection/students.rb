@@ -8,12 +8,6 @@ class Classroom::Collection::Students < Classroom::Collection::CourseCollection
     raise Classroom::StudentExistsError, 'Student already exist' if any?('student.social_id' => social_id)
   end
 
-  private
-
-  def wrap_array(it)
-    Classroom::Collection::StudentArray.new(it)
-  end
-
 end
 
 class Classroom::StudentExistsError < StandardError
