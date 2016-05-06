@@ -1,7 +1,7 @@
 class Classroom::Collection::GuideStudentsProgressArray < Mumukit::Service::JsonArrayWrapper
 
   def key
-    :guides_progress
+    :guide_students_progress
   end
 
 end

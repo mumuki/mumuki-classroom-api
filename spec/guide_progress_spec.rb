@@ -31,7 +31,7 @@ describe 'Classroom::GuideProgress' do
       Classroom::Collection::GuideStudentsProgress.for('foo').update!(submission)
     end
 
-    let(:guide_progress) { Classroom::Collection::GuideStudentsProgress.for('foo').where('guide.slug' => 'pdep-utn/foo', 'course.slug' => 'example/foo').as_json[:guides_progress] }
+    let(:guide_progress) { Classroom::Collection::GuideStudentsProgress.for('foo').where('guide.slug' => 'pdep-utn/foo', 'course.slug' => 'example/foo').as_json[:guide_students_progress] }
     let(:first_guide_progress) { guide_progress.first }
 
     context 'when student starts a new guide' do

@@ -160,7 +160,7 @@ get '/guide_progress/:course/:organization/:repository' do
   {
       guide: Classroom::Collection::GuideStudentsProgress.for(course).guide_data(repo_slug, course_slug).guide,
       progress: Classroom::Collection::GuideStudentsProgress.for(course).by_slug_and_course(repo_slug, course_slug).
-        as_json[:guides_progress].select { |guide| permissions.allows? guide['course']['slug'] }
+        as_json[:guide_students_progress].select { |guide| permissions.allows? guide['course']['slug'] }
   }
 end
 
