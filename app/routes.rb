@@ -123,6 +123,16 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
+get '/courses/:course/guides' do
+  protect!
+  Classroom::Collection::Guides.for(course).all.as_json
+end
+
+get '/courses/:course/guides/:organization/:repository' do
+  protect!
+  Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
+end
+
 get '/courses/:course/guides/:organization/:repository/:student_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
@@ -133,16 +143,6 @@ get '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id'
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
-end
-
-get '/courses/:course/guides' do
-  protect!
-  Classroom::Collection::Guides.for(course).all.as_json
-end
-
-get '/courses/:course/guides/:organization/:repository' do
-  protect!
-  Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
 end
 
 post '/courses/:course/comments' do
@@ -157,17 +157,17 @@ get '/courses/:course/comments/:exercise_id' do
   Classroom::Collection::Comments.for(course).where(exercise_id: exercise_id).as_json
 end
 
-get '/courses/:course/followers/:email' do
-  by_permissions :followers do | grants |
-    Classroom::Collection::Followers.for(course).where(email: params[:email], course: { '$regex' => grants }).as_json
-  end
-end
-
 post '/courses/:course/followers' do
   protect!
   json_body['course'] = course_slug
   Classroom::Collection::Followers.for(course).add_follower json_body
   {status: :created}
+end
+
+get '/courses/:course/followers/:email' do
+  by_permissions :followers do | grants |
+    Classroom::Collection::Followers.for(course).where(email: params[:email], course: { '$regex' => grants }).as_json
+  end
 end
 
 delete '/courses/:course/followers/:email/:social_id' do
