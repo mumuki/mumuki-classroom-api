@@ -104,9 +104,9 @@ post '/courses' do
   {status: :created}
 end
 
-get '/courses/:course' do
+get '/courses/:course/students' do
   protect!
-  Classroom::Collection::Guides.for(course).all.as_json
+  Classroom::Collection::Students.for(course).all.as_json
 end
 
 post '/courses/:course/students' do
@@ -123,54 +123,54 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
-get '/guide_progress/:course/:organization/:repository/:student_id' do
+get '/courses/:course/guides/:organization/:repository/:student_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .where(exercise_student_progress_query).as_json
 end
 
-get '/guide_progress/:course/:organization/:repository/:student_id/:exercise_id' do
+get '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
 end
 
-get '/guide_progress/:course/:organization/:repository' do
+get '/courses/:course/guides' do
+  protect!
+  Classroom::Collection::Guides.for(course).all.as_json
+end
+
+get '/courses/:course/guides/:organization/:repository' do
   protect!
   Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
 end
 
-get '/students/:course' do
-  protect!
-  Classroom::Collection::Students.for(course).all.as_json
-end
-
-post '/comment/:course' do
+post '/courses/:course/comments' do
   protect!
   Classroom::Collection::Comments.for(course).insert!(json_body.wrap_json)
   Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
   { status: :created }
 end
 
-get '/comments/:course/:exercise_id' do
+get '/courses/:course/comments/:exercise_id' do
   protect!
   Classroom::Collection::Comments.for(course).where(exercise_id: exercise_id).as_json
 end
 
-get '/followers/:course/:email' do
+get '/courses/:course/followers/:email' do
   by_permissions :followers do | grants |
     Classroom::Collection::Followers.for(course).where(email: params[:email], course: { '$regex' => grants }).as_json
   end
 end
 
-post '/follower/:course' do
+post '/courses/:course/followers' do
   protect!
   json_body['course'] = course_slug
   Classroom::Collection::Followers.for(course).add_follower json_body
   {status: :created}
 end
 
-delete '/follower/:course/:email/:social_id' do
+delete '/courses/:course/followers/:email/:social_id' do
   protect!
   Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
   {status: :created}
