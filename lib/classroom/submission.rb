@@ -77,7 +77,7 @@ module Classroom::Submission
 
     { passed: stats[:passed],
       failed: stats[:failed],
-      warning: stats[:passed_with_warnings] }
+      passed_with_warnings: stats[:passed_with_warnings] }
   end
 
   def self.student_from(json)

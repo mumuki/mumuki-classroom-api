@@ -68,7 +68,7 @@ describe Classroom::Submission do
                                                                       stats: {
                                                                         passed: 1,
                                                                         failed: 0,
-                                                                        warning: 0,
+                                                                        passed_with_warnings: 0,
                                                                       },
                                                                       last_assignment: {
                                                                         exercise: exercise,
@@ -99,7 +99,7 @@ describe Classroom::Submission do
                                                                       stats: {
                                                                         passed: 0,
                                                                         failed: 1,
-                                                                        warning: 0,
+                                                                        passed_with_warnings: 0,
                                                                       },
                                                                       last_assignment: {
                                                                         exercise: exercise,
@@ -132,7 +132,7 @@ describe Classroom::Submission do
                                                                       stats: {
                                                                         passed: 1,
                                                                         failed: 0,
-                                                                        warning: 1,
+                                                                        passed_with_warnings: 1,
                                                                       },
                                                                       last_assignment: {
                                                                         exercise: exercise2,
