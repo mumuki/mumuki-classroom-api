@@ -17,7 +17,7 @@ class Classroom::Collection::CourseCollection
   private
 
   def mongo_collection_name
-    "#{course}_#{underscore_class_name}".to_sym
+    "#{underscore_class_name}_#{course}".to_sym
   end
 
   def underscore_class_name
