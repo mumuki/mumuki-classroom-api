@@ -26,3 +26,18 @@ namespace :submission do
   end
 end
 
+namespace :users do
+  task :update_metadata, [:tenant] do |t, args|
+    auth0 = Auth0Client.new(
+      :client_id => ENV['MUMUKI_AUTH0_CLIENT_ID'],
+      :client_secret => ENV['MUMUKI_AUTH0_CLIENT_SECRET'],
+      :domain => "mumuki.auth0.com"
+    )
+
+    Classroom::Database.tenant = args[:tenant]
+    social_ids = Classroom::CourseStudent.distinct('student.social_id')
+    social_ids.each do |sid|
+      Mumukit::Auth::User.new(sid).update_permission('atheneum', { 'permissions' => "#{args[:tenant]}/*" })
+    end
+  end
+end
