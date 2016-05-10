@@ -217,6 +217,7 @@ describe 'routes' do
 
     context 'when course exists' do
       before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+      before { expect(Mumukit::Auth::User).to receive(:update_matadata) }
 
       context 'when not authenticated' do
         before { post '/courses/foo/students', student_json }
