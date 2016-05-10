@@ -11,7 +11,7 @@ namespace :submission do
         Classroom::Database.tenant = body.delete('tenant')
 
         begin
-          logger.info 'Processing new submission'
+          logger.info "Processing submission #{body['id']}"
           Classroom::Collection::GuidesProgress.update! body
         rescue => e
           logger.warn "Submission failed #{e}. body was: #{body}"
