@@ -9,11 +9,11 @@ GIT
 
 GIT
   remote: git://github.com/mumuki/mumukit-nuntius.git
-  revision: ee1b10259b63ac73f3541c8523e114723676fa65
-  tag: v0.2.0
+  revision: 56c6763451c4dfdb3869d9dea2d5628928035540
+  tag: v0.2.2
   specs:
-    mumukit-nuntius (0.2.0)
-      activesupport (~> 4.2)
+    mumukit-nuntius (0.2.2)
+      activesupport (~> 4.1)
       bunny (~> 2.3)
 
 GIT
