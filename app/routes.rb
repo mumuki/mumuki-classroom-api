@@ -102,6 +102,8 @@ post '/courses/:course/students' do
 
   Classroom::Collection::CourseStudents.insert!(json.wrap_json)
 
+  Mumukit::Auth::User.update_metadata(token.jwt['sub'], atheneum: "#{tenant}/*")
+
   {status: :created}
 end
 
