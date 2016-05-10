@@ -8,19 +8,17 @@ namespace :submission do
   task :listen do
     Mumukit::Nuntius::Consumer.start 'submissions' do |delivery_info, properties, body|
       begin
-        data = JSON.parse(body)
-
-        Classroom::Database.tenant = data.delete('tenant')
+        Classroom::Database.tenant = body.delete('tenant')
 
         begin
           logger.info 'Processing new submission'
-          Classroom::Collection::GuidesProgress.update! data
+          Classroom::Collection::GuidesProgress.update! body
         rescue => e
-          logger.warn "Submission failed #{e}. Data was: #{data}"
-          Classroom::Collection::FailedSubmissions.insert! data.wrap_json
+          logger.warn "Submission failed #{e}. body was: #{body}"
+          Classroom::Collection::FailedSubmissions.insert! body.wrap_json
         end
       rescue => e
-        logger.error "Submission malformed #{e}. Data was: #{data}"
+        logger.error "Submission couldn't be processed #{e}. body was: #{body}"
       ensure
         Classroom::Database.client.try(:close)
       end
