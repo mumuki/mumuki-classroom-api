@@ -1,10 +1,11 @@
 GIT
   remote: git://github.com/mumuki/mumukit-auth.git
-  revision: 2b183826ed6606f6f7e4e189b8f4a7de29b2c454
-  tag: v0.0.1
+  revision: 50c84859e1f003cf87aff95eb3d29d923d53ced5
+  tag: v0.1.1
   specs:
-    mumukit-auth (0.1.0)
+    mumukit-auth (0.1.1)
       activesupport
+      auth0
       jwt
 
 GIT
@@ -39,6 +40,8 @@ GEM
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
     amq-protocol (2.0.1)
+    auth0 (4.0.0)
+      httmultiparty (~> 0.3.16)
     bson (4.1.1)
     bson_ext (1.5.1)
     bunny (2.3.1)
@@ -49,12 +52,22 @@ GEM
     docile (1.1.5)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
+    httmultiparty (0.3.16)
+      httparty (>= 0.7.3)
+      mimemagic
+      multipart-post
+    httparty (0.13.7)
+      json (~> 1.8)
+      multi_xml (>= 0.5.2)
     i18n (0.7.0)
     json (1.8.3)
     jwt (1.5.4)
+    mimemagic (0.3.1)
     minitest (5.8.4)
     mongo (2.2.5)
       bson (~> 4.0)
+    multi_xml (0.5.5)
+    multipart-post (2.0.0)
     puma (3.4.0)
     rack (1.6.4)
     rack-protection (1.5.3)
