@@ -214,10 +214,12 @@ describe 'routes' do
 
   describe 'post /courses/:course/students/' do
     let(:student_json) { {first_name: 'Jon', last_name: 'Doe'}.to_json }
+    let(:auth0) {double('auth0')}
+    before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
+    before { allow(auth0).to receive(:update_permissions) }
 
     context 'when course exists' do
       before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
-      before { expect(Mumukit::Auth::User).to receive(:update_matadata) }
 
       context 'when not authenticated' do
         before { post '/courses/foo/students', student_json }
