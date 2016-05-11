@@ -37,7 +37,7 @@ namespace :users do
     Classroom::Database.tenant = args[:tenant]
     social_ids = Classroom::CourseStudent.distinct('student.social_id')
     social_ids.each do |sid|
-      Mumukit::Auth::User.new(sid).update_permission('atheneum', { 'permissions' => "#{args[:tenant]}/*" })
+      Mumukit::Auth::User.new(sid).update_permissions('atheneum', "#{args[:tenant]}/*")
     end
   end
 end
