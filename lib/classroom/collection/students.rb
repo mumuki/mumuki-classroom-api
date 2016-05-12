@@ -5,7 +5,7 @@ class Classroom::Collection::Students < Classroom::Collection::CourseCollection
   end
 
   def ensure_new!(social_id)
-    raise Classroom::StudentExistsError, 'Student already exist' if any?('student.social_id' => social_id)
+    raise Classroom::StudentExistsError, 'Student already exist' if any?(social_id: social_id)
   end
 
 end

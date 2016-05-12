@@ -116,7 +116,8 @@ post '/courses/:course/students' do
   Classroom::Collection::Students.for(course).ensure_new! social_id
 
   json = { student: json_body.merge(social_id: social_id), course: { slug: course_slug } }
-  Classroom::Collection::Students.for(course).insert!(json.wrap_json)
+  Classroom::Collection::CourseStudents.insert! json.wrap_json
+  Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
 
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
 

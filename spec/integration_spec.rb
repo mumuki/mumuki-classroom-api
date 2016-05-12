@@ -226,8 +226,7 @@ describe 'routes' do
           it { expect(last_response).to be_ok }
           it { expect(last_response.body).to json_eq status: 'created' }
           it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
-          it { expect(created_course_student.deep_symbolize_keys).to eq(student: student.merge(social_id: 'github|user123456'),
-                                                                        course: {slug: 'example/foo'}) }
+          it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456')) }
         end
         context 'and user already exists' do
           before { post '/courses/foo/students', student_json }
