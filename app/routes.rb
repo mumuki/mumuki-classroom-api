@@ -102,6 +102,8 @@ post '/courses/:course/students' do
 
   Classroom::Collection::CourseStudents.insert!(json.wrap_json)
 
+  Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
+
   {status: :created}
 end
 
