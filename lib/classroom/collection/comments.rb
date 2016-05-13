@@ -1,23 +1,9 @@
-module Classroom::Collection::Comments
-
-  extend Mumukit::Service::Collection
+class Classroom::Collection::Comments < Classroom::Collection::CourseCollection
 
   private
 
-  def self.mongo_collection_name
-    :comments
-  end
-
-  def self.mongo_database
-    Classroom::Database
-  end
-
-  def self.wrap(it)
-    Classroom::JsonWrapper.new(it)
-  end
-
-  def self.wrap_array(it)
-    Classroom::Collection::CommentArray.new(it)
+  def mongo_collection_name
+    underscore_class_name.to_sym
   end
 
 end

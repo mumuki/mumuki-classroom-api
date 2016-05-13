@@ -29,7 +29,7 @@ module Classroom::Collection::Courses
   end
 
   def self.wrap_array(it)
-    Classroom::Collection::CourseArray.new(it)
+    Classroom::JsonArrayWrapper.new(it, :courses)
   end
 
 end

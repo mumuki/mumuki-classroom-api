@@ -12,7 +12,7 @@ gem 'bunny'
 
 gem 'activesupport', '~> 4.2'
 
-gem 'mumukit-auth', github: 'mumuki/mumukit-auth', tag: 'v0.1.1'
+gem 'mumukit-auth', github: 'mumuki/mumukit-auth', tag: 'v0.1.2'
 
 gem 'mumukit-nuntius', github: 'mumuki/mumukit-nuntius', tag: 'v0.2.2'
 gem 'mumukit-service', github: 'mumuki/mumukit-service', tag: 'v0.2.1'

@@ -14,6 +14,31 @@ end
 
 helpers do
 
+  def course
+    params[:course]
+  end
+
+  def student_id
+    params[:student_id]
+  end
+
+  def exercise_id
+    params[:exercise_id].to_i
+  end
+
+  def exercise_student_progress_query
+    { 'guide.slug' => repo_slug, 'student.social_id' => student_id }
+  end
+
+  def by_permissions(key, &query)
+    grants = permissions_to_regex
+    if grants.to_s.blank?
+      {}.tap { |it| it[key] = [] }
+    else
+      query.call(grants)
+    end
+  end
+
   def permissions_to_regex
     permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
@@ -23,11 +48,11 @@ helpers do
   end
 
   def route_slug_parts
-    [tenant, params[:course]].compact
+    [tenant, course].compact
   end
 
   def course_slug
-    @course_slug ||= Mumukit::Service::Slug.new(tenant, params[:course]).to_s
+    @course_slug ||= Mumukit::Service::Slug.new(tenant, course).to_s
   end
 
   def repo_slug
@@ -56,105 +81,99 @@ error Classroom::CourseNotExistsError do
   halt 400
 end
 
-error Classroom::CourseStudentNotExistsError do
+error Classroom::StudentExistsError do
+  halt 400
+end
+
+error Classroom::StudentNotExistsError do
   halt 400
 end
 
 get '/courses' do
-  grants = permissions_to_regex
-  if grants.to_s.blank?
-    { courses: [] }
-  else
+  by_permissions :courses do | grants |
     Classroom::Collection::Courses.all(grants).as_json
   end
 end
 
 post '/courses' do
-  course_slug = json_body['slug']
-  permissions.protect!(course_slug)
+  permissions.protect! json_body['slug']
 
-  Classroom::Collection::Courses.ensure_new! course_slug
-
-  json = {code: json_body['code'],
-    days: json_body['days'],
-    period: json_body['period'],
-    shifts: json_body['shifts'],
-    description: json_body['description'],
-    slug: course_slug}
-
-  Classroom::Collection::Courses.insert!(json.wrap_json)
+  Classroom::Collection::Courses.ensure_new! json_body['slug']
+  Classroom::Collection::Courses.insert! json_body.wrap_json
 
   {status: :created}
 end
 
-get '/courses/:course' do
+get '/courses/:course/students' do
   protect!
-  {course_guides: Classroom::Collection::GuidesProgress.by_course(course_slug)}
+  Classroom::Collection::Students.for(course).all.as_json
 end
 
 post '/courses/:course/students' do
+  social_id = token.jwt['sub']
+
   Classroom::Collection::Courses.ensure_exist! course_slug
+  Classroom::Collection::Students.for(course).ensure_new! social_id
 
-  json ={student: {first_name: json_body['first_name'],
-                   last_name: json_body['last_name'],
-                   social_id: token.jwt['sub']},
-         course: {slug: course_slug}}
-
-  Classroom::Collection::CourseStudents.insert!(json.wrap_json)
+  json = { student: json_body.merge(social_id: social_id), course: { slug: course_slug } }
+  Classroom::Collection::CourseStudents.insert! json.wrap_json
+  Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
 
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
 
   {status: :created}
 end
 
-get '/guide_progress/:course/:organization/:repository/:student_id/:exercise_id' do
-  {exercise_progress: Classroom::Collection::GuidesProgress.exercise_by_student(course_slug, repo_slug, params['student_id'], params['exercise_id'].to_i)}
-end
-
-get '/guide_progress/:course/:organization/:repository' do
-  {
-      guide: Classroom::Collection::GuidesProgress.guide_data(repo_slug, course_slug).guide,
-      progress: Classroom::Collection::GuidesProgress.by_slug_and_course(repo_slug, course_slug).
-        as_json[:guides_progress].select { |guide| permissions.allows? guide['course']['slug'] }
-  }
-end
-
-get '/students/:course' do
+get '/courses/:course/guides' do
   protect!
-  { students: Classroom::Collection::GuidesProgress.students_by_course_slug(course_slug) }
+  Classroom::Collection::Guides.for(course).all.as_json
 end
 
-post '/comment/:course' do
+get '/courses/:course/guides/:organization/:repository' do
   protect!
-  Classroom::Collection::Comments.insert!(json_body.wrap_json)
+  Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
+end
+
+get '/courses/:course/guides/:organization/:repository/:student_id' do
+  Classroom::Collection::ExerciseStudentProgress
+    .for(course)
+    .where(exercise_student_progress_query).as_json
+end
+
+get '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
+  Classroom::Collection::ExerciseStudentProgress
+    .for(course)
+    .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
+end
+
+post '/courses/:course/comments' do
+  protect!
+  Classroom::Collection::Comments.for(course).insert!(json_body.wrap_json)
   Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
   { status: :created }
 end
 
-get '/comments/:course/:exercise_id' do
+get '/courses/:course/comments/:exercise_id' do
   protect!
-  Classroom::Collection::Comments.where(exercise_id: params[:exercise_id].to_i).as_json
+  Classroom::Collection::Comments.for(course).where(exercise_id: exercise_id).as_json
 end
 
-get '/followers/:email' do
-  grants = permissions_to_regex
-  if grants.to_s.blank?
-    { followers: [] }
-  else
-    Classroom::Collection::Followers.where(email: params[:email], course: { '$regex' => grants }).as_json
-  end
-end
-
-post '/follower/:course' do
+post '/courses/:course/followers' do
   protect!
   json_body['course'] = course_slug
-  Classroom::Collection::Followers.add_follower json_body
+  Classroom::Collection::Followers.for(course).add_follower json_body
   {status: :created}
 end
 
-delete '/follower/:course/:email/:social_id' do
+get '/courses/:course/followers/:email' do
+  by_permissions :followers do | grants |
+    Classroom::Collection::Followers.for(course).where(email: params[:email], course: { '$regex' => grants }).as_json
+  end
+end
+
+delete '/courses/:course/followers/:email/:social_id' do
   protect!
-  Classroom::Collection::Followers.remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
+  Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
   {status: :created}
 end
 

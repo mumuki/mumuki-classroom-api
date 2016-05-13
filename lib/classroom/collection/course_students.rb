@@ -2,8 +2,12 @@ module Classroom::Collection::CourseStudents
 
   extend Mumukit::Service::Collection
 
-  def self.find_by(args)
-    first_by(args, { _id: -1 })
+  def self.find_by_social_id!(social_id)
+    args = { 'student.social_id' => social_id }
+    find_projection(args).sort(:_id => -1)
+      .first
+      .tap { |it| validate_presence(args, it) }
+      .try { |it| wrap(it) }
   end
 
   private
@@ -20,7 +24,4 @@ module Classroom::Collection::CourseStudents
     Classroom::JsonWrapper.new(it)
   end
 
-end
-
-class Classroom::CourseStudentNotExistsError < StandardError
 end

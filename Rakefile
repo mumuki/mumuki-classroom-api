@@ -12,7 +12,7 @@ namespace :submission do
 
         begin
           logger.info "Processing submission #{body['id']}"
-          Classroom::Collection::GuidesProgress.update! body
+          Classroom::Submission.process! body
         rescue => e
           logger.warn "Submission failed #{e}. body was: #{body}"
           Classroom::Collection::FailedSubmissions.insert! body.wrap_json
