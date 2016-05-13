@@ -6,6 +6,7 @@ module Classroom::Submission
     json[:course] = find_submission_course! json
     json[:student] = find_student_from json
 
+    update_guide json
     update_exercise_student_progress json
     update_guide_student_progress_with_stats json
   end
@@ -23,6 +24,12 @@ module Classroom::Submission
       .find_by(social_id: social_id(json))
       .as_json
       .deep_symbolize_keys
+  end
+
+  def self.update_guide(json)
+    Classroom::Collection::Guides
+      .for(course_prefix json)
+      .update!(guide_from json)
   end
 
   def self.update_exercise_student_progress(json)
