@@ -89,6 +89,10 @@ error Classroom::StudentNotExistsError do
   halt 400
 end
 
+error Mumukit::Auth::EmailNotRegistered do
+  halt 400
+end
+
 get '/courses' do
   by_permissions :courses do | grants |
     Classroom::Collection::Courses.all(grants).as_json
@@ -174,6 +178,15 @@ end
 delete '/courses/:course/followers/:email/:social_id' do
   protect!
   Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
+  {status: :created}
+end
+
+post '/courses/:course/permissions' do
+  protect!
+  Mumukit::Auth::User.from_email(json_body['email']).tap do |user|
+    user.update_permissions('classroom', course_slug)
+    user.update_permissions('atheneum', "#{tenant}/*")
+  end
   {status: :created}
 end
 
