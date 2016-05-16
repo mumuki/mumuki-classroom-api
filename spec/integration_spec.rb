@@ -352,4 +352,16 @@ describe 'routes' do
     it { expect(last_response.body).to be_truthy }
     it { expect(last_response.body).to eq({followers: [{course: 'example/bar', social_ids: ['social|1']}]}.to_json)}
   end
+
+  describe 'post /courses/:course/permissions' do
+    let(:auth0) {double('auth0')}
+    let(:permissions_json) {{ email: 'aguspina87@gmail.com' }.to_json}
+    before { allow(Mumukit::Auth::User).to receive(:from_email).and_return(auth0) }
+    before { allow(auth0).to receive(:update_permissions) }
+    before { header 'Authorization', build_auth_header('*') }
+    before { post '/courses/bar/permissions', permissions_json }
+
+    it { expect(last_response.body).to be_truthy }
+    it { expect(last_response.body).to json_eq status: 'created' }
+  end
 end
