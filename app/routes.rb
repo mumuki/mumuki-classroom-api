@@ -190,6 +190,11 @@ post '/courses/:course/permissions' do
   {status: :created}
 end
 
+get '/courses/:course/exams' do
+  protect!
+  Classroom::Collection::Exams.for(course).all.as_json
+end
+
 get '/ping' do
   {message: 'pong!'}
 end
