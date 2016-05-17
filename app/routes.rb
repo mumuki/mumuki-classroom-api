@@ -195,6 +195,13 @@ get '/courses/:course/exams' do
   Classroom::Collection::Exams.for(course).all.as_json
 end
 
+post '/courses/:course/exams' do
+  protect!
+  Classroom::Collection::Exams.for(course).insert! json_body.wrap_json
+  Mumukit::Nuntius::Publisher.publish_exams json_body.merge(tenant: tenant)
+  {status: :created}
+end
+
 get '/ping' do
   {message: 'pong!'}
 end
