@@ -375,4 +375,17 @@ describe 'routes' do
     it { expect(last_response.body).to json_eq exams: [exam_json] }
 
   end
+
+  describe 'post /courses/:course/exams' do
+    let(:exam_json) { { slug: 'foo/bar', begin: 'today', end: 'tomorrow', duration: '150' }.to_json }
+    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams) }
+    before { header 'Authorization', build_auth_header('*') }
+    before { post '/courses/foo/exams', exam_json }
+
+    it { expect(last_response.body).to be_truthy }
+    it { expect(last_response.body).to json_eq status: 'created' }
+    it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
+    it { expect(Classroom::Collection::Exams.for('foo').find_by({}).to_json).to eq exam_json }
+
+  end
 end
