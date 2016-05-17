@@ -364,4 +364,15 @@ describe 'routes' do
     it { expect(last_response.body).to be_truthy }
     it { expect(last_response.body).to json_eq status: 'created' }
   end
+
+  describe 'get /courses/:course/exams' do
+    let(:exam_json) { { slug: 'foo/bar', begin: 'today', end: 'tomorrow', duration: '150' } }
+    before { header 'Authorization', build_auth_header('*') }
+    before { Classroom::Collection::Exams.for('foo').insert! exam_json.wrap_json }
+    before { get '/courses/foo/exams' }
+
+    it { expect(last_response.body).to be_truthy }
+    it { expect(last_response.body).to json_eq exams: [exam_json] }
+
+  end
 end
