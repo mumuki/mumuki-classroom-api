@@ -202,7 +202,7 @@ end
 
 post '/courses/:course/exams' do
   protect!
-  Classroom::Collection::Exams.for(course).insert! json_body.wrap_json
+  Classroom::Collection::Exams.for(course).upsert! json_body
   Mumukit::Nuntius::Publisher.publish_exams tenantized_json_body
   {status: :created}
 end

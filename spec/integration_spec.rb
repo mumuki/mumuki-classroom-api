@@ -377,15 +377,19 @@ describe 'routes' do
   end
 
   describe 'post /courses/:course/exams' do
-    let(:exam_json) { { slug: 'foo/bar', begin: 'today', end: 'tomorrow', duration: '150' }.stringify_keys }
+    let(:exam_json) { { slug: 'foo/bar', begin: 'today', end: 'tomorrow', duration: '150', social_ids: ['auth0|1'] }.stringify_keys }
+    let(:exam_json2) { { slug: 'foo/bar', begin: 'today', end: 'tomorrow', duration: '150', social_ids: ['auth0|2'] }.stringify_keys }
+    let(:result_json) { { slug: 'foo/bar', begin: 'today', end: 'tomorrow', duration: '150', social_ids: ['auth0|1', 'auth0|2'] }.stringify_keys }
     before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).with(exam_json.merge(tenant: 'example')) }
+    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).with(exam_json2.merge(tenant: 'example')) }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/exams', exam_json.to_json }
+    before { post '/courses/foo/exams', exam_json2.to_json }
 
     it { expect(last_response.body).to be_truthy }
     it { expect(last_response.body).to json_eq status: 'created' }
     it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
-    it { expect(Classroom::Collection::Exams.for('foo').find_by({}).to_json).to json_eq exam_json }
+    it { expect(Classroom::Collection::Exams.for('foo').where({}).to_json).to json_eq exams: [result_json] }
 
   end
 end
