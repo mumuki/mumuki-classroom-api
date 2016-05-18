@@ -152,6 +152,26 @@ describe Classroom::Submission do
 
     end
 
+    describe 'process submission without chapter' do
+      let(:submission_without_chapter) { submission.merge({
+        submitter: submitter,
+        exercise: exercise,
+        guide: guide
+      })}
+
+      let(:course_student) {{ course: {slug: 'example/course1'}, student: submitter }}
+      let(:student) {{ social_id: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe' }}
+
+      let(:guide_fetched) { Classroom::Collection::Guides.for('course1').all.as_json[:guides].first }
+
+      before { Classroom::Collection::Students.for('course1').insert! student.wrap_json }
+      before { Classroom::Collection::CourseStudents.insert! course_student.wrap_json }
+      before { Classroom::Submission.process!(submission_without_chapter) }
+
+      it { expect(guide_fetched.to_json).to eq(submission_without_chapter[:guide].to_json) }
+
+    end
+
   end
 
 end
