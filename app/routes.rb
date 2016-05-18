@@ -63,6 +63,11 @@ helpers do
     Classroom::Database.tenant = tenant
   end
 
+  def tenantized_json_body
+    json_body.merge(tenant: tenant)
+  end
+
+
 end
 
 before do
@@ -153,7 +158,7 @@ end
 post '/courses/:course/comments' do
   protect!
   Classroom::Collection::Comments.for(course).insert!(json_body.wrap_json)
-  Mumukit::Nuntius::Publisher.publish_comments json_body.merge(tenant: tenant)
+  Mumukit::Nuntius::Publisher.publish_comments tenantized_json_body
   { status: :created }
 end
 
@@ -187,6 +192,18 @@ post '/courses/:course/permissions' do
     user.update_permissions('classroom', course_slug)
     user.update_permissions('atheneum', "#{tenant}/*")
   end
+  {status: :created}
+end
+
+get '/courses/:course/exams' do
+  protect!
+  Classroom::Collection::Exams.for(course).all.as_json
+end
+
+post '/courses/:course/exams' do
+  protect!
+  Classroom::Collection::Exams.for(course).upsert! json_body
+  Mumukit::Nuntius::Publisher.publish_exams tenantized_json_body
   {status: :created}
 end
 
