@@ -101,12 +101,16 @@ module Classroom::Submission
   def self.guide_from(json)
     guide = json[:guide]
 
-    { slug: guide[:slug],
+    classroom_guide = {
+      slug: guide[:slug],
       name: guide[:name],
-      lesson: { id: guide[:chapter][:id],
-                name: guide[:chapter][:name] },
-      language: { name: guide[:language][:name],
-                  devicon: guide[:language][:devicon] }}
+      language: {
+        name: guide[:language][:name],
+        devicon: guide[:language][:devicon]
+      }
+    }
+    classroom_guide[:lesson] = { id: guide[:chapter][:id], name: guide[:chapter][:name] } if guide[:chapter]
+    classroom_guide
   end
 
   def self.exercise_from(json)
