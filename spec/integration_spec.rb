@@ -389,7 +389,7 @@ describe 'routes' do
     before { post '/courses/foo/exams', exam_json.to_json }
 
     it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_eq status: 'created' }
+    it { expect(last_response.body).to json_eq(status: 'created', id: kind_of(String)) }
     it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
     it { expect(exam_fetched['id']).to be_truthy }
     it { expect(exam_fetched.except('id')).to eq result_json }
@@ -414,17 +414,18 @@ describe 'routes' do
     let(:result_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: ['auth0|123456'] }.stringify_keys }
     let(:exam_fetched) { Classroom::Collection::Exams.for('foo').where({}).as_json[:exams].first }
 
-    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).with(exam_json.merge(tenant: 'example', id: kind_of(String))) }
+    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams) }
+    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams) }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/exams', exam_json.to_json }
-    before { put '/courses/foo/exams', exam_json.to_json }
+    before { put '/courses/foo/exams', exam_json2.to_json }
 
     it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_eq status: 'updated' }
+    it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
     it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
     it { expect(exam_fetched['id']).to be_truthy }
-    it { expect(exam_fetched['id']).to eql '1234567890' }
-    it { expect(exam_fetched.except('id')).to eq result_json }
+    it { expect(exam_fetched['id']).to_not eql '1234567890' }
+    it { expect(exam_fetched.except('id').to_json).to eq result_json.to_json }
   end
 
 end
