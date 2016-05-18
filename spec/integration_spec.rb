@@ -396,4 +396,17 @@ describe 'routes' do
 
   end
 
+  describe 'get /courses/:course/exams/:exam_id' do
+    let(:exam_json) {{ slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: [] }}
+    let(:exam_id) { Classroom::Collection::Exams.for('foo').insert!(exam_json.wrap_json)[:id] }
+    let(:response_json) { JSON.parse(last_response.body).deep_symbolize_keys }
+
+    before { header 'Authorization', build_auth_header('*') }
+    before { get "/courses/foo/exams/#{exam_id}", exam_json.to_json }
+
+    it { expect(response_json[:id]).to be_truthy }
+    it { expect(response_json.except(:id)).to eq(exam_json) }
+
+  end
+
 end

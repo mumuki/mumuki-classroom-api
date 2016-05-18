@@ -207,6 +207,11 @@ post '/courses/:course/exams' do
   {status: :created}
 end
 
+get '/courses/:course/exams/:exam_id' do
+  protect!
+  Classroom::Collection::Exams.for(course).find(params[:exam_id]).as_json
+end
+
 get '/ping' do
   {message: 'pong!'}
 end
