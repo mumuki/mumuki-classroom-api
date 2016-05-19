@@ -409,22 +409,32 @@ describe 'routes' do
   end
 
   describe 'put /courses/:course/exams' do
+    let!(:id) { Classroom::Collection::Exams.for('foo').insert! exam_json.wrap_json }
     let(:exam_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: [] }.stringify_keys }
-    let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: '1234567890').stringify_keys }
+    let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: id[:id]).stringify_keys }
     let(:result_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: ['auth0|123456'] }.stringify_keys }
     let(:exam_fetched) { Classroom::Collection::Exams.for('foo').where({}).as_json[:exams].first }
 
-    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).exactly(2).times }
-    before { expect(Mumukit::Service::IdGenerator).to receive(:next).and_return('1234567890') }
-    before { header 'Authorization', build_auth_header('*') }
-    before { post '/courses/foo/exams', exam_json.to_json }
-    before { put '/courses/foo/exams', exam_json2.to_json }
+    context 'when existing exam' do
+      before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).exactly(1).times }
+      before { header 'Authorization', build_auth_header('*') }
+      before { put '/courses/foo/exams', exam_json2.to_json }
 
-    it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
-    it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
-    it { expect(exam_fetched['id']).to be_truthy }
-    it { expect(exam_fetched.except('id').to_json).to eq result_json.to_json }
+      it { expect(last_response.body).to be_truthy }
+      it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
+      it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
+      it { expect(exam_fetched['id']).to eq(id[:id]) }
+      it { expect(exam_fetched.except('id').to_json).to eq result_json.to_json }
+    end
+
+    context 'when no existing exam' do
+      let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: '123').stringify_keys }
+      before { header 'Authorization', build_auth_header('*') }
+      before { put '/courses/foo/exams', exam_json2.to_json }
+      it { expect(last_response.body).to be_truthy }
+
+    end
+
   end
 
 end
