@@ -430,8 +430,7 @@ describe 'routes' do
     context 'when no existing exam' do
       let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: '123').stringify_keys }
       before { header 'Authorization', build_auth_header('*') }
-      before { put '/courses/foo/exams', exam_json2.to_json }
-      it { expect(last_response.body).to be_truthy }
+      it { expect { Classroom::Collection::Exams.for('foo').upsert! exam_json2 }.to raise_error(Classroom::ExamExistsError) }
 
     end
 
