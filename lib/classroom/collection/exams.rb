@@ -3,17 +3,12 @@ class Classroom::Collection::Exams < Classroom::Collection::CourseCollection
   include Mumukit::Service::Collection
 
   def upsert!(data)
-    query = {'id' => data['id']}
-    json = data.except('id')
-    puts("JSON: #{json}")
-    puts("JSON: #{query}")
-    puts("JSON: #{json['social_ids']}")
-    puts("JSON: #{json.except('social_ids')}")
+    query = {'id' => data.delete('id')}
     update_one(
       query,
       {
-        '$set' => json.except('social_ids'),
-        '$addToSet' => { 'social_ids' => { '$each' => json['social_ids'] }}
+        '$set' => data.except('social_ids'),
+        '$addToSet' => { 'social_ids' => { '$each' => data['social_ids'] }}
       }
     )
     query
