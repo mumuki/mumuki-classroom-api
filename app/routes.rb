@@ -207,7 +207,7 @@ post '/courses/:course/exams' do
   {status: :created}.merge(exam_id)
 end
 
-put '/courses/:course/exams' do
+put '/courses/:course/exams/:exam' do
   protect!
   exam_id = Classroom::Collection::Exams.for(course).upsert! json_body
   Mumukit::Nuntius::Publisher.publish_exams(tenantized_json_body.merge exam_id)

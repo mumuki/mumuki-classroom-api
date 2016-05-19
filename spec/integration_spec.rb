@@ -408,7 +408,7 @@ describe 'routes' do
     it { expect(response_json.except(:id)).to eq(exam_json) }
   end
 
-  describe 'put /courses/:course/exams' do
+  describe 'put /courses/:course/exams/:exam' do
     let!(:id) { Classroom::Collection::Exams.for('foo').insert! exam_json.wrap_json }
     let(:exam_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: [] }.stringify_keys }
     let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: id[:id]).stringify_keys }
@@ -418,7 +418,7 @@ describe 'routes' do
     context 'when existing exam' do
       before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).exactly(1).times }
       before { header 'Authorization', build_auth_header('*') }
-      before { put '/courses/foo/exams', exam_json2.to_json }
+      before { put "/courses/foo/exams/#{id[:id]}", exam_json2.to_json }
 
       it { expect(last_response.body).to be_truthy }
       it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
@@ -431,7 +431,6 @@ describe 'routes' do
       let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: '123').stringify_keys }
       before { header 'Authorization', build_auth_header('*') }
       it { expect { Classroom::Collection::Exams.for('foo').upsert! exam_json2 }.to raise_error(Classroom::ExamExistsError) }
-
     end
 
   end
