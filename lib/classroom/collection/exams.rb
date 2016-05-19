@@ -2,9 +2,9 @@ class Classroom::Collection::Exams < Classroom::Collection::CourseCollection
 
   include Mumukit::Service::Collection
 
-  def upsert!(data)
-    query = {'id' => data.delete('id')}
-    raise Classroom::ExamExistsError, 'Exam does not exist' unless any?(query)
+  def update!(id, data)
+    query = {'id' => id}
+    raise Classroom::ExamExistsError, 'Exam does not exist' unless exists?(id)
     update_one(query, { '$set' => data })
     query
   end

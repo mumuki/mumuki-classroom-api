@@ -209,7 +209,7 @@ end
 
 put '/courses/:course/exams/:exam' do
   protect!
-  exam_id = Classroom::Collection::Exams.for(course).upsert! json_body
+  exam_id = Classroom::Collection::Exams.for(course).update! params[:exam], json_body
   Mumukit::Nuntius::Publisher.publish_exams(tenantized_json_body.merge exam_id)
   {status: :updated}.merge(exam_id)
 end
