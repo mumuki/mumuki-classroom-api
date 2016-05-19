@@ -410,7 +410,7 @@ describe 'routes' do
 
   describe 'put /courses/:course/exams/:exam' do
     let!(:id) { Classroom::Collection::Exams.for('foo').insert! exam_json.wrap_json }
-    let(:exam_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: [] }.stringify_keys }
+    let(:exam_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: ['auth0|234567', 'auth0|345678'] }.stringify_keys }
     let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: id[:id]).stringify_keys }
     let(:result_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: ['auth0|123456'] }.stringify_keys }
     let(:exam_fetched) { Classroom::Collection::Exams.for('foo').where({}).as_json[:exams].first }

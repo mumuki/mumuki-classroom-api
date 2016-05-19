@@ -5,13 +5,7 @@ class Classroom::Collection::Exams < Classroom::Collection::CourseCollection
   def upsert!(data)
     query = {'id' => data.delete('id')}
     raise Classroom::ExamExistsError, 'Exam does not exist' unless any?(query)
-    update_one(
-      query,
-      {
-        '$set' => data.except('social_ids'),
-        '$addToSet' => { 'social_ids' => { '$each' => data['social_ids'] }}
-      }
-    )
+    update_one(query, { '$set' => data })
     query
   end
 
