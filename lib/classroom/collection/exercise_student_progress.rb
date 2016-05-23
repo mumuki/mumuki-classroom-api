@@ -28,6 +28,7 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
       .group_by { |it| it[:status] }
       .reduce(empty_stats) { | json, (key, value)| json.tap { json[key] = value.size || 0 }}
       .deep_symbolize_keys
+      .slice(*empty_stats.keys)
   end
 
   def last_submission(exercise_student)

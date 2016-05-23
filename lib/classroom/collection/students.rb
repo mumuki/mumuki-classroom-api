@@ -26,7 +26,7 @@ class Classroom::Collection::Students < Classroom::Collection::CourseCollection
     find_projection.each do |student|
       social_id = student.deep_symbolize_keys[:social_id]
       all_stats = Classroom::Collection::ExerciseStudentProgress.for(course).all_stats(social_id)
-      update_one({ social_id: social_id }, { :'$set' => all_stats })
+      update_one({ social_id: social_id }, { :'$set' => { stats: all_stats }})
     end
   end
 
