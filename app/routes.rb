@@ -100,7 +100,7 @@ end
 
 get '/courses' do
   by_permissions :courses do | grants |
-    Classroom::Collection::Courses.all(grants).as_json
+    Classroom::Collection::Courses.allowed(grants).as_json
   end
 end
 

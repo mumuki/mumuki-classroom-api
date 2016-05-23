@@ -2,7 +2,7 @@ module Classroom::Collection::Courses
 
   extend Mumukit::Service::Collection
 
-  def self.all(grants_pattern)
+  def self.allowed(grants_pattern)
     where(slug: {'$regex' => grants_pattern})
   end
 
