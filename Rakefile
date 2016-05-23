@@ -41,3 +41,14 @@ namespace :users do
     end
   end
 end
+
+namespace :students do
+  task :progress do |t, args|
+    Classroom::Database.within_each do
+      Classroom::Collection::Courses.all('*').raw.each do |course|
+        course_slug_code = course[:slug].split('/').second
+        Classroom::Collection::Students.for(course_slug_code).update_all_stats
+      end
+    end
+  end
+end

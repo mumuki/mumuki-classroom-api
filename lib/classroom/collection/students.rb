@@ -22,6 +22,14 @@ class Classroom::Collection::Students < Classroom::Collection::CourseCollection
     raise Classroom::StudentExistsError, 'Student already exist' if any?(social_id: social_id)
   end
 
+  def update_all_stats
+    find_projection.each do |student|
+      social_id = student.deep_symbolize_keys[:social_id]
+      all_stats = Classroom::Collection::ExerciseStudentProgress.for(course).all_stats(social_id)
+      update_one({ social_id: social_id }, { :'$set' => all_stats })
+    end
+  end
+
 end
 
 class Classroom::StudentExistsError < StandardError
