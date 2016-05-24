@@ -73,8 +73,8 @@ describe Classroom::Submission do
       before { Classroom::Collection::Students.for('example').update_all_stats }
 
       it { expect(students.size).to eq 2 }
-      it { expect(students.first).to eq student1.merge({ passed: 2, passed_with_warnings: 0, failed: 1 }) }
-      it { expect(students.second).to eq student2.merge({ passed: 0, passed_with_warnings: 1, failed: 0 }) }
+      it { expect(students.first).to eq student1.merge(stats: { passed: 2, passed_with_warnings: 0, failed: 1 }) }
+      it { expect(students.second).to eq student2.merge(stats: { passed: 0, passed_with_warnings: 1, failed: 0 }) }
     end
 
 
