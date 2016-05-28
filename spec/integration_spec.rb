@@ -110,10 +110,12 @@ describe 'routes' do
 
   describe 'get /courses/:course/students' do
 
+    let(:created_at) { 'created_at' }
+    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
     let(:student) {{ email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar' }}
 
-    let(:student1) {{ student: student, course: { slug: 'example/foo' } }}
-    let(:student2) {{ student: student, course: { slug: 'example/test' } }}
+    let(:student1) {{ student: student, course: { slug: 'example/foo' }, created_at: created_at }}
+    let(:student2) {{ student: student, course: { slug: 'example/test' }, created_at: created_at  }}
 
     before { header 'Authorization', build_auth_header('*') }
 
@@ -222,11 +224,13 @@ describe 'routes' do
 
         context 'and user does not exist' do
           let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
+          let(:created_at) { 'created_at' }
+          before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
 
           it { expect(last_response).to be_ok }
           it { expect(last_response.body).to json_eq status: 'created' }
           it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
-          it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456')) }
+          it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456', created_at: created_at)) }
         end
         context 'and user already exists' do
           before { post '/courses/foo/students', student_json }
