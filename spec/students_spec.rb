@@ -7,6 +7,7 @@ describe Classroom::Submission do
   end
 
   describe do
+    let(:created_at) { 'created_at' }
     let(:date) { Time.now }
     let(:student1) {{ social_id: 'github|123456' }}
     let(:student2) {{ social_id: 'github|234567' }}
@@ -51,6 +52,7 @@ describe Classroom::Submission do
       ]
     }}
 
+    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
     before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
     before { Classroom::Collection::Students.for('example').insert! student2.wrap_json }
 
@@ -63,8 +65,8 @@ describe Classroom::Submission do
       let(:students) { Classroom::Collection::Students.for('example').all.as_json.deep_symbolize_keys[:students] }
 
       it { expect(students.size).to eq 2 }
-      it { expect(students.first).to eq student1 }
-      it { expect(students.second).to eq student2 }
+      it { expect(students.first).to eq student1.merge(created_at: created_at) }
+      it { expect(students.second).to eq student2.merge(created_at: created_at) }
     end
 
     context 'if students stats processed' do
@@ -73,8 +75,8 @@ describe Classroom::Submission do
       before { Classroom::Collection::Students.for('example').update_all_stats }
 
       it { expect(students.size).to eq 2 }
-      it { expect(students.first).to eq student1.merge(stats: { passed: 2, passed_with_warnings: 0, failed: 1 }) }
-      it { expect(students.second).to eq student2.merge(stats: { passed: 0, passed_with_warnings: 1, failed: 0 }) }
+      it { expect(students.first).to eq student1.merge(created_at: created_at, stats: { passed: 2, passed_with_warnings: 0, failed: 1 }) }
+      it { expect(students.second).to eq student2.merge(created_at: created_at, stats: { passed: 0, passed_with_warnings: 1, failed: 0 }) }
     end
 
 
