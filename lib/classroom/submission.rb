@@ -9,6 +9,7 @@ module Classroom::Submission
     update_guide json
     update_exercise_student_progress json
     update_guide_student_progress_with_stats json
+    update_student_progress json
   end
 
   def self.find_submission_course!(json)
@@ -30,6 +31,12 @@ module Classroom::Submission
     Classroom::Collection::Guides
       .for(course_prefix json)
       .update!(guide_from json)
+  end
+
+  def self.update_student_progress(json)
+    Classroom::Collection::Students
+      .for(course_prefix json)
+      .update_all_stats_for(student_from(json)[:social_id])
   end
 
   def self.update_exercise_student_progress(json)
