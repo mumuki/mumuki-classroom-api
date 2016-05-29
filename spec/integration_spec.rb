@@ -273,9 +273,12 @@ describe 'routes' do
 
   describe 'post /courses/:course/teachers' do
     let(:auth0) {double('auth0')}
-    before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
+    before { allow(Mumukit::Auth::User).to receive(:from_email).and_return(auth0) }
+    before { allow(auth0).to receive(:social_id).and_return('auth|0') }
     before { allow(auth0).to receive(:update_permissions) }
-    let(:teacher) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', social_id: 'auth0|1'} }
+    before { allow(auth0).to receive(:user).and_return(extra_data) }
+    let(:extra_data) { { social_id: 'auth|0', picture: 'url' }.stringify_keys }
+    let(:teacher) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com'} }
     let(:teacher_json) { teacher.to_json }
 
     context 'when course exists' do
@@ -300,7 +303,7 @@ describe 'routes' do
           it { expect(last_response).to be_ok }
           it { expect(last_response.body).to json_eq status: 'created' }
           it { expect(Classroom::Collection::Teachers.for('foo').count).to eq 1 }
-          it { expect(created_teacher.deep_symbolize_keys).to eq(teacher.merge(created_at: created_at)) }
+          it { expect(created_teacher.deep_symbolize_keys).to eq(teacher.merge(created_at: created_at, image_url: 'url', social_id: 'auth|0')) }
         end
         context 'and teacher already exists' do
           before { post '/courses/foo/teachers', teacher_json }

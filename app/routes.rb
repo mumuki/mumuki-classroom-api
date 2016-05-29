@@ -147,15 +147,17 @@ end
 
 post '/courses/:course/teachers' do
   protect!
-  social_id = json_body['social_id']
 
-  ensure_course_existence!
-  Classroom::Collection::Teachers.for(course).ensure_new! social_id
+  Mumukit::Auth::User.from_email(json_body['email']).tap do |user|
+    ensure_course_existence!
 
-  Classroom::Collection::Teachers.for(course).insert!(json_body.wrap_json)
+    Classroom::Collection::Teachers.for(course).ensure_new! user.social_id
 
-  Mumukit::Auth::User.new(social_id).update_permissions('atheneum', "#{tenant}/*")
-  Mumukit::Auth::User.new(social_id).update_permissions('classroom', course_slug)
+    Classroom::Collection::Teachers.for(course).insert!(json_body.merge(image_url: user.user['picture'], social_id: user.user['social_id']).wrap_json)
+
+    user.update_permissions('classroom', course_slug)
+    user.update_permissions('atheneum', "#{tenant}/*")
+  end
 
   {status: :created}
 end
