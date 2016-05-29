@@ -215,15 +215,6 @@ delete '/courses/:course/followers/:email/:social_id' do
   {status: :created}
 end
 
-post '/courses/:course/permissions' do
-  protect!
-  Mumukit::Auth::User.from_email(json_body['email']).tap do |user|
-    user.update_permissions('classroom', course_slug)
-    user.update_permissions('atheneum', "#{tenant}/*")
-  end
-  {status: :created}
-end
-
 get '/courses/:course/exams' do
   protect!
   Classroom::Collection::Exams.for(course).all.as_json
