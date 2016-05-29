@@ -5,13 +5,11 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
   end
 
   def stats(exercise_student)
-    where(query_by_guide_and_student(exercise_student))
-      .as_json
-      .deep_symbolize_keys[:exercise_student_progress]
-      .map { |it| last_submission it }
-      .group_by { |it| it[:status] }
-      .reduce(empty_stats) { | json, (key, value)| json.tap { json[key] = value.size || 0 }}
-      .deep_symbolize_keys
+    _stats(query_by_guide_and_student(exercise_student))
+  end
+
+  def all_stats(social_id)
+    _stats({ :'student.social_id' => social_id })
   end
 
   def empty_stats
@@ -21,6 +19,17 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
   end
 
   private
+
+  def _stats(query)
+    where(query)
+      .as_json
+      .deep_symbolize_keys[:exercise_student_progress]
+      .map { |it| last_submission it }
+      .group_by { |it| it[:status] }
+      .reduce(empty_stats) { | json, (key, value)| json.tap { json[key] = value.size || 0 }}
+      .deep_symbolize_keys
+      .slice(*empty_stats.keys)
+  end
 
   def last_submission(exercise_student)
     exercise_student[:submissions].max_by { |it| it[:created_at] }
