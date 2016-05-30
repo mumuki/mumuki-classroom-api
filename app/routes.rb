@@ -67,6 +67,9 @@ helpers do
     json_body.merge(tenant: tenant)
   end
 
+  def ensure_course_existence!
+    Classroom::Collection::Courses.ensure_exist! course_slug
+  end
 
 end
 
@@ -91,6 +94,10 @@ error Classroom::StudentExistsError do
 end
 
 error Classroom::StudentNotExistsError do
+  halt 400
+end
+
+error Classroom::TeacherExistsError do
   halt 400
 end
 
@@ -121,7 +128,7 @@ end
 post '/courses/:course/students' do
   social_id = token.jwt['sub']
 
-  Classroom::Collection::Courses.ensure_exist! course_slug
+  ensure_course_existence!
   Classroom::Collection::Students.for(course).ensure_new! social_id
 
   json = { student: json_body.merge(social_id: social_id), course: { slug: course_slug } }
@@ -129,6 +136,27 @@ post '/courses/:course/students' do
   Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
 
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
+
+  {status: :created}
+end
+
+get '/courses/:course/teachers' do
+  protect!
+  Classroom::Collection::Teachers.for(course).all.as_json
+end
+
+post '/courses/:course/teachers' do
+  protect!
+
+
+  Mumukit::Auth::User.from_email(json_body['email']).tap do |user|
+    ensure_course_existence!
+    Classroom::Collection::Teachers.for(course).ensure_new! user.social_id
+    Classroom::Collection::Teachers.for(course).insert!(json_body.merge(image_url: user.user['picture'], social_id: user.social_id).wrap_json)
+
+    user.update_permissions('classroom', course_slug)
+    user.update_permissions('atheneum', "#{tenant}/*")
+  end
 
   {status: :created}
 end
@@ -183,15 +211,6 @@ end
 delete '/courses/:course/followers/:email/:social_id' do
   protect!
   Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
-  {status: :created}
-end
-
-post '/courses/:course/permissions' do
-  protect!
-  Mumukit::Auth::User.from_email(json_body['email']).tap do |user|
-    user.update_permissions('classroom', course_slug)
-    user.update_permissions('atheneum', "#{tenant}/*")
-  end
   {status: :created}
 end
 
