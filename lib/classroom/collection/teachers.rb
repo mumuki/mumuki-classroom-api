@@ -4,6 +4,14 @@ class Classroom::Collection::Teachers < Classroom::Collection::People
     Classroom::TeacherExistsError
   end
 
+  def upsert!(teacher)
+    mongo_collection.update_one(
+      { :email => teacher[:email] },
+      { :$set => teacher },
+      { :upsert => true }
+    )
+  end
+
 end
 
 

@@ -1,11 +1,13 @@
 require './lib/classroom'
+require 'mumukit/auth'
 require 'mumukit/nuntius'
 
 logger = Mumukit::Nuntius::Logger
-logger.info 'Listening to submissions'
 
 namespace :submission do
   task :listen do
+    logger.info 'Listening to submissions'
+
     Mumukit::Nuntius::Consumer.start 'submissions' do |delivery_info, properties, body|
       begin
         Classroom::Database.tenant = body.delete('tenant')
@@ -49,6 +51,27 @@ namespace :students do
       Classroom::Collection::Courses.all.raw.each do |course|
         course_slug_code = course.slug.split('/').second
         Classroom::Collection::Students.for(course_slug_code).update_all_stats
+      end
+    end
+  end
+  task :teacherify_all do
+    Classroom::Database.tenant = :test
+    Classroom::Database.within_each do
+      Classroom::Collection::CourseStudents.all.raw.each do |course_student|
+        student = course_student.student.deep_symbolize_keys
+        course_slug = course_student.course.deep_symbolize_keys[:slug]
+        course_slug_code = course_slug.split('/').second
+
+        begin
+          user = Mumukit::Auth::User.new(student[:social_id])
+
+          if student[:email].present? && user.teacher?(course_slug)
+            Classroom::Collection::Teachers.for(course_slug_code).upsert! student
+          end
+        rescue Auth0::NotFound => _
+          logger.error "Auth0 User Not Found - Student: #{student}"
+        end
+
       end
     end
   end
