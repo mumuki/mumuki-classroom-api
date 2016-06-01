@@ -1,9 +1,9 @@
 GIT
   remote: git://github.com/mumuki/mumukit-auth.git
-  revision: 5de44a646096416e23b23c7af9c5c618115c03b1
-  tag: v0.1.3
+  revision: 3c0f3e7a965235f065aaa66a49f8354f3e6dae09
+  tag: v0.2.0
   specs:
-    mumukit-auth (0.1.3)
+    mumukit-auth (0.2.0)
       activesupport
       auth0
       jwt
