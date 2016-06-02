@@ -249,7 +249,15 @@ describe 'routes' do
           it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
           it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456', created_at: created_at)) }
         end
-        context 'and user already exists' do
+        context 'and user already exists by social_id' do
+          before { post '/courses/foo/students', student_json }
+
+          it { expect(last_response).to_not be_ok }
+          it { expect(last_response.status).to eq 400 }
+          it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+        end
+        context 'and user already exists by email' do
+          before { header 'Authorization', build_auth_header('*', 'auth1') }
           before { post '/courses/foo/students', student_json }
 
           it { expect(last_response).to_not be_ok }
@@ -305,7 +313,15 @@ describe 'routes' do
           it { expect(Classroom::Collection::Teachers.for('foo').count).to eq 1 }
           it { expect(created_teacher.deep_symbolize_keys).to eq(teacher.merge(created_at: created_at, image_url: 'url', social_id: 'auth|0')) }
         end
-        context 'and teacher already exists' do
+        context 'and teacher already exists by social_id' do
+          before { post '/courses/foo/teachers', teacher_json }
+
+          it { expect(last_response).to_not be_ok }
+          it { expect(last_response.status).to eq 400 }
+          it { expect(last_response.body).to json_eq(message: 'Teacher already exist') }
+        end
+        context 'and user already exists by email' do
+          before { header 'Authorization', build_auth_header('*', 'auth1') }
           before { post '/courses/foo/teachers', teacher_json }
 
           it { expect(last_response).to_not be_ok }
