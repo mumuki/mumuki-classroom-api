@@ -10,6 +10,10 @@ module Classroom::Collection::CourseStudents
       .try { |it| wrap(it) }
   end
 
+  def self.ensure_new!(social_id, course_slug)
+    raise Classroom::CourseStudentExistsError, "Student already exist" if any?('student.social_id' => social_id, 'course.slug' => course_slug)
+  end
+
   private
 
   def self.mongo_collection_name
@@ -24,4 +28,7 @@ module Classroom::Collection::CourseStudents
     Classroom::JsonWrapper.new(it)
   end
 
+end
+
+class Classroom::CourseStudentExistsError < StandardError
 end
