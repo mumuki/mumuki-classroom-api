@@ -129,7 +129,7 @@ post '/courses/:course/students' do
   social_id = token.jwt['sub']
 
   ensure_course_existence!
-  Classroom::Collection::Students.for(course).ensure_new! social_id
+  Classroom::Collection::Students.for(course).ensure_new! social_id, json_body['email']
 
   json = { student: json_body.merge(social_id: social_id), course: { slug: course_slug } }
   Classroom::Collection::CourseStudents.insert! json.wrap_json
@@ -151,7 +151,7 @@ post '/courses/:course/teachers' do
 
   Mumukit::Auth::User.from_email(json_body['email']).tap do |user|
     ensure_course_existence!
-    Classroom::Collection::Teachers.for(course).ensure_new! user.social_id
+    Classroom::Collection::Teachers.for(course).ensure_new! user.social_id, json_body['email']
     Classroom::Collection::Teachers.for(course).insert!(json_body.merge(image_url: user.user['picture'], social_id: user.social_id).wrap_json)
 
     user.update_permissions('classroom', course_slug)

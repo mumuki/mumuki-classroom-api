@@ -18,8 +18,8 @@ class Classroom::Collection::People < Classroom::Collection::CourseCollection
   end
 
 
-  def ensure_new!(social_id)
-    raise exists_exception, "#{underscore_class_name.capitalize.singularize} already exist" if any?(social_id: social_id)
+  def ensure_new!(social_id, email)
+    raise exists_exception, "#{underscore_class_name.capitalize.singularize} already exist" if any?('$or' => [{social_id: social_id}, {email: email}])
   end
 
 end
