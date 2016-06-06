@@ -27,21 +27,3 @@ namespace :submission do
     end
   end
 end
-
-namespace :guides do
-  task :purge do
-    Classroom::Database.tenant = :test
-    Classroom::Database.within_each do
-      begin
-        Classroom::Collection::Courses.all.raw.each do | course |
-          course_slug_code = course.slug.split('/').second
-          Classroom::Collection::Guides.for(course_slug_code).all.raw.each do | guide |
-            Classroom::Collection::Guides.for(course_slug_code).delete_one(slug: guide.slug) unless Classroom::Collection::GuideStudentsProgress.for(course_slug_code).any?('guide.slug' => guide.slug)
-          end
-        end
-      rescue => e
-        puts e
-      end
-    end
-  end
-end
