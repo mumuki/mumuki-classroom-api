@@ -89,18 +89,24 @@ describe Classroom::Submission do
 
       let(:guides) { Classroom::Collection::Guides.for('example').all.as_json.deep_symbolize_keys[:guides] }
       let(:students) { Classroom::Collection::Students.for('example').all.as_json.deep_symbolize_keys[:students] }
+      let(:course_students) { Classroom::Collection::CourseStudents.all.as_json.deep_symbolize_keys[:array] }
       let(:guide_students_progress) { Classroom::Collection::GuideStudentsProgress.for('example').all.as_json.deep_symbolize_keys[:guide_students_progress] }
       let(:exercise_student_progress) { Classroom::Collection::ExerciseStudentProgress.for('example').all.as_json.deep_symbolize_keys[:exercise_student_progress] }
 
       before { Classroom::Collection::Guides.for('example').insert! guide1.wrap_json }
       before { Classroom::Collection::Guides.for('example').insert! guide2.wrap_json }
 
+      before { Classroom::Collection::CourseStudents.insert!({ student: student1, course: { slug: 'example/example' }}.wrap_json) }
+      before { Classroom::Collection::CourseStudents.insert!({ student: student2, course: { slug: 'example/example' }}.wrap_json) }
+      before { Classroom::Collection::CourseStudents.insert!({ student: student1, course: { slug: 'example/foo' }}.wrap_json) }
+
       before { Classroom::Collection::GuideStudentsProgress.for('example').insert! guide_student_progress1.wrap_json }
       before { Classroom::Collection::GuideStudentsProgress.for('example').insert! guide_student_progress2.wrap_json }
       before { Classroom::Collection::GuideStudentsProgress.for('example').insert! guide_student_progress3.wrap_json }
 
-      before { Classroom::Collection::Students.for('example').delete_cascade!('github|123456', 'example/example') }
+      before { Classroom::Collection::Students.for('example').delete!('github|123456') }
 
+      it { expect(course_students.size).to eq 2 }
       it { expect(guides.size).to eq 1 }
       it { expect(students.size).to eq 1 }
       it { expect(guide_students_progress.size).to eq 1 }

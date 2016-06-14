@@ -14,6 +14,10 @@ class Classroom::Collection::CourseCollection
     @course
   end
 
+  def course_slug
+    "#{Classroom::Database.organization}/#{course.dasherize}"
+  end
+
   private
 
   def mongo_collection_name

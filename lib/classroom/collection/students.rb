@@ -16,7 +16,7 @@ class Classroom::Collection::Students < Classroom::Collection::People
     update_one({ social_id: social_id }, { :'$set' => { stats: all_stats }})
   end
 
-  def delete_cascade!(social_id, course_slug)
+  def delete!(social_id)
     delete_one(social_id: social_id)
     student = { :'student.social_id' => social_id }
     Classroom::Collection::CourseStudents.delete_many(student.merge(:'course.slug' => course_slug))
