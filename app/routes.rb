@@ -60,7 +60,7 @@ helpers do
   end
 
   def set_mongo_connection
-    Classroom::Database.tenant = tenant
+    Classroom::Database.organization = tenant
   end
 
   def tenantized_json_body

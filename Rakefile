@@ -10,7 +10,7 @@ namespace :submission do
 
     Mumukit::Nuntius::Consumer.start 'submissions' do |delivery_info, properties, body|
       begin
-        Classroom::Database.tenant = body.delete('tenant')
+        Classroom::Database.organization = body.delete('tenant')
 
         begin
           logger.info "Processing submission #{body['id']}"

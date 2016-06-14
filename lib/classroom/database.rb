@@ -10,14 +10,14 @@ class Classroom::Database
     @client
   end
 
-  def self.tenant=(tenant)
-    @organization = tenant
-    @client = new_database_client(tenant)
+  def self.organization=(organization)
+    @organization = organization
+    @client = new_database_client(organization)
   end
 
   def self.within_each(&block)
     client.database_names.each do |organization|
-      self.tenant = organization.to_sym
+      self.organization = organization.to_sym
       block.call
     end
   end
