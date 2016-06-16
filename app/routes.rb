@@ -149,6 +149,12 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
+get '/courses/:course/student/:social_id' do
+  protect!
+
+  Classroom::Collection::Students.for(course).find_by(social_id: params[:social_id]).as_json
+end
+
 put '/courses/:course/student' do
   protect!
 
