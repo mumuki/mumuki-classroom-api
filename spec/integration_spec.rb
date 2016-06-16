@@ -299,7 +299,6 @@ describe 'routes' do
         before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
         before { Classroom::Collection::CourseStudents.insert! json.wrap_json }
         before { Classroom::Collection::Students.for('foo').insert!(student.merge(social_id: 'auth0|1').wrap_json) }
-        before { puts Classroom::Collection::Students.for('foo').all.as_json }
         before { header 'Authorization', build_auth_header('*') }
         before { put '/courses/foo/student', student2.to_json }
 
@@ -314,6 +313,21 @@ describe 'routes' do
       end
     end
 
+  end
+
+  describe 'get /courses/:course/student/:social_id' do
+    let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+    let(:json) {{ student: student.merge(social_id: 'auth0|1'), course: { slug: 'example/foo' }}}
+    let(:created_at) { 'created_at' }
+    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+    before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+    before { Classroom::Collection::CourseStudents.insert! json.wrap_json }
+    before { Classroom::Collection::Students.for('foo').insert!(student.merge(social_id: 'auth0|1').wrap_json) }
+    before { header 'Authorization', build_auth_header('*') }
+    before { get '/courses/foo/student/auth0%7c1' }
+
+    it { expect(last_response).to be_ok }
+    it { expect(last_response.body).to json_eq student.merge(created_at: created_at, social_id: 'auth0|1') }
   end
 
 
