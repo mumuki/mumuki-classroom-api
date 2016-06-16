@@ -4,6 +4,11 @@ class Classroom::Collection::Students < Classroom::Collection::People
     Classroom::StudentExistsError
   end
 
+  def update!(data)
+    query = {social_id:  data[:social_id]}
+    update_one(query, { :'$set' => { first_name: data[:first_name], last_name: data[:last_name] }})
+  end
+
   def update_all_stats
     find_projection.each do |student|
       social_id = student.deep_symbolize_keys[:social_id]

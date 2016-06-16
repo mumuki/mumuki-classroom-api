@@ -10,8 +10,17 @@ module Classroom::Collection::CourseStudents
       .try { |it| wrap(it) }
   end
 
+  def self.update!(data)
+    query = {'student.social_id' => data[:social_id], 'course.slug' => data[:course_slug]}
+    update_one(query, { '$set' => { 'student.first_name' => data[:first_name], 'student.last_name' => data[:last_name] }})
+  end
+
   def self.ensure_new!(social_id, course_slug)
     raise Classroom::CourseStudentExistsError, "Student already exist" if any?('student.social_id' => social_id, 'course.slug' => course_slug)
+  end
+
+  def self.ensure_exist!(social_id, slug)
+    raise Classroom::CourseStudentNotExistsError, "#{social_id} does not exist in #{slug}" unless any?('student.social_id' => social_id, 'course.slug' => slug)
   end
 
   private
@@ -31,4 +40,7 @@ module Classroom::Collection::CourseStudents
 end
 
 class Classroom::CourseStudentExistsError < StandardError
+end
+
+class Classroom::CourseStudentNotExistsError < StandardError
 end

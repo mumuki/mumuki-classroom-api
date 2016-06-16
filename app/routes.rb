@@ -71,6 +71,10 @@ helpers do
     Classroom::Collection::Courses.ensure_exist! course_slug
   end
 
+  def ensure_course_student_existence!(social_id)
+    Classroom::Collection::CourseStudents.ensure_exist! social_id, course_slug
+  end
+
 end
 
 before do
@@ -143,6 +147,24 @@ post '/courses/:course/students' do
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
 
   {status: :created}
+end
+
+get '/courses/:course/student/:social_id' do
+  protect!
+
+  Classroom::Collection::Students.for(course).find_by(social_id: params[:social_id]).as_json
+end
+
+put '/courses/:course/student' do
+  protect!
+
+  ensure_course_existence!
+  ensure_course_student_existence!(json_body['social_id'])
+  json = { first_name: json_body['first_name'], last_name: json_body['last_name'], social_id: json_body['social_id'], course_slug: course_slug}
+  Classroom::Collection::CourseStudents.update!(json)
+  Classroom::Collection::Students.for(course).update!(json)
+
+  {status: :updated}
 end
 
 get '/courses/:course/teachers' do
