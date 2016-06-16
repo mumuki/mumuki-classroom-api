@@ -28,7 +28,7 @@ Mumukit::Auth.configure do |c|
   c.client_secret = Base64.encode64 'bar'
 end
 
-Classroom::Database.tenant = 'example'
+Classroom::Database.organization = 'example'
 
 def build_auth_header(permissions_string, sub='github|user123456')
   metadata = {classroom: {permissions: permissions_string}}

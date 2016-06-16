@@ -1,21 +1,27 @@
 class Classroom::Database
+  
+  class << self
 
-  extend Mumukit::Service::Database
+    include Mumukit::Service::Database
 
-  def self.client
-    @client
-  end
+    attr_reader :organization
 
-  def self.tenant=(tenant)
-    @client = new_database_client(tenant)
-  end
-
-  def self.within_each(&block)
-    client.database_names.each do |organization|
-      self.tenant = organization.to_sym
-      block.call
+    def client
+      @client
     end
-  end
 
+    def organization=(organization)
+      @organization = organization
+      @client = new_database_client(organization)
+    end
+
+    def within_each(&block)
+      client.database_names.each do |organization|
+        self.organization = organization.to_sym
+        block.call
+      end
+    end
+
+  end
 
 end
