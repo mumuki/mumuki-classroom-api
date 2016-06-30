@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::Submission do
+describe Classroom::Collection::Students do
 
   after do
     Classroom::Database.clean!
@@ -115,5 +115,143 @@ describe Classroom::Submission do
     end
 
   end
+
+  describe 'students routes' do
+
+    describe 'get /courses/:course/students' do
+
+      let(:created_at) { 'created_at' }
+      before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+      let(:student) {{ email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar' }}
+
+      let(:student1) {{ student: student, course: { slug: 'example/foo' }, created_at: created_at }}
+      let(:student2) {{ student: student, course: { slug: 'example/test' }, created_at: created_at  }}
+
+      before { header 'Authorization', build_auth_header('*') }
+
+      context 'when guides already exists in a course' do
+        before { Classroom::Collection::Students.for('foo').insert!(student1.wrap_json) }
+        before { Classroom::Collection::Students.for('test').insert!(student2.wrap_json) }
+        before { get '/courses/foo/students' }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_eq students: [student1] }
+      end
+
+    end
+  end
+
+  describe 'post /courses/:course/students' do
+    let(:auth0) {double('auth0')}
+    before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
+    before { allow(auth0).to receive(:update_permissions) }
+    let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+    let(:student_json) { student.to_json }
+
+    context 'when course exists' do
+      before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+
+      context 'when not authenticated' do
+        before { post '/courses/foo/students', student_json }
+
+        it { expect(last_response).to_not be_ok }
+        it { expect(Classroom::Collection::Students.for('foo').count).to eq 0 }
+      end
+
+      context 'when authenticated' do
+        before { header 'Authorization', build_auth_header('*') }
+        before { post '/courses/foo/students', student_json }
+
+        context 'and user does not exist' do
+          let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
+          let(:created_at) { 'created_at' }
+          before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+
+          it { expect(last_response).to be_ok }
+          it { expect(last_response.body).to json_eq status: 'created' }
+          it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
+          it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456', created_at: created_at)) }
+        end
+        context 'and user already exists by social_id' do
+          before { post '/courses/foo/students', student_json }
+
+          it { expect(last_response).to_not be_ok }
+          it { expect(last_response.status).to eq 400 }
+          it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+        end
+        context 'and user already exists by email' do
+          before { header 'Authorization', build_auth_header('*', 'auth1') }
+          before { post '/courses/foo/students', student_json }
+
+          it { expect(last_response).to_not be_ok }
+          it { expect(last_response.status).to eq 400 }
+          it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+        end
+      end
+    end
+
+    context 'when course does not exist' do
+      it 'rejects creating a student' do
+        header 'Authorization', build_auth_header('*')
+
+        post '/courses/foo/students', student_json
+
+        expect(last_response).to_not be_ok
+        expect(Classroom::Collection::Students.for('foo').count).to eq 0
+      end
+    end
+  end
+
+  describe 'put /courses/:course/students' do
+    let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+    let(:student2) { {first_name: 'Agus', last_name: 'Pina', social_id: 'auth0|1' }}
+    let(:json) {{ student: student.merge(social_id: 'auth0|1'), course: { slug: 'example/foo' }}}
+
+
+    context 'when courses exists' do
+      before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+
+      context 'when not authenticated' do
+        before { put '/courses/foo/student', student2}
+
+        it { expect(last_response).to_not be_ok }
+      end
+
+      context 'when authenticated' do
+        let(:created_at) { 'created_at' }
+        before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+        before { Classroom::Collection::CourseStudents.insert! json.wrap_json }
+        before { Classroom::Collection::Students.for('foo').insert!(student.merge(social_id: 'auth0|1').wrap_json) }
+        before { header 'Authorization', build_auth_header('*') }
+        before { put '/courses/foo/student', student2.to_json }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_eq status: 'updated' }
+        it { expect(Classroom::Collection::Students.for('foo').find_by('social_id' => 'auth0|1').raw[:first_name]).to eq 'Agus' }
+        it { expect(Classroom::Collection::Students.for('foo').find_by('social_id' => 'auth0|1').raw[:last_name]).to eq 'Pina' }
+        it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
+        it { expect(Classroom::Collection::CourseStudents.count).to eq 1 }
+        it { expect(Classroom::Collection::CourseStudents.find_by('student.social_id' => 'auth0|1', 'course.slug' => 'example/foo').raw[:student][:first_name]).to eq 'Agus' }
+        it { expect(Classroom::Collection::CourseStudents.find_by('student.social_id' => 'auth0|1', 'course.slug' => 'example/foo').raw[:student][:last_name]).to eq 'Pina' }
+      end
+    end
+
+  end
+
+  describe 'get /courses/:course/student/:social_id' do
+    let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+    let(:json) {{ student: student.merge(social_id: 'auth0|1'), course: { slug: 'example/foo' }}}
+    let(:created_at) { 'created_at' }
+    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+    before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+    before { Classroom::Collection::CourseStudents.insert! json.wrap_json }
+    before { Classroom::Collection::Students.for('foo').insert!(student.merge(social_id: 'auth0|1').wrap_json) }
+    before { header 'Authorization', build_auth_header('*') }
+    before { get '/courses/foo/student/auth0%7c1' }
+
+    it { expect(last_response).to be_ok }
+    it { expect(last_response.body).to json_eq student.merge(created_at: created_at, social_id: 'auth0|1') }
+  end
+
 
 end
