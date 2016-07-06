@@ -111,12 +111,12 @@ module Classroom::Submission
     classroom_guide = {
       slug: guide[:slug],
       name: guide[:name],
+      parent: guide[:parent],
       language: {
         name: guide[:language][:name],
         devicon: guide[:language][:devicon]
       }
     }
-    classroom_guide[:lesson] = { id: guide[:chapter][:id], name: guide[:chapter][:name] } if guide[:chapter]
     classroom_guide
   end
 

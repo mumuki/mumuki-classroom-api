@@ -10,4 +10,10 @@ class Classroom::Collection::Guides < Classroom::Collection::CourseCollection
     end
   end
 
+  def migrate_parent(guide)
+    parent_data = { type: 'Lesson', name: guide.name, position: guide.lesson['id'], chapter: guide.lesson}
+
+    mongo_collection.update_one({ slug: guide.slug }, { :'$set' => guide.as_json.merge(parent: parent_data) }, { upsert: true })
+  end
+
 end

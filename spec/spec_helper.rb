@@ -6,6 +6,7 @@ require 'rack/test'
 require 'mumukit/auth'
 
 require_relative '../lib/classroom'
+require_relative '../app/routes'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -40,3 +41,8 @@ def build_auth_header(permissions_string, sub='github|user123456')
       Mumukit::Auth::Token.decoded_secret)
   'dummy token ' + encoded_token
 end
+
+def app
+  Sinatra::Application
+end
+

@@ -14,9 +14,16 @@ describe Classroom::Submission do
       id: 'guide_chapter_id',
       name: 'guide_chapter_name'
     }}
+    let(:parent) {{
+      type: 'Lesson',
+      name: 'A lesson name',
+      position: '1',
+      chapter: chapter
+    }}
     let(:guide) {{
       slug: 'guide_slug',
       name: 'guide_name',
+      parent: parent,
       language: {
         name: 'guide_language_name',
         devicon: 'guide_language_devicon'
@@ -41,7 +48,7 @@ describe Classroom::Submission do
     let(:atheneum_submission) { submission.merge({
       submitter: submitter,
       exercise: exercise,
-      guide: guide.merge(chapter: chapter)
+      guide: guide
     })}
 
     describe 'when new submission is consumed' do
@@ -63,7 +70,7 @@ describe Classroom::Submission do
 
         context 'and is the first exercise submission' do
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.deep_symbolize_keys).to eq(guide: guide.merge(lesson: chapter),
+          it { expect(guide_progress.first.deep_symbolize_keys).to eq(guide: guide,
                                                                       student: student,
                                                                       stats: {
                                                                         passed: 1,
@@ -75,7 +82,7 @@ describe Classroom::Submission do
                                                                         submission: submission
                                                                       }) }
           it { expect(exercise_progress.size).to eq 1 }
-          it { expect(exercise_progress.first.deep_symbolize_keys).to eq(guide: guide.merge(lesson: chapter),
+          it { expect(exercise_progress.first.deep_symbolize_keys).to eq(guide: guide,
                                                                          student: student,
                                                                          exercise: exercise,
                                                                          submissions: [submission]) }
@@ -94,7 +101,7 @@ describe Classroom::Submission do
           })}
           before { Classroom::Submission.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.deep_symbolize_keys).to eq(guide: guide.merge(lesson: chapter),
+          it { expect(guide_progress.first.deep_symbolize_keys).to eq(guide: guide,
                                                                       student: student,
                                                                       stats: {
                                                                         passed: 0,
@@ -106,7 +113,7 @@ describe Classroom::Submission do
                                                                         submission: submission2
                                                                       }) }
           it { expect(exercise_progress.size).to eq 1 }
-          it { expect(exercise_progress.first.deep_symbolize_keys).to eq(guide: guide.merge(lesson: chapter),
+          it { expect(exercise_progress.first.deep_symbolize_keys).to eq(guide: guide,
                                                                          student: student,
                                                                          exercise: exercise,
                                                                          submissions: [submission, submission2]) }
@@ -127,7 +134,7 @@ describe Classroom::Submission do
           })}
           before { Classroom::Submission.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.deep_symbolize_keys).to eq(guide: guide.merge(lesson: chapter),
+          it { expect(guide_progress.first.deep_symbolize_keys).to eq(guide: guide,
                                                                       student: student,
                                                                       stats: {
                                                                         passed: 1,
@@ -139,11 +146,11 @@ describe Classroom::Submission do
                                                                         submission: submission2
                                                                       }) }
           it { expect(exercise_progress.size).to eq 2 }
-          it { expect(exercise_progress.first.deep_symbolize_keys).to eq(guide: guide.merge(lesson: chapter),
+          it { expect(exercise_progress.first.deep_symbolize_keys).to eq(guide: guide,
                                                                          student: student,
                                                                          exercise: exercise,
                                                                          submissions: [submission]) }
-          it { expect(exercise_progress.second.deep_symbolize_keys).to eq(guide: guide.merge(lesson: chapter),
+          it { expect(exercise_progress.second.deep_symbolize_keys).to eq(guide: guide,
                                                                           student: student,
                                                                           exercise: exercise2,
                                                                           submissions: [submission2]) }
@@ -156,6 +163,7 @@ describe Classroom::Submission do
       let(:submission_without_chapter) { submission.merge({
         submitter: submitter,
         exercise: exercise,
+        parent: parent.delete(:chapter),
         guide: guide
       })}
 
