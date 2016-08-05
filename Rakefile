@@ -47,3 +47,21 @@ namespace :guides do
     end
   end
 end
+
+namespace :students do
+  task :update_last_submission do
+    Classroom::Database.organization = :test
+    Classroom::Database.within_each do
+      begin
+        Classroom::Collection::Courses.all.raw.each do | course |
+          course_slug_code = course.slug.split('/').second
+          Classroom::Collection::Students.for(course_slug_code).all.raw.each do | student |
+            Classroom::Collection::Students.for(course_slug_code).update_last_assignment_for(student.social_id)
+          end
+        end
+      rescue => e
+        puts e
+      end
+    end
+  end
+end

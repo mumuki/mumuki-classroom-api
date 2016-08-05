@@ -21,6 +21,11 @@ class Classroom::Collection::Students < Classroom::Collection::People
     update_one({ social_id: social_id }, { :'$set' => { stats: all_stats }})
   end
 
+  def update_last_assignment_for(social_id)
+    last_assignment = Classroom::Collection::GuideStudentsProgress.for(course).last_assignment_for(social_id)
+    update_one({ social_id: social_id }, { :'$set' => { last_assignment: last_assignment }})
+  end
+
   def delete!(social_id)
     delete_one(social_id: social_id)
     student = { :'student.social_id' => social_id }
