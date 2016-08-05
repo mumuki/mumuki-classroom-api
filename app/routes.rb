@@ -144,6 +144,7 @@ post '/courses/:course/students' do
   Classroom::Collection::CourseStudents.insert! json.wrap_json
   Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
 
+  Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: social_id, tenant: tenant)
   Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
 
   {status: :created}
