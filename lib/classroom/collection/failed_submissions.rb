@@ -12,8 +12,4 @@ module Classroom::Collection::FailedSubmissions
     Classroom::Database
   end
 
-  def self.wrap(it)
-    Classroom::JsonWrapper.new(it)
-  end
-
 end

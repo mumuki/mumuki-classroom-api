@@ -28,6 +28,35 @@ namespace :submission do
   end
 end
 
+namespace :resubmissions do
+  task :listen do
+    logger.info 'Listening to resubmissions'
+
+    Mumukit::Nuntius::Consumer.start 'resubmissions' do |delivery_info, properties, body|
+      begin
+        Classroom::Database.organization = body.delete('tenant')
+
+        logger.info "Processing resubmission #{body['social_id']}"
+
+        failed_submissions = Classroom::Collection::FailedSubmissions.where({ :'submitter.social_id' => body['social_id'] })
+        failed_submissions.raw.each do |it|
+          Classroom::Collection::FailedSubmissions.delete! it.id
+          begin
+            Classroom::Submission.process! it.raw
+          rescue => e
+            logger.warn "Resubmission failed #{e}. it was: #{it.raw}"
+            Classroom::Collection::FailedSubmissions.insert! it
+          end
+        end
+      rescue => e
+        logger.error "Resubmission couldn't be processed #{e}. it was: #{body}"
+      ensure
+        Classroom::Database.client.try(:close)
+      end
+    end
+  end
+end
+
 namespace :guides do
   task :migrate_parent do
     logger.info 'Migrating guides'
