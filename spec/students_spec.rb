@@ -160,37 +160,46 @@ describe Classroom::Collection::Students do
 
       context 'when authenticated' do
         before { header 'Authorization', build_auth_header('*') }
-        before { post '/courses/foo/students', student_json }
 
-        context 'and user does not exist' do
-          let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
-          let(:created_at) { 'created_at' }
-          before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
-
-          it { expect(last_response).to be_ok }
-          it { expect(last_response.body).to json_eq status: 'created' }
-          it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
-          it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456', created_at: created_at)) }
-        end
-        context 'and user already exists by social_id' do
+        context 'should publish int resubmissions queue' do
+          before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions) }
           before { post '/courses/foo/students', student_json }
+          context 'and user does not exist' do
+            let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
+            let(:created_at) { 'created_at' }
+            before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
 
-          it { expect(last_response).to_not be_ok }
-          it { expect(last_response.status).to eq 400 }
-          it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+            it { expect(last_response).to be_ok }
+            it { expect(last_response.body).to json_eq status: 'created' }
+            it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
+            it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456', created_at: created_at)) }
+          end
         end
-        context 'and user already exists by email' do
-          before { header 'Authorization', build_auth_header('*', 'auth1') }
+        context 'should not publish int resubmissions queue' do
+          before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
           before { post '/courses/foo/students', student_json }
+          context 'and user already exists by social_id' do
+            before { post '/courses/foo/students', student_json }
 
-          it { expect(last_response).to_not be_ok }
-          it { expect(last_response.status).to eq 400 }
-          it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+            it { expect(last_response).to_not be_ok }
+            it { expect(last_response.status).to eq 400 }
+            it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+          end
+          context 'and user already exists by email' do
+            before { header 'Authorization', build_auth_header('*', 'auth1') }
+            before { post '/courses/foo/students', student_json }
+
+            it { expect(last_response).to_not be_ok }
+            it { expect(last_response.status).to eq 400 }
+            it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+          end
         end
       end
     end
 
     context 'when course does not exist' do
+      before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+
       it 'rejects creating a student' do
         header 'Authorization', build_auth_header('*')
 
