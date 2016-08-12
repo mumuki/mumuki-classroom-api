@@ -28,26 +28,19 @@ namespace :submission do
   end
 end
 
+
 namespace :resubmissions do
   task :listen do
     logger.info 'Listening to resubmissions'
 
     Mumukit::Nuntius::Consumer.start 'resubmissions' do |delivery_info, properties, body|
       begin
-        Classroom::Database.organization = body.delete('tenant')
+        destination = body.delete('tenant')
+        social_id = body['social_id']
 
-        logger.info "Processing resubmission #{body['social_id']}"
+        logger.info "Processing resubmission #{social_id}"
 
-        failed_submissions = Classroom::Collection::FailedSubmissions.where({ :'submitter.social_id' => body['social_id'] })
-        failed_submissions.raw.each do |it|
-          Classroom::Collection::FailedSubmissions.delete! it.id
-          begin
-            Classroom::Submission.process! it.raw
-          rescue => e
-            logger.warn "Resubmission failed #{e}. it was: #{it.raw}"
-            Classroom::Collection::FailedSubmissions.insert! it
-          end
-        end
+        Classroom::FailedSubmission.reprocess!(social_id, destination, logger)
       rescue => e
         logger.error "Resubmission couldn't be processed #{e}. it was: #{body}"
       ensure
