@@ -265,6 +265,10 @@ get '/courses/:course/exams/:exam_id' do
   Classroom::Collection::Exams.for(course).find(params[:exam_id]).as_json
 end
 
+get '/organization' do
+  Classroom::Atheneum.organization_json
+end
+
 get '/ping' do
   {message: 'pong!'}
 end
