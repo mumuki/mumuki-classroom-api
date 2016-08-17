@@ -3,6 +3,7 @@ end
 
 require 'mumukit/service'
 require 'active_support/all'
+require 'rest-client'
 
 require 'bunny'
 
@@ -11,3 +12,5 @@ require_relative './classroom/json_wrapper'
 require_relative './classroom/collection'
 require_relative './classroom/follower'
 require_relative './classroom/submission'
+require_relative './classroom/env'
+require_relative './classroom/atheneum'
