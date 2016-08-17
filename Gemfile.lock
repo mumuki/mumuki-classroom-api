@@ -128,7 +128,7 @@ DEPENDENCIES
   mumukit-service!
   rack-test
   rake
-  rest-client
+  rest-client (~> 2.0)
   rspec (~> 2.99)
   sinatra
   sinatra-cross_origin (~> 0.3.1)

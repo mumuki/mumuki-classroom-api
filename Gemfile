@@ -10,7 +10,7 @@ gem 'bson_ext'
 
 gem 'bunny'
 
-gem 'rest-client'
+gem 'rest-client', '~> 2.0'
 
 gem 'activesupport', '~> 4.2'
 
