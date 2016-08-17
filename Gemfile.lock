@@ -50,24 +50,32 @@ GEM
       simplecov (>= 0.7.1, < 1.0.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
+    domain_name (0.5.20160615)
+      unf (>= 0.0.5, < 1.0.0)
     factory_girl (4.5.0)
       activesupport (>= 3.0.0)
     httmultiparty (0.3.16)
       httparty (>= 0.7.3)
       mimemagic
       multipart-post
+    http-cookie (1.0.2)
+      domain_name (~> 0.5)
     httparty (0.13.7)
       json (~> 1.8)
       multi_xml (>= 0.5.2)
     i18n (0.7.0)
     json (1.8.3)
     jwt (1.5.4)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
     mimemagic (0.3.1)
     minitest (5.8.4)
     mongo (2.2.5)
       bson (~> 4.0)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
+    netrc (0.11.0)
     puma (3.4.0)
     rack (1.6.4)
     rack-protection (1.5.3)
@@ -75,6 +83,10 @@ GEM
     rack-test (0.6.3)
       rack (>= 1.0)
     rake (10.5.0)
+    rest-client (2.0.0)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
     rspec (2.99.0)
       rspec-core (~> 2.99.0)
       rspec-expectations (~> 2.99.0)
@@ -97,6 +109,9 @@ GEM
     tilt (2.0.2)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.2)
 
 PLATFORMS
   ruby
@@ -113,9 +128,10 @@ DEPENDENCIES
   mumukit-service!
   rack-test
   rake
+  rest-client
   rspec (~> 2.99)
   sinatra
   sinatra-cross_origin (~> 0.3.1)
 
 BUNDLED WITH
-   1.11.2
+   1.12.5

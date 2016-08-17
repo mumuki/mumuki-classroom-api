@@ -10,6 +10,8 @@ gem 'bson_ext'
 
 gem 'bunny'
 
+gem 'rest-client'
+
 gem 'activesupport', '~> 4.2'
 
 gem 'mumukit-auth', github: 'mumuki/mumukit-auth', tag: 'v0.2.0'
