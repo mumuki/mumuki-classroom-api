@@ -11,15 +11,15 @@ class Classroom::Atheneum
     end
 
     def organization_url
-      "#{Classroom::Database.organization}.#{Classroom::Env.atheneum_url}/api/organizations"
+      "#{Classroom::Database.organization}.#{Mumukit::Service::Env.atheneum_url}/api/organizations"
     end
 
     def client_id
-      Classroom::Env.atheneum_client_id
+      Mumukit::Service::Env.atheneum_client_id
     end
 
     def client_secret
-      Classroom::Env.atheneum_client_secret
+      Mumukit::Service::Env.atheneum_client_secret
     end
   end
 end

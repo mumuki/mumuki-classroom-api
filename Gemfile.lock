@@ -19,10 +19,10 @@ GIT
 
 GIT
   remote: git://github.com/mumuki/mumukit-service.git
-  revision: 7ff2f6be31e307e2ea5c7d9a5c7d78d62d7b2541
-  tag: v0.2.1
+  revision: d78e4c9f770f4654a70756896f74947a06dabbb6
+  tag: v0.2.2
   specs:
-    mumukit-service (0.2.1)
+    mumukit-service (0.2.2)
       activesupport (~> 4.2)
       bson_ext
       mongo (~> 2.1)
@@ -76,7 +76,7 @@ GEM
     multi_xml (0.5.5)
     multipart-post (2.0.0)
     netrc (0.11.0)
-    puma (3.4.0)
+    puma (3.6.0)
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
