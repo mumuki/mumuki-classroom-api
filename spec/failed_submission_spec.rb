@@ -58,6 +58,15 @@ describe Classroom::FailedSubmission do
       it { expect(example_count).to eq(2) }
     end
 
+    context 'and submission.process! does not work one time' do
+      before { expect(Classroom::Submission).to receive(:process!).once.and_raise(StandardError) }
+      before { expect(Classroom::Submission).to receive(:process!).twice }
+      before { Classroom::FailedSubmission.reprocess!('github|123456', :example) }
+
+      it { expect(central_count).to eq(1) }
+      it { expect(example_count).to eq(1) }
+    end
+
   end
 
 end
