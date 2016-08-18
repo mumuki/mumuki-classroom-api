@@ -150,6 +150,12 @@ post '/courses/:course/students' do
   {status: :created}
 end
 
+post '/courses/:course/students/:student_id' do
+  protect!
+  Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: student_id, tenant: tenant)
+  {status: :created}
+end
+
 get '/courses/:course/student/:social_id' do
   protect!
 

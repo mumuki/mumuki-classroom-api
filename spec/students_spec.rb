@@ -262,5 +262,14 @@ describe Classroom::Collection::Students do
     it { expect(last_response.body).to json_eq student.merge(created_at: created_at, social_id: 'auth0|1') }
   end
 
+  describe 'post /courses/:course/students/:student_id' do
+
+    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions).with(social_id: 'github|123456', tenant: 'example') }
+    before { header 'Authorization', build_auth_header('*') }
+    before { post '/courses/foo/students/github%7C123456' }
+
+    it { expect(last_response).to be_ok }
+    it { expect(last_response.body).to eq({:status => :created}.to_json) }
+  end
 
 end
