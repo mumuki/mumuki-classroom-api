@@ -12,7 +12,7 @@ module Classroom::FailedSubmission
           Classroom::Database.organization = destination
           Classroom::Submission.process! it.raw
         rescue => e
-          logger.warn "Resubmission failed #{e}. it was: #{it.raw}" unless logger
+          logger.warn "Resubmission failed #{e}. it was: #{it.raw}" if logger.present?
           Classroom::Database.organization = source
           Classroom::Collection::FailedSubmissions.insert! it
         end

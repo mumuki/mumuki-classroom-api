@@ -27,6 +27,9 @@ describe Classroom::FailedSubmission do
 
   describe 'when resubmission is consumed' do
 
+    let(:central_count) { organization(:central) { Classroom::Collection::FailedSubmissions.count }}
+    let(:example_count) { organization(:example) { Classroom::Collection::FailedSubmissions.count }}
+
     before do
       organization('central') do
         Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
@@ -43,11 +46,16 @@ describe Classroom::FailedSubmission do
       before { expect(Classroom::Collection::FailedSubmissions).to_not receive(:insert!) }
       before { Classroom::FailedSubmission.reprocess!(submitter[:social_id], :example) }
 
-      let(:central_count) { organization(:central) { Classroom::Collection::FailedSubmissions.count }}
-      let(:example_count) { organization(:example) { Classroom::Collection::FailedSubmissions.count }}
-
       it { expect(central_count).to eq(1) }
       it { expect(example_count).to eq(0) }
+    end
+
+    context 'and submission.process! does not work' do
+      before { allow(Classroom::Submission).to receive(:process!).and_raise(StandardError) }
+      before { Classroom::FailedSubmission.reprocess!('github|234567', :example) }
+
+      it { expect(central_count).to eq(2) }
+      it { expect(example_count).to eq(2) }
     end
 
   end
