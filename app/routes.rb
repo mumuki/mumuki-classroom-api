@@ -156,6 +156,16 @@ post '/courses/:course/students/:student_id' do
   {status: :created}
 end
 
+delete '/courses/:course/students/:student_id' do
+  protect!
+  Classroom::Collection::ExerciseStudentProgress.for(course).delete_student!(student_id)
+  Classroom::Collection::Students.for(course).delete!(student_id)
+  Classroom::Collection::CourseStudents.delete_student!(course_slug, student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).delete_student!(student_id)
+  Classroom::Collection::Followers.for(course).delete_follower!(course_slug, student_id)
+  {status: :deleted}
+end
+
 get '/courses/:course/student/:social_id' do
   protect!
 

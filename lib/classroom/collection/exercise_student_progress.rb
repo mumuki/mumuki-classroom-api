@@ -9,13 +9,18 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
   end
 
   def all_stats(social_id)
-    _stats({ :'student.social_id' => social_id })
+    _stats(student_query(social_id))
   end
 
   def empty_stats
     { passed: 0,
       failed: 0,
       passed_with_warnings: 0 }
+  end
+
+  def delete_student!(social_id)
+    where(student_query(social_id)).raw.each { |it| Classroom::FailedSubmission.from(it) }
+    mongo_collection.delete_many(student_query(social_id))
   end
 
   private
@@ -47,6 +52,10 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
   def update_query(exercise_student)
     { :'$set' => exercise_student.except(:submission),
       :'$push' => { :submissions => exercise_student[:submission] }}
+  end
+
+  def student_query(social_id)
+    {:'student.social_id' => social_id}
   end
 
 end

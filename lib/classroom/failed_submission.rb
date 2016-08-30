@@ -7,6 +7,15 @@ module Classroom::FailedSubmission
     reprocess_from_organization social_id, :central, destination
   end
 
+  def self.from(exercise_student_progress)
+    progress = exercise_student_progress.raw.deep_symbolize_keys
+    progress[:submissions].each do |it|
+      Classroom::Collection::FailedSubmissions.insert! new_failed_submission(progress, it).wrap_json
+    end
+  end
+
+  private
+
   def self.reprocess_from_organization(social_id, source, destination)
     Classroom::Database.with source do
       Classroom::Collection::FailedSubmissions.find_by_social_id(social_id).raw.each do |failed_submission|
@@ -41,6 +50,41 @@ module Classroom::FailedSubmission
     Classroom::Database.with source do
       Classroom::Collection::FailedSubmissions.delete! it.id
     end
+  end
+
+  def self.new_failed_submission(progress, submission)
+    submission.merge({
+      exercise: guide_from(progress[:exercise]),
+      guide: guide_from(progress[:exercise]),
+      submitter: submitter_from(progress[:student])
+    })
+  end
+
+  def self.submitter_from(student)
+    {
+      name: student[:name],
+      email: student[:email],
+      social_id: student[:social_id],
+      image_url: student[:image_url]
+    }.compact
+  end
+
+  def self.guide_from(guide)
+    {
+      name: guide[:name],
+      slug: guide[:slug],
+      parent: guide[:parent],
+      lesson: guide[:lesson],
+      language: guide[:language]
+    }.compact
+  end
+
+  def self.exercise_from(exercise)
+    {
+      id: exercise[:id],
+      name: exercise[:name],
+      number: exercise[:number]
+    }.compact
   end
 
 end

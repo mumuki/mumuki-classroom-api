@@ -8,6 +8,13 @@ class Classroom::Collection::Followers < Classroom::Collection::CourseCollection
     update_follower(data, '$pull')
   end
 
+  def delete_follower!(course_slug, social_id)
+    update_many(
+      { 'course' => course_slug },
+      { '$pull' => { 'social_ids' => social_id }},
+      { :upsert => true })
+  end
+
   private
 
   def update_follower(data, action)

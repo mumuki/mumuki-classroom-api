@@ -19,6 +19,10 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
     end
   end
 
+  def delete_student!(social_id)
+    mongo_collection.delete_many(:'student.social_id' => :social_id)
+  end
+
   private
 
   def query_by_index(guide_student)

@@ -23,6 +23,10 @@ module Classroom::Collection::CourseStudents
     raise Classroom::CourseStudentNotExistsError, "#{social_id} does not exist in #{slug}" unless any?('student.social_id' => social_id, 'course.slug' => slug)
   end
 
+  def self.delete_student!(course_slug, student_id)
+    mongo_collection.delete_one('course.slug' => course_slug, 'student.social_id' => student_id)
+  end
+
   private
 
   def self.mongo_collection_name
