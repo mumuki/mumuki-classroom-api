@@ -6,57 +6,58 @@ describe Classroom::Collection::Students do
     Classroom::Database.clean!
   end
 
+  let(:created_at) { 'created_at' }
+  let(:date) { Time.now }
+
+  let(:student1) {{ social_id: 'github|123456' }}
+  let(:student2) {{ social_id: 'github|234567' }}
+
+  let(:guide1) {{ slug: 'foo/bar' }}
+  let(:guide2) {{ slug: 'bar/baz' }}
+
+  let(:guide_student_progress1) {{ guide: guide1, student: student1 }}
+  let(:guide_student_progress2) {{ guide: guide2, student: student1 }}
+  let(:guide_student_progress3) {{ guide: guide2, student: student2 }}
+
+  let(:exercise1) {{
+    guide: guide1,
+    student: student1,
+    exercise: { id: 1 },
+    submissions: [
+      { status: 'failed', created_at: date },
+      { status: 'passed', created_at: date + 2.minutes },
+      { status: 'failed', created_at: date + 1.minute }
+    ]
+  }}
+  let(:exercise2) {{
+    guide: guide1,
+    student: student1,
+    exercise: { id: 2 },
+    submissions: [
+      { status: 'failed', created_at: date },
+      { status: 'passed', created_at: date + 1.minute },
+      { status: 'failed', created_at: date + 2.minutes }
+    ]
+  }}
+  let(:exercise3) {{
+    guide: guide2,
+    student: student1,
+    exercise: { id: 3 },
+    submissions: [
+      { status: 'passed', created_at: date}
+    ]
+  }}
+  let(:exercise4) {{
+    guide: guide2,
+    student: student2,
+    exercise: { id: 4 },
+    submissions: [
+      { status: 'failed', created_at: date },
+      { status: 'passed_with_warnings', created_at: date + 2.minutes }
+    ]
+  }}
+
   describe do
-    let(:created_at) { 'created_at' }
-    let(:date) { Time.now }
-
-    let(:student1) {{ social_id: 'github|123456' }}
-    let(:student2) {{ social_id: 'github|234567' }}
-
-    let(:guide1) {{ slug: 'foo/bar' }}
-    let(:guide2) {{ slug: 'bar/baz' }}
-
-    let(:guide_student_progress1) {{ guide: guide1, student: student1 }}
-    let(:guide_student_progress2) {{ guide: guide2, student: student1 }}
-    let(:guide_student_progress3) {{ guide: guide2, student: student2 }}
-
-    let(:exercise1) {{
-      guide: guide1,
-      student: student1,
-      exercise: { id: 1 },
-      submissions: [
-        { status: 'failed', created_at: date },
-        { status: 'passed', created_at: date + 2.minutes },
-        { status: 'failed', created_at: date + 1.minute }
-      ]
-    }}
-    let(:exercise2) {{
-      guide: guide1,
-      student: student1,
-      exercise: { id: 2 },
-      submissions: [
-        { status: 'failed', created_at: date },
-        { status: 'passed', created_at: date + 1.minute },
-        { status: 'failed', created_at: date + 2.minutes }
-      ]
-    }}
-    let(:exercise3) {{
-      guide: guide2,
-      student: student1,
-      exercise: { id: 3 },
-      submissions: [
-        { status: 'passed', created_at: date}
-      ]
-    }}
-    let(:exercise4) {{
-      guide: guide2,
-      student: student2,
-      exercise: { id: 4 },
-      submissions: [
-        { status: 'failed', created_at: date },
-        { status: 'passed_with_warnings', created_at: date + 2.minutes }
-      ]
-    }}
 
     before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
     before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
@@ -270,6 +271,42 @@ describe Classroom::Collection::Students do
 
     it { expect(last_response).to be_ok }
     it { expect(last_response.body).to eq({:status => :created}.to_json) }
+  end
+
+  describe 'delete /courses/:course/students/:student_id' do
+
+    before { Classroom::Collection::Guides.for('example').insert! guide1.wrap_json }
+    before { Classroom::Collection::Guides.for('example').insert! guide2.wrap_json }
+    before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
+    before { Classroom::Collection::CourseStudents.insert!({ student: student1, course: { slug: 'example/example' }}.wrap_json) }
+    before { Classroom::Collection::GuideStudentsProgress.for('example').insert! guide_student_progress1.wrap_json }
+    before { Classroom::Collection::GuideStudentsProgress.for('example').insert! guide_student_progress2.wrap_json }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example').insert! exercise1.wrap_json }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example').insert! exercise2.wrap_json }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example').insert! exercise3.wrap_json }
+
+    context 'failed submission should be empty' do
+      it { expect(Classroom::Collection::FailedSubmissions.count).to eq 0 }
+    end
+
+    context 'failed submission should have removed student submissions' do
+      before { header 'Authorization', build_auth_header('*') }
+      before { delete '/courses/example/students/github%7C123456' }
+
+      it { expect(Classroom::Collection::FailedSubmissions.count).to eq 7 }
+    end
+
+    context 'should remove student and his existence from the course' do
+      before { header 'Authorization', build_auth_header('*') }
+      before { delete '/courses/example/students/github%7C123456' }
+
+      it { expect(Classroom::Collection::Guides.for('example').count).to eq 0 }
+      it { expect(Classroom::Collection::Students.for('example').count).to eq 0 }
+      it { expect(Classroom::Collection::CourseStudents.count).to eq 0 }
+      it { expect(Classroom::Collection::GuideStudentsProgress.for('example').count).to eq 0 }
+      it { expect(Classroom::Collection::ExerciseStudentProgress.for('example').count).to eq 0 }
+    end
+
   end
 
 end
