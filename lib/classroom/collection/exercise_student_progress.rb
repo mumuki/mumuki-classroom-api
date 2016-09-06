@@ -27,8 +27,8 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     json = data.deep_symbolize_keys
     eid = json[:exercise_id]
     sid = json[:submission_id]
-    social_id = json[:social_id]
     comment = json[:comment]
+    social_id = json[:social_id]
     mongo_collection.update_one(
       { :'student.social_id' => social_id, :'exercise.id' => eid, :'submissions.id' => sid },
       { :'$push' => { 'submissions.$.comments' => comment }}

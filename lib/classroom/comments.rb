@@ -1,4 +1,4 @@
-class Classroom::Collection::Comments
+class Classroom::Comments
 
   def self.for(course, data)
     Classroom::Collection::ExerciseStudentProgress

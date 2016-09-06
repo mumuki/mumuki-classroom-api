@@ -229,14 +229,9 @@ end
 
 post '/courses/:course/comments' do
   protect!
-  Classroom::Comments.for(course, json_body.wrap_json)
+  Classroom::Comments.for(course, json_body)
   Mumukit::Nuntius::Publisher.publish_comments tenantized_json_body.except(:social_id)
   { status: :created }
-end
-
-get '/courses/:course/comments/:exercise_id' do
-  protect!
-  Classroom::Collection::Comments.for(course).where(exercise_id: exercise_id).as_json
 end
 
 post '/courses/:course/followers' do

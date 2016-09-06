@@ -14,3 +14,5 @@ require_relative './classroom/follower'
 require_relative './classroom/submission'
 require_relative './classroom/atheneum'
 require_relative './classroom/failed_submission'
+require_relative './classroom/comments'
+
