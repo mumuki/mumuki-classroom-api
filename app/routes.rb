@@ -229,8 +229,8 @@ end
 
 post '/courses/:course/comments' do
   protect!
-  Classroom::Collection::Comments.for(course).insert!(json_body.wrap_json)
-  Mumukit::Nuntius::Publisher.publish_comments tenantized_json_body
+  Classroom::Comments.for(course, json_body.wrap_json)
+  Mumukit::Nuntius::Publisher.publish_comments tenantized_json_body.except(:social_id)
   { status: :created }
 end
 

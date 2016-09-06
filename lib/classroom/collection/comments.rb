@@ -1,9 +1,9 @@
-class Classroom::Collection::Comments < Classroom::Collection::CourseCollection
+class Classroom::Collection::Comments
 
-  private
-
-  def mongo_collection_name
-    underscore_class_name.to_sym
+  def self.for(course, data)
+    Classroom::Collection::ExerciseStudentProgress
+      .for(course)
+      .comment!(data)
   end
 
 end
