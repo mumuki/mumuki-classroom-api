@@ -23,6 +23,19 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     mongo_collection.delete_many(student_query(social_id))
   end
 
+  def comment!(data)
+    json = data.deep_symbolize_keys
+    eid = json[:exercise_id]
+    sid = json[:submission_id]
+    comment = json[:comment]
+    social_id = json[:social_id]
+    mongo_collection.update_one(
+      { :'student.social_id' => social_id, :'exercise.id' => eid, :'submissions.id' => sid },
+      { :'$push' => { 'submissions.$.comments' => comment }}
+    )
+
+  end
+
   private
 
   def _stats(query)
