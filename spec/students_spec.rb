@@ -309,4 +309,28 @@ describe Classroom::Collection::Students do
 
   end
 
+  describe 'post /courses/:course/students/:student_id/transfer' do
+
+    before { Classroom::Collection::Guides.for('example').insert! guide1.wrap_json }
+    before { Classroom::Collection::Guides.for('example').insert! guide2.wrap_json }
+    before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
+    before { Classroom::Collection::CourseStudents.insert!({ student: student1, course: { slug: 'example/example' }}.wrap_json) }
+    before { Classroom::Collection::GuideStudentsProgress.for('example').insert! guide_student_progress1.wrap_json }
+    before { Classroom::Collection::GuideStudentsProgress.for('example').insert! guide_student_progress2.wrap_json }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example').insert! exercise1.wrap_json }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example').insert! exercise2.wrap_json }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example').insert! exercise3.wrap_json }
+
+    context 'should transfer student to destination and transfer all his data' do
+      before { header 'Authorization', build_auth_header('example/*') }
+      before { post '/courses/example/students/github%7C123456/transfer', {destination: 'foo'}.to_json }
+
+      it { expect(Classroom::Collection::Guides.for('foo').count).to eq 2 }
+      it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
+      it { expect(Classroom::Collection::CourseStudents.count).to eq 2 }
+      it { expect(Classroom::Collection::GuideStudentsProgress.for('foo').count).to eq 2 }
+      it { expect(Classroom::Collection::ExerciseStudentProgress.for('foo').count).to eq 3 }
+    end
+
+  end
 end

@@ -21,12 +21,11 @@ class Classroom::Collection::Students < Classroom::Collection::People
   end
 
   def transfer(social_id, org, destination)
-    delete_one(social_id: social_id)
-    course_student = student_to_transfer(social_id, org, destination)
-    Classroom::Collection::Students.for(destination).insert! course_student.student.wrap_json
-    Classroom::Collection::CourseStudents.insert! course_student
+    Classroom::Collection::Students.for(destination).insert! find_by(social_id: social_id)
+    Classroom::Collection::CourseStudents.insert! student_to_transfer(social_id, org, destination)
     Classroom::Collection::GuideStudentsProgress.for(course).transfer(social_id, destination)
     Classroom::Collection::ExerciseStudentProgress.for(course).transfer(social_id, destination)
+    delete_one(social_id: social_id)
   end
 
   def update_all_stats_for(social_id)
