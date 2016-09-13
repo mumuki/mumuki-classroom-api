@@ -166,6 +166,14 @@ delete '/courses/:course/students/:student_id' do
   {status: :deleted}
 end
 
+post '/courses/:course/students/:student_id/transfer' do
+  protect!
+  Classroom::Collection::Students
+    .for(course)
+    .transfer(student_id, tenant, json_body['destination'])
+  {status: :updated}
+end
+
 get '/courses/:course/student/:social_id' do
   protect!
 

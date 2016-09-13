@@ -36,6 +36,15 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
 
   end
 
+  def transfer(social_id, destination)
+    where(student_query(social_id)).raw.each do |exercise_progress|
+      Classroom::Collection::ExerciseStudentProgress
+        .for(destination)
+        .insert! exercise_progress
+    end
+    mongo_collection.delete_many(student_query(social_id))
+  end
+
   private
 
   def _stats(query)
