@@ -176,7 +176,7 @@ describe Classroom::Submission do
       before { Classroom::Collection::CourseStudents.insert! course_student.wrap_json }
       before { Classroom::Submission.process!(submission_without_chapter) }
 
-      it { expect(guide_fetched.to_json).to eq(submission_without_chapter[:guide].to_json) }
+      it { expect(guide_fetched.to_json).to json_eq(submission_without_chapter[:guide]) }
 
     end
 

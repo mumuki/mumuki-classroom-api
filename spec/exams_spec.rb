@@ -65,7 +65,7 @@ describe Classroom::Collection::Exams do
       it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
       it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
       it { expect(exam_fetched['id']).to eq(id[:id]) }
-      it { expect(exam_fetched.except('id').to_json).to eq result_json.to_json }
+      it { expect(exam_fetched.except('id').to_json).to json_eq result_json }
     end
 
     context 'when no existing exam' do
