@@ -229,6 +229,11 @@ get '/courses/:course/guides/:organization/:repository/:student_id' do
     .where(exercise_student_progress_query).as_json
 end
 
+get '/courses/:course/progress' do
+  protect!
+  Classroom::Collection::ExerciseStudentProgress.for(course).all.as_json
+end
+
 get '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
