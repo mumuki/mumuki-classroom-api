@@ -23,6 +23,16 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
     mongo_collection.delete_many(:'student.social_id' => :social_id)
   end
 
+  def transfer(social_id, destination)
+    where(:'student.social_id' => social_id).raw.each do |guide_progress_data|
+      guide_progress = guide_progress_data.raw.deep_symbolize_keys
+      Classroom::Collection::GuideStudentsProgress.for(destination).insert! guide_progress_data
+      Classroom::Collection::Guides.for(course).transfer(guide_progress[:guide][:slug], destination)
+    end
+    delete_student!(social_id)
+    Classroom::Collection::Guides.for(course).delete_if_has_no_progress
+  end
+
   private
 
   def query_by_index(guide_student)
