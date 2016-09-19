@@ -75,6 +75,12 @@ GEM
       bson (~> 4.0)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
+    mumukit-core (0.2.0)
+      activesupport (~> 4.1)
+      i18n (~> 0.7)
+      rack (~> 1.5)
+    mumukit-inspection (0.1.1)
+      mumukit-core (~> 0.2)
     netrc (0.11.0)
     puma (3.6.0)
     rack (1.6.4)
@@ -124,6 +130,7 @@ DEPENDENCIES
   factory_girl
   mongo (~> 2.1)
   mumukit-auth!
+  mumukit-inspection (~> 0.1)
   mumukit-nuntius!
   mumukit-service!
   rack-test

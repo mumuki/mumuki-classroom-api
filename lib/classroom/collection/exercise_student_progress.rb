@@ -45,6 +45,19 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     mongo_collection.delete_many(student_query(social_id))
   end
 
+  def wrap(it)
+    inspection_wrap super(it)
+  end
+
+  def inspection_wrap(it)
+    it.raw[:submissions].each do |submission|
+      submission['expectation_results'].map! do |expectation|
+        { html: Mumukit::Inspection::I18n.t(expectation), result: expectation['result']}
+      end if submission['expectation_results'].present?
+    end
+    it
+  end
+
   private
 
   def _stats(query)
