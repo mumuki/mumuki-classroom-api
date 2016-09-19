@@ -7,8 +7,7 @@ describe Classroom::Atheneum do
   end
 
   describe 'get /organization' do
-    let(:org_json) { {organization: {id: 1}}.to_json}
-    let(:rest_mock) { double('rest_mock') }
+    let(:org_json) { {organization: {id: 1, locale: 'es'}}.to_json}
 
     before { expect_any_instance_of(RestClient::Resource).to receive(:get).and_return(org_json) }
     before { get '/organization'}

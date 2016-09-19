@@ -43,7 +43,7 @@ describe Classroom::Submission do
       created_at: '2016-01-01 00:00:00',
       test_results: 'test_results',
       submissions_count: 1,
-      expectation_results: 'expectation_results'
+      expectation_results: []
     }}
     let(:atheneum_submission) { submission.merge({
       submitter: submitter,
