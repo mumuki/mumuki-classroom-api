@@ -10,6 +10,10 @@ class Classroom::Atheneum
       JSON.parse(organization)
     end
 
+    def locale
+      organization_json['organization']['locale']
+    end
+
     def organization_url
       "#{Classroom::Database.organization}.#{Mumukit::Service::Env.atheneum_url}/api/organizations"
     end

@@ -7,7 +7,7 @@ module Classroom::Collection::Organizations
   end
 
   def self.locale
-    find_by(name: Classroom::Database.organization).try(&:locale) || 'es'
+    find_by(name: Classroom::Database.organization).try(&:locale) || Classroom::Atheneum.locale
   end
 
   private
