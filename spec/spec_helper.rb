@@ -15,6 +15,9 @@ Mongo::Logger.logger.level = ::Logger::INFO
 RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include FactoryGirl::Syntax::Methods
+  config.before(:each) do
+    allow(Classroom::Collection::Organizations).to receive(:locale).and_return('es')
+  end
 end
 
 RSpec::Matchers.define :json_eq do |expected_json_hash|
@@ -30,6 +33,7 @@ Mumukit::Auth.configure do |c|
 end
 
 Classroom::Database.organization = 'example'
+
 
 def build_auth_header(permissions_string, sub='github|user123456')
   metadata = {classroom: {permissions: permissions_string}}
