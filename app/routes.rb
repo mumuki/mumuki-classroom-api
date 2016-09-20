@@ -75,14 +75,15 @@ helpers do
     Classroom::Collection::CourseStudents.ensure_exist! social_id, course_slug
   end
 
-  def set_locale!(org)
-    I18n.locale = org['locale']
+  def set_locale!
+    I18n.locale = Classroom::Collection::Organizations.locale
   end
 
 end
 
 before do
   set_mongo_connection
+  set_locale!
 end
 
 after do
@@ -295,7 +296,7 @@ get '/courses/:course/exams/:exam_id' do
 end
 
 get '/organization' do
-  Classroom::Atheneum.organization_json.tap { |org| set_locale! org['organization'] }
+  Classroom::Atheneum.organization_json.tap { |org| Classroom::Collection::Organizations.set_locale! org['organization']['locale'] }
 end
 
 get '/ping' do
