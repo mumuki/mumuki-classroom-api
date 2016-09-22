@@ -87,7 +87,7 @@ end
 
 before do
   set_mongo_connection
-  set_locale! if organization.present?
+  set_locale!
 end
 
 after do

@@ -3,8 +3,13 @@ module Classroom::Collection::Organizations
   extend Mumukit::Service::Collection
 
   def self.current
-    orga = find_by(criteria)
-    orga.tap { |orga| update_one(criteria, Classroom::Atheneum.organization_json['organization'], upsert: true) unless orga.present? }
+    find_by(criteria) || fetch
+  end
+
+  def self.fetch
+    Classroom::Atheneum.organization_json['organization'].tap do |data|
+      update_one(criteria, data, upsert: true)
+    end
   end
 
   def self.criteria
