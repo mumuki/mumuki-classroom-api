@@ -170,6 +170,14 @@ delete '/courses/:course/students/:student_id' do
   {status: :deleted}
 end
 
+post '/courses/:course/students/:student_id/disable' do
+  protect!
+  Classroom::Collection::Students.for(course).disable!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).disable_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).disable_student!(student_id)
+  {status: :updated}
+end
+
 post '/courses/:course/students/:student_id/transfer' do
   protect!
   Classroom::Collection::Students

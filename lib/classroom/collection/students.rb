@@ -16,8 +16,11 @@ class Classroom::Collection::Students < Classroom::Collection::People
     end
   end
 
-  def delete!(social_id)
-    mongo_collection.delete_one(social_id: social_id)
+  def disable!(social_id)
+    mongo_collection.update_one(
+      { :social_id => social_id },
+      { :$set => { disabled: true, disabled_at: Time.now }}
+    )
   end
 
   def transfer(social_id, org, destination)

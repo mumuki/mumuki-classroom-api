@@ -23,6 +23,13 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     mongo_collection.delete_many(student_query(social_id))
   end
 
+  def disable_student!(social_id)
+    mongo_collection.update_many(
+      { :'student.social_id' => social_id },
+      { :$set => { disabled: true }}
+    )
+  end
+
   def comment!(data)
     json = data.deep_symbolize_keys
     eid = json[:exercise_id]
