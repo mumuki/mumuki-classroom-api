@@ -3,7 +3,7 @@ module Classroom::Collection::Organizations
   extend Mumukit::Service::Collection
 
   def self.current
-    find_by(criteria) || fetch
+    find_by(criteria) || wrap(fetch)
   end
 
   def self.fetch
