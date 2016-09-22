@@ -16,7 +16,7 @@ RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include FactoryGirl::Syntax::Methods
   config.before(:each) do
-    allow(Classroom::Collection::Organizations).to receive(:current).and_return(Mumukit::Service::JsonWrapper.new(id: 1, locale: 'es'))
+    Classroom::Collection::Organizations.insert! Mumukit::Service::JsonWrapper.new(id: 1, locale: 'es', name: 'example')
   end
 end
 

@@ -7,7 +7,7 @@ describe Classroom::Atheneum do
   end
 
   describe 'get /organization' do
-    let(:org_json) { {organization: {id: 1, locale: 'es'}}.to_json}
+    let(:org_json) { {organization: {locale: 'es', name: 'example'}}.to_json}
     before { get '/organization'}
 
     it { expect(last_response.body).to eq(org_json)}
