@@ -15,9 +15,6 @@ Mongo::Logger.logger.level = ::Logger::INFO
 RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include FactoryGirl::Syntax::Methods
-  config.before(:each) do
-    Classroom::Collection::Organizations.insert! Mumukit::Service::JsonWrapper.new(id: 1, locale: 'es', name: 'example')
-  end
 end
 
 RSpec::Matchers.define :json_eq do |expected_json_hash|
