@@ -333,4 +333,35 @@ describe Classroom::Collection::Students do
     end
 
   end
+
+  describe 'post /courses/:course/students/:student_id/detach' do
+
+    let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
+
+    before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
+
+    context 'should transfer student to destination and transfer all his data' do
+      before { header 'Authorization', build_auth_header('example/*') }
+      before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
+
+      it { expect(fetched_student.detached).to eq true }
+    end
+
+  end
+
+  describe 'post /courses/:course/students/:student_id/attach' do
+
+    let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
+
+    before { Classroom::Collection::Students.for('example').insert! student1.merge(detached: true, detached_at: Time.now).wrap_json }
+
+    context 'should transfer student to destination and transfer all his data' do
+      before { header 'Authorization', build_auth_header('example/*') }
+      before { post '/courses/example/students/github%7C123456/attach', {}.to_json }
+
+      it { expect(fetched_student.detached).to eq nil }
+      it { expect(fetched_student.detached_at).to eq nil }
+    end
+
+  end
 end

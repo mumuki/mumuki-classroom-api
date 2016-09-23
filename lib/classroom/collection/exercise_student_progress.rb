@@ -23,6 +23,20 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     mongo_collection.delete_many(student_query(social_id))
   end
 
+  def detach_student!(social_id)
+    mongo_collection.update_many(
+      { :'student.social_id' => social_id },
+      { :$set => { detached: true }}
+    )
+  end
+
+  def attach_student!(social_id)
+    mongo_collection.update_many(
+      { :'student.social_id' => social_id },
+      { :$unset => { detached: '' }}
+    )
+  end
+
   def comment!(data)
     json = data.deep_symbolize_keys
     eid = json[:exercise_id]

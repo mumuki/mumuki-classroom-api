@@ -23,6 +23,20 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
     mongo_collection.delete_many(:'student.social_id' => :social_id)
   end
 
+  def detach_student!(social_id)
+    mongo_collection.update_many(
+      { :'student.social_id' => social_id },
+      { :$set => { detached: true }}
+    )
+  end
+
+  def attach_student!(social_id)
+    mongo_collection.update_many(
+      { :'student.social_id' => social_id },
+      { :$unset => { detached: '' }}
+    )
+  end
+
   def transfer(social_id, destination)
     where(:'student.social_id' => social_id).raw.each do |guide_progress_data|
       guide_progress = guide_progress_data.raw.deep_symbolize_keys

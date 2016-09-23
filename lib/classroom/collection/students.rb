@@ -16,8 +16,18 @@ class Classroom::Collection::Students < Classroom::Collection::People
     end
   end
 
-  def delete!(social_id)
-    mongo_collection.delete_one(social_id: social_id)
+  def detach!(social_id)
+    mongo_collection.update_one(
+      { :social_id => social_id },
+      { :$set => { detached: true, detached_at: Time.now }}
+    )
+  end
+
+  def attach!(social_id)
+    mongo_collection.update_one(
+      { :social_id => social_id },
+      { :$unset => { detached: '', detached_at: '' }}
+    )
   end
 
   def transfer(social_id, org, destination)

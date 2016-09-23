@@ -170,6 +170,22 @@ delete '/courses/:course/students/:student_id' do
   {status: :deleted}
 end
 
+post '/courses/:course/students/:student_id/detach' do
+  protect!
+  Classroom::Collection::Students.for(course).detach!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
+  {status: :updated}
+end
+
+post '/courses/:course/students/:student_id/attach' do
+  protect!
+  Classroom::Collection::Students.for(course).attach!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
+  {status: :updated}
+end
+
 post '/courses/:course/students/:student_id/transfer' do
   protect!
   Classroom::Collection::Students
