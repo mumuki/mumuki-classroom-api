@@ -16,17 +16,17 @@ class Classroom::Collection::Students < Classroom::Collection::People
     end
   end
 
-  def disable!(social_id)
+  def detach!(social_id)
     mongo_collection.update_one(
       { :social_id => social_id },
-      { :$set => { disabled: true, disabled_at: Time.now }}
+      { :$set => { detached: true, detached_at: Time.now }}
     )
   end
 
   def enable!(social_id)
     mongo_collection.update_one(
       { :social_id => social_id },
-      { :$unset => { disabled: '', disabled_at: '' }}
+      { :$unset => { detached: '', detached_at: '' }}
     )
   end
 

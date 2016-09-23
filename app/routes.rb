@@ -172,7 +172,7 @@ end
 
 post '/courses/:course/students/:student_id/detach' do
   protect!
-  Classroom::Collection::Students.for(course).disable!(student_id)
+  Classroom::Collection::Students.for(course).detach!(student_id)
   Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
   Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
   {status: :updated}

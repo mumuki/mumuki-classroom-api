@@ -344,7 +344,7 @@ describe Classroom::Collection::Students do
       before { header 'Authorization', build_auth_header('example/*') }
       before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
 
-      it { expect(fetched_student.disabled).to eq true }
+      it { expect(fetched_student.detached).to eq true }
     end
 
   end
@@ -353,14 +353,14 @@ describe Classroom::Collection::Students do
 
     let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
 
-    before { Classroom::Collection::Students.for('example').insert! student1.merge(disabled: true, disabled_at: Time.now).wrap_json }
+    before { Classroom::Collection::Students.for('example').insert! student1.merge(detached: true, detached_at: Time.now).wrap_json }
 
     context 'should transfer student to destination and transfer all his data' do
       before { header 'Authorization', build_auth_header('example/*') }
       before { post '/courses/example/students/github%7C123456/attach', {}.to_json }
 
-      it { expect(fetched_student.disabled).to eq nil }
-      it { expect(fetched_student.disabled_at).to eq nil }
+      it { expect(fetched_student.detached).to eq nil }
+      it { expect(fetched_student.detached_at).to eq nil }
     end
 
   end
