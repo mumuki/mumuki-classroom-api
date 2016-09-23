@@ -178,6 +178,14 @@ post '/courses/:course/students/:student_id/disable' do
   {status: :updated}
 end
 
+post '/courses/:course/students/:student_id/enable' do
+  protect!
+  Classroom::Collection::Students.for(course).enable!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).enable_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).enable_student!(student_id)
+  {status: :updated}
+end
+
 post '/courses/:course/students/:student_id/transfer' do
   protect!
   Classroom::Collection::Students

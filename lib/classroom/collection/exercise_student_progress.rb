@@ -30,6 +30,13 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     )
   end
 
+  def enable_student!(social_id)
+    mongo_collection.update_many(
+      { :'student.social_id' => social_id },
+      { :$unset => { disabled: '' }}
+    )
+  end
+
   def comment!(data)
     json = data.deep_symbolize_keys
     eid = json[:exercise_id]

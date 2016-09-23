@@ -30,6 +30,13 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
     )
   end
 
+  def enable_student!(social_id)
+    mongo_collection.update_many(
+      { :'student.social_id' => social_id },
+      { :$unset => { disabled: '' }}
+    )
+  end
+
   def transfer(social_id, destination)
     where(:'student.social_id' => social_id).raw.each do |guide_progress_data|
       guide_progress = guide_progress_data.raw.deep_symbolize_keys

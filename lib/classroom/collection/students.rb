@@ -23,6 +23,13 @@ class Classroom::Collection::Students < Classroom::Collection::People
     )
   end
 
+  def enable!(social_id)
+    mongo_collection.update_one(
+      { :social_id => social_id },
+      { :$unset => { disabled: '', disabled_at: '' }}
+    )
+  end
+
   def transfer(social_id, org, destination)
     Classroom::Collection::Students.for(destination).insert! find_by(social_id: social_id)
     Classroom::Collection::CourseStudents.insert! student_to_transfer(social_id, org, destination)
