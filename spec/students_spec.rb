@@ -334,7 +334,7 @@ describe Classroom::Collection::Students do
 
   end
 
-  describe 'post /courses/:course/students/:student_id/disable' do
+  describe 'post /courses/:course/students/:student_id/detach' do
 
     let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
 
@@ -342,14 +342,14 @@ describe Classroom::Collection::Students do
 
     context 'should transfer student to destination and transfer all his data' do
       before { header 'Authorization', build_auth_header('example/*') }
-      before { post '/courses/example/students/github%7C123456/disable', {}.to_json }
+      before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
 
       it { expect(fetched_student.disabled).to eq true }
     end
 
   end
 
-  describe 'post /courses/:course/students/:student_id/enable' do
+  describe 'post /courses/:course/students/:student_id/attach' do
 
     let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
 
@@ -357,7 +357,7 @@ describe Classroom::Collection::Students do
 
     context 'should transfer student to destination and transfer all his data' do
       before { header 'Authorization', build_auth_header('example/*') }
-      before { post '/courses/example/students/github%7C123456/enable', {}.to_json }
+      before { post '/courses/example/students/github%7C123456/attach', {}.to_json }
 
       it { expect(fetched_student.disabled).to eq nil }
       it { expect(fetched_student.disabled_at).to eq nil }

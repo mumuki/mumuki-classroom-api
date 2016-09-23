@@ -23,14 +23,14 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
     mongo_collection.delete_many(:'student.social_id' => :social_id)
   end
 
-  def disable_student!(social_id)
+  def detach_student!(social_id)
     mongo_collection.update_many(
       { :'student.social_id' => social_id },
       { :$set => { disabled: true }}
     )
   end
 
-  def enable_student!(social_id)
+  def attach_student!(social_id)
     mongo_collection.update_many(
       { :'student.social_id' => social_id },
       { :$unset => { disabled: '' }}

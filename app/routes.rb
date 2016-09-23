@@ -170,19 +170,19 @@ delete '/courses/:course/students/:student_id' do
   {status: :deleted}
 end
 
-post '/courses/:course/students/:student_id/disable' do
+post '/courses/:course/students/:student_id/detach' do
   protect!
   Classroom::Collection::Students.for(course).disable!(student_id)
-  Classroom::Collection::ExerciseStudentProgress.for(course).disable_student!(student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).disable_student!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
   {status: :updated}
 end
 
-post '/courses/:course/students/:student_id/enable' do
+post '/courses/:course/students/:student_id/attach' do
   protect!
   Classroom::Collection::Students.for(course).enable!(student_id)
-  Classroom::Collection::ExerciseStudentProgress.for(course).enable_student!(student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).enable_student!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
   {status: :updated}
 end
 
