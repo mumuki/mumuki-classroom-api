@@ -333,4 +333,19 @@ describe Classroom::Collection::Students do
     end
 
   end
+
+  describe 'post /courses/:course/students/:student_id/disable' do
+
+    let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
+
+    before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
+
+    context 'should transfer student to destination and transfer all his data' do
+      before { header 'Authorization', build_auth_header('example/*') }
+      before { post '/courses/example/students/github%7C123456/disable', {}.to_json }
+
+      it { expect(fetched_student.disabled).to eq true }
+    end
+
+  end
 end
