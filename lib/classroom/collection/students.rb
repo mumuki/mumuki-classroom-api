@@ -23,7 +23,7 @@ class Classroom::Collection::Students < Classroom::Collection::People
     )
   end
 
-  def enable!(social_id)
+  def attach!(social_id)
     mongo_collection.update_one(
       { :social_id => social_id },
       { :$unset => { detached: '', detached_at: '' }}
