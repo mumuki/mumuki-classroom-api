@@ -1,9 +1,9 @@
 module Classroom
 end
 
+require 'mumukit/core'
 require 'mumukit/service'
 require 'mumukit/inspection'
-require 'active_support/all'
 require 'rest-client'
 
 require_relative './classroom/database'

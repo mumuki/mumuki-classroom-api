@@ -123,13 +123,13 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport (~> 4.2)
   bson_ext
   bunny
   codeclimate-test-reporter
   factory_girl
   mongo (~> 2.1)
   mumukit-auth!
+  mumukit-core (~> 0.2)
   mumukit-inspection (~> 0.1)
   mumukit-nuntius!
   mumukit-service!
