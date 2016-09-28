@@ -22,7 +22,7 @@ namespace :submission do
       rescue => e
         logger.error "Submission couldn't be processed #{e}. body was: #{body}"
       ensure
-        Classroom::Database.client.try(:close)
+        Classroom::Database.disconnect!
       end
     end
   end
@@ -44,7 +44,7 @@ namespace :resubmissions do
       rescue => e
         logger.error "Resubmission couldn't be processed #{e}. it was: #{body}"
       ensure
-        Classroom::Database.client.try(:close)
+        Classroom::Database.disconnect!
       end
     end
   end

@@ -15,6 +15,10 @@ module Classroom::Database
       @client = new_database_client(@organization)
     end
 
+    def disconnect!
+      client.try(:close)
+    end
+
     def within_each(&block)
       client.database_names.each { |organization| self.with organization, &block }
     end
@@ -33,7 +37,7 @@ module Classroom::Database
       connect! organization
       block.call
     ensure
-      @client.try(:close)
+      disconnect!
     end
   end
 
