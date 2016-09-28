@@ -81,7 +81,7 @@ before do
 end
 
 after do
-  Classroom::Database.client.close
+  Classroom::Database.disconnect!
 end
 
 require_relative './routes/courses'
