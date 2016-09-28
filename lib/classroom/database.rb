@@ -19,10 +19,6 @@ module Classroom::Database
       client.try(:close)
     end
 
-    def within_each(&block)
-      client.database_names.each { |organization| self.with organization, &block }
-    end
-
     def with(organization, &block)
       actual_client = @client
       actual_organization = @organization
