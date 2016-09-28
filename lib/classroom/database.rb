@@ -32,6 +32,7 @@ class Classroom::Database
     def do_with(organization, &block)
       self.organization = organization
       block.call
+    ensure
       @client.try(:close)
     end
   end
