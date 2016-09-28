@@ -5,7 +5,6 @@ require 'mumukit/nuntius'
 require 'mumukit/service/routes'
 require 'mumukit/service/routes/auth'
 
-require_relative './request'
 require_relative '../lib/classroom'
 
 configure do
