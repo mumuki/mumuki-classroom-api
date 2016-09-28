@@ -1,4 +1,4 @@
-class Classroom::Database
+module Classroom::Database
 
   class << self
 
