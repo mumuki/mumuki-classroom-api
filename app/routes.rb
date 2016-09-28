@@ -58,10 +58,6 @@ helpers do
     @repo_slug ||= Mumukit::Service::Slug.new(params[:organization], params[:repository]).to_s
   end
 
-  def set_mongo_connection
-    Classroom::Database.organization = tenant
-  end
-
   def tenantized_json_body
     json_body.merge(tenant: tenant)
   end
@@ -81,7 +77,7 @@ helpers do
 end
 
 before do
-  set_mongo_connection
+  Classroom::Database.organization = tenant
 end
 
 after do
