@@ -8,7 +8,7 @@ describe Classroom::FailedSubmission do
   end
 
   def organization(org)
-    Classroom::Database.organization = org
+    Classroom::Database.connect! org
     yield
   end
 

@@ -10,7 +10,7 @@ module Classroom::Database
       @client
     end
 
-    def organization=(organization)
+    def connect!(organization)
       @organization = organization.to_sym
       @client = new_database_client(@organization)
     end
@@ -30,7 +30,7 @@ module Classroom::Database
     private
 
     def do_with(organization, &block)
-      self.organization = organization
+      connect! organization
       block.call
     ensure
       @client.try(:close)

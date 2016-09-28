@@ -77,7 +77,7 @@ helpers do
 end
 
 before do
-  Classroom::Database.organization = tenant
+  Classroom::Database.connect! tenant
 end
 
 after do
