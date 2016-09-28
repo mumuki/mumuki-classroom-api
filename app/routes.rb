@@ -91,7 +91,7 @@ helpers do
 end
 
 before do
-  Classroom::Database.organization = tenant
+  Classroom::Database.connect! tenant
   set_locale! organization_json if organization_json
 end
 
