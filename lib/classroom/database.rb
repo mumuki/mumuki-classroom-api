@@ -45,12 +45,10 @@ class Classroom::Database
     end
 
     def with(organization, &block)
-      previous_database = @current_database
-      self.new(organization).with do |database|
-        @current_database = database
-        block.call
+      instance_variable_swap :@current_database do
+        @current_database = self.new(organization)
+        @current_database.with(&block)
       end
-      @current_database = previous_database
     end
   end
 end
