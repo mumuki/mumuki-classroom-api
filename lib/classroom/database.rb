@@ -1,22 +1,43 @@
-module Classroom::Database
+class Classroom::Database
+  extend Mumukit::Service::Database
+
+  attr_accessor :client, :organization
+
+  def initialize(organization)
+    @organization = organization.to_sym
+  end
+
+  def connect!
+    self.client = self.class.new_database_client(organization)
+  end
+
+  def disconnect!
+    client.try :close
+  end
+
+  def with(&block)
+    connect!
+    block.call(self)
+  ensure
+    disconnect!
+  end
 
   class << self
-
-    include Mumukit::Service::Database
-
-    attr_reader :organization
-
     def client
-      @client
+      @current_database.try :client
+    end
+
+    def organization
+      @current_database.try :organization
     end
 
     def connect!(organization)
-      @organization = organization.to_sym
-      @client = new_database_client(@organization)
+      @current_database = self.new(organization)
+      @current_database.connect!
     end
 
     def disconnect!
-      client.try(:close)
+      @current_database.disconnect!
     end
 
     def within_each(&block)
@@ -24,21 +45,12 @@ module Classroom::Database
     end
 
     def with(organization, &block)
-      actual_client = @client
-      actual_organization = @organization
-      do_with organization, &block
-      @organization = actual_organization
-      @client = actual_client
-    end
-
-    private
-
-    def do_with(organization, &block)
-      connect! organization
-      block.call
-    ensure
-      disconnect!
+      previous_database = @current_database
+      self.new(organization).with do |database|
+        @current_database = database
+        block.call
+      end
+      @current_database = previous_database
     end
   end
-
 end
