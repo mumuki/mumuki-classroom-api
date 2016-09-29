@@ -317,7 +317,7 @@ get '/courses/:course/exams/:exam_id' do
 end
 
 get '/organization' do
-  Classroom::Atheneum.organization_json.tap { |org| set_locale! org['organization'] }
+  Classroom::Collection::Organizations.find_by(name: tenant).as_json
 end
 
 get '/ping' do
