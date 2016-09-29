@@ -1,5 +1,3 @@
-require 'mumukit/nuntius'
-
 module Classroom::FailedSubmission
 
   def self.reprocess!(social_id, destination)
