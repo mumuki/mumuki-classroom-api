@@ -27,7 +27,7 @@ helpers do
   end
 
   def exercise_student_progress_query
-    { 'guide.slug' => repo_slug, 'student.social_id' => student_id }
+    {'guide.slug' => repo_slug, 'student.social_id' => student_id}
   end
 
   def by_permissions(key, &query)
@@ -118,7 +118,7 @@ error Mumukit::Auth::EmailNotRegistered do
 end
 
 get '/courses' do
-  by_permissions :courses do | grants |
+  by_permissions :courses do |grants|
     Classroom::Collection::Courses.allowed(grants).as_json
   end
 end
@@ -144,12 +144,12 @@ post '/courses/:course/students' do
   Classroom::Collection::CourseStudents.ensure_new! social_id, course_slug
   Classroom::Collection::Students.for(course).ensure_new! social_id, json_body['email']
 
-  json = { student: json_body.merge(social_id: social_id), course: { slug: course_slug } }
+  json = {student: json_body.merge(social_id: social_id), course: {slug: course_slug}}
   Classroom::Collection::CourseStudents.insert! json.wrap_json
   Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
 
   Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: social_id, tenant: tenant)
-  Mumukit::Auth::User.new(token.jwt['sub']).update_permissions('atheneum', "#{tenant}/*")
+  Mumukit::Auth::User.new(token.jwt['sub']).add_permission!('atheneum', "#{tenant}/*")
 
   {status: :created}
 end
@@ -205,7 +205,7 @@ put '/courses/:course/student' do
 
   ensure_course_existence!
   ensure_course_student_existence!(json_body['social_id'])
-  json = { first_name: json_body['first_name'], last_name: json_body['last_name'], social_id: json_body['social_id'], course_slug: course_slug}
+  json = {first_name: json_body['first_name'], last_name: json_body['last_name'], social_id: json_body['social_id'], course_slug: course_slug}
   Classroom::Collection::CourseStudents.update!(json)
   Classroom::Collection::Students.for(course).update!(json)
 
@@ -226,8 +226,8 @@ post '/courses/:course/teachers' do
     Classroom::Collection::Teachers.for(course).insert!(json_body.merge(image_url: user.user['picture'], social_id: user.social_id).wrap_json)
     Classroom::Collection::Students.for(course).delete!(user.social_id)
 
-    user.update_permissions('classroom', course_slug)
-    user.update_permissions('atheneum', "#{tenant}/*")
+    user.add_permission!('classroom', course_slug)
+    user.add_permission!('atheneum', "#{tenant}/*")
   end
 
   {status: :created}
@@ -264,7 +264,7 @@ post '/courses/:course/comments' do
   protect!
   Classroom::Comments.for(course, json_body)
   Mumukit::Nuntius::Publisher.publish_comments tenantized_json_body.except(:social_id)
-  { status: :created }
+  {status: :created}
 end
 
 post '/courses/:course/followers' do
@@ -275,8 +275,8 @@ post '/courses/:course/followers' do
 end
 
 get '/courses/:course/followers/:email' do
-  by_permissions :followers do | grants |
-    Classroom::Collection::Followers.for(course).where(email: params[:email], course: { '$regex' => grants }).as_json
+  by_permissions :followers do |grants|
+    Classroom::Collection::Followers.for(course).where(email: params[:email], course: {'$regex' => grants}).as_json
   end
 end
 

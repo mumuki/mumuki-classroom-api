@@ -145,7 +145,7 @@ describe Classroom::Collection::Students do
   describe 'post /courses/:course/students' do
     let(:auth0) {double('auth0')}
     before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
-    before { allow(auth0).to receive(:update_permissions) }
+    before { allow(auth0).to receive(:add_permission!) }
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
     let(:student_json) { student.to_json }
 
