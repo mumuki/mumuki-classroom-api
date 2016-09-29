@@ -85,6 +85,7 @@ after do
 end
 
 require_relative './routes/courses'
+require_relative './routes/comments'
 require_relative './routes/errors'
 require_relative './routes/exams'
 require_relative './routes/followers'
@@ -198,11 +199,4 @@ get '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id'
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
-end
-
-post '/courses/:course/comments' do
-  protect!
-  Classroom::Collection::ExerciseStudentProgress.for(course).comment!(json_body)
-  Mumukit::Nuntius::Publisher.publish_comments tenantized_json_body.except(:social_id)
-  { status: :created }
 end
