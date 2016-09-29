@@ -2,7 +2,7 @@ module Classroom::Collection::Organizations
 
   extend Mumukit::Service::Collection
 
-  def upsert!(organization)
+  def self.upsert!(organization)
     mongo_collection.update_one(
       { :name => organization['name'] },
       { :$set => organization },

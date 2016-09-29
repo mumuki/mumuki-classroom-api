@@ -79,10 +79,15 @@ helpers do
     I18n.locale = org['locale']
   end
 
+  def organization_json
+    @organization_json ||= Classroom::Collection::Organizations.find_by(name: tenant).as_json
+  end
+
 end
 
 before do
   set_mongo_connection
+  set_locale! organization_json if organization_json
 end
 
 after do
@@ -317,7 +322,7 @@ get '/courses/:course/exams/:exam_id' do
 end
 
 get '/organization' do
-  Classroom::Collection::Organizations.find_by(name: tenant).as_json
+  organization_json
 end
 
 get '/ping' do
