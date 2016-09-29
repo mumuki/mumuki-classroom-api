@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'sinatra/cross_origin'
 require 'mumukit/auth'
-require 'mumukit/nuntius'
 require 'mumukit/service/routes'
 require 'mumukit/service/routes/auth'
 

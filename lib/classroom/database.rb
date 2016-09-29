@@ -17,7 +17,7 @@ class Classroom::Database
 
   def with(&block)
     connect!
-    block.call(self)
+    block.call
   ensure
     disconnect!
   end
