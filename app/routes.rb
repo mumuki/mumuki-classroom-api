@@ -189,11 +189,13 @@ end
 
 post '/courses/:course/students/:student_id/attach' do
   protect!
-  Classroom::Collection::Students.for(course).attach!(student_id)
-  Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
-  user.add_permission!('atheneum', "#{tenant}/*")
-  Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', { social_id: student_id })
+  Mumukit::Auth::User.new(student_id).try do |user|
+    Classroom::Collection::Students.for(course).attach!(student_id)
+    Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
+    Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
+    user.add_permission!('atheneum', "#{tenant}/*")
+    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', { social_id: student_id })
+  end
   {status: :updated}
 end
 
