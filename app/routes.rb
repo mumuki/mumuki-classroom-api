@@ -83,6 +83,11 @@ helpers do
     @organization_json ||= Classroom::Collection::Organizations.find_by(name: tenant).as_json
   end
 
+  def update_user_metadata(user, method)
+    user.send("#{method}_permission!", 'atheneum', "#{tenant}/*")
+    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', {social_id: student_id})
+  end
+  
 end
 
 before do
@@ -181,8 +186,7 @@ post '/courses/:course/students/:student_id/detach' do
     Classroom::Collection::Students.for(course).detach!(student_id)
     Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
     Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
-    user.remove_permission!('atheneum', "#{tenant}/*")
-    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', { social_id: student_id })
+    update_user_metadata(user, 'remove')
   end
   {status: :updated}
 end
@@ -193,8 +197,7 @@ post '/courses/:course/students/:student_id/attach' do
     Classroom::Collection::Students.for(course).attach!(student_id)
     Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
     Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
-    user.add_permission!('atheneum', "#{tenant}/*")
-    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', { social_id: student_id })
+    update_user_metadata(user, 'add')
   end
   {status: :updated}
 end
