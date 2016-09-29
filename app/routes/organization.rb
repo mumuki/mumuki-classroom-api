@@ -1,3 +1,3 @@
 get '/organization' do
-  Classroom::Atheneum.organization_json.tap { |org| set_locale! org['organization'] }
+  Mumukit::Bridge::Atheneum.organization_json.tap { |org| set_locale! org['organization'] }
 end

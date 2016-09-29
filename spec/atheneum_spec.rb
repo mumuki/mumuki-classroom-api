@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::Atheneum do
+describe Mumukit::Bridge::Atheneum do
 
   after do
     Classroom::Database.clean!
