@@ -6,6 +6,7 @@ require 'mumukit/service'
 require 'mumukit/inspection'
 require 'rest-client'
 
+require_relative './class'
 require_relative './classroom/database'
 require_relative './classroom/json_wrapper'
 require_relative './classroom/atheneum'
