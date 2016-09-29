@@ -23,21 +23,11 @@ class Classroom::Database
   end
 
   class << self
-    def client
-      @current_database.try :client
-    end
-
-    def organization
-      @current_database.try :organization
-    end
+    delegate :client, :organization, :disconnect!, to: :@current_database
 
     def connect!(organization)
       @current_database = self.new(organization)
       @current_database.connect!
-    end
-
-    def disconnect!
-      @current_database.disconnect!
     end
 
     def with(organization, &block)
