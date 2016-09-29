@@ -17,5 +17,4 @@ require_relative './classroom/documents'
 
 require_relative './classroom/submission'
 require_relative './classroom/failed_submission'
-require_relative './classroom/comments'
 
