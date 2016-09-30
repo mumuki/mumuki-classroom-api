@@ -83,12 +83,12 @@ helpers do
     @organization_json ||= Classroom::Collection::Organizations.find_by(name: tenant).as_json
   end
 
-  def update_user_metadata(user, method)
+  def update_and_notify_user_metadata(user, method)
     user.send("#{method}_permission!", 'atheneum', "#{tenant}/*")
     Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', {social_id: student_id})
   end
 
-  def upsert_exam(exam_id)
+  def notify_upsert_exam(exam_id)
     Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpsertExam', tenantized_json_body.merge(exam_id))
   end
 
@@ -190,7 +190,7 @@ post '/courses/:course/students/:student_id/detach' do
     Classroom::Collection::Students.for(course).detach!(student_id)
     Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
     Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
-    update_user_metadata(user, 'remove')
+    update_and_notify_user_metadata(user, 'remove')
   end
   {status: :updated}
 end
@@ -201,7 +201,7 @@ post '/courses/:course/students/:student_id/attach' do
     Classroom::Collection::Students.for(course).attach!(student_id)
     Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
     Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
-    update_user_metadata(user, 'add')
+    update_and_notify_user_metadata(user, 'add')
   end
   {status: :updated}
 end
@@ -314,14 +314,14 @@ end
 post '/courses/:course/exams' do
   protect!
   exam_id = Classroom::Collection::Exams.for(course).insert! json_body.wrap_json
-  upsert_exam(exam_id)
+  notify_upsert_exam(exam_id)
   {status: :created}.merge(exam_id)
 end
 
 put '/courses/:course/exams/:exam' do
   protect!
   exam_id = Classroom::Collection::Exams.for(course).update! params[:exam], json_body
-  upsert_exam(exam_id)
+  notify_upsert_exam(exam_id)
   {status: :updated}.merge(exam_id)
 end
 
