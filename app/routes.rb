@@ -87,7 +87,11 @@ helpers do
     user.send("#{method}_permission!", 'atheneum', "#{tenant}/*")
     Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', {social_id: student_id})
   end
-  
+
+  def upsert_exam(exam_id)
+    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpsertExam', tenantized_json_body.merge(exam_id))
+  end
+
 end
 
 before do
@@ -310,14 +314,14 @@ end
 post '/courses/:course/exams' do
   protect!
   exam_id = Classroom::Collection::Exams.for(course).insert! json_body.wrap_json
-  Mumukit::Nuntius::Publisher.publish_exams(tenantized_json_body.merge exam_id)
+  upsert_exam(exam_id)
   {status: :created}.merge(exam_id)
 end
 
 put '/courses/:course/exams/:exam' do
   protect!
   exam_id = Classroom::Collection::Exams.for(course).update! params[:exam], json_body
-  Mumukit::Nuntius::Publisher.publish_exams(tenantized_json_body.merge exam_id)
+  upsert_exam(exam_id)
   {status: :updated}.merge(exam_id)
 end
 
