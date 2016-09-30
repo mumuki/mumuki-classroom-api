@@ -1,5 +1,5 @@
 module Classroom::Submission
-
+  #FIXME this code should be added to a submission document
   def self.process!(data)
     json = data.deep_symbolize_keys
 

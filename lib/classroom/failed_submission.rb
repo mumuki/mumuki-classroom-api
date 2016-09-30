@@ -1,5 +1,5 @@
 module Classroom::FailedSubmission
-
+#FIXME this code should be added to a failed submission document
   def self.reprocess!(social_id, destination)
     reprocess_from_organization social_id, destination, destination
     reprocess_from_organization social_id, :central, destination
