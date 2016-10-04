@@ -6,7 +6,7 @@ script:
 - bundle exec rspec
 services:
 - mongodb
-env: RACK_ENV=test
+env: RACK_ENV=development
 before_install:
 - openssl aes-256-cbc -K $encrypted_09633be6cc24_key -iv $encrypted_09633be6cc24_iv
   -in escualo_rsa.enc -out escualo_rsa -d
