@@ -145,7 +145,7 @@ describe Classroom::Collection::Students do
   describe 'post /courses/:course/students' do
     let(:auth0) {double('auth0')}
     before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
-    before { allow(auth0).to receive(:add_permission!) }
+    before { allow(auth0).to receive(:update_permissions) }
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
     let(:student_json) { student.to_json }
 
@@ -334,43 +334,34 @@ describe Classroom::Collection::Students do
 
   end
 
-  describe 'when needs mumuki-user' do
-    let(:auth0) {double('auth0')}
+  describe 'post /courses/:course/students/:student_id/detach' do
 
-    before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
-    before { expect(Mumukit::Nuntius::CommandPublisher).to receive(:publish).with('atheneum', 'UpdateUserMetadata', instance_of(Hash)) }
+    let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
 
-    describe 'post /courses/:course/students/:student_id/detach' do
+    before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
 
-      let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
+    context 'should transfer student to destination and transfer all his data' do
+      before { header 'Authorization', build_auth_header('example/*') }
+      before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
 
-      before { allow(auth0).to receive(:remove_permission!) }
-      before { Classroom::Collection::Students.for('example').insert! student1.wrap_json }
-
-      context 'should transfer student to destination and transfer all his data' do
-        before { header 'Authorization', build_auth_header('example/*') }
-        before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
-
-        it { expect(fetched_student.detached).to eq true }
-      end
-
+      it { expect(fetched_student.detached).to eq true }
     end
 
-    describe 'post /courses/:course/students/:student_id/attach' do
+  end
 
-      let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
+  describe 'post /courses/:course/students/:student_id/attach' do
 
-      before { allow(auth0).to receive(:add_permission!) }
-      before { Classroom::Collection::Students.for('example').insert! student1.merge(detached: true, detached_at: Time.now).wrap_json }
+    let(:fetched_student) {Classroom::Collection::Students.for('example').find_by(social_id: 'github|123456')}
 
-      context 'should transfer student to destination and transfer all his data' do
-        before { header 'Authorization', build_auth_header('example/*') }
-        before { post '/courses/example/students/github%7C123456/attach', {}.to_json }
+    before { Classroom::Collection::Students.for('example').insert! student1.merge(detached: true, detached_at: Time.now).wrap_json }
 
-        it { expect(fetched_student.detached).to eq nil }
-        it { expect(fetched_student.detached_at).to eq nil }
-      end
+    context 'should transfer student to destination and transfer all his data' do
+      before { header 'Authorization', build_auth_header('example/*') }
+      before { post '/courses/example/students/github%7C123456/attach', {}.to_json }
 
+      it { expect(fetched_student.detached).to eq nil }
+      it { expect(fetched_student.detached_at).to eq nil }
     end
+
   end
 end
