@@ -12,12 +12,12 @@ gem 'bunny'
 
 gem 'rest-client', '~> 2.0'
 
-gem 'mumukit-auth', github: 'mumuki/mumukit-auth', tag: 'v0.2.0'
-gem 'mumukit-nuntius', github: 'mumuki/mumukit-nuntius', tag: 'v0.2.2'
+gem 'mumukit-core', '~> 0.2'
+gem 'mumukit-auth', '~> 1.0'
+gem 'mumukit-nuntius', '~> 0.3'
 gem 'mumukit-service', github: 'mumuki/mumukit-service', tag: 'v0.2.2'
 
 gem 'mumukit-inspection', '~> 0.1'
-gem 'mumukit-core', '~> 0.2'
 
 group :test do
   gem 'rspec', '~> 2.99'

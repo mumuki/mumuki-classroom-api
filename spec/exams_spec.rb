@@ -25,7 +25,7 @@ describe Classroom::Collection::Exams do
     let(:result_json) { { slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', social_ids: [] }.stringify_keys }
     let(:exam_fetched) { Classroom::Collection::Exams.for('foo').where({}).as_json[:exams].first }
 
-    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).with(exam_json.merge(tenant: 'example', id: kind_of(String))) }
+    before { expect(Mumukit::Nuntius::CommandPublisher).to receive(:publish).with('atheneum', 'UpsertExam', exam_json.merge(tenant: 'example', id: kind_of(String))) }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/exams', exam_json.to_json }
 
@@ -57,7 +57,7 @@ describe Classroom::Collection::Exams do
     let(:exam_fetched) { Classroom::Collection::Exams.for('foo').where({}).as_json[:exams].first }
 
     context 'when existing exam' do
-      before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_exams).exactly(1).times }
+      before { expect(Mumukit::Nuntius::CommandPublisher).to receive(:publish).exactly(1).times }
       before { header 'Authorization', build_auth_header('*') }
       before { put "/courses/foo/exams/#{id[:id]}", exam_json2.to_json }
 
