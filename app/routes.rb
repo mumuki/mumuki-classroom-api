@@ -10,6 +10,7 @@ require_relative '../lib/classroom'
 
 configure do
   set :app_name, 'classroom'
+  set :root, File.join(__dir__, '..')
 end
 
 helpers do
