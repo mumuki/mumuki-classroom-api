@@ -1,4 +1,4 @@
-namespace :submission do
+namespace :submissions do
   task :listen do
     Mumukit::Nuntius::Logger.info 'Listening to submissions'
 
