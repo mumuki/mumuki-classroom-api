@@ -1,6 +1,3 @@
-require 'mumukit/auth'
+Dir.glob('lib/tasks/*.rake').each { |r| import r }
 
 require_relative './lib/classroom'
-require_relative './lib/tasks/submissions'
-require_relative './lib/tasks/resubmissions'
-require_relative './lib/tasks/commands'
