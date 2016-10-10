@@ -2,6 +2,10 @@ require 'spec_helper'
 
 describe Classroom::Collection::ExerciseStudentProgress do
 
+  before do
+    Classroom::Collection::Organizations.insert!({locale: 'es', name: 'example'}.wrap_json)
+  end
+
   after do
     Classroom::Database.clean!
   end

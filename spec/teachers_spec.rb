@@ -27,7 +27,7 @@ describe Classroom::Collection::Teachers do
     let(:auth0) {double('auth0')}
     before { allow(Mumukit::Auth::User).to receive(:from_email).and_return(auth0) }
     before { allow(auth0).to receive(:social_id).and_return('auth|0') }
-    before { allow(auth0).to receive(:update_permissions) }
+    before { allow(auth0).to receive(:add_permission!) }
     before { allow(auth0).to receive(:user).and_return(extra_data) }
     let(:extra_data) { { social_id: 'auth|0', picture: 'url' }.stringify_keys }
     let(:teacher) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com'} }
