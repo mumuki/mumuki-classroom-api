@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::Comments do
+describe 'comments' do
 
   after do
     Classroom::Database.clean!

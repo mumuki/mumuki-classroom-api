@@ -1,40 +1,45 @@
 class Classroom::Database
+  extend Mumukit::Service::Database
+
+  attr_accessor :client, :organization
+
+  def initialize(organization)
+    @organization = organization.to_sym
+  end
+
+  def connect!
+    self.client = self.class.new_database_client(organization)
+  end
+
+  def disconnect!
+    client.try :close
+  end
+
+  def with(&block)
+    connect!
+    block.call
+  ensure
+    disconnect!
+  end
 
   class << self
+    delegate :client, :organization, :disconnect!, to: :@current_database
 
-    include Mumukit::Service::Database
-
-    attr_reader :organization
-
-    def client
-      @client
+    def connect!(organization)
+      @current_database = self.new(organization)
+      @current_database.connect!
     end
 
-    def organization=(organization)
-      @organization = organization.to_sym
-      @client = new_database_client(@organization)
-    end
-
+    # This method is here in order to easily do migrations
     def within_each(&block)
-      client.database_names.each { |organization| self.with organization, &block }
+      client.database_names.each { |organization| with organization, &block }
     end
 
     def with(organization, &block)
-      actual_client = @client
-      actual_organization = @organization
-      do_with organization, &block
-      @organization = actual_organization
-      @client = actual_client
-    end
-
-    private
-
-    def do_with(organization, &block)
-      self.organization = organization
-      block.call
-    ensure
-      @client.try(:close)
+      instance_variable_swap :@current_database do
+        @current_database = self.new(organization)
+        @current_database.with(&block)
+      end
     end
   end
-
 end
