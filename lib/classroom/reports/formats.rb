@@ -13,6 +13,8 @@ class Classroom::Reports::Formats
 
   module Table
     def self.format_report(stats)
+      return '<no data>' if stats.empty?
+
       header = stats.first.keys.join(' | ')
       body = stats.map { |it| it.values.join(' | ') }.join("\n")
 <<EOF

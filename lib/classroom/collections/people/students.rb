@@ -64,8 +64,8 @@ class Classroom::Collection::Students < Classroom::Collection::People
     json_course_student.wrap_json
   end
 
-  def report(course, &block)
-    self.for(course).all.raw.select(&block).as_json(only: [:first_name, :last_name, :email, :created_at])
+  def report(&block)
+    all.raw.select(&block).as_json(only: [:first_name, :last_name, :email, :created_at])
   end
 
 end
