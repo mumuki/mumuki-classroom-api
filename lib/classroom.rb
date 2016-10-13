@@ -14,6 +14,7 @@ require_relative './classroom/json_wrapper'
 
 require_relative './classroom/collections'
 require_relative './classroom/documents'
+require_relative './classroom/reports'
 
 require_relative './classroom/submission'
 require_relative './classroom/failed_submission'
