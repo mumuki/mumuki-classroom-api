@@ -32,6 +32,7 @@ class Classroom::Database
 
     # This method is here in order to easily do migrations
     def within_each(&block)
+      connect! :test
       client.database_names.each { |organization| with organization, &block }
     end
 
