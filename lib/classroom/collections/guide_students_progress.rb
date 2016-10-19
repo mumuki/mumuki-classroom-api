@@ -8,7 +8,7 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
     guide_student_progress = first_by({'student.social_id' => social_id }, { 'last_assignment.submission.created_at' => -1 })
     guide_student_progress.try do |it|
       {
-        guide: { slug: it.guide['slug'] },
+        guide: it.guide,
         exercise: it.last_assignment['exercise'],
         submission: {
           id: it.last_assignment['submission']['id'],
