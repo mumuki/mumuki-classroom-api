@@ -43,3 +43,4 @@ bundle exec rake students:reports:active[<organization>,<course>,<from>,<to>,<js
 ```bash
 # migration_name is the name of the migration file in ./migrations/, without extension and the "migrate_" prefeix
 bundle exec rake db:migrate[<migration_name>]
+```
