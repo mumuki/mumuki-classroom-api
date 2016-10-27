@@ -9,7 +9,7 @@ class Classroom::Collection::People < Classroom::Collection::CourseCollection
   end
 
   def date_wrap(it)
-    it.raw[:created_at] = it.raw.delete(:_id).generation_time
+    it.raw.delete(:_id)
     it
   end
 
