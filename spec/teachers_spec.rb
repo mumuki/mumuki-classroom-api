@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'time'
 
 describe Classroom::Collection::Teachers do
 
@@ -6,10 +7,12 @@ describe Classroom::Collection::Teachers do
     Classroom::Database.clean!
   end
 
+  let(:created_at) { Time.new(2015, 12, 8).utc }
+  let(:created_at_iso) { created_at.iso8601(3) }
+  before { allow(Time).to receive(:now).and_return(created_at) }
+
   describe 'get /courses/:course/teachers' do
 
-    let(:created_at) { 'created_at' }
-    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
     let(:teacher) {{ email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar', social_id: 'auth0|1' }}
     before { header 'Authorization', build_auth_header('*') }
 
@@ -18,7 +21,7 @@ describe Classroom::Collection::Teachers do
       before { get '/courses/foo/teachers' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq teachers: [teacher.merge(created_at: 'created_at')] }
+      it { expect(last_response.body).to json_eq teachers: [teacher.merge(created_at: created_at)] }
     end
 
   end
@@ -49,13 +52,11 @@ describe Classroom::Collection::Teachers do
 
         context 'and user does not exist' do
           let(:created_teacher) { Classroom::Collection::Teachers.for('foo').find_by({}).as_json }
-          let(:created_at) { 'created_at' }
-          before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
 
           it { expect(last_response).to be_ok }
           it { expect(last_response.body).to json_eq status: 'created' }
           it { expect(Classroom::Collection::Teachers.for('foo').count).to eq 1 }
-          it { expect(created_teacher.deep_symbolize_keys).to eq(teacher.merge(created_at: created_at, image_url: 'url', social_id: 'auth|0')) }
+          it { expect(created_teacher.deep_symbolize_keys).to eq(teacher.merge(created_at: created_at_iso, image_url: 'url', social_id: 'auth|0')) }
         end
         context 'and teacher already exists by social_id' do
           before { post '/courses/foo/teachers', teacher_json }

@@ -4,11 +4,17 @@ class Classroom::Collection::People < Classroom::Collection::CourseCollection
     first_by(args, { _id: -1 })
   end
 
-  def wrap(it)
-    date_wrap super(it)
+  def insert!(json)
+    data = json.raw.deep_symbolize_keys
+    data[:created_at] ||= Time.now
+    super(data.wrap_json)
   end
 
-  def date_wrap(it)
+  def wrap(it)
+    without_id super(it)
+  end
+
+  def without_id(it)
     it.raw.delete(:_id)
     it
   end
