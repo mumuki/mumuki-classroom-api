@@ -1,6 +1,6 @@
 namespace :resubmissions do
   task :listen do
-    logger.info 'Listening to resubmissions'
+    Mumukit::Nuntius::Logger.info 'Listening to resubmissions'
 
     Mumukit::Nuntius::Consumer.negligent_start! 'resubmissions' do |body|
       begin
