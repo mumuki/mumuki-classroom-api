@@ -184,7 +184,7 @@ describe Classroom::Collection::Students do
           before { allow(Time).to receive(:now).and_return(created_at) }
           before { post '/courses/foo/students', student_json }
           context 'and user does not exist' do
-            let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json.tap { |it| puts "JSON: #{it}" } }
+            let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
 
             it { expect(last_response).to be_ok }
             it { expect(last_response.body).to json_eq status: 'created' }
