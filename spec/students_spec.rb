@@ -289,7 +289,7 @@ describe Classroom::Collection::Students do
     it { expect(last_response.body).to eq({:status => :created}.to_json) }
   end
 
-  describe 'delete /courses/:course/students/:student_id' do
+  describe 'post /courses/:course/delete/students' do
 
     before { Classroom::Collection::Guides.for('example').insert! guide1.wrap_json }
     before { Classroom::Collection::Guides.for('example').insert! guide2.wrap_json }
@@ -307,14 +307,14 @@ describe Classroom::Collection::Students do
 
     context 'failed submission should have removed student submissions' do
       before { header 'Authorization', build_auth_header('*') }
-      before { delete '/courses/example/students/github%7C123456' }
+      before { post '/courses/example/delete/students', {social_ids: ['github|123456'] }.to_json }
 
       it { expect(Classroom::Collection::FailedSubmissions.count).to eq 7 }
     end
 
     context 'should remove student and his existence from the course' do
       before { header 'Authorization', build_auth_header('*') }
-      before { delete '/courses/example/students/github%7C123456' }
+      before { post '/courses/example/delete/students', {social_ids: ['github|123456'] }.to_json }
 
       it { expect(Classroom::Collection::Guides.for('example').count).to eq 0 }
       it { expect(example_students.count).to eq 0 }
@@ -339,7 +339,7 @@ describe Classroom::Collection::Students do
 
     context 'should transfer student to destination and transfer all his data' do
       before { header 'Authorization', build_auth_header('example/*') }
-      before { post '/courses/example/students/github%7C123456/transfer', {destination: 'foo'}.to_json }
+      before { post '/courses/example/transfer/students', {destination: 'foo', social_ids: ['github|123456']}.to_json }
 
       it { expect(Classroom::Collection::Guides.for('foo').count).to eq 2 }
       it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
@@ -365,7 +365,7 @@ describe Classroom::Collection::Students do
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example/*') }
-        before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
+        before { post '/courses/example/detach/students', {social_ids: ['github|123456']}.to_json }
 
         it { expect(fetched_student.detached).to eq true }
       end
@@ -381,7 +381,7 @@ describe Classroom::Collection::Students do
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example/*') }
-        before { post '/courses/example/students/github%7C123456/attach', {}.to_json }
+        before { post '/courses/example/attach/students', {social_ids: ['github|123456']}.to_json }
 
         it { expect(fetched_student.detached).to eq nil }
         it { expect(fetched_student.detached_at).to eq nil }
