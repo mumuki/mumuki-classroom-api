@@ -24,7 +24,7 @@ namespace :students do
 
       Classroom::Database.with args[:organization] do
         stats = Classroom::Collection::Students.for(args[:course]).report do |user|
-          user.created_at >= from && user.detached_at < to
+          (user.detached_at.blank? || user.detached_at >= from) && user.created_at < to
         end
         puts Classroom::Reports::Formats.format_report(format, stats)
       end
