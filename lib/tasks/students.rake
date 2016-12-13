@@ -19,7 +19,7 @@ namespace :students do
       args.with_defaults(format: 'table')
 
       from = Date.parse(args[:from])
-      to = args[:from].try { |it| Date.parse(it) } || 1.day.since
+      to = args[:to].try { |it| Date.parse(it) } || 1.day.since
       format = args[:format]
 
       Classroom::Database.with args[:organization] do
