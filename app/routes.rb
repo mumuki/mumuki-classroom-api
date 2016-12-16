@@ -80,11 +80,11 @@ helpers do
 
   def update_and_notify_user_metadata(user, method)
     user.send("#{method}_permission!", 'atheneum', "#{tenant}/*")
-    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', {social_id: student_id})
+    Mumukit::Nuntius::EventPublisher.publish('UpdateUserMetadata', {social_id: student_id})
   end
 
   def notify_upsert_exam(exam_id)
-    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpsertExam', tenantized_json_body.merge(exam_id))
+    Mumukit::Nuntius::EventPublisher.publish('UpsertExam', tenantized_json_body.merge(exam_id))
   end
 
 end

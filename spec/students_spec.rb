@@ -354,7 +354,7 @@ describe Classroom::Collection::Students do
     let(:auth0) { double('auth0') }
 
     before { allow(Mumukit::Auth::User).to receive(:new).and_return(auth0) }
-    before { expect(Mumukit::Nuntius::CommandPublisher).to receive(:publish).with('atheneum', 'UpdateUserMetadata', instance_of(Hash)) }
+    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpdateUserMetadata', instance_of(Hash)) }
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
