@@ -18,5 +18,5 @@ require_relative './classroom/reports'
 
 require_relative './classroom/submission'
 require_relative './classroom/failed_submission'
-require_relative './classroom/command'
+require_relative './classroom/event'
 
