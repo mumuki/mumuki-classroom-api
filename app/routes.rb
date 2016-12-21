@@ -78,9 +78,14 @@ helpers do
     @organization_json ||= Classroom::Collection::Organizations.find_by(name: tenant).as_json
   end
 
-  def update_and_notify_user_metadata(user, method)
-    user.send("#{method}_permission!", 'atheneum', "#{tenant}/*")
-    Mumukit::Nuntius::EventPublisher.publish('UpdateUserMetadata', {social_id: student_id})
+  def update_and_notify_user_metadata(uid, method)
+    permissions = Mumukit::Auth::Store.get uid
+    permissions.send("#{method}_permission!", "#{tenant}/*")
+    Classroom::Collection::Students.for(course).find_by({social_id: uid}).try do |user|
+      user_as_json = user.as_json.with_indifferent_access.slice(:first_name, :last_name, :email)
+      user_to_notify = user_as_json.merge(uid: uid, permissions: permissions)
+      Mumukit::Nuntius::EventPublisher.publish('UserChanged', user_to_notify)
+    end
   end
 
   def notify_upsert_exam(exam_id)
@@ -112,66 +117,27 @@ get '/courses/:course/students' do
   Classroom::Collection::Students.for(course).all.as_json
 end
 
-post '/courses/:course/students' do
-  social_id = token.jwt['sub']
-
-  ensure_course_existence!
-  Classroom::Collection::CourseStudents.ensure_new! social_id, course_slug
-  Classroom::Collection::Students.for(course).ensure_new! social_id, json_body['email']
-
-  json = {student: json_body.merge(social_id: social_id), course: {slug: course_slug}}
-  Classroom::Collection::CourseStudents.insert! json.wrap_json
-  Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
-
-  Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: social_id, tenant: tenant)
-  Mumukit::Auth::User.new(token.jwt['sub']).add_permission!('atheneum', "#{tenant}/*")
-
-  {status: :created}
-end
-
 post '/courses/:course/students/:student_id' do
   protect! :teacher
   Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: student_id, tenant: tenant)
   {status: :created}
 end
 
-delete '/courses/:course/students/:student_id' do
-  protect! :teacher
-  Classroom::Collection::ExerciseStudentProgress.for(course).delete_student!(student_id)
-  Classroom::Collection::Students.for(course).delete!(student_id)
-  Classroom::Collection::CourseStudents.delete_student!(course_slug, student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).delete_student!(student_id)
-  Classroom::Collection::Followers.for(course).delete_follower!(course_slug, student_id)
-  {status: :deleted}
-end
-
 post '/courses/:course/students/:student_id/detach' do
   protect! :teacher
-  Mumukit::Auth::User.new(student_id).try do |user|
-    Classroom::Collection::Students.for(course).detach!(student_id)
-    Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
-    Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
-    update_and_notify_user_metadata(user, 'remove')
-  end
+  Classroom::Collection::Students.for(course).detach!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
+  update_and_notify_user_metadata(student_id, 'remove')
   {status: :updated}
 end
 
 post '/courses/:course/students/:student_id/attach' do
   protect! :teacher
-  Mumukit::Auth::User.new(student_id).try do |user|
-    Classroom::Collection::Students.for(course).attach!(student_id)
-    Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
-    Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
-    update_and_notify_user_metadata(user, 'add')
-  end
-  {status: :updated}
-end
-
-post '/courses/:course/students/:student_id/transfer' do
-  protect! :teacher
-  Classroom::Collection::Students
-    .for(course)
-    .transfer(student_id, tenant, json_body['destination'])
+  Classroom::Collection::Students.for(course).attach!(student_id)
+  Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
+  Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
+  update_and_notify_user_metadata(student_id, 'add')
   {status: :updated}
 end
 
@@ -179,18 +145,6 @@ get '/courses/:course/student/:social_id' do
   protect! :teacher
 
   Classroom::Collection::Students.for(course).find_by(social_id: params[:social_id]).as_json
-end
-
-put '/courses/:course/student' do
-  protect! :teacher
-
-  ensure_course_existence!
-  ensure_course_student_existence!(json_body['social_id'])
-  json = {first_name: json_body['first_name'], last_name: json_body['last_name'], social_id: json_body['social_id'], course_slug: course_slug}
-  Classroom::Collection::CourseStudents.update!(json)
-  Classroom::Collection::Students.for(course).update!(json)
-
-  {status: :updated}
 end
 
 get '/courses/:course/guides' do
