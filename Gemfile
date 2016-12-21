@@ -13,9 +13,9 @@ gem 'bunny'
 gem 'rest-client', '~> 2.0'
 
 gem 'mumukit-core', '~> 0.4'
-gem 'mumukit-auth', '~> 2.2'
+gem 'mumukit-auth', '~> 3.1'
 gem 'mumukit-nuntius', '~> 1.0'
-gem 'mumukit-service', '~> 0.7'
+gem 'mumukit-service', '~> 1.0'
 
 gem 'mumukit-inspection', '~> 0.1'
 
