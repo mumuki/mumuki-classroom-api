@@ -1,5 +1,5 @@
 post '/courses/:course/followers' do
-  protect!
+  protect! :teacher
   json_body['course'] = course_slug
   Classroom::Collection::Followers.for(course).add_follower json_body
   {status: :created}
@@ -12,7 +12,7 @@ get '/courses/:course/followers/:email' do
 end
 
 delete '/courses/:course/followers/:email/:social_id' do
-  protect!
+  protect! :teacher
   Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
   {status: :created}
 end

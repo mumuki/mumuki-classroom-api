@@ -53,6 +53,7 @@ end
 Classroom::Database.connect! 'example'
 
 def build_auth_header(permissions_string, sub='github|user123456')
+  Mumukit::Auth::Store.set!(sub, { teacher: permissions_string })
   metadata = {classroom: {permissions: permissions_string}}
 
   encoded_token = JWT.encode(

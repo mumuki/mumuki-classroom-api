@@ -108,7 +108,7 @@ require_relative './routes/ping'
 require_relative './routes/teachers'
 
 get '/courses/:course/students' do
-  protect!
+  protect! :teacher
   Classroom::Collection::Students.for(course).all.as_json
 end
 
@@ -130,13 +130,13 @@ post '/courses/:course/students' do
 end
 
 post '/courses/:course/students/:student_id' do
-  protect!
+  protect! :teacher
   Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: student_id, tenant: tenant)
   {status: :created}
 end
 
 delete '/courses/:course/students/:student_id' do
-  protect!
+  protect! :teacher
   Classroom::Collection::ExerciseStudentProgress.for(course).delete_student!(student_id)
   Classroom::Collection::Students.for(course).delete!(student_id)
   Classroom::Collection::CourseStudents.delete_student!(course_slug, student_id)
@@ -146,7 +146,7 @@ delete '/courses/:course/students/:student_id' do
 end
 
 post '/courses/:course/students/:student_id/detach' do
-  protect!
+  protect! :teacher
   Mumukit::Auth::User.new(student_id).try do |user|
     Classroom::Collection::Students.for(course).detach!(student_id)
     Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
@@ -157,7 +157,7 @@ post '/courses/:course/students/:student_id/detach' do
 end
 
 post '/courses/:course/students/:student_id/attach' do
-  protect!
+  protect! :teacher
   Mumukit::Auth::User.new(student_id).try do |user|
     Classroom::Collection::Students.for(course).attach!(student_id)
     Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
@@ -168,7 +168,7 @@ post '/courses/:course/students/:student_id/attach' do
 end
 
 post '/courses/:course/students/:student_id/transfer' do
-  protect!
+  protect! :teacher
   Classroom::Collection::Students
     .for(course)
     .transfer(student_id, tenant, json_body['destination'])
@@ -176,13 +176,13 @@ post '/courses/:course/students/:student_id/transfer' do
 end
 
 get '/courses/:course/student/:social_id' do
-  protect!
+  protect! :teacher
 
   Classroom::Collection::Students.for(course).find_by(social_id: params[:social_id]).as_json
 end
 
 put '/courses/:course/student' do
-  protect!
+  protect! :teacher
 
   ensure_course_existence!
   ensure_course_student_existence!(json_body['social_id'])
@@ -194,12 +194,12 @@ put '/courses/:course/student' do
 end
 
 get '/courses/:course/guides' do
-  protect!
+  protect! :teacher
   Classroom::Collection::Guides.for(course).all.as_json
 end
 
 get '/courses/:course/guides/:organization/:repository' do
-  protect!
+  protect! :teacher
   Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
 end
 
@@ -210,7 +210,7 @@ get '/courses/:course/guides/:organization/:repository/:student_id' do
 end
 
 get '/courses/:course/progress' do
-  protect!
+  protect! :teacher
   Classroom::Collection::ExerciseStudentProgress.for(course).all.as_json
 end
 

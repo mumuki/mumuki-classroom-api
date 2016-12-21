@@ -1,10 +1,10 @@
 get '/courses/:course/teachers' do
-  protect!
+  protect! :teacher
   Classroom::Collection::Teachers.for(course).all.as_json
 end
 
 post '/courses/:course/teachers' do
-  protect!
+  protect! :teacher
 
   Mumukit::Auth::User.from_email(json_body['email']).tap do |user|
     ensure_course_existence!
