@@ -3,7 +3,6 @@ CodeClimate::TestReporter.start
 
 require 'factory_girl'
 require 'rack/test'
-require 'mumukit/auth'
 
 require_relative '../lib/classroom'
 require_relative '../app/routes'

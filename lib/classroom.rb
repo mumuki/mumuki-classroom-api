@@ -5,6 +5,7 @@ require 'mumukit/core'
 require 'mumukit/service'
 require 'mumukit/inspection'
 require 'mumukit/nuntius'
+require 'mumukit/auth'
 
 require_relative './class'
 require_relative './consumer'
