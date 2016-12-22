@@ -48,6 +48,13 @@ require 'base64'
 Mumukit::Auth.configure do |c|
   c.client_id = 'foo'
   c.client_secret = Base64.encode64 'bar'
+  c.daybreak_name = 'test'
+end
+
+Rspec.configure do |config|
+ config.after(:each) do
+   FileUtils.rm ["#{Mumukit::Auth.config.daybreak_name}.db"], force: true
+  end
 end
 
 Classroom::Database.connect! 'example'

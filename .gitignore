@@ -25,4 +25,4 @@
 .idea/
 coverage/
 workspace/
-.db
+*.db
