@@ -77,7 +77,7 @@ describe Classroom::Collection::Courses do
   end
 
   describe 'get courses/:course/progress' do
-    let(:exercise_progress) {{ student: {social_id: 1}, guide: {slug: 'foo/bar'}, exercise: {id: 1}, submissions: [] }}
+    let(:exercise_progress) {{ student: {uid: 1}, guide: {slug: 'foo/bar'}, exercise: {id: 1}, submissions: [] }}
     before { Classroom::Collection::ExerciseStudentProgress.for('foo').insert! exercise_progress.wrap_json }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/progress' }

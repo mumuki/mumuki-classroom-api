@@ -98,7 +98,7 @@ module Classroom::Submission
 
     { passed: stats[:passed],
       failed: stats[:failed],
-      passed_with_warnings: stats[:passed_with_warnings] }
+      passed_with_warnings: stats[:passed_with_warnings] }.compact
   end
 
   def self.student_from(json)
@@ -110,7 +110,7 @@ module Classroom::Submission
       image_url: student[:image_url],
       social_id: student[:social_id],
       last_name: student[:last_name],
-      first_name: student[:first_name] }
+      first_name: student[:first_name] }.compact
   end
 
   def self.guide_from(json)
@@ -123,9 +123,9 @@ module Classroom::Submission
       language: {
         name: guide[:language][:name],
         devicon: guide[:language][:devicon]
-      }
+      }.compact
     }
-    classroom_guide
+    classroom_guide.compact
   end
 
   def self.exercise_from(json)
@@ -133,7 +133,7 @@ module Classroom::Submission
 
     { id: exercise[:id],
       name: exercise[:name],
-      number: exercise[:number] }
+      number: exercise[:number] }.compact
   end
 
   def self.submission_from(json)
@@ -145,7 +145,7 @@ module Classroom::Submission
       created_at: json[:created_at],
       test_results: json[:test_results],
       submissions_count: json[:submissions_count],
-      expectation_results: json[:expectation_results] }
+      expectation_results: json[:expectation_results] }.compact
   end
 
 end
