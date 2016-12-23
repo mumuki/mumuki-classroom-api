@@ -22,6 +22,12 @@ def do_migrate!
         end&.compact || []
         Classroom::Collection::Followers.for(course).update_one({email: follower.email}, { '$set': {uids: uids, uid: follower.email} })
       end
+      Classroom::Collection::Exams.for(course).all.each do |exam|
+        uids = exam.social_ids&.map do |social_id|
+          Classroom::Collection::Students.for(course).find_by({social_id: social_id})&.uid
+        end&.compact || []
+        Classroom::Collection::Exams.for(course).update_one(exam.as_json, { '$set': {uids: uids} })
+      end
     end
     Classroom::Collection::FailedSubmissions.all.each do |submission|
       Classroom::Collection::FailedSubmissions.update_one(submission.as_json, { '$set': { uid: (submission.submitter[:email] || submission.submitter[:social_id])} })
