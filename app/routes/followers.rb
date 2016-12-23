@@ -11,8 +11,8 @@ get '/courses/:course/followers/:email' do
   end
 end
 
-delete '/courses/:course/followers/:email/:social_id' do
+delete '/courses/:course/followers/:email/:uid' do
   protect! :teacher
-  Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'social_id' => params[:social_id]
+  Classroom::Collection::Followers.for(course).remove_follower 'course' => course_slug, 'email' => params[:email], 'uid' => uid
   {status: :created}
 end

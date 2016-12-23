@@ -16,6 +16,12 @@ def do_migrate!
         uid = teacher.email || social_id
         Classroom::Collection::Teachers.for(course).update_one({social_id: social_id}, { '$set': {uid: uid} })
       end
+      Classroom::Collection::Followers.for(course).all.each do |follower|
+        uids = follower.social_ids&.map do |social_id|
+          Classroom::Collection::Students.for(course).find_by({social_id: social_id})&.uid
+        end&.compact || []
+        Classroom::Collection::Followers.for(course).update_one({email: follower.email}, { '$set': {uids: uids, uid: follower.email} })
+      end
     end
   end
 end

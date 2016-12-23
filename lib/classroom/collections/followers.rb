@@ -11,7 +11,7 @@ class Classroom::Collection::Followers < Classroom::Collection::CourseCollection
   def delete_follower!(course_slug, social_id)
     update_many(
       { 'course' => course_slug },
-      { '$pull' => { 'social_ids' => social_id }},
+      { '$pull' => { uids: social_id }},
       { :upsert => true })
   end
 
@@ -20,7 +20,7 @@ class Classroom::Collection::Followers < Classroom::Collection::CourseCollection
   def update_follower(data, action)
     update_one(
       { 'email' => data['email'], 'course' => data['course'] },
-      { action => { 'social_ids' => data['social_id'] }},
+      { action => { uids: data['uid'] }},
       { :upsert => true })
   end
 
