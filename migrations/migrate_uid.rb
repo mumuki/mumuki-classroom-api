@@ -23,5 +23,8 @@ def do_migrate!
         Classroom::Collection::Followers.for(course).update_one({email: follower.email}, { '$set': {uids: uids, uid: follower.email} })
       end
     end
+    Classroom::Collection::FailedSubmissions.all.each do |submission|
+      Classroom::Collection::FailedSubmissions.update_one(submission.as_json, { '$set': { uid: (submission.submitter[:email] || submission.submitter[:social_id])} })
+    end
   end
 end
