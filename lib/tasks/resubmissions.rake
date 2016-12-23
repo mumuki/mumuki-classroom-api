@@ -4,11 +4,11 @@ namespace :resubmissions do
 
     Mumukit::Nuntius::Consumer.negligent_start! 'resubmissions' do |body|
       begin
-        destination = body.delete('tenant')
-        social_id = body['social_id']
+        destination = body['tenant']
+        uid = body['uid']
 
-        Mumukit::Nuntius::Logger.info "Processing resubmission #{social_id}"
-        Classroom::FailedSubmission.reprocess! social_id, destination
+        Mumukit::Nuntius::Logger.info "Processing resubmission #{uid}"
+        Classroom::FailedSubmission.reprocess! uid, destination
       ensure
         Classroom::Database.disconnect!
       end
