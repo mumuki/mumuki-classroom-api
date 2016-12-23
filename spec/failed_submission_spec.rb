@@ -12,7 +12,7 @@ describe Classroom::FailedSubmission do
     yield
   end
 
-  let(:submitter) {{social_id: 'github|123456'}}
+  let(:submitter) {{uid: 'github|123456'}}
   let(:chapter) {{id: 'guide_chapter_id', name: 'guide_chapter_name'} }
   let(:parent) {{type: 'Lesson', name: 'A lesson name', position: '1', chapter: chapter} }
   let(:guide) {{slug: 'guide_slug', name: 'guide_name', parent: parent, language: {name: 'guide_language_name', devicon: 'guide_language_devicon'}} }
@@ -33,7 +33,7 @@ describe Classroom::FailedSubmission do
     before do
       organization('central') do
         Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
-        Classroom::Collection::FailedSubmissions.insert! atheneum_submission.merge(submitter: {social_id: 'github|234567'}).wrap_json
+        Classroom::Collection::FailedSubmissions.insert! atheneum_submission.merge(submitter: {uid: 'github|234567'}).wrap_json
       end
       organization('example') do
         Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
@@ -44,7 +44,7 @@ describe Classroom::FailedSubmission do
     context 'and submission.process! works' do
       before { expect(Classroom::Submission).to receive(:process!).exactly(3).times }
       before { expect(Classroom::Collection::FailedSubmissions).to_not receive(:insert!) }
-      before { Classroom::FailedSubmission.reprocess!(submitter[:social_id], :example) }
+      before { Classroom::FailedSubmission.reprocess!(submitter[:uid], :example) }
 
       it { expect(central_count).to eq(1) }
       it { expect(example_count).to eq(0) }
