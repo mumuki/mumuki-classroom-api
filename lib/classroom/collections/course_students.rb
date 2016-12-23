@@ -2,29 +2,42 @@ module Classroom::Collection::CourseStudents
 
   extend Mumukit::Service::Collection
 
-  def self.find_by_social_id!(social_id)
-    args = { 'student.social_id' => social_id }
-    find_projection(args).sort(:_id => -1)
+  def self.find_by_social_id!(uid)
+    find_projection(student_key uid).sort(_id: -1)
       .first
-      .tap { |it| validate_presence(args, it) }
-      .try { |it| wrap(it) }
+      .tap { |it| validate_presence student_key(uid), it }
+      .try { |it| wrap it }
   end
 
   def self.update!(data)
-    query = {'student.social_id' => data[:social_id], 'course.slug' => data[:course_slug]}
-    update_one(query, { '$set' => { 'student.first_name' => data[:first_name], 'student.last_name' => data[:last_name] }})
+    update_one(
+      key(data[:course_slug], data[:social_id]),
+      { '$set': { 'student.first_name': data[:first_name], 'student.last_name': data[:last_name] }}
+    )
   end
 
-  def self.ensure_new!(social_id, course_slug)
-    raise Classroom::CourseStudentExistsError, "Student already exist" if any?('student.social_id' => social_id, 'course.slug' => course_slug)
+  def self.ensure_new!(uid, course_slug)
+    raise Classroom::CourseStudentExistsError, "Student already exist" if any?(key course_slug, uid)
   end
 
-  def self.ensure_exist!(social_id, slug)
-    raise Classroom::CourseStudentNotExistsError, "#{social_id} does not exist in #{slug}" unless any?('student.social_id' => social_id, 'course.slug' => slug)
+  def self.ensure_exist!(uid, course_slug)
+    raise Classroom::CourseStudentNotExistsError, "#{uid} does not exist in #{course_slug}" unless any?(key course_slug, uid)
+  end
+
+  def self.student_key(uid)
+    { 'student.uid': uid }
+  end
+
+  def self.course_key(slug)
+    { 'course.slug': slug }
+  end
+
+  def self.key(slug, uid)
+    student_key(uid).merge(course_key slug)
   end
 
   def self.delete_student!(course_slug, student_id)
-    mongo_collection.delete_one('course.slug' => course_slug, 'student.social_id' => student_id)
+    mongo_collection.delete_one(key course_slug, student_id)
   end
 
   private
