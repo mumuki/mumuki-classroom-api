@@ -9,8 +9,8 @@ describe Classroom::Collection::Students do
   let(:created_at) { 'created_at' }
   let(:date) { Time.now }
 
-  let(:student1) { {social_id: 'github|123456', first_name: 'John'} }
-  let(:student2) { {social_id: 'github|234567', first_name: 'Dorothy'} }
+  let(:student1) { {uid: 'github|123456', first_name: 'John'} }
+  let(:student2) { {uid: 'github|234567', first_name: 'Dorothy'} }
 
   let(:guide1) { {slug: 'foo/bar'} }
   let(:guide2) { {slug: 'bar/baz'} }
@@ -117,12 +117,12 @@ describe Classroom::Collection::Students do
       before { example_students.delete!('github|123456') }
 
       it { expect(course_students.size).to eq 2 }
-      it { expect(course_students.first).to json_like student: {social_id: "github|234567",
+      it { expect(course_students.first).to json_like student: {uid: 'github|234567',
                                                                 first_name: 'Dorothy'},
-                                                      course: {slug: "example/example"} }
-      it { expect(course_students.second).to json_like student: {social_id: "github|123456",
+                                                      course: {slug: 'example/example'} }
+      it { expect(course_students.second).to json_like student: {uid: 'github|123456',
                                                                  first_name: 'John'},
-                                                       course: {slug: "example/foo"} }
+                                                       course: {slug: 'example/foo'} }
       it { expect(guides.size).to eq 1 }
       it { expect(students.size).to eq 1 }
       it { expect(guide_students_progress.size).to eq 1 }
@@ -185,7 +185,7 @@ describe Classroom::Collection::Students do
 
   describe 'when needs mumuki-user' do
     let(:auth0) { double('auth0') }
-    let(:fetched_student) { example_students.find_by(social_id: 'github|123456') }
+    let(:fetched_student) { example_students.find_by(uid: 'github|123456') }
 
     before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
     before { allow(Mumukit::Auth::Store).to receive(:get).and_return(auth0) }

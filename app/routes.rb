@@ -80,7 +80,7 @@ helpers do
   def update_and_notify_user_metadata(uid, method)
     permissions = Mumukit::Auth::Store.get uid
     permissions.send("#{method}_permission!", "#{tenant}/*")
-    Classroom::Collection::Students.for(course).find_by({social_id: uid}).try do |user|
+    Classroom::Collection::Students.for(course).find_by({uid: uid}).try do |user|
       user_as_json = user.as_json.with_indifferent_access.slice(:first_name, :last_name, :email)
       user_to_notify = user_as_json.merge(uid: uid, permissions: permissions)
       Mumukit::Nuntius::EventPublisher.publish('UserChanged', user_to_notify)
