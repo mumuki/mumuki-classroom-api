@@ -16,8 +16,8 @@ helpers do
     params[:course]
   end
 
-  def student_id
-    params[:student_id]
+  def uid
+    params[:uid]
   end
 
   def exercise_id
@@ -25,7 +25,7 @@ helpers do
   end
 
   def exercise_student_progress_query
-    {'guide.slug' => repo_slug, 'student.social_id' => student_id}
+    {'guide.slug' => repo_slug, 'student.uid' => uid}
   end
 
   def by_permissions(key, &query)
@@ -65,8 +65,8 @@ helpers do
     Classroom::Collection::Courses.ensure_exist! course_slug
   end
 
-  def ensure_course_student_existence!(social_id)
-    Classroom::Collection::CourseStudents.ensure_exist! social_id, course_slug
+  def ensure_course_student_existence!(uid)
+    Classroom::Collection::CourseStudents.ensure_exist! uid, course_slug
   end
 
   def set_locale!(org)
@@ -116,34 +116,34 @@ get '/courses/:course/students' do
   Classroom::Collection::Students.for(course).all.as_json
 end
 
-post '/courses/:course/students/:student_id' do
+post '/courses/:course/students/:uid' do
   protect! :teacher
-  Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: student_id, tenant: tenant)
+  Mumukit::Nuntius::Publisher.publish_resubmissions(uid: uid, tenant: tenant)
   {status: :created}
 end
 
-post '/courses/:course/students/:student_id/detach' do
+post '/courses/:course/students/:uid/detach' do
   protect! :teacher
-  Classroom::Collection::Students.for(course).detach!(student_id)
-  Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
-  update_and_notify_user_metadata(student_id, 'remove')
+  Classroom::Collection::Students.for(course).detach!(uid)
+  Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(uid)
+  Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(uid)
+  update_and_notify_user_metadata(uid, 'remove')
   {status: :updated}
 end
 
-post '/courses/:course/students/:student_id/attach' do
+post '/courses/:course/students/:uid/attach' do
   protect! :teacher
-  Classroom::Collection::Students.for(course).attach!(student_id)
-  Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
-  update_and_notify_user_metadata(student_id, 'add')
+  Classroom::Collection::Students.for(course).attach!(uid)
+  Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(uid)
+  Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(uid)
+  update_and_notify_user_metadata(uid, 'add')
   {status: :updated}
 end
 
-get '/courses/:course/student/:social_id' do
+get '/courses/:course/student/:uid' do
   protect! :teacher
 
-  Classroom::Collection::Students.for(course).find_by(social_id: params[:social_id]).as_json
+  Classroom::Collection::Students.for(course).find_by(uid: uid).as_json
 end
 
 get '/courses/:course/guides' do
@@ -156,7 +156,7 @@ get '/courses/:course/guides/:organization/:repository' do
   Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
 end
 
-get '/courses/:course/guides/:organization/:repository/:student_id' do
+get '/courses/:course/guides/:organization/:repository/:uid' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .where(exercise_student_progress_query).as_json
@@ -167,7 +167,7 @@ get '/courses/:course/progress' do
   Classroom::Collection::ExerciseStudentProgress.for(course).all.as_json
 end
 
-get '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
+get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
