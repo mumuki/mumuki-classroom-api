@@ -114,12 +114,14 @@ end
 
 post '/courses/:course/students' do
   social_id = token.jwt['sub']
-
+  json = {
+    student: json_body.merge(social_id: social_id, created_at: Time.now),
+    course: { slug: course_slug }
+  }
   ensure_course_existence!
   Classroom::Collection::CourseStudents.ensure_new! social_id, course_slug
   Classroom::Collection::Students.for(course).ensure_new! social_id, json_body['email']
 
-  json = {student: json_body.merge(social_id: social_id), course: {slug: course_slug}}
   Classroom::Collection::CourseStudents.insert! json.wrap_json
   Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
 

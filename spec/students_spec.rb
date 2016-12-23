@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'time'
 
 describe Classroom::Collection::Students do
 
@@ -6,8 +7,9 @@ describe Classroom::Collection::Students do
     Classroom::Database.clean!
   end
 
-  let(:created_at) { 'created_at' }
-  let(:date) { Time.now }
+  let(:created_at) { Time.new(2015, 12, 8).utc }
+  let(:created_at_iso) { created_at.iso8601(3) }
+  let(:date) { created_at }
 
   let(:student1) { {social_id: 'github|123456', first_name: 'John'} }
   let(:student2) { {social_id: 'github|234567', first_name: 'Dorothy'} }
@@ -62,7 +64,7 @@ describe Classroom::Collection::Students do
 
   describe do
 
-    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+    before { allow(Time).to receive(:now).and_return(created_at) }
     before { example_students.insert! student1.wrap_json }
     before { example_students.insert! student2.wrap_json }
 
@@ -73,16 +75,16 @@ describe Classroom::Collection::Students do
 
     describe '#report' do
       let(:report) { example_students.report }
-      it { expect(report.first).to json_like created_at: created_at, first_name: 'John' }
-      it { expect(report.second).to json_like created_at: created_at, first_name: 'Dorothy' }
+      it { expect(report.first).to json_like created_at: created_at_iso, first_name: 'John' }
+      it { expect(report.second).to json_like created_at: created_at_iso, first_name: 'Dorothy' }
     end
 
     context 'if no students stats processed' do
       let(:students) { example_students.all.as_json.deep_symbolize_keys[:students] }
 
       it { expect(students.size).to eq 2 }
-      it { expect(students.first).to eq student1.merge(created_at: created_at) }
-      it { expect(students.second).to eq student2.merge(created_at: created_at) }
+      it { expect(students.first).to eq student1.merge(created_at: created_at_iso) }
+      it { expect(students.second).to eq student2.merge(created_at: created_at_iso) }
     end
 
     context 'if students stats processed' do
@@ -91,8 +93,8 @@ describe Classroom::Collection::Students do
       before { example_students.update_all_stats }
 
       it { expect(students.size).to eq 2 }
-      it { expect(students.first).to eq student1.merge(created_at: created_at, stats: {passed: 2, passed_with_warnings: 0, failed: 1}) }
-      it { expect(students.second).to eq student2.merge(created_at: created_at, stats: {passed: 0, passed_with_warnings: 1, failed: 0}) }
+      it { expect(students.first).to eq student1.merge(created_at: created_at_iso, stats: {passed: 2, passed_with_warnings: 0, failed: 1}) }
+      it { expect(students.second).to eq student2.merge(created_at: created_at_iso, stats: {passed: 0, passed_with_warnings: 1, failed: 0}) }
     end
 
     context 'delete student from students' do
@@ -137,8 +139,7 @@ describe Classroom::Collection::Students do
 
     describe 'get /courses/:course/students' do
 
-      let(:created_at) { 'created_at' }
-      before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+      before { allow(Time).to receive(:now).and_return(created_at) }
       let(:student) { {email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar'} }
 
       let(:student1) { {student: student, course: {slug: 'example/foo'}, created_at: created_at} }
@@ -180,16 +181,15 @@ describe Classroom::Collection::Students do
 
         context 'should publish int resubmissions queue' do
           before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions) }
+          before { allow(Time).to receive(:now).and_return(created_at) }
           before { post '/courses/foo/students', student_json }
           context 'and user does not exist' do
             let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
-            let(:created_at) { 'created_at' }
-            before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
 
             it { expect(last_response).to be_ok }
             it { expect(last_response.body).to json_eq status: 'created' }
             it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
-            it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456', created_at: created_at)) }
+            it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(social_id: 'github|user123456', created_at: created_at_iso)) }
           end
         end
         context 'should not publish int resubmissions queue' do
@@ -244,8 +244,7 @@ describe Classroom::Collection::Students do
       end
 
       context 'when authenticated' do
-        let(:created_at) { 'created_at' }
-        before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+        before { allow(Time).to receive(:now).and_return(created_at) }
         before { Classroom::Collection::CourseStudents.insert! json.wrap_json }
         before { Classroom::Collection::Students.for('foo').insert!(student.merge(social_id: 'auth0|1').wrap_json) }
         before { header 'Authorization', build_auth_header('*') }
@@ -267,8 +266,7 @@ describe Classroom::Collection::Students do
   describe 'get /courses/:course/student/:social_id' do
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
     let(:json) { {student: student.merge(social_id: 'auth0|1'), course: {slug: 'example/foo'}} }
-    let(:created_at) { 'created_at' }
-    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+    before { allow(Time).to receive(:now).and_return(created_at) }
     before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
     before { Classroom::Collection::CourseStudents.insert! json.wrap_json }
     before { Classroom::Collection::Students.for('foo').insert!(student.merge(social_id: 'auth0|1').wrap_json) }
