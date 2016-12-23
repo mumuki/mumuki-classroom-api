@@ -7,7 +7,7 @@ describe Classroom::Collection::Followers do
   end
 
   describe 'post /courses/:course/followers' do
-    let(:follower_json) {{email: 'aguspina87@gmail.com', course: 'bar', social_id: 'social|1'}.to_json}
+    let(:follower_json) {{email: 'aguspina87@gmail.com', course: 'bar', social_ids: ['social|1']}.to_json}
 
     context 'when authenticated' do
       before { header 'Authorization', build_auth_header('*') }
@@ -42,16 +42,16 @@ describe Classroom::Collection::Followers do
   end
 
   context 'delete /follower' do
-    let(:follower_json) {{email: 'aguspina87@gmail.com', course: 'bar', social_id: 'social|1'}.to_json}
+    let(:follower_json) {{email: 'aguspina87@gmail.com', course: 'bar', social_ids: ['social|1']}.to_json}
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/bar/followers', follower_json }
-    before { delete '/courses/bar/followers/aguspina87@gmail.com/social%7c1' }
+    before { post '/courses/bar/followers/aguspina87@gmail.com/unfollow', follower_json }
 
     it { expect(Classroom::Collection::Followers.for('bar').find_by(course: 'example/bar', email: 'aguspina87@gmail.com').social_ids).to eq([]) }
   end
 
   context 'get /follower' do
-    let(:follower_json) {{email: 'aguspina87@gmail.com', course: 'bar', social_id: 'social|1'}.to_json}
+    let(:follower_json) {{email: 'aguspina87@gmail.com', course: 'bar', social_ids: ['social|1']}.to_json}
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/bar/followers', follower_json }
     before { get '/courses/bar/followers/aguspina87@gmail.com' }

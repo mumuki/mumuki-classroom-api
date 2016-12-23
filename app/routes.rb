@@ -135,43 +135,51 @@ post '/courses/:course/students/:student_id' do
   {status: :created}
 end
 
-delete '/courses/:course/students/:student_id' do
+post '/courses/:course/delete/students' do
   protect!
-  Classroom::Collection::ExerciseStudentProgress.for(course).delete_student!(student_id)
-  Classroom::Collection::Students.for(course).delete!(student_id)
-  Classroom::Collection::CourseStudents.delete_student!(course_slug, student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).delete_student!(student_id)
-  Classroom::Collection::Followers.for(course).delete_follower!(course_slug, student_id)
+  json_body['social_ids'].each do |student_id|
+    Classroom::Collection::ExerciseStudentProgress.for(course).delete_student!(student_id)
+    Classroom::Collection::Students.for(course).delete!(student_id)
+    Classroom::Collection::CourseStudents.delete_student!(course_slug, student_id)
+    Classroom::Collection::GuideStudentsProgress.for(course).delete_student!(student_id)
+    Classroom::Collection::Followers.for(course).delete_follower!(course_slug, student_id)
+  end
   {status: :deleted}
 end
 
-post '/courses/:course/students/:student_id/detach' do
+post '/courses/:course/detach/students' do
   protect!
-  Mumukit::Auth::User.new(student_id).try do |user|
-    Classroom::Collection::Students.for(course).detach!(student_id)
-    Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
-    Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
-    update_and_notify_user_metadata(user, 'remove')
+  json_body['social_ids'].each do |student_id|
+    Mumukit::Auth::User.new(student_id).try do |user|
+      Classroom::Collection::Students.for(course).detach!(student_id)
+      Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
+      Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
+      update_and_notify_user_metadata(user, 'remove')
+    end
   end
   {status: :updated}
 end
 
-post '/courses/:course/students/:student_id/attach' do
+post '/courses/:course/attach/students' do
   protect!
-  Mumukit::Auth::User.new(student_id).try do |user|
-    Classroom::Collection::Students.for(course).attach!(student_id)
-    Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
-    Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
-    update_and_notify_user_metadata(user, 'add')
+  json_body['social_ids'].each do |student_id|
+    Mumukit::Auth::User.new(student_id).try do |user|
+      Classroom::Collection::Students.for(course).attach!(student_id)
+      Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
+      Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
+      update_and_notify_user_metadata(user, 'add')
+    end
   end
   {status: :updated}
 end
 
-post '/courses/:course/students/:student_id/transfer' do
+post '/courses/:course/transfer/students' do
   protect!
-  Classroom::Collection::Students
-    .for(course)
-    .transfer(student_id, tenant, json_body['destination'])
+  json_body['social_ids'].each do |student_id|
+    Classroom::Collection::Students
+      .for(course)
+      .transfer(student_id, tenant, json_body['destination'])
+  end
   {status: :updated}
 end
 
