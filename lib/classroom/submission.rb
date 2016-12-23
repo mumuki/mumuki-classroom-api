@@ -104,7 +104,8 @@ module Classroom::Submission
   def self.student_from(json)
     student = json[:student]
 
-    { name: student[:name],
+    { uid: student[:uid],
+      name: student[:name],
       email: student[:email],
       image_url: student[:image_url],
       social_id: student[:social_id],

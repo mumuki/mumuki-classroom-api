@@ -8,6 +8,7 @@ describe Classroom::Submission do
 
   describe do
     let(:submitter) {{
+      uid: 'github|123456',
       social_id: 'github|123456'
     }}
     let(:chapter) {{
@@ -62,7 +63,7 @@ describe Classroom::Submission do
         let(:guide_progress) { Classroom::Collection::GuideStudentsProgress.for('course1').all.as_json[:guide_students_progress] }
         let(:exercise_progress) { Classroom::Collection::ExerciseStudentProgress.for('course1').all.as_json[:exercise_student_progress] }
         let(:course_student) {{ course: {slug: 'example/course1'}, student: submitter }}
-        let(:student) {{ social_id: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe' }}
+        let(:student) {{ social_id: 'github|123456', uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe' }}
 
         before { Classroom::Collection::Students.for('course1').insert! student.wrap_json }
         before { Classroom::Collection::CourseStudents.insert! course_student.wrap_json }
@@ -168,7 +169,7 @@ describe Classroom::Submission do
       })}
 
       let(:course_student) {{ course: {slug: 'example/course1'}, student: submitter }}
-      let(:student) {{ social_id: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe' }}
+      let(:student) {{ social_id: 'github|123456', uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe' }}
 
       let(:guide_fetched) { Classroom::Collection::Guides.for('course1').all.as_json[:guides].first }
 
