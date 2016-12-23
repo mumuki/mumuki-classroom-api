@@ -2,7 +2,7 @@ module Classroom::Collection::CourseStudents
 
   extend Mumukit::Service::Collection
 
-  def self.find_by_social_id!(uid)
+  def self.find_by_uid!(uid)
     find_projection(student_key uid).sort(_id: -1)
       .first
       .tap { |it| validate_presence student_key(uid), it }
@@ -11,7 +11,7 @@ module Classroom::Collection::CourseStudents
 
   def self.update!(data)
     update_one(
-      key(data[:course_slug], data[:social_id]),
+      key(data[:course_slug], data[:uid]),
       { '$set': { 'student.first_name': data[:first_name], 'student.last_name': data[:last_name] }}
     )
   end

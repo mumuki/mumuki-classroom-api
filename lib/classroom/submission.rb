@@ -15,7 +15,7 @@ module Classroom::Submission
 
   def self.find_submission_course!(json)
     Classroom::Collection::CourseStudents
-      .find_by_social_id!(social_id json)
+      .find_by_uid!(uid json)
       .course
       .deep_symbolize_keys
   end
@@ -23,7 +23,7 @@ module Classroom::Submission
   def self.find_student_from(json)
     Classroom::Collection::Students
       .for(course_prefix json)
-      .find_by(social_id: social_id(json))
+      .find_by(uid: uid(json))
       .as_json
       .deep_symbolize_keys
   end
@@ -37,13 +37,13 @@ module Classroom::Submission
   def self.update_student_progress(json)
     Classroom::Collection::Students
       .for(course_prefix json)
-      .update_all_stats_for(student_from(json)[:social_id])
+      .update_all_stats_for(student_from(json)[:uid])
   end
 
   def self.update_student_last_assignment(json)
     Classroom::Collection::Students
       .for(course_prefix json)
-      .update_last_assignment_for(student_from(json)[:social_id])
+      .update_last_assignment_for(student_from(json)[:uid])
   end
 
   def self.update_exercise_student_progress(json)
@@ -70,8 +70,8 @@ module Classroom::Submission
       .deep_symbolize_keys
   end
 
-  def self.social_id(json)
-    json[:submitter][:social_id]
+  def self.uid(json)
+    json[:submitter][:uid]
   end
 
   def self.course_prefix(json)

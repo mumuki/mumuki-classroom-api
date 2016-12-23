@@ -9,8 +9,8 @@ module Mumukit::Auth::PermissionsDiff
         grants(role, old_perms, new_perms).each do |grant|
           grant_s = grant.to_s
           diff[role] ||= {}.with_indifferent_access
-          add_grant(diff, role, 'added', grant_s) if add_grant?(grant_s, new_perms, old_perms, role)
-          add_grant(diff, role, 'removed', grant_s) if remove_grant?(grant_s, new_perms, old_perms, role)
+          add_grant(diff, role, :added, grant_s) if add_grant?(grant_s, new_perms, old_perms, role)
+          add_grant(diff, role, :removed, grant_s) if remove_grant?(grant_s, new_perms, old_perms, role)
         end
       end
     end
