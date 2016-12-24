@@ -69,7 +69,7 @@ describe Classroom::Collection::Exams do
     end
 
     context 'when no existing exam' do
-      let(:exam_json2) { exam_json.merge(social_ids: ['auth0|123456'], id: '123').stringify_keys }
+      let(:exam_json2) { exam_json.merge(uids: ['auth0|123456'], id: '123').stringify_keys }
       before { header 'Authorization', build_auth_header('*') }
       it { expect { Classroom::Collection::Exams.for('foo').update! '123', exam_json2 }.to raise_error(Classroom::ExamExistsError) }
     end
