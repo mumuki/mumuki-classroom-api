@@ -40,5 +40,10 @@ class Classroom::Event::UserChanged
       end
     end
 
+    def student_removed(user, course_slug)
+      course = course_slug.to_mumukit_slug.course
+      Classroom::Collection::Students.for(course).detach! user[:uid]
+    end
+
   end
 end
