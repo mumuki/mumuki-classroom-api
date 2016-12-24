@@ -3,7 +3,7 @@ class Classroom::Event::UserChanged
     def execute!(user)
       user_h = user.with_indifferent_access
       update_user_permissions user_h
-      update_user_model user_h
+      update_user_model user_h.except(:permissions)
     end
 
     private
@@ -36,13 +36,16 @@ class Classroom::Event::UserChanged
       if Classroom::Collection::Students.for(course).exists? user[:uid]
         Classroom::Collection::Students.for(course).attach! user[:uid]
       else
-        Classroom::Collection::CourseStudents.create user.except(:permissions), course_slug
+        Classroom::Collection::CourseStudents.create user, course_slug
       end
     end
 
     def student_removed(user, course_slug)
-      course = course_slug.to_mumukit_slug.course
-      Classroom::Collection::Students.for(course).detach! user[:uid]
+      Classroom::Collection::Students.for(course_slug.to_mumukit_slug.course).detach! user[:uid]
+    end
+
+    def teacher_added(user, course_slug)
+      Classroom::Collection::Teachers.for(course_slug.to_mumukit_slug.course).upsert! user
     end
 
   end
