@@ -50,7 +50,7 @@ Mumukit::Auth.configure do |c|
   c.daybreak_name = 'test'
 end
 
-Rspec.configure do |config|
+RSpec.configure do |config|
  config.after(:each) do
    FileUtils.rm ["#{Mumukit::Auth.config.daybreak_name}.db"], force: true
   end
