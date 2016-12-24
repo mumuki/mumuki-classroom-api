@@ -32,15 +32,12 @@ class Classroom::Event::UserChanged
     end
 
     def student_added(user, course_slug)
-      json_body = user.except(:uid, :permissions).deep_symbolize_keys
-      uid = user[:uid]
-      Classroom::Collection::Courses.ensure_exist! course_slug
-      Classroom::Collection::CourseStudents.ensure_new! uid, course_slug
-      Classroom::Collection::Students.for(course).ensure_new! uid
-
-      json = {student: json_body.merge(uid: uid), course: {slug: course_slug}}
-      Classroom::Collection::CourseStudents.insert! json.wrap_json
-      Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
+      course = course_slug.to_mumukit_slug.course
+      if Classroom::Collection::Students.for(course).exists? user[:uid]
+        Classroom::Collection::Students.for(course).attach! user[:uid]
+      else
+        Classroom::Collection::CourseStudents.create user.except(:permissions), course_slug
+      end
     end
 
   end

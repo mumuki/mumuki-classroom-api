@@ -17,9 +17,12 @@ class Classroom::Collection::People < Classroom::Collection::CourseCollection
     mongo_collection.find(args).projection(projection)
   end
 
+  def exists?(uid)
+    any? uid: uid
+  end
 
   def ensure_new!(uid)
-    raise exists_exception, "#{underscore_class_name.capitalize.singularize} already exist" if any?(uid: uid)
+    raise exists_exception, "#{underscore_class_name.capitalize.singularize} already exist" if exists? uid
   end
 
 end

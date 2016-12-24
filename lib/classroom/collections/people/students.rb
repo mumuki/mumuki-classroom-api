@@ -17,17 +17,15 @@ class Classroom::Collection::Students < Classroom::Collection::People
   end
 
   def detach!(uid)
-    mongo_collection.update_one(
-      { 'uid': uid },
-      { '$set': { detached: true, detached_at: Time.now }}
-    )
+    do_detach!(uid)
+    Classroom::Collection::ExerciseStudentProgress.for(course).detach_student! uid
+    Classroom::Collection::GuideStudentsProgress.for(course).detach_student! uid
   end
 
   def attach!(uid)
-    mongo_collection.update_one(
-      { 'uid': uid },
-      { '$unset': { detached: '', detached_at: '' }}
-    )
+    do_attach!(uid)
+    Classroom::Collection::ExerciseStudentProgress.for(course).attach_student! uid
+    Classroom::Collection::GuideStudentsProgress.for(course).attach_student! uid
   end
 
   def update_all_stats_for(uid)
@@ -51,6 +49,22 @@ class Classroom::Collection::Students < Classroom::Collection::People
 
   def report(&block)
     all.raw.select(&block).as_json(only: [:first_name, :last_name, :email, :created_at])
+  end
+
+  private
+
+  def do_detach!(uid)
+    mongo_collection.update_one(
+      {'uid': uid},
+      {'$set': {detached: true, detached_at: Time.now}}
+    )
+  end
+
+  def do_attach!(uid)
+    mongo_collection.update_one(
+      {'uid': uid},
+      {'$unset': {detached: '', detached_at: ''}}
+    )
   end
 
 end

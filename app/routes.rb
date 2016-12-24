@@ -125,8 +125,6 @@ end
 post '/courses/:course/students/:uid/detach' do
   protect! :teacher
   Classroom::Collection::Students.for(course).detach!(uid)
-  Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(uid)
-  Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(uid)
   update_and_notify_user_metadata(uid, 'remove')
   {status: :updated}
 end
@@ -134,8 +132,6 @@ end
 post '/courses/:course/students/:uid/attach' do
   protect! :teacher
   Classroom::Collection::Students.for(course).attach!(uid)
-  Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(uid)
-  Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(uid)
   update_and_notify_user_metadata(uid, 'add')
   {status: :updated}
 end

@@ -16,6 +16,16 @@ module Classroom::Collection::CourseStudents
     )
   end
 
+  def self.create!(user, course_slug)
+    course = course_slug.to_mumukit_slug.course
+    ensure_new! user[:uid], course_slug
+    Classroom::Collection::Courses.ensure_exist! course_slug
+    Classroom::Collection::Students.for(course).ensure_new! user[:uid]
+    json = { student: user, course: {slug: course_slug}}
+    Classroom::Collection::CourseStudents.insert! json.wrap_json
+    Classroom::Collection::Students.for(course).insert! user.wrap_json
+  end
+
   def self.ensure_new!(uid, course_slug)
     raise Classroom::CourseStudentExistsError, "Student already exist" if any?(key course_slug, uid)
   end
