@@ -13,7 +13,7 @@ gem 'bunny'
 gem 'rest-client', '~> 2.0'
 
 gem 'mumukit-core', '~> 0.4'
-gem 'mumukit-auth', '~> 3.1'
+gem 'mumukit-auth', '~> 3.2'
 gem 'mumukit-nuntius', '~> 1.0'
 gem 'mumukit-service', '~> 1.0'
 
