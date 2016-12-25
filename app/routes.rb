@@ -25,7 +25,7 @@ helpers do
   end
 
   def exercise_student_progress_query
-    {'guide.slug' => repo_slug, 'student.uid' => uid}
+    {'guide.slug': repo_slug, 'student.uid': uid}
   end
 
   def by_permissions(key, &query)
@@ -77,11 +77,11 @@ helpers do
     @organization_json ||= Classroom::Collection::Organizations.find_by(name: tenant).as_json
   end
 
-  def update_and_notify_user_metadata(uid, method)
+  def update_and_notify_student_metadata(uid, method)
     permissions = Mumukit::Auth::Store.get uid
-    permissions.send("#{method}_permission!", "#{tenant}/*")
+    permissions.send("#{method}_permission!", 'student', course_slug)
     Classroom::Collection::Students.for(course).find_by({uid: uid}).try do |user|
-      user_as_json = user.as_json.with_indifferent_access.slice(:first_name, :last_name, :email)
+      user_as_json = user.as_json(only: [:first_name, :last_name, :email])
       user_to_notify = user_as_json.merge(uid: uid, permissions: permissions)
       Mumukit::Nuntius::EventPublisher.publish('UserChanged', user_to_notify)
     end
@@ -125,14 +125,14 @@ end
 post '/courses/:course/students/:uid/detach' do
   protect! :teacher
   Classroom::Collection::Students.for(course).detach!(uid)
-  update_and_notify_user_metadata(uid, 'remove')
+  update_and_notify_student_metadata(uid, 'remove')
   {status: :updated}
 end
 
 post '/courses/:course/students/:uid/attach' do
   protect! :teacher
   Classroom::Collection::Students.for(course).attach!(uid)
-  update_and_notify_user_metadata(uid, 'add')
+  update_and_notify_student_metadata(uid, 'add')
   {status: :updated}
 end
 

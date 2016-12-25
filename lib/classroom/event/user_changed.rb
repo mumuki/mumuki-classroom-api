@@ -1,5 +1,8 @@
 class Classroom::Event::UserChanged
   class << self
+
+    attr_accessor :diffs
+
     def execute!(user)
       user_h = user.with_indifferent_access
       update_user_permissions user_h
@@ -16,11 +19,11 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      @diff.each do |scope, diff|
+      diffs.each do |scope, diff|
         diff.each do |type, grants|
           grants.each do |grant|
-            message = "#{type}_#{scope}"
-            self.send message, user, grant if self.respond_to? message
+            message = "#{scope}_#{type}"
+            self.send message, user, grant if self.respond_to? message, true
           end
         end
       end
@@ -28,7 +31,7 @@ class Classroom::Event::UserChanged
 
     def set_diff_permissions(db, user)
       permissions = db.get user[:uid]
-      @diff = Mumukit::Auth::PermissionsDiff.diff permissions, user[:permissions]
+      self.diffs = Mumukit::Auth::PermissionsDiff.diff permissions, user[:permissions]
     end
 
     def student_added(user, course_slug)
@@ -36,7 +39,7 @@ class Classroom::Event::UserChanged
       if Classroom::Collection::Students.for(course).exists? user[:uid]
         Classroom::Collection::Students.for(course).attach! user[:uid]
       else
-        Classroom::Collection::CourseStudents.create user, course_slug
+        Classroom::Collection::CourseStudents.create! user, course_slug
       end
     end
 
