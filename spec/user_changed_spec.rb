@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Classroom::Event::UserChanged do
 
   let(:uid) {'agus@mumuki.org'}
-  let(:event) {user.merge permissions: new_permissions}
+  let(:event) {{user: user.merge(permissions: new_permissions)}}
   let(:old_permissions) {{student: 'example/foo'}.with_indifferent_access}
   let(:new_permissions) {{student: 'example/bar', teacher: 'example/foo'}.with_indifferent_access}
   let(:user) {{uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access}

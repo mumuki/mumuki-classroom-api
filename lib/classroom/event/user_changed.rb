@@ -4,7 +4,7 @@ class Classroom::Event::UserChanged
     attr_accessor :diffs
 
     def execute!(user)
-      user_h = user.with_indifferent_access
+      user_h = user.with_indifferent_access[:user]
       update_user_permissions user_h
       update_user_model user_h.except(:permissions)
     end
