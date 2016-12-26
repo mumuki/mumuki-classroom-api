@@ -32,7 +32,7 @@ GEM
     minitest (5.10.1)
     mongo (2.4.1)
       bson (>= 4.2.1, < 5.0.0)
-    mumukit-auth (3.2.0)
+    mumukit-auth (3.3.1)
       daybreak
       jwt
       mumukit-core (~> 0.4)
@@ -99,7 +99,7 @@ DEPENDENCIES
   codeclimate-test-reporter
   factory_girl
   mongo (~> 2.1)
-  mumukit-auth (~> 3.2)
+  mumukit-auth (~> 3.3)
   mumukit-core (~> 0.4)
   mumukit-inspection (~> 0.1)
   mumukit-nuntius (~> 1.0)

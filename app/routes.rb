@@ -117,20 +117,20 @@ get '/courses/:course/students' do
 end
 
 post '/courses/:course/students/:uid' do
-  protect! :teacher
+  protect! :janitor
   Mumukit::Nuntius::Publisher.publish_resubmissions(uid: uid, tenant: tenant)
   {status: :created}
 end
 
 post '/courses/:course/students/:uid/detach' do
-  protect! :teacher
+  protect! :janitor
   Classroom::Collection::Students.for(course).detach!(uid)
   update_and_notify_student_metadata(uid, 'remove')
   {status: :updated}
 end
 
 post '/courses/:course/students/:uid/attach' do
-  protect! :teacher
+  protect! :janitor
   Classroom::Collection::Students.for(course).attach!(uid)
   update_and_notify_student_metadata(uid, 'add')
   {status: :updated}
