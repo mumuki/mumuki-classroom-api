@@ -14,7 +14,7 @@ gem 'rest-client', '~> 2.0'
 
 gem 'mumukit-core', '~> 0.4'
 gem 'mumukit-auth', '~> 3.3'
-gem 'mumukit-nuntius', '~> 1.0'
+gem 'mumukit-nuntius', '~> 2.1'
 gem 'mumukit-service', '~> 1.0'
 
 gem 'mumukit-inspection', '~> 0.1'

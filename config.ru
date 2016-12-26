@@ -11,6 +11,10 @@ Mumukit::Auth.configure do |c|
   c.daybreak_name = ENV['MUMUKI_DAYBREAK_NAME']
 end
 
+Mumukit::Nuntius.configure do |c|
+  c.app_name = 'classroom'
+end
+
 require_relative './app/routes'
 
 run Sinatra::Application

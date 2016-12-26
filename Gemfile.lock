@@ -9,7 +9,7 @@ GEM
     amq-protocol (2.0.1)
     bson (4.2.1)
     bson_ext (1.5.1)
-    bunny (2.5.1)
+    bunny (2.6.2)
       amq-protocol (>= 2.0.1)
     codeclimate-test-reporter (0.6.0)
       simplecov (>= 0.7.1, < 1.0.0)
@@ -42,7 +42,7 @@ GEM
       rack (>= 1.5)
     mumukit-inspection (0.1.1)
       mumukit-core (~> 0.2)
-    mumukit-nuntius (1.0.0)
+    mumukit-nuntius (2.1.1)
       activesupport (>= 4.1)
       bunny (~> 2.3)
     mumukit-service (1.0.0)
@@ -102,7 +102,7 @@ DEPENDENCIES
   mumukit-auth (~> 3.3)
   mumukit-core (~> 0.4)
   mumukit-inspection (~> 0.1)
-  mumukit-nuntius (~> 1.0)
+  mumukit-nuntius (~> 2.1)
   mumukit-service (~> 1.0)
   rack-test
   rake
