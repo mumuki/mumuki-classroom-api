@@ -187,7 +187,7 @@ describe Classroom::Collection::Students do
     let(:auth0) { double('auth0') }
     let(:fetched_student) { example_students.find_by(uid: 'github|123456') }
 
-    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
+    before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
     before { allow(Mumukit::Auth::Store).to receive(:get).and_return(auth0) }
     before { allow(auth0).to receive(:protect!) }
 
@@ -222,6 +222,147 @@ describe Classroom::Collection::Students do
         it { expect(fetched_student.detached_at).to eq nil }
       end
 
+    end
+    describe 'post /courses/:course/students' do
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+      let(:student_json) { student.to_json }
+      before { allow(auth0).to receive(:add_permission!) }
+
+      context 'when course exists' do
+        before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+
+        context 'when not authenticated' do
+          before { post '/courses/foo/students', student_json }
+
+          it { expect(last_response).to_not be_ok }
+          it { expect(Classroom::Collection::Students.for('foo').count).to eq 0 }
+        end
+
+        context 'when authenticated' do
+          before { header 'Authorization', build_auth_header('*') }
+
+          context 'should publish int resubmissions queue' do
+            before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions) }
+            before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
+            before { post '/courses/foo/students', student_json }
+            context 'and user does not exist' do
+              let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
+              let(:created_at) { 'created_at' }
+              before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+
+              it { expect(last_response).to be_ok }
+              it { expect(last_response.body).to json_eq status: 'created' }
+              it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
+              it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(uid: 'jondoe@gmail.com', created_at: created_at)) }
+            end
+          end
+          context 'should not publish int resubmissions queue' do
+            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+            before { post '/courses/foo/students', student_json }
+            context 'and user already exists by uid' do
+              before { post '/courses/foo/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+            end
+            context 'and user already exists by email' do
+              before { header 'Authorization', build_auth_header('*', 'auth1') }
+              before { post '/courses/foo/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+            end
+          end
+        end
+      end
+
+      context 'when course does not exist' do
+        before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+        before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
+
+        it 'rejects creating a student' do
+          header 'Authorization', build_auth_header('*')
+
+          post '/courses/foo/students', student_json
+
+          expect(last_response).to_not be_ok
+          expect(Classroom::Collection::Students.for('foo').count).to eq 0
+        end
+      end
+    end
+
+    describe 'post /courses/:course/students' do
+      let(:auth0) { double('auth0') }
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+      let(:student_json) { student.to_json }
+      before { allow(Mumukit::Auth::Store).to receive(:get).and_return(auth0) }
+      before { allow(Mumukit::Auth::Store).to receive(:set!) }
+      before { allow(auth0).to receive(:add_permission!) }
+
+      context 'when course exists' do
+        before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+
+        context 'when not authenticated' do
+          before { post '/courses/foo/students', student_json }
+
+          it { expect(last_response).to_not be_ok }
+          it { expect(Classroom::Collection::Students.for('foo').count).to eq 0 }
+        end
+
+        context 'when authenticated' do
+          before { header 'Authorization', build_auth_header('*') }
+
+          context 'should publish int resubmissions queue' do
+            before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions) }
+            before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
+            before { post '/courses/foo/students', student_json }
+            context 'and user does not exist' do
+              let(:created_course_student) { Classroom::Collection::Students.for('foo').find_by({}).as_json }
+              let(:created_at) { 'created_at' }
+              before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
+
+              it { expect(last_response).to be_ok }
+              it { expect(last_response.body).to json_eq status: 'created' }
+              it { expect(Classroom::Collection::Students.for('foo').count).to eq 1 }
+              it { expect(created_course_student.deep_symbolize_keys).to eq(student.merge(uid: 'jondoe@gmail.com', created_at: created_at)) }
+            end
+          end
+          context 'should not publish int resubmissions queue' do
+            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+            before { post '/courses/foo/students', student_json }
+            context 'and user already exists by uid' do
+              before { post '/courses/foo/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+            end
+            context 'and user already exists by email' do
+              before { header 'Authorization', build_auth_header('*', 'auth1') }
+              before { post '/courses/foo/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+            end
+          end
+        end
+      end
+
+      context 'when course does not exist' do
+        before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+
+        it 'rejects creating a student' do
+          header 'Authorization', build_auth_header('*')
+
+          post '/courses/foo/students', student_json
+
+          expect(last_response).to_not be_ok
+          expect(Classroom::Collection::Students.for('foo').count).to eq 0
+        end
+      end
     end
   end
 end
