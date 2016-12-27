@@ -50,11 +50,11 @@ helpers do
   end
 
   def course_slug
-    @course_slug ||= Mumukit::Service::Slug.new(tenant, course).to_s
+    @course_slug ||= Mumukit::Auth::Slug.join_s(tenant, course)
   end
 
   def repo_slug
-    @repo_slug ||= Mumukit::Service::Slug.new(params[:organization], params[:repository]).to_s
+    @repo_slug ||= Mumukit::Auth::Slug.join_s(params[:organization], params[:repository])
   end
 
   def tenantized_json_body
@@ -173,4 +173,25 @@ get '/permissions' do
   permissions.protect! :teacher, Mumukit::Auth::Slug.join_s(tenant, '_')
 
   {permissions: permissions }
+end
+
+post '/courses/:course/students' do
+  protect! :janitor
+
+  ensure_course_existence!
+  Classroom::Collection::CourseStudents.ensure_new! json_body['email'], course_slug
+  Classroom::Collection::Students.for(course).ensure_new! json_body['email']
+
+  json = {student: json_body.merge(uid: json_body['email']), course: {slug: course_slug}}
+  Classroom::Collection::CourseStudents.insert! json.wrap_json
+  Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
+
+  Mumukit::Nuntius::Publisher.publish_resubmissions(uid: json[:student][:uid], tenant: tenant)
+
+  perm = Mumukit::Auth::Store.get json[:student][:uid]
+  perm.add_permission!(:student, course_slug)
+  Mumukit::Auth::Store.set! json[:student][:uid], perm
+  Mumukit::Nuntius::EventPublisher.publish 'UserChanged', user: json[:student].merge(permissions: perm)
+
+  {status: :created}
 end
