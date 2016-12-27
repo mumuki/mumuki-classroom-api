@@ -168,3 +168,9 @@ get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
     .for(course)
     .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
 end
+
+get '/permissions' do
+  permissions.protect! :teacher, Mumukit::Auth::Slug.join_s(tenant, '_')
+
+  {permissions: permissions }
+end
