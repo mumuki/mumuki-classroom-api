@@ -9,8 +9,10 @@ def do_migrate!
       Classroom::Collection::GuideStudentsProgress.for(course).update_many({'student.social_id': social_id}, { '$set': {'student.uid': uid}})
       Classroom::Collection::ExerciseStudentProgress.for(course).update_many({'student.social_id': social_id}, { '$set': {'student.uid': uid}})
     end
-    Classroom::Collection::Courses.all.each do |course|
-      course = course.slug.split('/').last
+    Classroom::Collection::Courses.all.each do |course_w|
+      course = course_w.slug.split('/').last
+      Classroom::Collection::Courses.add_uid_to_course! course_w.slug
+      Classroom::Collection::CourseStudents.add_uid_to_course! course_w.slug
       Classroom::Collection::Teachers.for(course).all.each do |teacher|
         social_id = teacher.social_id
         uid = teacher.email || social_id
@@ -32,5 +34,23 @@ def do_migrate!
     Classroom::Collection::FailedSubmissions.all.each do |submission|
       Classroom::Collection::FailedSubmissions.update_one(submission.as_json, { '$set': { uid: (submission.submitter[:email] || submission.submitter[:social_id])} })
     end
+  end
+end
+
+module Classroom::Collection::Courses
+  def self.add_uid_to_course!(slug)
+    mongo_collection.update_many(
+      {'slug': slug},
+      {'$set': {'uid': slug}},
+    )
+  end
+end
+
+module Classroom::Collection::CourseStudents
+  def self.add_uid_to_course!(slug)
+    mongo_collection.update_many(
+      {'course.slug': slug},
+      {'$set': {'course.uid': slug}},
+    )
   end
 end
