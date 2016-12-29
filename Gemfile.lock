@@ -102,7 +102,7 @@ DEPENDENCIES
   mumukit-auth (~> 3.3)
   mumukit-core (~> 0.4)
   mumukit-inspection (~> 0.1)
-  mumukit-nuntius (~> 2.1)
+  mumukit-nuntius (~> 2.3)
   mumukit-service (~> 1.0)
   rack-test
   rake
