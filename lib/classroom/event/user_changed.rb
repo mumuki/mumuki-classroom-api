@@ -23,7 +23,9 @@ class Classroom::Event::UserChanged
         diff.each do |type, grants|
           grants.each do |grant|
             message = "#{scope}_#{type}"
-            self.send message, user, grant if self.respond_to? message, true
+            Classroom::Database.with grant.to_mumukit_slug.organization do
+              self.send message, user, grant if self.respond_to? message, true
+            end
           end
         end
       end
