@@ -224,12 +224,12 @@ describe Classroom::Collection::Students do
 
     end
     describe 'post /courses/:course/students' do
-      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
       let(:student_json) { student.to_json }
       before { allow(auth0).to receive(:add_permission!) }
 
       context 'when course exists' do
-        before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+        before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo', uid: 'example/foo'}.wrap_json) }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
@@ -295,14 +295,14 @@ describe Classroom::Collection::Students do
 
     describe 'post /courses/:course/students' do
       let(:auth0) { double('auth0') }
-      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
       let(:student_json) { student.to_json }
       before { allow(Mumukit::Auth::Store).to receive(:get).and_return(auth0) }
       before { allow(Mumukit::Auth::Store).to receive(:set!) }
       before { allow(auth0).to receive(:add_permission!) }
 
       context 'when course exists' do
-        before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo'}.wrap_json) }
+        before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo', uid: 'example/foo'}.wrap_json) }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }

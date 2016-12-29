@@ -16,12 +16,12 @@ module Classroom::Collection::CourseStudents
     )
   end
 
-  def self.create!(user, course_slug)
-    course = course_slug.to_mumukit_slug.course
-    ensure_new! user[:uid], course_slug
-    Classroom::Collection::Courses.ensure_exist! course_slug
+  def self.create!(user, course_uid)
+    course = course_uid.to_mumukit_slug.course
+    ensure_new! user[:uid], course_uid
+    Classroom::Collection::Courses.ensure_exist! course_uid
     Classroom::Collection::Students.for(course).ensure_new! user[:uid]
-    json = { student: user, course: {slug: course_slug}}
+    json = { student: user, course: {uid: course_uid}}
     Classroom::Collection::CourseStudents.insert! json.wrap_json
     Classroom::Collection::Students.for(course).insert! user.wrap_json
   end
@@ -38,16 +38,16 @@ module Classroom::Collection::CourseStudents
     { 'student.uid': uid }
   end
 
-  def self.course_key(slug)
-    { 'course.slug': slug }
+  def self.course_key(uid)
+    { 'course.uid': uid }
   end
 
-  def self.key(slug, uid)
-    student_key(uid).merge(course_key slug)
+  def self.key(course_uid, student_uid)
+    student_key(student_uid).merge(course_key course_uid)
   end
 
-  def self.delete_student!(course_slug, student_id)
-    mongo_collection.delete_one(key course_slug, student_id)
+  def self.delete_student!(course_uid, student_uid)
+    mongo_collection.delete_one(key course_uid, student_uid)
   end
 
   private

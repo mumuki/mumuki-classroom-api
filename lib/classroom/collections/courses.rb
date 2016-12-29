@@ -3,15 +3,15 @@ module Classroom::Collection::Courses
   extend Mumukit::Service::Collection
 
   def self.allowed(grants_pattern)
-    where(slug: {'$regex' => grants_pattern})
+    where(uid: {'$regex' => grants_pattern})
   end
 
-  def self.ensure_new!(slug)
-    raise Classroom::CourseExistsError, "#{slug} does already exist" if any?(slug: slug)
+  def self.ensure_new!(uid)
+    raise Classroom::CourseExistsError, "#{uid} does already exist" if any?(uid: uid)
   end
 
-  def self.ensure_exist!(slug)
-    raise Classroom::CourseNotExistsError, "#{slug} does not exist" unless any?(slug: slug)
+  def self.ensure_exist!(uid)
+    raise Classroom::CourseNotExistsError, "#{uid} does not exist" unless any?(uid: uid)
   end
 
   def self.upsert!(course)

@@ -17,11 +17,11 @@ describe Classroom::Collection::Courses do
     end
 
     context 'when there are courses' do
-      before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'test/foo', description: 'baz'}.wrap_json) }
+      before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz'}.wrap_json) }
       before { get '/courses' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq courses: [{name: 'foo', slug: 'test/foo', description: 'baz'}] }
+      it { expect(last_response.body).to json_eq courses: [{name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz'}] }
     end
   end
 
@@ -31,8 +31,9 @@ describe Classroom::Collection::Courses do
                          period: '2016',
                          shifts: ['morning'],
                          description: 'haskell',
+                         uid: 'example/2016-K2001',
                          slug: 'example/2016-K2001'}.to_json }
-    let(:created_slug) { Classroom::Collection::Courses.find_by(slug: 'example/2016-K2001').slug }
+    let(:created_uid) { Classroom::Collection::Courses.find_by(uid: 'example/2016-K2001').uid }
 
     context 'when is normal teacher' do
       it 'rejects course creation' do
@@ -46,27 +47,29 @@ describe Classroom::Collection::Courses do
     end
 
     context 'when is org admin' do
+      before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
       before { header 'Authorization', build_auth_header('example/*') }
       before { post '/courses', course_json }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Classroom::Collection::Courses.count).to eq 1 }
-      it { expect(created_slug).to eq 'example/2016-K2001' }
+      it { expect(created_uid).to eq 'example/2016-K2001' }
     end
 
     context 'when is global admin' do
+      before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses', course_json }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Classroom::Collection::Courses.count).to eq 1 }
-      it { expect(created_slug).to eq 'example/2016-K2001' }
+      it { expect(created_uid).to eq 'example/2016-K2001' }
     end
 
     context 'when course already exists' do
-      before { Classroom::Collection::Courses.insert!({slug: 'example/2016-K2001'}.wrap_json) }
+      before { Classroom::Collection::Courses.insert!({uid: 'example/2016-K2001'}.wrap_json) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses', course_json }
 
