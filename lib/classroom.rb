@@ -22,3 +22,14 @@ require_relative './classroom/failed_submission'
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 
+Mumukit::Nuntius.configure do |c|
+  c.app_name = 'classroom'
+  c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
+end
+
+Mumukit::Auth.configure do |c|
+  c.client_id = ENV['MUMUKI_AUTH0_CLIENT_ID']
+  c.client_secret = ENV['MUMUKI_AUTH0_CLIENT_SECRET']
+  c.daybreak_name = 'permissions'
+end
+
