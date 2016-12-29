@@ -14,6 +14,14 @@ module Classroom::Collection::Courses
     raise Classroom::CourseNotExistsError, "#{slug} does not exist" unless any?(slug: slug)
   end
 
+  def self.upsert!(course)
+    mongo_collection.update_one(
+      {'uid': course[:uid]},
+      {'$set': course.as_json(except: :uid)},
+      {'upsert': true}
+    )
+  end
+
   private
 
   def self.mongo_collection_name
