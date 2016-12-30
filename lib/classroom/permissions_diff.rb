@@ -1,13 +1,25 @@
-module Mumukit::Auth::PermissionsDiff
+class Hash
+  def to_mumukit_permissions
+    Mumukit::Auth::Permissions.parse self
+  end
+end
 
+class Mumukit::Auth::Permissions
+  def to_mumukit_permissions
+    self
+  end
+end
+
+
+
+module Mumukit::Auth::Permissions::Diff
   def self.diff(old_permissions, new_permissions)
-    old_perms = Mumukit::Auth::Permissions.parse(old_permissions.as_json)
-    new_perms = Mumukit::Auth::Permissions.parse(new_permissions.as_json)
+    old_perms = old_permissions.to_mumukit_permissions
+    new_perms = new_permissions.to_mumukit_permissions
 
     {}.with_indifferent_access.tap do |diff|
       Mumukit::Auth::Roles::ROLES.each do |role|
-        grants(role, old_perms, new_perms).each do |grant|
-          grant_s = grant.to_s
+        grants(role, old_perms, new_perms).each do |grant_s|
           diff[role] ||= {}.with_indifferent_access
           add_grant(diff, role, :added, grant_s) if add_grant?(grant_s, new_perms, old_perms, role)
           add_grant(diff, role, :removed, grant_s) if remove_grant?(grant_s, new_perms, old_perms, role)
@@ -23,19 +35,14 @@ module Mumukit::Auth::PermissionsDiff
   end
 
   def self.remove_grant?(grant_s, new_perms, old_perms, role)
-    old_perms.has_permission?(role, grant_s) and !new_perms.has_permission?(role, grant_s)
+    old_perms.has_permission?(role, grant_s) && !new_perms.has_permission?(role, grant_s)
   end
 
   def self.add_grant?(grant_s, new_perms, old_perms, role)
-    !old_perms.has_permission?(role, grant_s) and new_perms.has_permission?(role, grant_s)
+    !old_perms.has_permission?(role, grant_s) && new_perms.has_permission?(role, grant_s)
   end
 
   def self.grants(role, *permissions)
-    permissions.reduce([]) { |accum, perm| accum | grants_from(role, perm) }
+    permissions.flat_map { |it| it.grant_strings_for(role) }
   end
-
-  def self.grants_from(role, permission)
-    permission.scope_for(role)&.grants || []
-  end
-
 end
