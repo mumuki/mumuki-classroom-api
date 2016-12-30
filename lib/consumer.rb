@@ -1,6 +1,6 @@
 module Mumukit::Nuntius::Consumer
   def self.negligent_start!(queue_name, &block)
-    start queue_name do |_delivery_info, _properties, body|
+    start queue_name, queue_name do |_delivery_info, _properties, body|
       begin
         block.call(body)
       rescue => e
