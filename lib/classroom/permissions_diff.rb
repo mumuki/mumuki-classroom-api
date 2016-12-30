@@ -47,7 +47,7 @@ class Mumukit::Auth::Permissions
     def compare_grants!(role, some_permissions, another_permissions, change_type)
       some_permissions
         .grants_for(role)
-        .select { |grant| !another_permissions.has_permission?(role, grant) }
+        .select { |grant| !another_permissions.role_allows?(role, grant) }
         .each { |grant| changes << Change.new(role, grant, change_type) }
     end
 
