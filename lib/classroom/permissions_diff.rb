@@ -29,7 +29,11 @@ class Mumukit::Auth::Permissions
     end
 
     def organization
-      grant.to_mumukit_slug.organization
+      granted_slug.organization
+    end
+
+    def granted_slug
+      grant.to_mumukit_slug
     end
   end
 
