@@ -8,41 +8,50 @@ class Mumukit::Auth::Permissions
   def to_mumukit_permissions
     self
   end
+
+  def grants_for(role)
+    scope_for(role).grants
+  end
 end
 
+class Mumukit::Auth::Permissions
+  class Change
+    attr_accessor :role, :grant, :change_type
 
-
-module Mumukit::Auth::Permissions::Diff
-  def self.diff(old_permissions, new_permissions)
-    old_perms = old_permissions.to_mumukit_permissions
-    new_perms = new_permissions.to_mumukit_permissions
-
-    {}.with_indifferent_access.tap do |diff|
-      Mumukit::Auth::Roles::ROLES.each do |role|
-        grants(role, old_perms, new_perms).each do |grant_s|
-          diff[role] ||= {}.with_indifferent_access
-          add_grant(diff, role, :added, grant_s) if add_grant?(grant_s, new_perms, old_perms, role)
-          add_grant(diff, role, :removed, grant_s) if remove_grant?(grant_s, new_perms, old_perms, role)
-        end
-      end
+    def initialize(role, grant, change_type)
+      @role = role
+      @grant = grant
+      @change_type = change_type
     end
   end
 
-  private
+  class Diff
+    attr_accessor :changes
 
-  def self.add_grant(diff, role, type, grant)
-    (diff[role][type] ||= []) << grant
-  end
+    def initialize
+      @changes = []
+    end
 
-  def self.remove_grant?(grant_s, new_perms, old_perms, role)
-    old_perms.has_permission?(role, grant_s) && !new_perms.has_permission?(role, grant_s)
-  end
+    def empty?
+      changes.empty?
+    end
 
-  def self.add_grant?(grant_s, new_perms, old_perms, role)
-    !old_perms.has_permission?(role, grant_s) && new_perms.has_permission?(role, grant_s)
-  end
+    def compare_grants!(role, some_permissions, another_permissions, change_type)
+      some_permissions
+        .grants_for(role)
+        .select { |grant| !another_permissions.has_permission?(role, grant) }
+        .each { |grant| changes << Change.new(role, grant, change_type) }
+    end
 
-  def self.grants(role, *permissions)
-    permissions.flat_map { |it| it.grant_strings_for(role) }
+    def self.diff(old_permissions, new_permissions)
+      old_permissions = old_permissions.to_mumukit_permissions
+      new_permissions = new_permissions.to_mumukit_permissions
+      new.tap do |it|
+        Mumukit::Auth::Roles::ROLES.each do |role|
+          it.compare_grants! role, old_permissions, new_permissions, :removed
+          it.compare_grants! role, new_permissions, old_permissions, :added
+        end
+      end
+    end
   end
 end
