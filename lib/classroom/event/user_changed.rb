@@ -18,13 +18,14 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      Classroom::Database.within_each do
-        update_student user
-      end
-      diffs.changes.each do |change|
-        message = change.description
-        Classroom::Database.with change.organization do
-          self.send message, user, change.grant.to_s if self.respond_to? message, true
+      Classroom::Database.within_each { update_student user }
+
+      diffs.changes_by_organization.each do |organization, changes|
+        Classroom::Database.with organization do
+          changes.each do |change|
+            message = change.description
+            self.send message, user, change.grant.to_s if self.respond_to? message, true
+          end
         end
       end
     end

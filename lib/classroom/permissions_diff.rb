@@ -40,6 +40,10 @@ class Mumukit::Auth::Permissions
       @changes = []
     end
 
+    def changes_by_organization
+      changes.group_by(&:organization)
+    end
+
     def empty?
       changes.empty?
     end
