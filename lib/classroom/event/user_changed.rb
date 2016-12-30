@@ -18,7 +18,9 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      update_student user
+      Classroom::Database.within_each do
+        update_student user
+      end
       diffs.each do |scope, diff|
         diff.each do |type, grants|
           grants.each do |grant|
