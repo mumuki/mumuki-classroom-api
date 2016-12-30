@@ -4,9 +4,8 @@ class Classroom::Event::UserChanged
     attr_accessor :diffs
 
     def execute!(user)
-      user_h = user.with_indifferent_access[:user]
-      update_user_permissions user_h
-      update_user_model user_h.except(:permissions)
+      update_user_permissions user[:user]
+      update_user_model user[:user].except(:permissions)
     end
 
     private
@@ -19,6 +18,7 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
+      update_student user
       diffs.each do |scope, diff|
         diff.each do |type, grants|
           grants.each do |grant|
@@ -34,6 +34,32 @@ class Classroom::Event::UserChanged
     def set_diff_permissions(db, user)
       permissions = db.get user[:uid]
       self.diffs = Mumukit::Auth::PermissionsDiff.diff permissions, user[:permissions]
+    end
+
+    def values
+      [:uid, :social_id, :email, :name, :first_name, :last_name, :image_url]
+    end
+
+    def update_student(user)
+      Classroom::Collection::CourseStudents.find_by_uid(user[:uid]).try do |course_student|
+        course_h = course_student.course.as_json.with_indifferent_access
+        student_h = course_student.student.as_json(only: values).with_indifferent_access
+        user_h = user.as_json(only: values).with_indifferent_access
+        update_student! course_h, user_h if has_changes?(student_h, user_h)
+      end
+    end
+
+    def has_changes?(student_h, user_h)
+      user_h != student_h
+    end
+
+    def update_student!(course_h, student_h)
+      course = course_h[:uid].to_mumukit_slug.course
+      sub_student = student_h.transform_keys { |field| "student.#{field}".to_sym }
+      Classroom::Collection::Students.for(course).update! student_h
+      Classroom::Collection::CourseStudents.update_student! sub_student
+      Classroom::Collection::GuideStudentsProgress.for(course).update_student! sub_student
+      Classroom::Collection::ExerciseStudentProgress.for(course).update_student! sub_student
     end
 
     def student_added(user, course_slug)

@@ -5,8 +5,7 @@ class Classroom::Collection::Students < Classroom::Collection::People
   end
 
   def update!(data)
-    query = {uid:  data[:uid]}
-    update_one(query, { '$set': { first_name: data[:first_name], last_name: data[:last_name] }})
+    update_one({uid: data[:uid]}, { '$set': data})
   end
 
   def update_all_stats

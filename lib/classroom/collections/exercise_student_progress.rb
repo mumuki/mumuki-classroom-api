@@ -4,6 +4,10 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     mongo_collection.update_one(query_by_index(exercise_student), update_query(exercise_student), upsert: true)
   end
 
+  def update_student!(sub_student)
+    mongo_collection.update_many({'student.uid': sub_student[:'student.uid']}, {'$set': sub_student})
+  end
+
   def stats(exercise_student)
     _stats(query_by_guide_and_student(exercise_student))
   end

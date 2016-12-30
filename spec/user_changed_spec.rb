@@ -23,22 +23,28 @@ describe Classroom::Event::UserChanged do
     end
 
     context 'update models' do
+
       before { Classroom::Collection::Courses.insert!({uid: 'example/foo'}.wrap_json) }
       before { Classroom::Collection::Courses.insert!({uid: 'example/bar'}.wrap_json) }
       before { Classroom::Collection::Students.for('foo').insert! user.wrap_json }
       before { Classroom::Collection::CourseStudents.insert!({course: {uid: 'example/foo'}, student: user}.wrap_json) }
       before { Classroom::Event::UserChanged.execute! event }
 
+      let(:user2) {user.merge(social_id: 'foo').except(:first_name)}
+      let(:event) {{user: user2.merge(permissions: new_permissions)}}
+
       let(:student_foo_fetched) {Classroom::Collection::Students.for('foo').find_by(uid: uid)}
       let(:student_bar_fetched) {Classroom::Collection::Students.for('bar').find_by(uid: uid)}
       let(:teacher_foo_fetched) {Classroom::Collection::Teachers.for('foo').find_by(uid: uid)}
 
       it { expect(student_foo_fetched.detached).to eq true }
+      it { expect(student_foo_fetched.social_id).to eq 'foo'}
+      it { expect(student_foo_fetched.first_name).to eq 'Agustín'}
 
-      it { expect(student_bar_fetched.as_json(except: [:created_at])).to eq user }
+      it { expect(student_bar_fetched.as_json(except: [:created_at])).to eq user2 }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_foo_fetched.as_json(except: [:created_at])).to eq user }
+      it { expect(teacher_foo_fetched.as_json(except: [:created_at])).to eq user2 }
     end
 
   end

@@ -4,6 +4,10 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
     mongo_collection.update_one(query_by_index(guide_student), { :'$set' => guide_student }, { upsert: true })
   end
 
+  def update_student!(sub_student)
+    mongo_collection.update_many({'student.uid': sub_student[:'student.uid']}, {'$set': sub_student})
+  end
+
   def last_assignment_for(uid)
     guide_student_progress = first_by({'student.uid': uid }, { 'last_assignment.submission.created_at': -1 })
     guide_student_progress.try do |it|

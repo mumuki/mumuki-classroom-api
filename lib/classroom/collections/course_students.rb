@@ -9,11 +9,14 @@ module Classroom::Collection::CourseStudents
       .try { |it| wrap it }
   end
 
-  def self.update!(data)
-    update_one(
-      key(data[:course_slug], data[:uid]),
-      { '$set': { 'student.first_name': data[:first_name], 'student.last_name': data[:last_name] }}
-    )
+  def self.find_by_uid(uid)
+    find_projection(student_key uid).sort(_id: -1)
+      .first
+      .try { |it| wrap it }
+  end
+
+  def self.update_student!(sub_student)
+    mongo_collection.update_many({'student.uid': sub_student[:'student.uid']}, {'$set': sub_student})
   end
 
   def self.create!(user, course_uid)
