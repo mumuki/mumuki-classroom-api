@@ -21,21 +21,17 @@ class Classroom::Event::UserChanged
       Classroom::Database.within_each do
         update_student user
       end
-      diffs.each do |scope, diff|
-        diff.each do |type, grants|
-          grants.each do |grant|
-            message = "#{scope}_#{type}"
-            Classroom::Database.with grant.to_mumukit_slug.organization do
-              self.send message, user, grant if self.respond_to? message, true
-            end
-          end
+      diffs.changes.each do |change|
+        message = change.description
+        Classroom::Database.with change.organization do
+          self.send message, user, change.grant.to_s if self.respond_to? message, true
         end
       end
     end
 
     def set_diff_permissions(db, user)
       permissions = db.get user[:uid]
-      self.diffs = Mumukit::Auth::PermissionsDiff.diff permissions, user[:permissions]
+      self.diffs = Mumukit::Auth::Permissions::Diff.diff permissions, user[:permissions]
     end
 
     def values

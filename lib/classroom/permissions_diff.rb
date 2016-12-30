@@ -16,12 +16,20 @@ end
 
 class Mumukit::Auth::Permissions
   class Change
-    attr_accessor :role, :grant, :change_type
+    attr_accessor :role, :grant, :type
 
     def initialize(role, grant, change_type)
       @role = role
       @grant = grant
-      @change_type = change_type
+      @type = change_type
+    end
+
+    def description
+      "#{role}_#{type}"
+    end
+
+    def organization
+      grant.to_mumukit_slug.organization
     end
   end
 
