@@ -1,24 +1,43 @@
 require 'spec_helper'
 
-describe Mumukit::Auth::PermissionsDiff do
+describe Mumukit::Auth::Permissions::Diff do
 
-  let(:permissions) { Mumukit::Auth::Permissions.parse({
+  let(:permissions) { Mumukit::Auth::Permissions.parse(
     student: 'foo/bar:foo/baz',
     teacher: 'mumuki/foo:example/*',
-  }) }
+  ) }
+  let(:diff) { Mumukit::Auth::Permissions::Diff.diff permissions, new_permissions }
 
-  let(:new_permissions) {{ student: 'foo/bar:foo/fiz' }}
+  context 'student and teacher changed' do
+    let(:new_permissions) { {student: 'foo/bar:foo/fiz'} }
 
-  it 'diff' do
-    expect(Mumukit::Auth::PermissionsDiff.diff permissions, new_permissions).to eq ({
-      'student' => {
-        'added' => ['foo/fiz'],
-        'removed' => ['foo/baz']
-      },
-      'teacher' => {
-        'removed' => %w(mumuki/foo example/*)
-      }
-    })
+    it { expect(diff).to eq(
+                           'student' => {
+                             'added' => ['foo/fiz'],
+                             'removed' => ['foo/baz']
+                           },
+                           'teacher' => {
+                             'removed' => %w(mumuki/foo example/*)
+                           }) }
   end
 
+  context 'no changes' do
+    let(:new_permissions) { permissions }
+    it { expect(diff).to eq(
+                           'student' => {},
+                           'teacher' => {}
+                         ) }
+  end
+
+
+  context 'everything removed' do
+    let(:new_permissions) { {} }
+    it { expect(diff).to eq(
+                           'student' => {
+                             "removed" => %w(foo/bar foo/baz)
+                           },
+                           'teacher' => {
+                             'removed' => %w(mumuki/foo example/*)
+                           }) }
+  end
 end
