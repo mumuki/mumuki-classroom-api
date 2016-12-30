@@ -1,8 +1,8 @@
 module Classroom::FailedSubmission
 #FIXME this code should be added to a failed submission document
-  def self.reprocess!(social_id, destination)
-    reprocess_from_organization social_id, destination, destination
-    reprocess_from_organization social_id, :central, destination
+  def self.reprocess!(uid, destination)
+    reprocess_from_organization uid, destination, destination
+    reprocess_from_organization uid, :central, destination
   end
 
   def self.from(exercise_student_progress)
@@ -14,9 +14,9 @@ module Classroom::FailedSubmission
 
   private
 
-  def self.reprocess_from_organization(social_id, source, destination)
+  def self.reprocess_from_organization(uid, source, destination)
     Classroom::Database.with source do
-      Classroom::Collection::FailedSubmissions.find_by_social_id(social_id).raw.each do |failed_submission|
+      Classroom::Collection::FailedSubmissions.find_by_uid(uid).raw.each do |failed_submission|
         delete_failed_submission failed_submission, source
         try_reprocess failed_submission, source, destination
       end
@@ -60,6 +60,7 @@ module Classroom::FailedSubmission
 
   def self.submitter_from(student)
     {
+      uid: student[:uid],
       name: student[:name],
       email: student[:email],
       social_id: student[:social_id],

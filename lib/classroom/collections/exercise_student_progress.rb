@@ -4,12 +4,16 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     mongo_collection.update_one(query_by_index(exercise_student), update_query(exercise_student), upsert: true)
   end
 
+  def update_student!(sub_student)
+    mongo_collection.update_many({'student.uid': sub_student[:'student.uid']}, {'$set': sub_student})
+  end
+
   def stats(exercise_student)
     _stats(query_by_guide_and_student(exercise_student))
   end
 
-  def all_stats(social_id)
-    _stats(student_query(social_id))
+  def all_stats(uid)
+    _stats(student_query(uid))
   end
 
   def empty_stats
@@ -18,21 +22,16 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
       passed_with_warnings: 0 }
   end
 
-  def delete_student!(social_id)
-    where(student_query(social_id)).raw.each { |it| Classroom::FailedSubmission.from(it) }
-    mongo_collection.delete_many(student_query(social_id))
-  end
-
-  def detach_student!(social_id)
+  def detach_student!(uid)
     mongo_collection.update_many(
-      { :'student.social_id' => social_id },
+      { :'student.uid' => uid },
       { :$set => { detached: true }}
     )
   end
 
-  def attach_student!(social_id)
+  def attach_student!(uid)
     mongo_collection.update_many(
-      { :'student.social_id' => social_id },
+      { :'student.uid' => uid },
       { :$unset => { detached: '' }}
     )
   end
@@ -41,22 +40,13 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     json = data.deep_symbolize_keys
     eid = json[:exercise_id]
     sid = json[:submission_id]
+    uid = json[:uid]
     comment = json[:comment]
-    social_id = json[:social_id]
     mongo_collection.update_one(
-      { :'student.social_id' => social_id, :'exercise.id' => eid, :'submissions.id' => sid },
-      { :'$push' => { 'submissions.$.comments' => comment }}
+      { 'student.uid': uid, 'exercise.id': eid, 'submissions.id': sid },
+      { '$push': { 'submissions.$.comments': comment }}
     )
 
-  end
-
-  def transfer(social_id, destination)
-    where(student_query(social_id)).raw.each do |exercise_progress|
-      Classroom::Collection::ExerciseStudentProgress
-        .for(destination)
-        .insert! exercise_progress
-    end
-    mongo_collection.delete_many(student_query(social_id))
   end
 
   def wrap(it)
@@ -91,7 +81,7 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
 
   def query_by_guide_and_student(exercise_student)
     { :'guide.slug' => exercise_student[:guide][:slug],
-      :'student.social_id' => exercise_student[:student][:social_id] }
+      :'student.uid' => exercise_student[:student][:uid] }
   end
 
   def query_by_index(exercise_student)
@@ -103,8 +93,8 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
       :'$push' => { :submissions => exercise_student[:submission] }}
   end
 
-  def student_query(social_id)
-    {:'student.social_id' => social_id}
+  def student_query(uid)
+    {:'student.uid' => uid}
   end
 
 end

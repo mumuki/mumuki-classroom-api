@@ -15,7 +15,7 @@ module Classroom::Submission
 
   def self.find_submission_course!(json)
     Classroom::Collection::CourseStudents
-      .find_by_social_id!(social_id json)
+      .find_by_uid!(uid json)
       .course
       .deep_symbolize_keys
   end
@@ -23,7 +23,7 @@ module Classroom::Submission
   def self.find_student_from(json)
     Classroom::Collection::Students
       .for(course_prefix json)
-      .find_by(social_id: social_id(json))
+      .find_by(uid: uid(json))
       .as_json
       .deep_symbolize_keys
   end
@@ -37,13 +37,13 @@ module Classroom::Submission
   def self.update_student_progress(json)
     Classroom::Collection::Students
       .for(course_prefix json)
-      .update_all_stats_for(student_from(json)[:social_id])
+      .update_all_stats_for(student_from(json)[:uid])
   end
 
   def self.update_student_last_assignment(json)
     Classroom::Collection::Students
       .for(course_prefix json)
-      .update_last_assignment_for(student_from(json)[:social_id])
+      .update_last_assignment_for(student_from(json)[:uid])
   end
 
   def self.update_exercise_student_progress(json)
@@ -70,8 +70,8 @@ module Classroom::Submission
       .deep_symbolize_keys
   end
 
-  def self.social_id(json)
-    json[:submitter][:social_id]
+  def self.uid(json)
+    json[:submitter][:uid]
   end
 
   def self.course_prefix(json)
@@ -98,18 +98,19 @@ module Classroom::Submission
 
     { passed: stats[:passed],
       failed: stats[:failed],
-      passed_with_warnings: stats[:passed_with_warnings] }
+      passed_with_warnings: stats[:passed_with_warnings] }.compact
   end
 
   def self.student_from(json)
     student = json[:student]
 
-    { name: student[:name],
+    { uid: student[:uid],
+      name: student[:name],
       email: student[:email],
       image_url: student[:image_url],
       social_id: student[:social_id],
       last_name: student[:last_name],
-      first_name: student[:first_name] }
+      first_name: student[:first_name] }.compact
   end
 
   def self.guide_from(json)
@@ -122,9 +123,9 @@ module Classroom::Submission
       language: {
         name: guide[:language][:name],
         devicon: guide[:language][:devicon]
-      }
+      }.compact
     }
-    classroom_guide
+    classroom_guide.compact
   end
 
   def self.exercise_from(json)
@@ -132,7 +133,7 @@ module Classroom::Submission
 
     { id: exercise[:id],
       name: exercise[:name],
-      number: exercise[:number] }
+      number: exercise[:number] }.compact
   end
 
   def self.submission_from(json)
@@ -144,7 +145,7 @@ module Classroom::Submission
       created_at: json[:created_at],
       test_results: json[:test_results],
       submissions_count: json[:submissions_count],
-      expectation_results: json[:expectation_results] }
+      expectation_results: json[:expectation_results] }.compact
   end
 
 end

@@ -21,7 +21,3 @@ end
 error Classroom::TeacherExistsError do
   halt 400
 end
-
-error Mumukit::Auth::EmailNotRegistered do
-  halt 400
-end

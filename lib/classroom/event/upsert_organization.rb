@@ -1,4 +1,4 @@
-class Classroom::Command::UpsertOrganization
+class Classroom::Event::UpsertOrganization
   class << self
     def execute!(organization)
       Classroom::Database.with organization['name'] do

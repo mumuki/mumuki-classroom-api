@@ -3,7 +3,6 @@ CodeClimate::TestReporter.start
 
 require 'factory_girl'
 require 'rack/test'
-require 'mumukit/auth'
 
 require_relative '../lib/classroom'
 require_relative '../app/routes'
@@ -48,17 +47,22 @@ require 'base64'
 Mumukit::Auth.configure do |c|
   c.client_id = 'foo'
   c.client_secret = Base64.encode64 'bar'
+  c.daybreak_name = 'test'
+end
+
+RSpec.configure do |config|
+ config.after(:each) do
+   FileUtils.rm ["#{Mumukit::Auth.config.daybreak_name}.db"], force: true
+  end
 end
 
 Classroom::Database.connect! 'example'
 
 def build_auth_header(permissions_string, sub='github|user123456')
-  metadata = {classroom: {permissions: permissions_string}}
-
+  Mumukit::Auth::Store.set!(sub, { owner: permissions_string })
   encoded_token = JWT.encode(
       {aud: Mumukit::Auth.config.client_id,
-       sub: sub,
-       app_metadata: metadata},
+       sub: sub},
       Mumukit::Auth::Token.decoded_secret)
   'dummy token ' + encoded_token
 end

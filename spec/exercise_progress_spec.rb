@@ -13,18 +13,18 @@ describe Classroom::Collection::ExerciseStudentProgress do
   describe 'get' do
     let(:progress1) {{
       guide: { slug: 'example/foo' },
-      student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
+      student: { name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456' },
       exercise: { id: 177, name: 'foo' },
       submissions: [{ status: :passed }] }}
 
     let(:progress2) {{
       guide: { slug: 'example/foo' },
-      student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
+      student: { name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456' },
       exercise: { id: 178, name: 'foo' },
       submissions: [{ status: :failed, expectation_results: [{binding: 'f', inspection: 'HasComposition', result: 'failed'}] }, { status: :passed }] }}
     let(:result2) {{
       guide: { slug: 'example/foo' },
-      student: { name: 'jondoe', email: 'jondoe@gmail.com', social_id: 'github|123456' },
+      student: { name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456' },
       exercise: { id: 178, name: 'foo' },
       submissions: [{ status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}] }, { status: :passed }] }}
 

@@ -5,10 +5,14 @@ get '/courses' do
 end
 
 post '/courses' do
-  permissions.protect! json_body['slug']
+  json = json_body.with_indifferent_access
+  course = json.merge(uid: json[:slug])
+  permissions.protect! :janitor, json[:slug]
 
-  Classroom::Collection::Courses.ensure_new! json_body['slug']
-  Classroom::Collection::Courses.insert! json_body.wrap_json
+  Classroom::Collection::Courses.ensure_new! json[:uid]
+  Classroom::Collection::Courses.upsert! course
+
+  Mumukit::Nuntius::EventPublisher.publish('CourseChanged', {course: course})
 
   {status: :created}
 end

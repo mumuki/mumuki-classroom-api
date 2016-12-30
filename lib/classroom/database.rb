@@ -1,14 +1,18 @@
 class Classroom::Database
   extend Mumukit::Service::Database
 
-  attr_accessor :client, :organization
+  attr_accessor :organization
 
   def initialize(organization)
     @organization = organization.to_sym
   end
 
+  def client
+    @client ||= self.class.new_database_client(organization)
+  end
+
   def connect!
-    self.client = self.class.new_database_client(organization)
+    client
   end
 
   def disconnect!

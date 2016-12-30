@@ -1,70 +1,60 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (4.2.7.1)
+    activesupport (5.0.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (~> 0.7)
-      json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
-      thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
     amq-protocol (2.0.1)
-    auth0 (4.0.0)
-      httmultiparty (~> 0.3.16)
-    bson (4.1.1)
+    bson (4.2.1)
     bson_ext (1.5.1)
-    bunny (2.5.1)
+    bunny (2.6.2)
       amq-protocol (>= 2.0.1)
     codeclimate-test-reporter (0.6.0)
       simplecov (>= 0.7.1, < 1.0.0)
+    concurrent-ruby (1.0.4)
+    daybreak (0.3.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
     domain_name (0.5.20160826)
       unf (>= 0.0.5, < 1.0.0)
     factory_girl (4.7.0)
       activesupport (>= 3.0.0)
-    httmultiparty (0.3.16)
-      httparty (>= 0.7.3)
-      mimemagic
-      multipart-post
     http-cookie (1.0.3)
       domain_name (~> 0.5)
-    httparty (0.14.0)
-      multi_xml (>= 0.5.2)
     i18n (0.7.0)
-    json (1.8.3)
+    json (2.0.2)
     jwt (1.5.6)
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
-    mimemagic (0.3.2)
-    minitest (5.9.1)
-    mongo (2.3.0)
-      bson (~> 4.1)
-    multi_xml (0.5.5)
-    multipart-post (2.0.0)
-    mumukit-auth (1.0.0)
-      auth0
+    minitest (5.10.1)
+    mongo (2.4.1)
+      bson (>= 4.2.1, < 5.0.0)
+    mumukit-auth (3.3.1)
+      daybreak
       jwt
-      mumukit-core (~> 0.2)
-    mumukit-core (0.3.0)
-      activesupport (~> 4.1)
+      mumukit-core (~> 0.4)
+    mumukit-core (0.4.3)
+      activesupport (>= 4.1)
       i18n (~> 0.7)
-      rack (~> 1.5)
+      rack (>= 1.5)
     mumukit-inspection (0.1.1)
       mumukit-core (~> 0.2)
-    mumukit-nuntius (0.3.6)
-      activesupport (~> 4.1)
+    mumukit-nuntius (2.3.1)
       bunny (~> 2.3)
-    mumukit-service (0.6.0)
+      mumukit-core (~> 0.2)
+    mumukit-service (1.0.0)
       bson_ext
       mongo (~> 2.1)
-      mumukit-core (~> 0.2)
+      mumukit-core (~> 0.4)
       puma
       sinatra
       sinatra-cross_origin (~> 0.3.1)
     netrc (0.11.0)
-    puma (3.6.0)
-    rack (1.6.4)
+    puma (3.6.2)
+    rack (1.6.5)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.3)
@@ -109,11 +99,11 @@ DEPENDENCIES
   codeclimate-test-reporter
   factory_girl
   mongo (~> 2.1)
-  mumukit-auth (~> 1.0)
-  mumukit-core (~> 0.3)
+  mumukit-auth (~> 3.3)
+  mumukit-core (~> 0.4)
   mumukit-inspection (~> 0.1)
-  mumukit-nuntius (~> 0.3)
-  mumukit-service (~> 0.6)
+  mumukit-nuntius (~> 2.3)
+  mumukit-service (~> 1.0)
   rack-test
   rake
   rest-client (~> 2.0)
@@ -122,4 +112,4 @@ DEPENDENCIES
   sinatra-cross_origin (~> 0.3.1)
 
 BUNDLED WITH
-   1.12.5
+   1.13.6

@@ -2,8 +2,8 @@ module Classroom::Collection::FailedSubmissions
 
   extend Mumukit::Service::Collection
 
-  def self.find_by_social_id(social_id)
-    where({ :'submitter.social_id' => social_id })
+  def self.find_by_uid(uid)
+    where({ :'submitter.uid' => uid })
   end
 
   private

@@ -1,6 +1,5 @@
 require 'sinatra'
 require 'sinatra/cross_origin'
-require 'mumukit/auth'
 require 'mumukit/service/routes'
 require 'mumukit/service/routes/auth'
 
@@ -17,8 +16,8 @@ helpers do
     params[:course]
   end
 
-  def student_id
-    params[:student_id]
+  def uid
+    params[:uid]
   end
 
   def exercise_id
@@ -26,7 +25,7 @@ helpers do
   end
 
   def exercise_student_progress_query
-    {'guide.slug' => repo_slug, 'student.social_id' => student_id}
+    {'guide.slug': repo_slug, 'student.uid': uid}
   end
 
   def by_permissions(key, &query)
@@ -51,11 +50,11 @@ helpers do
   end
 
   def course_slug
-    @course_slug ||= Mumukit::Service::Slug.new(tenant, course).to_s
+    @course_slug ||= Mumukit::Auth::Slug.join_s(tenant, course)
   end
 
   def repo_slug
-    @repo_slug ||= Mumukit::Service::Slug.new(params[:organization], params[:repository]).to_s
+    @repo_slug ||= Mumukit::Auth::Slug.join_s(params[:organization], params[:repository])
   end
 
   def tenantized_json_body
@@ -66,8 +65,8 @@ helpers do
     Classroom::Collection::Courses.ensure_exist! course_slug
   end
 
-  def ensure_course_student_existence!(social_id)
-    Classroom::Collection::CourseStudents.ensure_exist! social_id, course_slug
+  def ensure_course_student_existence!(uid)
+    Classroom::Collection::CourseStudents.ensure_exist! uid, course_slug
   end
 
   def set_locale!(org)
@@ -78,13 +77,18 @@ helpers do
     @organization_json ||= Classroom::Collection::Organizations.find_by(name: tenant).as_json
   end
 
-  def update_and_notify_user_metadata(user, method)
-    user.send("#{method}_permission!", 'atheneum', "#{tenant}/*")
-    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpdateUserMetadata', {social_id: student_id})
+  def update_and_notify_student_metadata(uid, method)
+    permissions = Mumukit::Auth::Store.get uid
+    permissions.send("#{method}_permission!", 'student', course_slug)
+    Classroom::Collection::Students.for(course).find_by({uid: uid}).try do |user|
+      user_as_json = user.as_json(only: [:first_name, :last_name, :email])
+      user_to_notify = user_as_json.merge(uid: uid, permissions: permissions)
+      Mumukit::Nuntius::EventPublisher.publish('UserChanged', {user: user_to_notify})
+    end
   end
 
   def notify_upsert_exam(exam_id)
-    Mumukit::Nuntius::CommandPublisher.publish('atheneum', 'UpsertExam', tenantized_json_body.merge(exam_id))
+    Mumukit::Nuntius::EventPublisher.publish('UpsertExam', tenantized_json_body.merge(exam_id))
   end
 
 end
@@ -108,114 +112,86 @@ require_relative './routes/ping'
 require_relative './routes/teachers'
 
 get '/courses/:course/students' do
-  protect!
+  protect! :teacher
   Classroom::Collection::Students.for(course).all.as_json
 end
 
-post '/courses/:course/students' do
-  social_id = token.jwt['sub']
-
-  ensure_course_existence!
-  Classroom::Collection::CourseStudents.ensure_new! social_id, course_slug
-  Classroom::Collection::Students.for(course).ensure_new! social_id, json_body['email']
-
-  json = {student: json_body.merge(social_id: social_id), course: {slug: course_slug}}
-  Classroom::Collection::CourseStudents.insert! json.wrap_json
-  Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
-
-  Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: social_id, tenant: tenant)
-  Mumukit::Auth::User.new(token.jwt['sub']).add_permission!('atheneum', "#{tenant}/*")
-
+post '/courses/:course/students/:uid' do
+  protect! :janitor
+  Mumukit::Nuntius::Publisher.publish_resubmissions(uid: uid, tenant: tenant)
   {status: :created}
 end
 
-post '/courses/:course/students/:student_id' do
-  protect!
-  Mumukit::Nuntius::Publisher.publish_resubmissions(social_id: student_id, tenant: tenant)
-  {status: :created}
-end
-
-delete '/courses/:course/students/:student_id' do
-  protect!
-  Classroom::Collection::ExerciseStudentProgress.for(course).delete_student!(student_id)
-  Classroom::Collection::Students.for(course).delete!(student_id)
-  Classroom::Collection::CourseStudents.delete_student!(course_slug, student_id)
-  Classroom::Collection::GuideStudentsProgress.for(course).delete_student!(student_id)
-  Classroom::Collection::Followers.for(course).delete_follower!(course_slug, student_id)
-  {status: :deleted}
-end
-
-post '/courses/:course/students/:student_id/detach' do
-  protect!
-  Mumukit::Auth::User.new(student_id).try do |user|
-    Classroom::Collection::Students.for(course).detach!(student_id)
-    Classroom::Collection::ExerciseStudentProgress.for(course).detach_student!(student_id)
-    Classroom::Collection::GuideStudentsProgress.for(course).detach_student!(student_id)
-    update_and_notify_user_metadata(user, 'remove')
-  end
+post '/courses/:course/students/:uid/detach' do
+  protect! :janitor
+  Classroom::Collection::Students.for(course).detach!(uid)
+  update_and_notify_student_metadata(uid, 'remove')
   {status: :updated}
 end
 
-post '/courses/:course/students/:student_id/attach' do
-  protect!
-  Mumukit::Auth::User.new(student_id).try do |user|
-    Classroom::Collection::Students.for(course).attach!(student_id)
-    Classroom::Collection::ExerciseStudentProgress.for(course).attach_student!(student_id)
-    Classroom::Collection::GuideStudentsProgress.for(course).attach_student!(student_id)
-    update_and_notify_user_metadata(user, 'add')
-  end
+post '/courses/:course/students/:uid/attach' do
+  protect! :janitor
+  Classroom::Collection::Students.for(course).attach!(uid)
+  update_and_notify_student_metadata(uid, 'add')
   {status: :updated}
 end
 
-post '/courses/:course/students/:student_id/transfer' do
-  protect!
-  Classroom::Collection::Students
-    .for(course)
-    .transfer(student_id, tenant, json_body['destination'])
-  {status: :updated}
-end
+get '/courses/:course/student/:uid' do
+  protect! :teacher
 
-get '/courses/:course/student/:social_id' do
-  protect!
-
-  Classroom::Collection::Students.for(course).find_by(social_id: params[:social_id]).as_json
-end
-
-put '/courses/:course/student' do
-  protect!
-
-  ensure_course_existence!
-  ensure_course_student_existence!(json_body['social_id'])
-  json = {first_name: json_body['first_name'], last_name: json_body['last_name'], social_id: json_body['social_id'], course_slug: course_slug}
-  Classroom::Collection::CourseStudents.update!(json)
-  Classroom::Collection::Students.for(course).update!(json)
-
-  {status: :updated}
+  Classroom::Collection::Students.for(course).find_by(uid: uid).as_json
 end
 
 get '/courses/:course/guides' do
-  protect!
+  protect! :teacher
   Classroom::Collection::Guides.for(course).all.as_json
 end
 
 get '/courses/:course/guides/:organization/:repository' do
-  protect!
+  protect! :teacher
   Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
 end
 
-get '/courses/:course/guides/:organization/:repository/:student_id' do
+get '/courses/:course/guides/:organization/:repository/:uid' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .where(exercise_student_progress_query).as_json
 end
 
 get '/courses/:course/progress' do
-  protect!
+  protect! :teacher
   Classroom::Collection::ExerciseStudentProgress.for(course).all.as_json
 end
 
-get '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
+get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
   Classroom::Collection::ExerciseStudentProgress
     .for(course)
     .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
+end
+
+get '/permissions' do
+  permissions.protect! :teacher, Mumukit::Auth::Slug.join_s(tenant, '_')
+
+  {permissions: permissions }
+end
+
+post '/courses/:course/students' do
+  protect! :janitor
+
+  ensure_course_existence!
+  Classroom::Collection::CourseStudents.ensure_new! json_body['email'], course_slug
+  Classroom::Collection::Students.for(course).ensure_new! json_body['email']
+
+  json = {student: json_body.merge(uid: json_body['email']), course: {slug: course_slug}}
+  Classroom::Collection::CourseStudents.insert! json.wrap_json
+  Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
+
+  Mumukit::Nuntius::Publisher.publish_resubmissions(uid: json[:student][:uid], tenant: tenant)
+
+  perm = Mumukit::Auth::Store.get json[:student][:uid]
+  perm.add_permission!(:student, course_slug)
+  Mumukit::Auth::Store.set! json[:student][:uid], perm
+  Mumukit::Nuntius::EventPublisher.publish 'UserChanged', user: json[:student].merge(permissions: perm)
+
+  {status: :created}
 end

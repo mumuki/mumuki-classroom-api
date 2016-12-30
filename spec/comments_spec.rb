@@ -8,10 +8,10 @@ describe 'comments' do
 
   describe 'post /courses/:course/comments' do
     let(:comment) {{content: 'hola', type: 'good'}}
-    let(:comment_to_post) {{social_id: 1, exercise_id: 1, submission_id: 1, comment: comment}.to_json}
+    let(:comment_to_post) {{uid: 1, exercise_id: 1, submission_id: 1, comment: comment}.to_json}
 
     context 'when authenticated' do
-      before { Classroom::Collection::ExerciseStudentProgress.for('bar').insert!({student: {social_id: 1}, exercise: {id: 1}, submissions: [{id:1}]}.wrap_json) }
+      before { Classroom::Collection::ExerciseStudentProgress.for('bar').insert!({student: {uid: 1}, exercise: {id: 1}, submissions: [{id:1}]}.wrap_json) }
       before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses/bar/comments', comment_to_post }
@@ -25,7 +25,7 @@ describe 'comments' do
       before { header 'Authorization', build_auth_header('foo/bar') }
       before { post '/courses/baz/comments', comment_to_post }
 
-      it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are foo/bar'}.to_json) }
+      it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are '}.to_json) }
     end
 
   end
