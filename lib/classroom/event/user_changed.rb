@@ -24,7 +24,7 @@ class Classroom::Event::UserChanged
         Classroom::Database.with organization do
           changes.each do |change|
             message = change.description
-            self.send message, user, change.grant.to_s if self.respond_to? message, true
+            self.send message, user, change.granted_slug if self.respond_to? message, true
           end
         end
       end
@@ -61,21 +61,20 @@ class Classroom::Event::UserChanged
       Classroom::Collection::ExerciseStudentProgress.for(course).update_student! sub_student
     end
 
-    def student_added(user, course_slug)
-      course = course_slug.to_mumukit_slug.course
-      if Classroom::Collection::Students.for(course).exists? user[:uid]
-        Classroom::Collection::Students.for(course).attach! user[:uid]
+    def student_added(user, granted_slug)
+      if Classroom::Collection::Students.for(granted_slug.course).exists? user[:uid]
+        Classroom::Collection::Students.for(granted_slug.course).attach! user[:uid]
       else
-        Classroom::Collection::CourseStudents.create! user, course_slug
+        Classroom::Collection::CourseStudents.create! user, granted_slug.to_s
       end
     end
 
-    def student_removed(user, course_slug)
-      Classroom::Collection::Students.for(course_slug.to_mumukit_slug.course).detach! user[:uid]
+    def student_removed(user, granted_slug)
+      Classroom::Collection::Students.for(granted_slug.course).detach! user[:uid]
     end
 
-    def teacher_added(user, course_slug)
-      Classroom::Collection::Teachers.for(course_slug.to_mumukit_slug.course).upsert! user
+    def teacher_added(user, granted_slug)
+      Classroom::Collection::Teachers.for(granted_slug.course).upsert! user
     end
 
   end
