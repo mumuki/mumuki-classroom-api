@@ -1,7 +1,7 @@
 class Classroom::Event::UserChanged
   class << self
 
-    attr_accessor :diffs
+    attr_accessor :changes
 
     def execute!(user)
       update_user_permissions user[:user]
@@ -18,28 +18,25 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      Classroom::Database.within_each { update_student user }
-
-      diffs.changes_by_organization.each do |organization, changes|
-        Classroom::Database.with organization do
-          changes.each do |change|
-            message = change.description
-            self.send message, user, change.granted_slug if self.respond_to? message, true
-          end
+      Classroom::Database.within_each do |organization|
+        update_student user
+        changes[organization]&.each do |change|
+          message = change.description
+          self.send message, user, change.granted_slug if self.respond_to? message, true
         end
       end
     end
 
     def set_diff_permissions(db, user)
       permissions = db.get user[:uid]
-      self.diffs = Mumukit::Auth::Permissions::Diff.diff permissions, user[:permissions]
+      self.changes = Mumukit::Auth::Permissions::Diff.diff(permissions, user[:permissions]).changes_by_organization
     end
 
     def update_student(user)
       Classroom::Collection::CourseStudents.find_by_uid(user[:uid]).try do |course_student|
         course_h = course_student.course.as_json.with_indifferent_access
         old_profile = Mumukit::Auth::Profile.extract course_student.student
-        new_profile = Mumukit::Auth::Profile.extract  user
+        new_profile = Mumukit::Auth::Profile.extract user
         update_student! course_h, new_profile.attributes if old_profile != new_profile
       end
     end

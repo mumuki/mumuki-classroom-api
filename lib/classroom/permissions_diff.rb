@@ -45,7 +45,7 @@ class Mumukit::Auth::Permissions
     end
 
     def changes_by_organization
-      changes.group_by(&:organization)
+      changes.group_by(&:organization).with_indifferent_access
     end
 
     def empty?
