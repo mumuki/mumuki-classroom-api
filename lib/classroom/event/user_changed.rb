@@ -36,18 +36,14 @@ class Classroom::Event::UserChanged
     end
 
     def update_student(user)
-      values = Mumukit::Auth::Profile::FIELDS
       Classroom::Collection::CourseStudents.find_by_uid(user[:uid]).try do |course_student|
         course_h = course_student.course.as_json.with_indifferent_access
-        student_h = course_student.student.as_json(only: values).with_indifferent_access
-        user_h = user.as_json(only: values).with_indifferent_access
-        update_student! course_h, user_h if has_changes?(student_h, user_h)
+        old_profile = Mumukit::Auth::Profile.extract course_student.student
+        new_profile = Mumukit::Auth::Profile.extract  user
+        update_student! course_h, new_profile.attributes if old_profile != new_profile
       end
     end
 
-    def has_changes?(student_h, user_h)
-      user_h != student_h
-    end
 
     def update_student!(course_h, student_h)
       course = course_h[:uid].to_mumukit_slug.course
