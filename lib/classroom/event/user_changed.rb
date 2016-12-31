@@ -35,11 +35,8 @@ class Classroom::Event::UserChanged
       self.diffs = Mumukit::Auth::Permissions::Diff.diff permissions, user[:permissions]
     end
 
-    def values
-      [:uid, :social_id, :email, :name, :first_name, :last_name, :image_url]
-    end
-
     def update_student(user)
+      values = Mumukit::Auth::Profile::FIELDS
       Classroom::Collection::CourseStudents.find_by_uid(user[:uid]).try do |course_student|
         course_h = course_student.course.as_json.with_indifferent_access
         student_h = course_student.student.as_json(only: values).with_indifferent_access
