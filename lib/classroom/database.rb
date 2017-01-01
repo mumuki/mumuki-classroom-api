@@ -29,6 +29,10 @@ class Classroom::Database
   class << self
     delegate :client, :organization, :disconnect!, to: :@current_database
 
+    def ensure!(organization)
+      with(organization) { client.collections }
+    end
+
     def connect!(organization)
       @current_database = self.new(organization)
       @current_database.connect!

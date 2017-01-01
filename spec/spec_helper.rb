@@ -56,6 +56,7 @@ RSpec.configure do |config|
   end
 end
 
+Classroom::Database.ensure! 'example'
 Classroom::Database.connect! 'example'
 
 def build_auth_header(permissions_string, sub='github|user123456')
