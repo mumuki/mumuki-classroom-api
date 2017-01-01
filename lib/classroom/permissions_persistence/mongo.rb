@@ -18,7 +18,8 @@ class Classroom::PermissionsPersistence::Mongo
 
   def get(uid)
     Classroom::Database.with :classroom do
-      Mumukit::Auth::Permissions.parse find_by(uid: uid).permissions.as_json
+      permissions = find_by(uid: uid)&.permissions || {}
+      Mumukit::Auth::Permissions.parse permissions.as_json
     end
   end
 
@@ -29,6 +30,10 @@ class Classroom::PermissionsPersistence::Mongo
   end
 
   private
+
+  def mongo_database
+    Classroom::Database
+  end
 
   def mongo_collection_name
     :permissions
