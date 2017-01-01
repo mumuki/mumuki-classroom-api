@@ -27,15 +27,22 @@ class Classroom::Database
   end
 
   class << self
-    delegate :client, :organization, :disconnect!, to: :@current_database
+    delegate :client, :organization, :disconnect!, to: :current_database
+
+    def current_database
+      Thread.current.thread_variable_get :current_database
+    end
+
+    def current_database=(database)
+      Thread.current.thread_variable_set :current_database, database
+    end
 
     def ensure!(organization)
       with(organization) { client.collections }
     end
 
     def connect!(organization)
-      @current_database = self.new(organization)
-      @current_database.connect!
+      self.current_database = self.new(organization).tap(&:connect!)
     end
 
     # This method is here in order to easily do migrations
@@ -46,10 +53,11 @@ class Classroom::Database
     end
 
     def with(organization, &block)
-      instance_variable_swap :@current_database do
-        @current_database = self.new(organization)
-        @current_database.with(&block)
-      end
+      old = self.current_database
+      self.current_database = self.new(organization)
+      self.current_database.with(&block)
+    ensure
+      self.current_database = old
     end
   end
 end
