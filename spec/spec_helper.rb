@@ -50,7 +50,6 @@ Mumukit::Auth.configure do |c|
   c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
 end
 
-Classroom::Database.ensure! 'example'
 Classroom::Database.connect! 'example'
 
 def build_auth_header(permissions_string, sub='github|user123456')
@@ -60,6 +59,16 @@ def build_auth_header(permissions_string, sub='github|user123456')
        sub: sub},
       Mumukit::Auth::Token.decoded_secret)
   'dummy token ' + encoded_token
+end
+
+def with_organization(organization, &block)
+  Classroom::Database.connect_transient! organization, &block
+end
+
+def with_client(organization, &block)
+  with_organization organization do
+    block.call Classroom::Database.client
+  end
 end
 
 def app

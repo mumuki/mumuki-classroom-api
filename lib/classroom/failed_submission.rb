@@ -15,7 +15,7 @@ module Classroom::FailedSubmission
   private
 
   def self.reprocess_from_organization(uid, source, destination)
-    Classroom::Database.with source do
+    Classroom::Database.connect_transient! source do
       Classroom::Collection::FailedSubmissions.find_by_uid(uid).raw.each do |failed_submission|
         delete_failed_submission failed_submission, source
         try_reprocess failed_submission, source, destination
@@ -33,19 +33,19 @@ module Classroom::FailedSubmission
   end
 
   def self.insert_failed_submission(failed_submission, source)
-    Classroom::Database.with source do
+    Classroom::Database.connect_transient! source do
       Classroom::Collection::FailedSubmissions.insert! failed_submission
     end
   end
 
   def self.reprocess_failed_submission(destination, it)
-    Classroom::Database.with destination do
+    Classroom::Database.connect_transient! destination do
       Classroom::Submission.process! it.raw
     end
   end
 
   def self.delete_failed_submission(it, source)
-    Classroom::Database.with source do
+    Classroom::Database.connect_transient! source do
       Classroom::Collection::FailedSubmissions.delete! it.id
     end
   end

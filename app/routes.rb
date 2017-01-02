@@ -98,10 +98,6 @@ before do
   set_locale! organization_json if organization_json
 end
 
-after do
-  Classroom::Database.disconnect!
-end
-
 require_relative './routes/courses'
 require_relative './routes/comments'
 require_relative './routes/errors'

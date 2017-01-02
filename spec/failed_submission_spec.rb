@@ -3,39 +3,32 @@ require 'spec_helper'
 describe Classroom::FailedSubmission do
 
   before do
-    organization(:central) {Classroom::Database.clean!}
-    organization(:example) {Classroom::Database.clean!}
+    Classroom::Database.clean! :central
+    Classroom::Database.clean! :example
   end
 
-  def organization(org)
-    Classroom::Database.connect! org
-    yield
-  end
+  let(:submitter) { {uid: 'github|123456'} }
+  let(:chapter) { {id: 'guide_chapter_id', name: 'guide_chapter_name'} }
+  let(:parent) { {type: 'Lesson', name: 'A lesson name', position: '1', chapter: chapter} }
+  let(:guide) { {slug: 'guide_slug', name: 'guide_name', parent: parent, language: {name: 'guide_language_name', devicon: 'guide_language_devicon'}} }
+  let(:exercise) { {id: 1, name: 'exercise_name', number: 1} }
+  let(:submission) { {id: 1, status: 'passed', result: 'result', content: 'find f = head.filter f', feedback: 'feedback', created_at: '2016-01-01 00:00:00', test_results: 'test_results', submissions_count: 1, expectation_results: 'expectation_results'} }
 
-  let(:submitter) {{uid: 'github|123456'}}
-  let(:chapter) {{id: 'guide_chapter_id', name: 'guide_chapter_name'} }
-  let(:parent) {{type: 'Lesson', name: 'A lesson name', position: '1', chapter: chapter} }
-  let(:guide) {{slug: 'guide_slug', name: 'guide_name', parent: parent, language: {name: 'guide_language_name', devicon: 'guide_language_devicon'}} }
-  let(:exercise) {{id: 1, name: 'exercise_name', number: 1} }
-  let(:submission) {{id: 1, status: 'passed', result: 'result', content: 'find f = head.filter f', feedback: 'feedback', created_at: '2016-01-01 00:00:00', test_results: 'test_results', submissions_count: 1, expectation_results: 'expectation_results'} }
-
-  let(:atheneum_submission) { submission.merge({
-    submitter: submitter,
-    exercise: exercise,
-    guide: guide
-  })}
+  let(:atheneum_submission) { submission.merge submitter: submitter,
+                                               exercise: exercise,
+                                               guide: guide }
 
   describe 'when resubmission is consumed' do
 
-    let(:central_count) { organization(:central) { Classroom::Collection::FailedSubmissions.count }}
-    let(:example_count) { organization(:example) { Classroom::Collection::FailedSubmissions.count }}
+    let(:central_count) { with_organization(:central) { Classroom::Collection::FailedSubmissions.count } }
+    let(:example_count) { with_organization(:example) { Classroom::Collection::FailedSubmissions.count } }
 
     before do
-      organization('central') do
+      with_organization('central') do
         Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
         Classroom::Collection::FailedSubmissions.insert! atheneum_submission.merge(submitter: {uid: 'github|234567'}).wrap_json
       end
-      organization('example') do
+      with_organization('example') do
         Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
         Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
       end

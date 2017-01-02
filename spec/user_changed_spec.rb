@@ -34,11 +34,12 @@ describe Classroom::Event::UserChanged do
     end
 
     context 'update models' do
-
-      before { Classroom::Collection::Courses.insert!({uid: 'example/foo'}.wrap_json) }
-      before { Classroom::Collection::Courses.insert!({uid: 'example/bar'}.wrap_json) }
-      before { Classroom::Collection::Students.for('foo').insert! user.wrap_json }
-      before { Classroom::Collection::CourseStudents.insert!({course: {uid: 'example/foo'}, student: user}.wrap_json) }
+      before do
+        Classroom::Collection::Courses.insert!({uid: 'example/foo'}.wrap_json)
+        Classroom::Collection::Courses.insert!({uid: 'example/bar'}.wrap_json)
+        Classroom::Collection::Students.for('foo').insert! user.wrap_json
+        Classroom::Collection::CourseStudents.insert!({course: {uid: 'example/foo'}, student: user}.wrap_json)
+      end
       before { Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }

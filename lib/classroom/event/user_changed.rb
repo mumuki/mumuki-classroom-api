@@ -18,9 +18,9 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      Classroom::Database.within_each do |database|
+      Classroom::Database.connect_each! do |organization|
         update_student user
-        changes[database.organization]&.each do |change|
+        changes[organization]&.each do |change|
           message = change.description
           self.send message, user, change.granted_slug if self.respond_to? message, true
         end
