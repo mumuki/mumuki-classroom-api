@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Classroom::FailedSubmission do
 
-  after do
+  before do
     organization(:central) {Classroom::Database.clean!}
     organization(:example) {Classroom::Database.clean!}
   end

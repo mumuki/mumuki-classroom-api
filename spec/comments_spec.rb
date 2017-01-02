@@ -2,23 +2,23 @@ require 'spec_helper'
 
 describe 'comments' do
 
-  after do
+  before do
     Classroom::Database.clean!
   end
 
   describe 'post /courses/:course/comments' do
-    let(:comment) {{content: 'hola', type: 'good'}}
-    let(:comment_to_post) {{uid: 1, exercise_id: 1, submission_id: 1, comment: comment}.to_json}
+    let(:comment) { {content: 'hola', type: 'good'} }
+    let(:comment_to_post) { {uid: 1, exercise_id: 1, submission_id: 1, comment: comment}.to_json }
 
     context 'when authenticated' do
-      before { Classroom::Collection::ExerciseStudentProgress.for('bar').insert!({student: {uid: 1}, exercise: {id: 1}, submissions: [{id:1}]}.wrap_json) }
+      before { Classroom::Collection::ExerciseStudentProgress.for('bar').insert!({student: {uid: 1}, exercise: {id: 1}, submissions: [{id: 1}]}.wrap_json) }
       before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses/bar/comments', comment_to_post }
 
       let(:exercise) { Classroom::Collection::ExerciseStudentProgress.for('bar').all.raw.first }
 
-      it { expect(exercise.submissions.first.deep_symbolize_keys).to eq({id: 1, comments: [comment]})}
+      it { expect(exercise.submissions.first.deep_symbolize_keys).to eq({id: 1, comments: [comment]}) }
     end
 
     context 'reject unauthorized requests' do

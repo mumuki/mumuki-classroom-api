@@ -9,7 +9,7 @@ describe Classroom::Event::UserChanged do
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
 
   before { Mumukit::Auth::Store.set! uid, old_permissions }
-  after { Classroom::Database.clean! }
+  before { Classroom::Database.clean! }
 
   describe 'execute!' do
 

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Classroom::Submission do
 
-  after do
+  before do
     Classroom::Database.clean!
   end
 
