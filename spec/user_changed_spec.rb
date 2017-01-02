@@ -14,6 +14,7 @@ describe Classroom::Event::UserChanged do
   describe 'execute!' do
 
     context 'save new permissions' do
+      before { Classroom::Database.ensure! 'example' }
       before do
         expect(Classroom::Event::UserChanged).to receive(:student_added)
         expect(Classroom::Event::UserChanged).to receive(:teacher_added)
@@ -21,6 +22,7 @@ describe Classroom::Event::UserChanged do
       end
       before { Classroom::Event::UserChanged.execute! event }
 
+      it { expect(Classroom::Database.database_names).to include 'example' }
       it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff old_permissions, new_permissions)
              .to json_like(changes: [

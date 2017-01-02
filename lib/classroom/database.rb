@@ -45,15 +45,17 @@ class Classroom::Database
       with(organization) { client[:classroom].insert_one classroom_db: true }
     end
 
+    def database_names
+      with(:test) { client.database_names }
+    end
+
     def connect!(organization)
       self.current_database = self.new(organization).tap(&:connect!)
     end
 
     # This method is here in order to easily do migrations
     def within_each(&block)
-      with :test do
-        client.database_names.each { |organization| with organization, &block }
-      end
+      database_names.each { |organization| with organization, &block }
     end
 
     def with(organization, &block)

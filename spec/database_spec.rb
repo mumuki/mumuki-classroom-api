@@ -7,6 +7,7 @@ describe Classroom::Database do
     before { Classroom::Database.ensure! :foo }
 
     it { expect(Classroom::Database.current_database).to be initial }
+    it { expect(Classroom::Database.database_names).to include 'foo'}
     it { expect(Classroom::Database.with(:foo) { |it| it.client.database_names }).to include 'foo' }
   end
 
