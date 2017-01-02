@@ -11,7 +11,7 @@ describe Classroom::Database do
     it { expect(with_organization(:foo) { Classroom::Database.database_names }).to include 'foo' }
   end
 
-  describe '.with' do
+  describe '.connect_each!' do
     before { Classroom::Database.clean! :bar }
     before { Classroom::Database.clean! :baz }
 
