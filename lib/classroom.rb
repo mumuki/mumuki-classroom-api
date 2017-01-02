@@ -22,6 +22,7 @@ require_relative './classroom/submission'
 require_relative './classroom/failed_submission'
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
+require_relative './classroom/permissions_persistence'
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
@@ -31,6 +32,6 @@ end
 Mumukit::Auth.configure do |c|
   c.client_id = ENV['MUMUKI_AUTH0_CLIENT_ID']
   c.client_secret = ENV['MUMUKI_AUTH0_CLIENT_SECRET']
-  c.daybreak_name = 'permissions'
+  c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
 end
 
