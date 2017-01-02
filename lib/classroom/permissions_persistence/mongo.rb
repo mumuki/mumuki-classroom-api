@@ -2,7 +2,7 @@ class Classroom::PermissionsPersistence::Mongo
 
   include Mumukit::Service::Collection
 
-  def self.from_env
+  def self.from_config
     new
   end
 
@@ -10,7 +10,7 @@ class Classroom::PermissionsPersistence::Mongo
     Classroom::Database.with :classroom do
       update_one(
         { 'uid': uid },
-        { '$set': { permissions: permissions } },
+        { '$set': { permissions: permissions.as_json } },
         { 'upsert': true }
       )
     end
