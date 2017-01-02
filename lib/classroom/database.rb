@@ -21,7 +21,7 @@ class Classroom::Database
 
   def with(&block)
     connect!
-    block.call @organization
+    block.call
   ensure
     disconnect!
   end
@@ -38,7 +38,7 @@ class Classroom::Database
     end
 
     def ensure!(organization)
-      with(organization) { client.collections }
+      with(organization) { client[:classroom].insert_one classroom_db: true }
     end
 
     def connect!(organization)
@@ -55,7 +55,9 @@ class Classroom::Database
     def with(organization, &block)
       old = self.current_database
       self.current_database = self.new(organization)
-      self.current_database.with(&block)
+      current_database.with do
+        block.call current_database
+      end
     ensure
       self.current_database = old
     end
