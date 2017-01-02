@@ -14,12 +14,21 @@ describe Classroom::Event::UserChanged do
   describe 'execute!' do
 
     context 'save new permissions' do
-      before { expect(Classroom::Event::UserChanged).to receive(:student_added) }
-      before { expect(Classroom::Event::UserChanged).to receive(:teacher_added) }
-      before { expect(Classroom::Event::UserChanged).to receive(:student_removed) }
+      before do
+        allow(Classroom::Event::UserChanged).to receive(:student_added)
+        allow(Classroom::Event::UserChanged).to receive(:teacher_added)
+        allow(Classroom::Event::UserChanged).to receive(:student_removed)
+      end
       before { Classroom::Event::UserChanged.execute! event }
 
+      it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
+      it { expect(Mumukit::Auth::Permissions::Diff.diff old_permissions, new_permissions)
+             .to json_like(changes: [
+               {role: 'student', grant: 'example/foo', type: 'removed'},
+               {role: 'student', grant: 'example/bar', type: 'added'},
+               {role: 'teacher', grant: 'example/foo', type: 'added'}]) }
       it { expect(Mumukit::Auth::Store.get(uid).as_json).to eq(new_permissions) }
+
     end
 
     context 'update models' do
