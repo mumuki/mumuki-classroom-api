@@ -9,6 +9,7 @@ require 'mumukit/auth'
 
 require_relative './class'
 require_relative './consumer'
+require_relative './profile'
 
 require_relative './classroom/database'
 require_relative './classroom/json_wrapper'

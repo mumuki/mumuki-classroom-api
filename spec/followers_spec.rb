@@ -28,7 +28,7 @@ describe Classroom::Collection::Followers do
       before { header 'Authorization', build_auth_header('foo/bar') }
       before { post '/courses/baz/followers', follower_json }
 
-      it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz. Permissions are '}.to_json) }
+      it { expect(last_response.body).to eq({message: 'Unauthorized access to example/baz as teacher. Scope is ``'}.to_json) }
     end
 
     context 'when not authenticated' do

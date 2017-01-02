@@ -1,41 +1,73 @@
-module Mumukit::Auth::PermissionsDiff
+class Hash
+  def to_mumukit_permissions
+    Mumukit::Auth::Permissions.parse self
+  end
+end
 
-  def self.diff(old_permissions, new_permissions)
-    old_perms = Mumukit::Auth::Permissions.parse(old_permissions.as_json)
-    new_perms = Mumukit::Auth::Permissions.parse(new_permissions.as_json)
+class Mumukit::Auth::Permissions
+  def to_mumukit_permissions
+    self
+  end
 
-    {}.with_indifferent_access.tap do |diff|
-      Mumukit::Auth::Roles::ROLES.each do |role|
-        grants(role, old_perms, new_perms).each do |grant|
-          grant_s = grant.to_s
-          diff[role] ||= {}.with_indifferent_access
-          add_grant(diff, role, :added, grant_s) if add_grant?(grant_s, new_perms, old_perms, role)
-          add_grant(diff, role, :removed, grant_s) if remove_grant?(grant_s, new_perms, old_perms, role)
+  def grants_for(role)
+    scope_for(role).grants
+  end
+end
+
+class Mumukit::Auth::Permissions
+  class Change
+    attr_accessor :role, :grant, :type
+
+    def initialize(role, grant, change_type)
+      @role = role
+      @grant = grant
+      @type = change_type
+    end
+
+    def description
+      "#{role}_#{type}"
+    end
+
+    def organization
+      granted_slug.organization
+    end
+
+    def granted_slug
+      grant.to_mumukit_slug
+    end
+  end
+
+  class Diff
+    attr_accessor :changes
+
+    def initialize
+      @changes = []
+    end
+
+    def changes_by_organization
+      changes.group_by(&:organization).with_indifferent_access
+    end
+
+    def empty?
+      changes.empty?
+    end
+
+    def compare_grants!(role, some_permissions, another_permissions, change_type)
+      some_permissions
+        .grants_for(role)
+        .select { |grant| !another_permissions.role_allows?(role, grant) }
+        .each { |grant| changes << Change.new(role, grant, change_type) }
+    end
+
+    def self.diff(old_permissions, new_permissions)
+      old_permissions = old_permissions.to_mumukit_permissions
+      new_permissions = new_permissions.to_mumukit_permissions
+      new.tap do |it|
+        Mumukit::Auth::Roles::ROLES.each do |role|
+          it.compare_grants! role, old_permissions, new_permissions, :removed
+          it.compare_grants! role, new_permissions, old_permissions, :added
         end
       end
     end
   end
-
-  private
-
-  def self.add_grant(diff, role, type, grant)
-    (diff[role][type] ||= []) << grant
-  end
-
-  def self.remove_grant?(grant_s, new_perms, old_perms, role)
-    old_perms.has_permission?(role, grant_s) and !new_perms.has_permission?(role, grant_s)
-  end
-
-  def self.add_grant?(grant_s, new_perms, old_perms, role)
-    !old_perms.has_permission?(role, grant_s) and new_perms.has_permission?(role, grant_s)
-  end
-
-  def self.grants(role, *permissions)
-    permissions.reduce([]) { |accum, perm| accum | grants_from(role, perm) }
-  end
-
-  def self.grants_from(role, permission)
-    permission.scope_for(role)&.grants || []
-  end
-
 end
