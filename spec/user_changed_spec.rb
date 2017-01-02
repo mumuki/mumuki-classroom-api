@@ -15,9 +15,9 @@ describe Classroom::Event::UserChanged do
 
     context 'save new permissions' do
       before do
-        allow(Classroom::Event::UserChanged).to receive(:student_added)
-        allow(Classroom::Event::UserChanged).to receive(:teacher_added)
-        allow(Classroom::Event::UserChanged).to receive(:student_removed)
+        expect(Classroom::Event::UserChanged).to receive(:student_added)
+        expect(Classroom::Event::UserChanged).to receive(:teacher_added)
+        expect(Classroom::Event::UserChanged).to receive(:student_removed)
       end
       before { Classroom::Event::UserChanged.execute! event }
 
