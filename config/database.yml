@@ -1,4 +1,8 @@
+common: &common
+  pool: 8
+
 production:
+  <<: *common
   host: <%=ENV['MUMUKI_MONGODB_HOST']%>
   port: <%=ENV['MUMUKI_MONGODB_PORT']%>
   user: <%=ENV['MUMUKI_MONGODB_USERNAME']%>
@@ -6,11 +10,13 @@ production:
   database: <%=ENV['MUMUKI_MONGODB_DATABASE']%>
 
 development:
+  <<: *common
   host: localhost
   port: 27017
   database: classroom
 
 test:
+  <<: *common
   host: <%=ENV['MONGO_PORT_27017_TCP_ADDR'] || 'localhost'%>
   port: <%=ENV['MONGO_PORT_27017_TCP_PORT'] || 27017%>
   database: classroom-test

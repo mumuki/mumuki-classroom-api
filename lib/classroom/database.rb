@@ -2,6 +2,16 @@ class Classroom::Database
   extend Mumukit::Service::Database
 
   class << self
+    def new_database_client(database)
+      Mongo::Client.new(
+        ["#{config[:host]}:#{config[:port]}"],
+        database: database,
+        user: config[:user],
+        password: config[:password],
+        min_pool_size: 1,
+        max_pool_size: config[:pool])
+    end
+
     def client=(client)
       Thread.current.thread_variable_set :mongo_client, client
     end
