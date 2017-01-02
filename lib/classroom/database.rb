@@ -15,6 +15,10 @@ class Classroom::Database
     client
   end
 
+  def clean!
+    client.collections.each(&:drop)
+  end
+
   def disconnect!
     client.try :close
   end
