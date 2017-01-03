@@ -1,55 +1,71 @@
 class Classroom::Database
   extend Mumukit::Service::Database
 
-  attr_accessor :organization
-
-  def initialize(organization)
-    @organization = organization.to_sym
-  end
-
-  def client
-    @client ||= self.class.new_database_client(organization)
-  end
-
-  def connect!
-    client
-  end
-
-  def disconnect!
-    client.try :close
-  end
-
-  def with(&block)
-    connect!
-    block.call @organization
-  ensure
-    disconnect!
-  end
-
   class << self
-    delegate :client, :organization, :disconnect!, to: :@current_database
+    def new_database_client(database)
+      Mongo::Client.new(
+        ["#{config[:host]}:#{config[:port]}"],
+        database: database,
+        user: config[:user],
+        password: config[:password],
+        min_pool_size: 1,
+        max_pool_size: config[:pool])
+    end
 
-    def ensure!(organization)
-      with(organization) { client.collections }
+    def client=(client)
+      Thread.current.thread_variable_set :mongo_client, client
+    end
+
+    def client
+      Thread.current.thread_variable_get :mongo_client
+    end
+
+    def organization
+      client.database.name
+    end
+
+    def database_names
+      client.database_names
+    end
+
+    def clean!(target = organization)
+      connect_transient!(target) { client.collections.each(&:drop) }
+    end
+
+    def ensure!(target = organization)
+      connect_transient!(target) { client[:classroom].insert_one classroom_db: true }
     end
 
     def connect!(organization)
-      @current_database = self.new(organization)
-      @current_database.connect!
-    end
-
-    # This method is here in order to easily do migrations
-    def within_each(&block)
-      with :test do
-        client.database_names.each { |organization| with organization, &block }
+      if client
+        self.client = client.use(organization)
+      else
+        self.client = new_database_client(organization)
       end
     end
 
-    def with(organization, &block)
-      instance_variable_swap :@current_database do
-        @current_database = self.new(organization)
-        @current_database.with(&block)
+    def connect_each!(&block)
+      database_names.each do |organization|
+        connect_transient!(organization) { block.call organization }
       end
+    end
+
+    def connect_transient!(new_organization, &block)
+      if new_organization == organization
+        block.call
+      else
+        swap_and_call!(block, new_organization)
+      end
+    end
+
+    private
+
+    def swap_and_call!(block, new_organization)
+      old_organization = organization
+      connect! new_organization
+      block.call
+    ensure
+      connect! old_organization
     end
   end
 end

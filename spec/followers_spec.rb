@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Classroom::Collection::Followers do
 
-  after do
+  before do
     Classroom::Database.clean!
   end
 

@@ -18,7 +18,7 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      Classroom::Database.within_each do |organization|
+      Classroom::Database.connect_each! do |organization|
         update_student user
         changes[organization]&.each do |change|
           message = change.description

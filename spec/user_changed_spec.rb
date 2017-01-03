@@ -9,18 +9,20 @@ describe Classroom::Event::UserChanged do
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
 
   before { Mumukit::Auth::Store.set! uid, old_permissions }
-  after { Classroom::Database.clean! }
+  before { Classroom::Database.clean! }
 
   describe 'execute!' do
 
     context 'save new permissions' do
+      before { Classroom::Database.ensure! 'example' }
       before do
-        allow(Classroom::Event::UserChanged).to receive(:student_added)
-        allow(Classroom::Event::UserChanged).to receive(:teacher_added)
-        allow(Classroom::Event::UserChanged).to receive(:student_removed)
+        expect(Classroom::Event::UserChanged).to receive(:student_added)
+        expect(Classroom::Event::UserChanged).to receive(:teacher_added)
+        expect(Classroom::Event::UserChanged).to receive(:student_removed)
       end
       before { Classroom::Event::UserChanged.execute! event }
 
+      it { expect(Classroom::Database.database_names).to include 'example' }
       it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff old_permissions, new_permissions)
              .to json_like(changes: [
@@ -32,11 +34,12 @@ describe Classroom::Event::UserChanged do
     end
 
     context 'update models' do
-
-      before { Classroom::Collection::Courses.insert!({uid: 'example/foo'}.wrap_json) }
-      before { Classroom::Collection::Courses.insert!({uid: 'example/bar'}.wrap_json) }
-      before { Classroom::Collection::Students.for('foo').insert! user.wrap_json }
-      before { Classroom::Collection::CourseStudents.insert!({course: {uid: 'example/foo'}, student: user}.wrap_json) }
+      before do
+        Classroom::Collection::Courses.insert!({uid: 'example/foo'}.wrap_json)
+        Classroom::Collection::Courses.insert!({uid: 'example/bar'}.wrap_json)
+        Classroom::Collection::Students.for('foo').insert! user.wrap_json
+        Classroom::Collection::CourseStudents.insert!({course: {uid: 'example/foo'}, student: user}.wrap_json)
+      end
       before { Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
