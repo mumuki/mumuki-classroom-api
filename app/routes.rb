@@ -88,7 +88,7 @@ helpers do
   end
 
   def notify_upsert_exam(exam_id)
-    Mumukit::Nuntius::EventPublisher.publish('UpsertExam', tenantized_json_body.merge(exam_id))
+    Mumukit::Nuntius::EventPublisher.publish('UpsertExam', tenantized_json_body.except(:social_uds).merge(exam_id))
   end
 
 end
