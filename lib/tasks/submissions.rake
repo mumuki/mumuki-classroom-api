@@ -3,7 +3,9 @@ namespace :submissions do
     Mumukit::Nuntius::Logger.info 'Listening to submissions'
 
     Mumukit::Nuntius::Consumer.negligent_start! 'submissions' do |body|
-      Classroom::Database.connect_transient! body.delete('tenant') do
+      organization = body.delete('tenant')
+      Classroom::Database.connect! organization
+      Classroom::Database.connect_transient! organization do
         begin
           Mumukit::Nuntius::Logger.info "Processing submission #{body['id']}"
           Classroom::Submission.process! body

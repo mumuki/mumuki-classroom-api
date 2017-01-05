@@ -7,6 +7,7 @@ namespace :students do
       to = args[:to].try { |it| Date.parse(it) } || 1.day.since
       format = args[:format]
 
+      Classroom::Database.connect! args[:organization]
       Classroom::Database.connect_transient! args[:organization] do
         stats = Classroom::Collection::Students.for(args[:course]).report do |user|
           user.created_at >= from && user.created_at < to
@@ -22,6 +23,7 @@ namespace :students do
       to = args[:to].try { |it| Date.parse(it) } || 1.day.since
       format = args[:format]
 
+      Classroom::Database.connect! args[:organization]
       Classroom::Database.connect_transient! args[:organization] do
         stats = Classroom::Collection::Students.for(args[:course]).report do |user|
           (user.detached_at.blank? || user.detached_at >= from) && user.created_at < to
