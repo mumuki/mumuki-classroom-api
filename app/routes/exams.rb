@@ -3,11 +3,20 @@ get '/courses/:course/exams' do
   Classroom::Collection::Exams.for(course).all.as_json
 end
 
-post '/courses/:course/exams' do
-  protect! :teacher
+def create_exam
   exam_id = Classroom::Collection::Exams.for(course).insert! json_body.wrap_json
   notify_upsert_exam(exam_id)
   {status: :created}.merge(exam_id)
+end
+
+post '/courses/:course/exams' do
+  protect! :teacher
+  create_exam
+end
+
+post '/api/courses/:course/exams' do
+  protect! :teacher, :auth
+  create_exam
 end
 
 put '/courses/:course/exams/:exam' do

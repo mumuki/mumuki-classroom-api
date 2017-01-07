@@ -12,6 +12,20 @@ end
 
 helpers do
 
+
+  def token(client = :auth0)
+    @token ||= Mumukit::Auth::Token.decode_header(authorization_header, client).tap { |it| it.verify_client! client }
+  end
+
+  def permissions(client = :auth0)
+    @permissions ||= token(client).permissions
+  end
+
+  def protect!(scope, client = :auth0)
+    permissions(client).protect! scope, slug.to_s
+  end
+
+
   def course
     params[:course]
   end
