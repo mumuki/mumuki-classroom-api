@@ -12,6 +12,20 @@ end
 
 helpers do
 
+
+  def token(client = :auth0)
+    @token ||= Mumukit::Auth::Token.decode_header(authorization_header, client).tap { |it| it.verify_client! client }
+  end
+
+  def permissions(client = :auth0)
+    @permissions ||= token(client).permissions
+  end
+
+  def protect!(scope, client = :auth0)
+    permissions(client).protect! scope, slug.to_s
+  end
+
+
   def course
     params[:course]
   end
@@ -88,7 +102,7 @@ helpers do
   end
 
   def notify_upsert_exam(exam_id)
-    Mumukit::Nuntius::EventPublisher.publish('UpsertExam', tenantized_json_body.except(:social_uds).merge(exam_id))
+    Mumukit::Nuntius::EventPublisher.publish('UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id))
   end
 
 end
@@ -110,6 +124,16 @@ require_relative './routes/teachers'
 get '/courses/:course/students' do
   protect! :teacher
   Classroom::Collection::Students.for(course).all.as_json
+end
+
+get '/api/courses/:course/students' do
+  protect! :teacher, :auth
+  Classroom::Collection::Students.for(course).all.as_json
+end
+
+get '/api/courses/:course/students/:uid' do
+  protect! :teacher, :auth
+  Classroom::Collection::GuideStudentsProgress.for(course).where('student.uid': uid).as_json
 end
 
 post '/courses/:course/students/:uid' do
@@ -143,6 +167,11 @@ get '/courses/:course/guides' do
   Classroom::Collection::Guides.for(course).all.as_json
 end
 
+get '/api/courses/:course/guides' do
+  protect! :teacher, :auth
+  Classroom::Collection::Guides.for(course).all.as_json
+end
+
 get '/courses/:course/guides/:organization/:repository' do
   protect! :teacher
   Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
@@ -168,7 +197,7 @@ end
 get '/permissions' do
   permissions.protect! :teacher, Mumukit::Auth::Slug.join_s(tenant, '_')
 
-  {permissions: permissions }
+  {permissions: permissions}
 end
 
 post '/courses/:course/students' do
