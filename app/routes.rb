@@ -131,6 +131,11 @@ get '/api/courses/:course/students' do
   Classroom::Collection::Students.for(course).all.as_json
 end
 
+get '/api/courses/:course/students/:uid' do
+  protect! :teacher, :auth
+  Classroom::Collection::GuideStudentsProgress.for(course).where('student.uid': uid).as_json
+end
+
 post '/courses/:course/students/:uid' do
   protect! :janitor
   Mumukit::Nuntius::Publisher.publish_resubmissions(uid: uid, tenant: tenant)
