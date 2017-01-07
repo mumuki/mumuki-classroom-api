@@ -5,7 +5,7 @@ namespace :courses do
       puts "migrating #{organization}"
       Classroom::Collection::Courses.all.each_with_index do |course, index|
         puts "#{index}"
-        Mumukit::Nuntius::EventPublisher.publish('CourseChanged', {course: course.as_json})
+        Mumukit::Nuntius::EventPublisher.publish('CourseChanged', {course: course.as_json(except: [:name])})
       end
     end
   end
