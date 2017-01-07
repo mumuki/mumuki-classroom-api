@@ -93,4 +93,22 @@ describe Classroom::Collection::Exams do
 
   end
 
+  describe 'post /api/courses/:course/exams/:exam/students/:uid' do
+    let!(:id) { Classroom::Collection::Exams.for('foo').insert! exam_json.wrap_json }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']}.stringify_keys }
+    let(:exam_fetched) { Classroom::Collection::Exams.for('foo').where({}).as_json[:exams].first }
+
+    context 'when existing exam' do
+      before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).exactly(1).times }
+      before { header 'Authorization', build_mumuki_auth_header('*') }
+      before { post "/api/courses/foo/exams/#{id[:id]}/students/agus@mumuki.org" }
+
+      it { expect(last_response.body).to be_truthy }
+      it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
+      it { expect(Classroom::Collection::Exams.for('foo').count).to eq 1 }
+      it { expect(exam_fetched['uids'].last).to eq('agus@mumuki.org') }
+    end
+
+  end
+
 end

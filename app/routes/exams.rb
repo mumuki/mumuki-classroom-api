@@ -26,6 +26,14 @@ put '/courses/:course/exams/:exam' do
   {status: :updated}.merge(exam_id)
 end
 
+post '/api/courses/:course/exams/:exam/students/:uid' do
+  protect! :teacher, :auth
+  exam_id = Classroom::Collection::Exams.for(course).add_student! params[:exam], params[:uid]
+  @json_body = Classroom::Collection::Exams.for(course).find_by(exam_id).as_json
+  notify_upsert_exam(exam_id)
+  {status: :updated}.merge(exam_id)
+end
+
 get '/courses/:course/exams/:exam_id' do
   protect! :teacher
   Classroom::Collection::Exams.for(course).find(params[:exam_id]).as_json
