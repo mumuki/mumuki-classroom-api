@@ -167,6 +167,11 @@ get '/courses/:course/guides' do
   Classroom::Collection::Guides.for(course).all.as_json
 end
 
+get '/api/courses/:course/guides' do
+  protect! :teacher, :auth
+  Classroom::Collection::Guides.for(course).all.as_json
+end
+
 get '/courses/:course/guides/:organization/:repository' do
   protect! :teacher
   Classroom::Collection::GuideStudentsProgress.for(course).where('guide.slug' => repo_slug).as_json
