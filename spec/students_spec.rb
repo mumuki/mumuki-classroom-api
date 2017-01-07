@@ -144,15 +144,25 @@ describe Classroom::Collection::Students do
       let(:student1) { {student: student, course: {slug: 'example/foo'}, created_at: created_at} }
       let(:student2) { {student: student, course: {slug: 'example/test'}, created_at: created_at} }
 
-      before { header 'Authorization', build_auth_header('*') }
 
       context 'when guides already exists in a course' do
         before { Classroom::Collection::Students.for('foo').insert!(student1.wrap_json) }
         before { Classroom::Collection::Students.for('test').insert!(student2.wrap_json) }
-        before { get '/courses/foo/students' }
 
-        it { expect(last_response).to be_ok }
-        it { expect(last_response.body).to json_eq students: [student1] }
+        context 'get students with auth0 client' do
+          before { header 'Authorization', build_auth_header('*') }
+          before { get '/courses/foo/students' }
+
+          it { expect(last_response).to be_ok }
+          it { expect(last_response.body).to json_eq students: [student1] }
+        end
+        context 'get students with auth client' do
+          before { header 'Authorization', build_mumuki_auth_header('*') }
+          before { get '/api/courses/foo/students' }
+
+          it { expect(last_response).to be_ok }
+          it { expect(last_response.body).to json_eq students: [student1] }
+        end
       end
 
     end

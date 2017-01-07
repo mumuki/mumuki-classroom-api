@@ -126,6 +126,11 @@ get '/courses/:course/students' do
   Classroom::Collection::Students.for(course).all.as_json
 end
 
+get '/api/courses/:course/students' do
+  protect! :teacher, :auth
+  Classroom::Collection::Students.for(course).all.as_json
+end
+
 post '/courses/:course/students/:uid' do
   protect! :janitor
   Mumukit::Nuntius::Publisher.publish_resubmissions(uid: uid, tenant: tenant)
@@ -182,7 +187,7 @@ end
 get '/permissions' do
   permissions.protect! :teacher, Mumukit::Auth::Slug.join_s(tenant, '_')
 
-  {permissions: permissions }
+  {permissions: permissions}
 end
 
 post '/courses/:course/students' do
