@@ -53,7 +53,7 @@ bundle exec rake db:migrate[<migration_name>]
 **Minimal permission**: `janitor`
 
 ```
-POST /api/courses/:course/exam/:exam_id/student/:uid
+POST /api/courses/:course/exam/:exam_id/students/:uid
 ```
 
 **Response**
