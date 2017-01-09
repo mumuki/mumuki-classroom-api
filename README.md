@@ -114,6 +114,39 @@ GET /api/courses/:course/guides
   "error": "Exception"
 }
 ```
+### Students
+
+**Minimal permission**: `teacher`
+
+```
+GET /api/courses/:course/students
+```
+```json
+
+{
+  "students": [
+      {
+          "name": "johndoe",
+          "email": "johndoe@gmail.com",
+          "image_url": "https://s.gravatar.com/avatar/ca995a4f4ba1aafbd71a6403aa78635c?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fsa.png",
+          "social_id": "auth0|57e035e9e6379dd660dbcd",
+          "first_name": "John",
+          "last_name": "Doe",
+          "last_assignment": null,
+          "uid": "johndoe@gmail.com",
+          "created_at": "2016-09-19T19:01:11.000Z"
+      }
+  ]
+}
+``` 
+
+**Forbidden Response**
+```json
+{
+  "status": 403,
+  "error": "Exception"
+}
+```
 
 ### Students progress
 
