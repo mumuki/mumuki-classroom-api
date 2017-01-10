@@ -17,7 +17,9 @@ class Classroom::Database
     end
 
     def client
-      Thread.current.thread_variable_get :mongo_client
+      thread_client = Thread.current.thread_variable_get :mongo_client
+      self.client = new_database_client(:classroom) unless thread_client
+      thread_client
     end
 
     def organization
