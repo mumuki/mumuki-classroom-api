@@ -114,6 +114,44 @@ GET /api/courses/:course/guides
   "error": "Exception"
 }
 ```
+
+### Courses
+
+
+**Minimal permission**: `teacher`
+
+```
+GET /api/courses/
+```
+
+**Response**
+```json
+{
+    "courses": [
+        {
+            "uid": "staging-digitalhouse/2017-1",
+            "days": [
+                "Lunes"
+            ],
+            "code": "1",
+            "shifts": [
+                "Mañana"
+            ],
+            "period": "2017",
+            "description": "Curso de prueba",
+            "slug": "staging-digitalhouse/2017-1"
+        }
+    ]
+}
+```
+**Forbidden Response**
+```json
+{
+  "status": 403,
+  "error": "Exception"
+}
+```
+
 ### Students
 
 **Minimal permission**: `teacher`
