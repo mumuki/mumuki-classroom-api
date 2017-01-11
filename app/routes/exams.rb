@@ -3,6 +3,11 @@ get '/courses/:course/exams' do
   Classroom::Collection::Exams.for(course).all.as_json
 end
 
+get '/api/courses/:course/exams' do
+  protect! :teacher, :auth
+  Classroom::Collection::Exams.for(course).all.as_json
+end
+
 def create_exam
   exam_id = Classroom::Collection::Exams.for(course).insert! json_body.wrap_json
   notify_upsert_exam(exam_id)
