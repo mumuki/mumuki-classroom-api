@@ -42,8 +42,8 @@ helpers do
     {'guide.slug': repo_slug, 'student.uid': uid}
   end
 
-  def by_permissions(key, &query)
-    grants = permissions_to_regex
+  def by_permissions(key, client = :auth0, &query)
+    grants = permissions_to_regex client
     if grants.to_s.blank?
       {}.tap { |it| it[key] = [] }
     else
@@ -51,8 +51,8 @@ helpers do
     end
   end
 
-  def permissions_to_regex
-    permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+  def permissions_to_regex(client)
+    permissions(client).to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
 
   def tenant
