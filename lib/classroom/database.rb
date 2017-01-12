@@ -17,9 +17,9 @@ class Classroom::Database
     end
 
     def client
-      thread_client = Thread.current.thread_variable_get :mongo_client
-      self.client = new_database_client(:classroom) unless thread_client
-      thread_client
+      Thread.current.thread_variable_get(:mongo_client).if_nil? do
+        self.client = new_database_client(:classroom)
+      end
     end
 
     def organization
@@ -69,5 +69,17 @@ class Classroom::Database
     ensure
       connect! old_organization
     end
+  end
+end
+
+class NilClass
+  def if_nil?(&block)
+    block.call
+  end
+end
+
+class Object
+  def if_nil?(&_block)
+    self
   end
 end
