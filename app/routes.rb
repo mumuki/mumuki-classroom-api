@@ -75,6 +75,10 @@ helpers do
     json_body.merge(tenant: tenant)
   end
 
+  def email
+    json_body.with_indifferent_access[:email].downcase
+  end
+
   def ensure_course_existence!
     Classroom::Collection::Courses.ensure_exist! course_slug
   end
@@ -204,10 +208,10 @@ post '/courses/:course/students' do
   protect! :janitor
 
   ensure_course_existence!
-  Classroom::Collection::CourseStudents.ensure_new! json_body['email'], course_slug
-  Classroom::Collection::Students.for(course).ensure_new! json_body['email']
+  Classroom::Collection::CourseStudents.ensure_new! email, course_slug
+  Classroom::Collection::Students.for(course).ensure_new! email
 
-  json = {student: json_body.merge(uid: json_body['email']), course: {slug: course_slug}}
+  json = {student: json_body.merge(uid: email), course: {slug: course_slug}}
   Classroom::Collection::CourseStudents.insert! json.wrap_json
   Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
 
