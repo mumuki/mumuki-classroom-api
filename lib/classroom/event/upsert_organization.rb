@@ -1,4 +1,4 @@
-module Office
+module Classroom
   module Event
     class UpsertOrganization
       def self.execute!(payload)
