@@ -5,7 +5,7 @@ class Classroom::Collection::Students < Classroom::Collection::People
   end
 
   def update!(data)
-    update_one({uid: data[:uid]}, { '$set': data})
+    update_one({uid: data[:uid]}, {'$set': data})
   end
 
   def update_all_stats
@@ -29,17 +29,17 @@ class Classroom::Collection::Students < Classroom::Collection::People
 
   def update_all_stats_for(uid)
     all_stats = Classroom::Collection::ExerciseStudentProgress.for(course).all_stats(uid)
-    update_one({ uid: uid }, { :'$set' => { stats: all_stats }})
+    update_one({uid: uid}, {:'$set' => {stats: all_stats}})
   end
 
   def update_last_assignment_for(uid)
     last_assignment = Classroom::Collection::GuideStudentsProgress.for(course).last_assignment_for(uid)
-    update_one({ uid: uid }, { '$set': { last_assignment: last_assignment }})
+    update_one({uid: uid}, {'$set': {last_assignment: last_assignment}})
   end
 
   def delete!(uid)
     delete_one(uid: uid)
-    student = { 'student.uid': uid }
+    student = {'student.uid': uid}
     Classroom::Collection::CourseStudents.delete_many(student.merge('course.slug': course_slug))
     Classroom::Collection::GuideStudentsProgress.for(course).delete_many(student)
     Classroom::Collection::ExerciseStudentProgress.for(course).delete_many(student)
@@ -47,7 +47,7 @@ class Classroom::Collection::Students < Classroom::Collection::People
   end
 
   def report(&block)
-    all.raw.select(&block).as_json(only: [:first_name, :last_name, :email, :created_at])
+    all.raw.select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
   end
 
   private
