@@ -17,8 +17,8 @@ post '/courses' do
   course = json.merge(uid: json[:slug])
   permissions.protect! :janitor, json[:slug]
 
-  Classroom::Collection::Courses.ensure_new! json[:uid]
-  Classroom::Collection::Courses.upsert! course
+  Classroom::Collection::Courses.for(organization).ensure_new! json[:uid]
+  Classroom::Collection::Courses.for(organization).upsert! course
 
   Mumukit::Nuntius::EventPublisher.publish('CourseChanged', {course: course})
 

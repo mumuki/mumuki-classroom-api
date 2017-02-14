@@ -19,6 +19,14 @@ class Classroom::Collection::OrganizationCollection
     super query(args.as_json).wrap_json
   end
 
+  def find_by(args)
+    super query(args)
+  end
+
+  def count(args = {})
+    mongo_collection.find(query args).count
+  end
+
   def where(args)
     super query(args)
   end

@@ -33,7 +33,7 @@ describe Classroom::Collection::Courses do
                          description: 'haskell',
                          uid: 'example/2016-K2001',
                          slug: 'example/2016-K2001'}.to_json }
-    let(:created_uid) { Classroom::Collection::Courses.find_by(uid: 'example/2016-K2001').uid }
+    let(:created_uid) { Classroom::Collection::Courses.for('example').find_by(uid: 'example/2016-K2001').uid }
 
     context 'when is normal teacher' do
       it 'rejects course creation' do
@@ -42,7 +42,7 @@ describe Classroom::Collection::Courses do
         post '/courses', course_json
 
         expect(last_response).to_not be_ok
-        expect(Classroom::Collection::Courses.count).to eq 0
+        expect(Classroom::Collection::Courses.for('example').count).to eq 0
       end
     end
 
@@ -53,7 +53,7 @@ describe Classroom::Collection::Courses do
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
-      it { expect(Classroom::Collection::Courses.count).to eq 1 }
+      it { expect(Classroom::Collection::Courses.for('example').count).to eq 1 }
       it { expect(created_uid).to eq 'example/2016-K2001' }
     end
 
@@ -64,12 +64,12 @@ describe Classroom::Collection::Courses do
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
-      it { expect(Classroom::Collection::Courses.count).to eq 1 }
+      it { expect(Classroom::Collection::Courses.for('example').count).to eq 1 }
       it { expect(created_uid).to eq 'example/2016-K2001' }
     end
 
     context 'when course already exists' do
-      before { Classroom::Collection::Courses.insert!({uid: 'example/2016-K2001'}.wrap_json) }
+      before { Classroom::Collection::Courses.for('example').insert!({uid: 'example/2016-K2001'}.wrap_json) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses', course_json }
 
