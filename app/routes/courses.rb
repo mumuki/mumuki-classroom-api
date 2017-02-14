@@ -1,13 +1,15 @@
-get '/courses' do
-  by_permissions :courses do |grants|
-    Classroom::Collection::Courses.allowed(grants).as_json
+helpers do
+  def allowed_courses(grants)
+    Classroom::Collection::Courses.for(organization).allowed(grants).as_json
   end
 end
 
+get '/courses' do
+  by_permissions(:courses) { |grants| allowed_courses grants }
+end
+
 get '/api/courses' do
-  by_permissions :courses, :auth do |grants|
-    Classroom::Collection::Courses.allowed(grants).as_json
-  end
+  by_permissions(:courses, :auth) { |grants| allowed_courses grants }
 end
 
 post '/courses' do

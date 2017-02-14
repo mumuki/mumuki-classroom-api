@@ -17,11 +17,11 @@ describe Classroom::Collection::Courses do
     end
 
     context 'when there are courses' do
-      before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz'}.wrap_json) }
+      before { Classroom::Collection::Courses.for('example').insert!({name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz'}) }
       before { get '/courses' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq courses: [{name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz'}] }
+      it { expect(last_response.body).to json_eq courses: [{name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz', organization: 'example'}] }
     end
   end
 

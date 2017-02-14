@@ -63,6 +63,10 @@ helpers do
     request.first_subdomain
   end
 
+  def organization
+    tenant
+  end
+
   def route_slug_parts
     [tenant, course].compact
   end
@@ -92,7 +96,7 @@ helpers do
   end
 
   def organization_json
-    @organization_json ||= Classroom::Collection::Organizations.find_by(name: tenant).as_json
+    @organization_json ||= Classroom::Collection::Organizations.find_by(name: organization).as_json
   end
 
   def update_and_notify_student_metadata(uid, method)
@@ -112,7 +116,7 @@ helpers do
 end
 
 before do
-  Classroom::Database.connect! tenant
+  Classroom::Database.connect! :classroom
   set_locale! organization_json if organization_json
 end
 

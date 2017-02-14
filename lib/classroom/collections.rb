@@ -1,6 +1,7 @@
 module Classroom::Collection
 end
 
+require_relative './collections/organization_collection'
 require_relative './collections/course_collection'
 require_relative './collections/followers'
 require_relative './collections/courses'

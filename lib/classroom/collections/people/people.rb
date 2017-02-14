@@ -1,7 +1,7 @@
 class Classroom::Collection::People < Classroom::Collection::CourseCollection
 
   def find_by(args)
-    first_by(args, { _id: -1 })
+    first_by(args, {_id: -1})
   end
 
   def wrap(it)

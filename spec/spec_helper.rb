@@ -48,7 +48,7 @@ Mumukit::Auth.configure do |c|
   c.clients.default = {id: 'test-client', secret: 'thisIsATestSecret'}
 end
 
-Classroom::Database.connect! 'example'
+Classroom::Database.connect! :classroom_test
 
 def build_mumuki_auth_header(permissions, sub='github|user123456')
   Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
