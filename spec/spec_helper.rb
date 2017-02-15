@@ -45,9 +45,7 @@ end
 
 require 'base64'
 Mumukit::Auth.configure do |c|
-  c.client_ids = {auth0: 'foo', auth: 'bar'}
-  c.client_secrets = {auth0: Base64.encode64('bar'), auth: Base64.encode64('foo')}
-  c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
+  c.clients.default = {id: 'test-client', secret: 'thisIsATestSecret'}
 end
 
 Classroom::Database.connect! 'example'
