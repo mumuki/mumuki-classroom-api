@@ -203,7 +203,7 @@ get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
 end
 
 get '/permissions' do
-  permissions.authorize! :teacher, Mumukit::Auth::Slug.join_s(tenant, '_')
+  authorize! :teacher
 
   {permissions: permissions}
 end
