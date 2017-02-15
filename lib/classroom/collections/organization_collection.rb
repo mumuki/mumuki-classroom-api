@@ -23,6 +23,10 @@ class Classroom::Collection::OrganizationCollection
     super query(args)
   end
 
+  def all
+    where query
+  end
+
   def count(args = {})
     mongo_collection.find(query args).count
   end
@@ -42,7 +46,7 @@ class Classroom::Collection::OrganizationCollection
   end
 
   def query(args = {})
-    {organization: @organization}.merge args
+    {organization: organization}.merge args
   end
 
   def mongo_collection_name

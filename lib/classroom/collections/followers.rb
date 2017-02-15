@@ -8,20 +8,14 @@ class Classroom::Collection::Followers < Classroom::Collection::CourseCollection
     update_follower(data, '$pull')
   end
 
-  def delete_follower!(course_slug, uid)
-    update_many(
-      { 'course' => course_slug },
-      { '$pull' => { uids: uid }},
-      { :upsert => true })
-  end
-
   private
 
   def update_follower(data, action)
+    json = data.with_indifferent_access
     update_one(
-      { 'email' => data['email'], 'course' => data['course'] },
-      { action => { uids: data['uid'] }},
-      { :upsert => true })
+      query(:email => json['email']),
+      {action => {uids: json['uid']}},
+      {:upsert => true})
   end
 
   def wrap(it)

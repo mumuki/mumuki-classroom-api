@@ -36,7 +36,6 @@ class Classroom::Database
     end
 
     def clean!(target = default_database_name)
-      return if target.to_sym === :classroom
       connect_transient!(target) { client.collections.each(&:drop) }
     end
 
