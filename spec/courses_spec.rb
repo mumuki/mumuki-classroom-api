@@ -81,10 +81,10 @@ describe Classroom::Collection::Courses do
 
   describe 'get courses/:course/progress' do
     let(:exercise_progress) { {student: {uid: 1}, guide: {slug: 'foo/bar'}, exercise: {id: 1}, submissions: []} }
-    before { Classroom::Collection::ExerciseStudentProgress.for('foo').insert! exercise_progress.wrap_json }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'foo').insert! exercise_progress }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/progress' }
-    it { expect(last_response.body).to json_eq exercise_student_progress: [exercise_progress] }
+    it { expect(last_response.body).to json_eq exercise_student_progress: [exercise_progress.merge(organization: 'example', course: 'example/foo')] }
   end
 
 end

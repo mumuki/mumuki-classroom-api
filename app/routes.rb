@@ -193,7 +193,7 @@ end
 
 get '/courses/:course/progress' do
   authorize! :teacher
-  Classroom::Collection::ExerciseStudentProgress.for(course).all.as_json
+  Classroom::Collection::ExerciseStudentProgress.for(organization, course).all.as_json
 end
 
 get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
