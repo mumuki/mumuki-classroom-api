@@ -19,4 +19,4 @@ test:
   <<: *common
   host: <%=ENV['MONGO_PORT_27017_TCP_ADDR'] || 'localhost'%>
   port: <%=ENV['MONGO_PORT_27017_TCP_PORT'] || 27017%>
-  database: classroom-test
+  database: classroom_test

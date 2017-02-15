@@ -1,11 +1,12 @@
 class Classroom::Database
+
   extend Mumukit::Service::Database
 
   class << self
-    def new_database_client(database)
+    def new_database_client(_)
       Mongo::Client.new(
         ["#{config[:host]}:#{config[:port]}"],
-        database: database,
+        database: default_database_name,
         user: config[:user],
         password: config[:password],
         min_pool_size: 1,
@@ -18,7 +19,7 @@ class Classroom::Database
 
     def client
       Thread.current.thread_variable_get(:mongo_client).if_nil? do
-        self.client = new_database_client(:classroom)
+        self.client = new_database_client(default_database_name)
       end
     end
 
@@ -26,23 +27,28 @@ class Classroom::Database
       client.database.name
     end
 
+    def default_database_name
+      config[:database]
+    end
+
     def database_names
       client.database_names
     end
 
-    def clean!(target = organization)
+    def clean!(target = default_database_name)
+      return if target.to_sym === :classroom
       connect_transient!(target) { client.collections.each(&:drop) }
     end
 
-    def ensure!(target = organization)
-      connect_transient!(target) { client[:classroom].insert_one classroom_db: true }
+    def ensure!(target = default_database_name)
+      connect_transient!(target) { client[default_database_name].insert_one classroom_db: true }
     end
 
-    def connect!(organization)
+    def connect!(_)
       if client
-        self.client = client.use(organization)
+        self.client = client.use(default_database_name)
       else
-        self.client = new_database_client(organization)
+        self.client = new_database_client(default_database_name)
       end
     end
 
