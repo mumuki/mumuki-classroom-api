@@ -187,7 +187,7 @@ end
 
 get '/courses/:course/guides/:organization/:repository/:uid' do
   Classroom::Collection::ExerciseStudentProgress
-    .for(course)
+    .for(organization, course)
     .where(exercise_student_progress_query).as_json
 end
 
@@ -198,7 +198,7 @@ end
 
 get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
   Classroom::Collection::ExerciseStudentProgress
-    .for(course)
+    .for(organization, course)
     .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
 end
 

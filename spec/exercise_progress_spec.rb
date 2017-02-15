@@ -1,5 +1,9 @@
 require 'spec_helper'
 
+def with_course(json)
+  {organization: 'example', course: 'example/k2048'}.merge(json)
+end
+
 describe Classroom::Collection::ExerciseStudentProgress do
 
   before do
@@ -29,22 +33,22 @@ describe Classroom::Collection::ExerciseStudentProgress do
       submissions: [{status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}]}, {status: :passed}]} }
 
 
-    before { Classroom::Collection::ExerciseStudentProgress.for('k2048').insert!(progress1.wrap_json) }
-    before { Classroom::Collection::ExerciseStudentProgress.for('k2048').insert!(progress2.wrap_json) }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert!(progress1.wrap_json) }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert!(progress2.wrap_json) }
     before { header 'Authorization', build_auth_header('*') }
 
     context 'get /courses/:course/guides/:organization/:repository/:student_id' do
       before { get '/courses/k2048/guides/example/foo/github%7c123456' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq({exercise_student_progress: [progress1, result2]}.to_json) }
+      it { expect(last_response.body).to eq({exercise_student_progress: [with_course(progress1), with_course(result2)]}.to_json) }
     end
 
     context '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
       before { get '/courses/k2048/guides/example/foo/github%7c123456/178' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq(result2.to_json) }
+      it { expect(last_response.body).to eq(with_course(result2).to_json) }
     end
   end
 
