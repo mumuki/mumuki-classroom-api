@@ -19,7 +19,7 @@ class Classroom::Collection::CourseCollection < Classroom::Collection::Organizat
 
   private
 
-  def pk
+  def default_index
     super.merge course: 1
   end
 

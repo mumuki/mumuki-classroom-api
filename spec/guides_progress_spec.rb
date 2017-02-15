@@ -1,5 +1,9 @@
 require 'spec_helper'
 
+def with_course(json)
+  {organization: 'example', course: 'example/k2048'}.merge(json)
+end
+
 describe Classroom::Collection::Courses do
 
   before do
@@ -27,9 +31,9 @@ describe Classroom::Collection::Courses do
     last_assignment: {exercise: {id: 1}, submission: {status: :passed_with_warnings}}
   } }
 
-  before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress1.wrap_json) }
-  before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress2.wrap_json) }
-  before { Classroom::Collection::GuideStudentsProgress.for('k2048').insert!(guide_progress3.wrap_json) }
+  before { Classroom::Collection::GuideStudentsProgress.for('example', 'k2048').insert!(guide_progress1) }
+  before { Classroom::Collection::GuideStudentsProgress.for('example', 'k2048').insert!(guide_progress2) }
+  before { Classroom::Collection::GuideStudentsProgress.for('example', 'k2048').insert!(guide_progress3) }
 
   describe 'get /courses/:course/guides/:org/:repo' do
 
@@ -39,8 +43,8 @@ describe Classroom::Collection::Courses do
       before { get '/courses/k2048/guides/example/foo' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq({guide_students_progress: [guide_progress1,
-                                                                       guide_progress2]}.to_json) }
+      it { expect(last_response.body).to eq({guide_students_progress: [with_course(guide_progress1),
+                                                                       with_course(guide_progress2)]}.to_json) }
     end
 
   end
@@ -53,8 +57,8 @@ describe Classroom::Collection::Courses do
       before { get '/api/courses/k2048/students/agus@mumuki.org' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq({guide_students_progress: [guide_progress2,
-                                                                       guide_progress3]}.to_json) }
+      it { expect(last_response.body).to eq({guide_students_progress: [with_course(guide_progress2),
+                                                                       with_course(guide_progress3)]}.to_json) }
     end
 
   end

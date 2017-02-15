@@ -41,8 +41,12 @@ class Classroom::Collection::OrganizationCollection
     mongo_database.client[mongo_collection_name].indexes.create_one hash_index
   end
 
-  def pk
+  def default_index
     {organization: 1}
+  end
+
+  def pk
+    default_index
   end
 
   def query(args = {})
