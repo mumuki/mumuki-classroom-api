@@ -6,9 +6,9 @@ class Classroom::Collection::Teachers < Classroom::Collection::People
 
   def upsert!(teacher)
     mongo_collection.update_one(
-      { 'uid': teacher[:uid] },
-      { '$set': teacher },
-      { 'upsert': true }
+      query(uid: teacher[:uid]),
+      {'$set': teacher},
+      {'upsert': true}
     )
   end
 

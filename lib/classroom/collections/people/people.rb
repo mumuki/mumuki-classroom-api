@@ -1,7 +1,11 @@
 class Classroom::Collection::People < Classroom::Collection::CourseCollection
 
+  def initialize(organization, course)
+    super organization, course
+  end
+
   def find_by(args)
-    first_by(args, {_id: -1})
+    first_by(query(args), _id: -1)
   end
 
   def wrap(it)
@@ -18,11 +22,17 @@ class Classroom::Collection::People < Classroom::Collection::CourseCollection
   end
 
   def exists?(uid)
-    any? uid: uid
+    any? query(uid: uid)
   end
 
   def ensure_new!(uid)
     raise exists_exception, "#{underscore_class_name.capitalize.singularize} already exist" if exists? uid
+  end
+
+  private
+
+  def pk
+    super.merge uid: 1
   end
 
 end
