@@ -1,5 +1,9 @@
 require 'spec_helper'
 
+def with_course(json)
+  {organization: 'example', course: 'example/foo'}.merge json
+end
+
 describe Classroom::Collection::Guides do
 
   before do
@@ -22,14 +26,14 @@ describe Classroom::Collection::Guides do
     end
 
     context 'when guides already exists in a course' do
-      before { Classroom::Collection::Guides.for('foo').insert!(guide1.wrap_json) }
-      before { Classroom::Collection::Guides.for('foo').insert!(guide2.wrap_json) }
-      before { Classroom::Collection::Guides.for('bar').insert!(guide3.wrap_json) }
+      before { Classroom::Collection::Guides.for('example', 'foo').insert!(guide1) }
+      before { Classroom::Collection::Guides.for('example', 'foo').insert!(guide2) }
+      before { Classroom::Collection::Guides.for('example', 'bar').insert!(guide3) }
       before { header 'Authorization', build_auth_header('*') }
       before { get '/courses/foo/guides' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq guides: [guide1, guide2] }
+      it { expect(last_response.body).to eq({guides: [with_course(guide1), with_course(guide2)]}.to_json) }
     end
 
     context 'when no guides in a course yet' do
@@ -41,14 +45,14 @@ describe Classroom::Collection::Guides do
     end
 
     context 'when guides already exists in a course' do
-      before { Classroom::Collection::Guides.for('foo').insert!(guide1.wrap_json) }
-      before { Classroom::Collection::Guides.for('foo').insert!(guide2.wrap_json) }
-      before { Classroom::Collection::Guides.for('bar').insert!(guide3.wrap_json) }
+      before { Classroom::Collection::Guides.for('example', 'foo').insert!(guide1) }
+      before { Classroom::Collection::Guides.for('example', 'foo').insert!(guide2) }
+      before { Classroom::Collection::Guides.for('example', 'bar').insert!(guide3) }
       before { header 'Authorization', build_mumuki_auth_header('*') }
       before { get '/api/courses/foo/guides' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq guides: [guide1, guide2] }
+      it { expect(last_response.body).to eq({guides: [with_course(guide1), with_course(guide2)]}.to_json) }
     end
 
   end

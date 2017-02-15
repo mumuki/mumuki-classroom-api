@@ -172,12 +172,12 @@ end
 
 get '/courses/:course/guides' do
   authorize! :teacher
-  Classroom::Collection::Guides.for(course).all.as_json
+  Classroom::Collection::Guides.for(organization, course).all.as_json
 end
 
 get '/api/courses/:course/guides' do
   authorize! :teacher
-  Classroom::Collection::Guides.for(course).all.as_json
+  Classroom::Collection::Guides.for(organization, course).all.as_json
 end
 
 get '/courses/:course/guides/:organization/:repository' do
