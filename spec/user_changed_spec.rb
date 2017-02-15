@@ -8,8 +8,8 @@ describe Classroom::Event::UserChanged do
   let(:new_permissions) { {student: 'example/bar', teacher: 'example/foo'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
 
-  before { Mumukit::Auth::Store.set! uid, old_permissions }
   before { Classroom::Database.clean! }
+  before { Classroom::Collection::Users.upsert_permissions! uid, old_permissions }
 
   describe 'execute!' do
 
@@ -29,7 +29,6 @@ describe Classroom::Event::UserChanged do
                {role: 'student', grant: 'example/foo', type: 'removed'},
                {role: 'student', grant: 'example/bar', type: 'added'},
                {role: 'teacher', grant: 'example/foo', type: 'added'}]) }
-      it { expect(Mumukit::Auth::Store.get(uid).as_json).to eq(new_permissions) }
 
     end
 

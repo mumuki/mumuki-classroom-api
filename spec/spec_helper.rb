@@ -52,22 +52,14 @@ end
 
 Classroom::Database.connect! 'example'
 
-def build_auth_header(permissions_string, sub='github|user123456')
-  Mumukit::Auth::Store.set!(sub, {owner: permissions_string})
-  encoded_token = JWT.encode(
-    {aud: Mumukit::Auth.config.client_ids[:auth0],
-     sub: sub},
-    Mumukit::Auth::Token.decoded_secret)
-  'dummy token ' + encoded_token
+def build_mumuki_auth_header(permissions, sub='github|user123456')
+  Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
+  Mumukit::Auth::Token.encode sub, {}
 end
 
-def build_mumuki_auth_header(permissions_string, sub='github|user123456')
-  Mumukit::Auth::Store.set!(sub, {owner: permissions_string})
-  encoded_token = JWT.encode(
-    {aud: Mumukit::Auth.config.client_ids[:auth],
-     sub: sub},
-    Mumukit::Auth::Token.decoded_secret(:auth))
-  'dummy token ' + encoded_token
+def build_auth_header(permissions, sub='github|user123456')
+  Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
+  Mumukit::Auth::Token.encode sub, {}
 end
 
 def with_organization(organization, &block)

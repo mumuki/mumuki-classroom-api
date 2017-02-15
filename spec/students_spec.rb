@@ -4,6 +4,7 @@ describe Classroom::Collection::Students do
 
   before do
     Classroom::Database.clean!
+    Classroom::Collection::Users.upsert_permissions! 'github|123456', {}
   end
 
   let(:created_at) { 'created_at' }
@@ -194,16 +195,12 @@ describe Classroom::Collection::Students do
   end
 
   describe 'when needs mumuki-user' do
-    let(:auth0) { double('auth0') }
     let(:fetched_student) { example_students.find_by(uid: 'github|123456') }
 
     before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
-    before { allow(Mumukit::Auth::Store).to receive(:get).and_return(auth0) }
-    before { allow(auth0).to receive(:protect!) }
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
-      before { allow(auth0).to receive(:remove_permission!) }
       before { example_students.insert! student1.wrap_json }
 
       context 'should transfer student to destination and transfer all his data' do
@@ -219,7 +216,6 @@ describe Classroom::Collection::Students do
 
     describe 'post /courses/:course/students/:student_id/attach' do
 
-      before { allow(auth0).to receive(:add_permission!) }
       before { example_students.insert! student1.merge(detached: true, detached_at: Time.now).wrap_json }
 
       context 'should transfer student to destination and transfer all his data' do
@@ -236,7 +232,6 @@ describe Classroom::Collection::Students do
     describe 'post /courses/:course/students' do
       let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
       let(:student_json) { student.to_json }
-      before { allow(auth0).to receive(:add_permission!) }
 
       context 'when course exists' do
         before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo', uid: 'example/foo'}.wrap_json) }
@@ -304,12 +299,8 @@ describe Classroom::Collection::Students do
     end
 
     describe 'post /courses/:course/students' do
-      let(:auth0) { double('auth0') }
       let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
       let(:student_json) { student.to_json }
-      before { allow(Mumukit::Auth::Store).to receive(:get).and_return(auth0) }
-      before { allow(Mumukit::Auth::Store).to receive(:set!) }
-      before { allow(auth0).to receive(:add_permission!) }
 
       context 'when course exists' do
         before { Classroom::Collection::Courses.insert!({name: 'foo', slug: 'example/foo', uid: 'example/foo'}.wrap_json) }

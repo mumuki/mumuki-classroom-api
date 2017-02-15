@@ -11,10 +11,8 @@ class Classroom::Event::UserChanged
     private
 
     def update_user_permissions(user)
-      Mumukit::Auth::Store.with do |db|
-        set_diff_permissions db, user
-        db.set! user[:uid], user[:permissions]
-      end
+      set_diff_permissions user
+      Classroom::Collection::Users.upsert_permissions! user[:uid], user[:permissions]
     end
 
     def update_user_model(user)
@@ -27,8 +25,8 @@ class Classroom::Event::UserChanged
       end
     end
 
-    def set_diff_permissions(db, user)
-      permissions = db.get user[:uid]
+    def set_diff_permissions(user)
+      permissions = Classroom::Collection::Users.find_by_uid!(user[:uid]).permissions
       self.changes = Mumukit::Auth::Permissions::Diff.diff(permissions, user[:permissions]).changes_by_organization
     end
 
@@ -43,7 +41,8 @@ class Classroom::Event::UserChanged
 
 
     def update_student!(course_h, student_h)
-      course = course_h[:uid].to_mumukit_slug.course
+      course_slug = course_h[:uid] || course_h[:slug]
+      course = course_slug.to_mumukit_slug.course
       sub_student = student_h.transform_keys { |field| "student.#{field}".to_sym }
       Classroom::Collection::Students.for(course).update! student_h
       Classroom::Collection::CourseStudents.update_student! sub_student
