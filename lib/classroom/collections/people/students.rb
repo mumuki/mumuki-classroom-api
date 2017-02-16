@@ -41,6 +41,16 @@ class Classroom::Collection::Students < Classroom::Collection::People
     all.raw.select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
   end
 
+  def delete!(uid)
+    delete_one(uid: uid)
+    student = {'student.uid': uid}
+    Classroom::Collection::CourseStudents.for(organization).delete_many(student.merge('course.slug': course_slug, organization: organization))
+    Classroom::Collection::GuideStudentsProgress.for(organization, course).delete_many(student.merge(organization: organization))
+    Classroom::Collection::ExerciseStudentProgress.for(organization, course).delete_many(student.merge(organization: organization))
+    Classroom::Collection::Guides.for(organization, course).delete_if_has_no_progress
+  end
+
+
   private
 
   def do_detach!(uid)

@@ -84,11 +84,11 @@ helpers do
   end
 
   def ensure_course_existence!
-    Classroom::Collection::Courses.ensure_exist! course_slug
+    Classroom::Collection::Courses.for(organization).ensure_exist! course_slug
   end
 
   def ensure_course_student_existence!(uid)
-    Classroom::Collection::CourseStudents.ensure_exist! uid, course_slug
+    Classroom::Collection::CourseStudents.for(organization).ensure_exist! uid, course_slug
   end
 
   def set_locale!(org)
@@ -102,7 +102,7 @@ helpers do
   def update_and_notify_student_metadata(uid, method)
     permissions = Classroom::Collection::Users.find_by_uid!(uid).permissions
     permissions.send("#{method}_permission!", 'student', course_slug)
-    Classroom::Collection::Students.for(course).find_by({uid: uid}).try do |user|
+    Classroom::Collection::Students.for(organization, course).find_by({uid: uid}).try do |user|
       user_as_json = user.as_json(only: [:first_name, :last_name, :email])
       user_to_notify = user_as_json.merge(uid: uid, permissions: permissions)
       Mumukit::Nuntius::EventPublisher.publish('UserChanged', {user: user_to_notify})
@@ -131,12 +131,12 @@ require_relative './routes/teachers'
 
 get '/courses/:course/students' do
   authorize! :teacher
-  Classroom::Collection::Students.for(course).all.as_json
+  Classroom::Collection::Students.for(organization, course).all.as_json
 end
 
 get '/api/courses/:course/students' do
   authorize! :teacher
-  Classroom::Collection::Students.for(course).all.as_json
+  Classroom::Collection::Students.for(organization, course).all.as_json
 end
 
 get '/api/courses/:course/students/:uid' do
@@ -152,14 +152,14 @@ end
 
 post '/courses/:course/students/:uid/detach' do
   authorize! :janitor
-  Classroom::Collection::Students.for(course).detach!(uid)
+  Classroom::Collection::Students.for(organization, course).detach!(uid)
   update_and_notify_student_metadata(uid, 'remove')
   {status: :updated}
 end
 
 post '/courses/:course/students/:uid/attach' do
   authorize! :janitor
-  Classroom::Collection::Students.for(course).attach!(uid)
+  Classroom::Collection::Students.for(organization, course).attach!(uid)
   update_and_notify_student_metadata(uid, 'add')
   {status: :updated}
 end
@@ -167,7 +167,7 @@ end
 get '/courses/:course/student/:uid' do
   authorize! :teacher
 
-  Classroom::Collection::Students.for(course).find_by(uid: uid).as_json
+  Classroom::Collection::Students.for(organization, course).find_by(uid: uid).as_json
 end
 
 get '/courses/:course/guides' do
@@ -212,12 +212,12 @@ post '/courses/:course/students' do
   authorize! :janitor
 
   ensure_course_existence!
-  Classroom::Collection::CourseStudents.ensure_new! json_body['email'], course_slug
-  Classroom::Collection::Students.for(course).ensure_new! json_body['email']
+  Classroom::Collection::CourseStudents.for(organization).ensure_new! json_body['email'], course_slug
+  Classroom::Collection::Students.for(organization, course).ensure_new! json_body['email']
 
   json = {student: json_body.merge(uid: json_body['email']), course: {slug: course_slug}}
-  Classroom::Collection::CourseStudents.insert! json.wrap_json
-  Classroom::Collection::Students.for(course).insert!(json[:student].wrap_json)
+  Classroom::Collection::CourseStudents.for(organization).insert! json
+  Classroom::Collection::Students.for(organization, course).insert!(json[:student])
 
   Mumukit::Nuntius::Publisher.publish_resubmissions(uid: json[:student][:uid], tenant: tenant)
 
