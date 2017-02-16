@@ -10,6 +10,7 @@ describe Classroom::Event::UserChanged do
 
   before { Classroom::Database.clean! }
   before { Classroom::Collection::Users.upsert_permissions! uid, old_permissions }
+  before { Classroom::Collection::Organizations.insert!({name: 'example'}.wrap_json) }
 
   describe 'execute!' do
 
@@ -22,7 +23,7 @@ describe Classroom::Event::UserChanged do
       end
       before { Classroom::Event::UserChanged.execute! event }
 
-      it { expect(Classroom::Database.database_names).to include 'example' }
+      it { expect(Classroom::Collection::Organizations.all.map(&:name)).to include 'example' }
       it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff old_permissions, new_permissions)
              .to json_like(changes: [
@@ -34,28 +35,28 @@ describe Classroom::Event::UserChanged do
 
     context 'update models' do
       before do
-        Classroom::Collection::Courses.insert!({uid: 'example/foo'}.wrap_json)
-        Classroom::Collection::Courses.insert!({uid: 'example/bar'}.wrap_json)
-        Classroom::Collection::Students.for('foo').insert! user.wrap_json
-        Classroom::Collection::CourseStudents.insert!({course: {uid: 'example/foo'}, student: user}.wrap_json)
+        Classroom::Collection::Courses.for('example').insert!({uid: 'example/foo'})
+        Classroom::Collection::Courses.for('example').insert!({uid: 'example/bar'})
+        Classroom::Collection::Students.for('example', 'foo').insert! user
+        Classroom::Collection::CourseStudents.for('example').insert!({course: {uid: 'example/foo'}, student: user})
       end
       before { Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
       let(:event) { {user: user2.merge(permissions: new_permissions)} }
 
-      let(:student_foo_fetched) { Classroom::Collection::Students.for('foo').find_by(uid: uid) }
-      let(:student_bar_fetched) { Classroom::Collection::Students.for('bar').find_by(uid: uid) }
-      let(:teacher_foo_fetched) { Classroom::Collection::Teachers.for('foo').find_by(uid: uid) }
+      let(:student_foo_fetched) { Classroom::Collection::Students.for('example', 'foo').find_by(uid: uid) }
+      let(:student_bar_fetched) { Classroom::Collection::Students.for('example', 'bar').find_by(uid: uid) }
+      let(:teacher_foo_fetched) { Classroom::Collection::Teachers.for('example', 'foo').find_by(uid: uid) }
 
       it { expect(student_foo_fetched.detached).to eq true }
       it { expect(student_foo_fetched.social_id).to eq 'foo' }
       it { expect(student_foo_fetched.first_name).to eq 'Agustín' }
 
-      it { expect(student_bar_fetched.as_json(except: [:created_at])).to eq user2 }
+      it { expect(student_bar_fetched.as_json(except: [:created_at])).to eq user2.merge(organization: 'example', course: 'example/bar') }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_foo_fetched.as_json(except: [:created_at])).to eq user2 }
+      it { expect(teacher_foo_fetched.as_json(except: [:created_at])).to eq user2.merge(organization: 'example', course: 'example/foo') }
     end
 
   end

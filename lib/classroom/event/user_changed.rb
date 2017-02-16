@@ -16,11 +16,11 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      Classroom::Database.connect_each! do |organization|
-        update_student user
+      Classroom::Collection::Organizations.all.map(&:name).each do |organization|
+        update_student organization, user
         changes[organization]&.each do |change|
           message = change.description
-          self.send message, user, change.granted_slug if self.respond_to? message, true
+          self.send message, organization, user, change.granted_slug if self.respond_to? message, true
         end
       end
     end
@@ -30,40 +30,40 @@ class Classroom::Event::UserChanged
       self.changes = Mumukit::Auth::Permissions::Diff.diff(permissions, user[:permissions]).changes_by_organization
     end
 
-    def update_student(user)
-      Classroom::Collection::CourseStudents.find_by_uid(user[:uid]).try do |course_student|
+    def update_student(organization, user)
+      Classroom::Collection::CourseStudents.for(organization).find_by_uid(user[:uid]).try do |course_student|
         course_h = course_student.course.as_json.with_indifferent_access
         old_profile = Mumukit::Auth::Profile.extract course_student.student
         new_profile = Mumukit::Auth::Profile.extract user
-        update_student! course_h, new_profile.attributes if old_profile != new_profile
+        update_student! organization, course_h, new_profile.attributes if old_profile != new_profile
       end
     end
 
 
-    def update_student!(course_h, student_h)
+    def update_student!(organization, course_h, student_h)
       course_slug = course_h[:uid] || course_h[:slug]
       course = course_slug.to_mumukit_slug.course
       sub_student = student_h.transform_keys { |field| "student.#{field}".to_sym }
-      Classroom::Collection::Students.for(course).update! student_h
-      Classroom::Collection::CourseStudents.update_student! sub_student
-      Classroom::Collection::GuideStudentsProgress.for(course).update_student! sub_student
-      Classroom::Collection::ExerciseStudentProgress.for(course).update_student! sub_student
+      Classroom::Collection::Students.for(organization, course).update! student_h
+      Classroom::Collection::CourseStudents.for(organization).update_student! sub_student
+      Classroom::Collection::GuideStudentsProgress.for(organization, course).update_student! sub_student
+      Classroom::Collection::ExerciseStudentProgress.for(organization, course).update_student! sub_student
     end
 
-    def student_added(user, granted_slug)
-      if Classroom::Collection::Students.for(granted_slug.course).exists? user[:uid]
-        Classroom::Collection::Students.for(granted_slug.course).attach! user[:uid]
+    def student_added(organization, user, granted_slug)
+      if Classroom::Collection::Students.for(organization, granted_slug.course).exists? user[:uid]
+        Classroom::Collection::Students.for(organization, granted_slug.course).attach! user[:uid]
       else
-        Classroom::Collection::CourseStudents.create! user, granted_slug.to_s
+        Classroom::Collection::CourseStudents.for(organization).create! user, granted_slug.to_s
       end
     end
 
-    def student_removed(user, granted_slug)
-      Classroom::Collection::Students.for(granted_slug.course).detach! user[:uid]
+    def student_removed(organization, user, granted_slug)
+      Classroom::Collection::Students.for(organization, granted_slug.course).detach! user[:uid]
     end
 
-    def teacher_added(user, granted_slug)
-      Classroom::Collection::Teachers.for(granted_slug.course).upsert! user
+    def teacher_added(organization, user, granted_slug)
+      Classroom::Collection::Teachers.for(organization, granted_slug.course).upsert! user
     end
 
   end

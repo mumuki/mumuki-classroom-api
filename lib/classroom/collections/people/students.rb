@@ -17,14 +17,14 @@ class Classroom::Collection::Students < Classroom::Collection::People
 
   def detach!(uid)
     do_detach!(uid)
-    Classroom::Collection::ExerciseStudentProgress.for(course).detach_student! uid
-    Classroom::Collection::GuideStudentsProgress.for(course).detach_student! uid
+    Classroom::Collection::ExerciseStudentProgress.for(organization, course).detach_student! uid
+    Classroom::Collection::GuideStudentsProgress.for(organization, course).detach_student! uid
   end
 
   def attach!(uid)
     do_attach!(uid)
-    Classroom::Collection::ExerciseStudentProgress.for(course).attach_student! uid
-    Classroom::Collection::GuideStudentsProgress.for(course).attach_student! uid
+    Classroom::Collection::ExerciseStudentProgress.for(organization, course).attach_student! uid
+    Classroom::Collection::GuideStudentsProgress.for(organization, course).attach_student! uid
   end
 
   def update_all_stats_for(uid)
@@ -37,15 +37,6 @@ class Classroom::Collection::Students < Classroom::Collection::People
     update_one(query(uid: uid), {'$set': {last_assignment: last_assignment}})
   end
 
-  def delete!(uid)
-    delete_one(uid: uid)
-    student = {'student.uid': uid}
-    Classroom::Collection::CourseStudents.delete_many(student.merge('course.slug': course_slug))
-    Classroom::Collection::GuideStudentsProgress.for(course).delete_many(student)
-    Classroom::Collection::ExerciseStudentProgress.for(course).delete_many(student)
-    Classroom::Collection::Guides.for(course).delete_if_has_no_progress
-  end
-
   def report(&block)
     all.raw.select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
   end
@@ -54,14 +45,14 @@ class Classroom::Collection::Students < Classroom::Collection::People
 
   def do_detach!(uid)
     mongo_collection.update_one(
-      {'uid': uid},
+      query('uid': uid),
       {'$set': {detached: true, detached_at: Time.now}}
     )
   end
 
   def do_attach!(uid)
     mongo_collection.update_one(
-      {'uid': uid},
+      query('uid': uid),
       {'$unset': {detached: '', detached_at: ''}}
     )
   end

@@ -29,17 +29,11 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
   end
 
   def detach_student!(uid)
-    mongo_collection.update_many(
-      {:'student.uid' => uid},
-      {:$set => {detached: true}}
-    )
+    mongo_collection.update_many(query('student.uid': uid), '$set': {detached: true})
   end
 
   def attach_student!(uid)
-    mongo_collection.update_many(
-      {:'student.uid' => uid},
-      {:$unset => {detached: ''}}
-    )
+    mongo_collection.update_many(query('student.uid': uid), '$unset': {detached: ''})
   end
 
   private

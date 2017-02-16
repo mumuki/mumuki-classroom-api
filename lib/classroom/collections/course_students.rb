@@ -19,14 +19,14 @@ class Classroom::Collection::CourseStudents < Classroom::Collection::Organizatio
     mongo_collection.update_many({'student.uid': sub_student[:'student.uid']}, {'$set': sub_student})
   end
 
-  def self.create!(user, course_uid)
+  def create!(user, course_uid)
     course = course_uid.to_mumukit_slug.course
     ensure_new! user[:uid], course_uid
-    Classroom::Collection::Courses.ensure_exist! course_uid
-    Classroom::Collection::Students.for(course).ensure_new! user[:uid]
+    Classroom::Collection::Courses.for(organization).ensure_exist! course_uid
+    Classroom::Collection::Students.for(organization, course).ensure_new! user[:uid]
     json = {student: user, course: {uid: course_uid}}
-    Classroom::Collection::CourseStudents.insert! json.wrap_json
-    Classroom::Collection::Students.for(course).insert! user.wrap_json
+    Classroom::Collection::CourseStudents.for(organization).insert! json
+    Classroom::Collection::Students.for(organization, course).insert! user
   end
 
   def ensure_new!(uid, course_slug)
