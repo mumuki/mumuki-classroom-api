@@ -13,8 +13,13 @@ module Classroom::Submission
     update_student_last_assignment json
   end
 
+  def self.organization(json)
+    json[:organization]
+  end
+
   def self.find_submission_course!(json)
     Classroom::Collection::CourseStudents
+      .for(organization json)
       .find_by_uid!(uid json)
       .course
       .deep_symbolize_keys
@@ -22,7 +27,7 @@ module Classroom::Submission
 
   def self.find_student_from(json)
     Classroom::Collection::Students
-      .for(course_prefix json)
+      .for(organization(json), course_prefix(json))
       .find_by(uid: uid(json))
       .as_json
       .deep_symbolize_keys
@@ -30,25 +35,25 @@ module Classroom::Submission
 
   def self.update_guide(json)
     Classroom::Collection::Guides
-      .for(course_prefix json)
+      .for(organization(json), course_prefix(json))
       .update!(guide_from json)
   end
 
   def self.update_student_progress(json)
     Classroom::Collection::Students
-      .for(course_prefix json)
+      .for(organization(json), course_prefix(json))
       .update_all_stats_for(student_from(json)[:uid])
   end
 
   def self.update_student_last_assignment(json)
     Classroom::Collection::Students
-      .for(course_prefix json)
+      .for(organization(json), course_prefix(json))
       .update_last_assignment_for(student_from(json)[:uid])
   end
 
   def self.update_exercise_student_progress(json)
     Classroom::Collection::ExerciseStudentProgress
-      .for(course_prefix json)
+      .for(organization(json), course_prefix(json))
       .update!(exercise_student_progress_from json)
   end
 
@@ -59,13 +64,13 @@ module Classroom::Submission
 
   def self.update_guide_student_progress(json)
     Classroom::Collection::GuideStudentsProgress
-      .for(course_prefix json)
+      .for(organization(json), course_prefix(json))
       .update!(guide_students_progress_from json)
   end
 
   def self.student_stats_for(json)
     Classroom::Collection::ExerciseStudentProgress
-      .for(course_prefix json)
+      .for(organization(json), course_prefix(json))
       .stats(exercise_student_progress_from json)
       .deep_symbolize_keys
   end

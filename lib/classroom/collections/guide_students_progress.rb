@@ -14,9 +14,9 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
   end
 
   def last_assignment_for(uid)
-    guide_student_progress = first_by({'student.uid': uid}, {'last_assignment.submission.created_at': -1})
+    guide_student_progress = first_by(query('student.uid': uid), {'last_assignment.submission.created_at': -1})
     guide_student_progress.try do |it|
-      {
+      query(
         guide: it.guide,
         exercise: it.last_assignment['exercise'],
         submission: {
@@ -24,7 +24,7 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
           status: it.last_assignment['submission']['status'],
           created_at: it.last_assignment['submission']['created_at'],
         }
-      }
+      )
     end
   end
 
@@ -49,8 +49,7 @@ class Classroom::Collection::GuideStudentsProgress < Classroom::Collection::Cour
   end
 
   def query_by_index(guide_student)
-    {:'guide.slug' => guide_student[:guide][:slug],
-     :'student.uid' => guide_student[:student][:uid]}
+    query 'guide.slug': guide_student[:guide][:slug], 'student.uid': guide_student[:student][:uid]
   end
 
 end

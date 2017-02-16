@@ -28,13 +28,13 @@ class Classroom::Collection::Students < Classroom::Collection::People
   end
 
   def update_all_stats_for(uid)
-    all_stats = Classroom::Collection::ExerciseStudentProgress.for(course).all_stats(uid)
-    update_one({uid: uid}, {:'$set' => {stats: all_stats}})
+    all_stats = Classroom::Collection::ExerciseStudentProgress.for(organization, course).all_stats(uid)
+    update_one(query(uid: uid), {:'$set' => {stats: all_stats}})
   end
 
   def update_last_assignment_for(uid)
-    last_assignment = Classroom::Collection::GuideStudentsProgress.for(course).last_assignment_for(uid)
-    update_one({uid: uid}, {'$set': {last_assignment: last_assignment}})
+    last_assignment = Classroom::Collection::GuideStudentsProgress.for(organization, course).last_assignment_for(uid)
+    update_one(query(uid: uid), {'$set': {last_assignment: last_assignment}})
   end
 
   def delete!(uid)

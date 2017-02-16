@@ -4,6 +4,7 @@ namespace :submissions do
 
     Mumukit::Nuntius::Consumer.negligent_start! 'submissions' do |body|
       organization = body.delete('tenant')
+      body['organization'] = organization
       Classroom::Database.connect! organization
       Classroom::Database.connect_transient! organization do
         begin

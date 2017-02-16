@@ -5,7 +5,7 @@ class Classroom::Collection::People < Classroom::Collection::CourseCollection
   end
 
   def find_by(args)
-    first_by(query(args), _id: -1)
+    first_by(query(args), {_id: -1})
   end
 
   def wrap(it)

@@ -80,21 +80,19 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
   end
 
   def query_by_guide_and_student(exercise_student)
-    {:'guide.slug' => exercise_student[:guide][:slug],
-     :'student.uid' => exercise_student[:student][:uid]}
+    query 'guide.slug': exercise_student[:guide][:slug], 'student.uid': exercise_student[:student][:uid]
   end
 
   def query_by_index(exercise_student)
-    query_by_guide_and_student(exercise_student).merge(:'exercise.id' => exercise_student[:exercise][:id])
+    query_by_guide_and_student(exercise_student).merge 'exercise.id': exercise_student[:exercise][:id]
   end
 
   def update_query(exercise_student)
-    {:'$set' => exercise_student.except(:submission),
-     :'$push' => {:submissions => exercise_student[:submission]}}
+    {'$set': exercise_student.except(:submission), '$push': {submissions: exercise_student[:submission]}}
   end
 
   def student_query(uid)
-    {:'student.uid' => uid}
+    query 'student.uid': uid
   end
 
 end
