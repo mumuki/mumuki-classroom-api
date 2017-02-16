@@ -1,19 +1,22 @@
-module Classroom::Collection::FailedSubmissions
+class Classroom::Collection::FailedSubmissions < Classroom::Collection::OrganizationCollection
 
-  extend Mumukit::Service::Collection
+  def initialize(organization)
+    super organization
+    create_index id: 1
+  end
 
-  def self.find_by_uid(uid)
-    where({ :'submitter.uid' => uid })
+  def find_by_uid(uid)
+    where query('submitter.uid': uid)
   end
 
   private
 
-  def self.mongo_collection_name
-    :failed_submissions
+  def pk
+    super.merge 'submitter.uid': 1
   end
 
-  def self.mongo_database
-    Classroom::Database
+  def wrap(it)
+    Mumukit::Service::Document.new it
   end
 
 end

@@ -3,8 +3,7 @@ require 'spec_helper'
 describe Classroom::FailedSubmission do
 
   before do
-    Classroom::Database.clean! :central
-    Classroom::Database.clean! :example
+    Classroom::Database.clean!
   end
 
   let(:submitter) { {uid: 'github|123456'} }
@@ -20,18 +19,14 @@ describe Classroom::FailedSubmission do
 
   describe 'when resubmission is consumed' do
 
-    let(:central_count) { with_organization(:central) { Classroom::Collection::FailedSubmissions.count } }
-    let(:example_count) { with_organization(:example) { Classroom::Collection::FailedSubmissions.count } }
+    let(:central_count) { Classroom::Collection::FailedSubmissions.for('central').count }
+    let(:example_count) { Classroom::Collection::FailedSubmissions.for('example').count }
 
     before do
-      with_organization('central') do
-        Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
-        Classroom::Collection::FailedSubmissions.insert! atheneum_submission.merge(submitter: {uid: 'github|234567'}).wrap_json
-      end
-      with_organization('example') do
-        Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
-        Classroom::Collection::FailedSubmissions.insert! atheneum_submission.wrap_json
-      end
+      Classroom::Collection::FailedSubmissions.for('central').insert! atheneum_submission
+      Classroom::Collection::FailedSubmissions.for('central').insert! atheneum_submission.merge(submitter: {uid: 'github|234567'})
+      Classroom::Collection::FailedSubmissions.for('example').insert! atheneum_submission
+      Classroom::Collection::FailedSubmissions.for('example').insert! atheneum_submission
     end
 
     context 'and submission.process! works' do

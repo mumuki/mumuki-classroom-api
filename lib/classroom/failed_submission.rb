@@ -1,5 +1,7 @@
 module Classroom::FailedSubmission
-#FIXME this code should be added to a failed submission document
+
+  #FIXME this code should be added to a failed submission document
+
   def self.reprocess!(uid, destination)
     reprocess_from_organization uid, destination, destination
     reprocess_from_organization uid, :central, destination
@@ -15,11 +17,10 @@ module Classroom::FailedSubmission
   private
 
   def self.reprocess_from_organization(uid, source, destination)
-    Classroom::Database.connect_transient! source do
-      Classroom::Collection::FailedSubmissions.find_by_uid(uid).raw.each do |failed_submission|
-        delete_failed_submission failed_submission, source
-        try_reprocess failed_submission, source, destination
-      end
+    Classroom::Database.connect! source
+    Classroom::Collection::FailedSubmissions.for(source).find_by_uid(uid).each do |failed_submission|
+      delete_failed_submission failed_submission, source
+      try_reprocess failed_submission, source, destination
     end
   end
 
@@ -33,29 +34,28 @@ module Classroom::FailedSubmission
   end
 
   def self.insert_failed_submission(failed_submission, source)
-    Classroom::Database.connect_transient! source do
-      Classroom::Collection::FailedSubmissions.insert! failed_submission
-    end
+    Classroom::Database.connect! source
+    Classroom::Collection::FailedSubmissions.for(source).insert! failed_submission
   end
 
   def self.reprocess_failed_submission(destination, it)
-    Classroom::Database.connect_transient! destination do
-      Classroom::Submission.process! it.raw
-    end
+    json = it.raw
+    json['organization'] = destination
+    Classroom::Database.connect! destination
+    Classroom::Submission.process! json
   end
 
   def self.delete_failed_submission(it, source)
-    Classroom::Database.connect_transient! source do
-      Classroom::Collection::FailedSubmissions.delete! it.id
-    end
+    Classroom::Database.connect! source
+    Classroom::Collection::FailedSubmissions.for(source).delete! it.id
   end
 
   def self.new_failed_submission(progress, submission)
     submission.merge({
-      exercise: guide_from(progress[:exercise]),
-      guide: guide_from(progress[:exercise]),
-      submitter: submitter_from(progress[:student])
-    })
+                       exercise: guide_from(progress[:exercise]),
+                       guide: guide_from(progress[:exercise]),
+                       submitter: submitter_from(progress[:student])
+                     })
   end
 
   def self.submitter_from(student)
