@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-def with_course(json)
-  {organization: 'example', course: 'example/k2048'}.merge(json)
-end
-
 describe Classroom::Collection::ExerciseStudentProgress do
+
+  def with_course(json)
+    {organization: 'example', course: 'example/k2048'}.merge(json)
+  end
 
   before do
     Classroom::Database.clean!
@@ -33,8 +33,8 @@ describe Classroom::Collection::ExerciseStudentProgress do
       submissions: [{status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}]}, {status: :passed}]} }
 
 
-    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert!(progress1.wrap_json) }
-    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert!(progress2.wrap_json) }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert! progress1 }
+    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert! progress2 }
     before { header 'Authorization', build_auth_header('*') }
 
     context 'get /courses/:course/guides/:organization/:repository/:student_id' do

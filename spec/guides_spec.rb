@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-def with_course(json)
-  {organization: 'example', course: 'example/foo'}.merge json
-end
-
 describe Classroom::Collection::Guides do
+
+  def with_course(json)
+    {organization: 'example', course: 'example/foo'}.merge json
+  end
 
   before do
     Classroom::Database.clean!
