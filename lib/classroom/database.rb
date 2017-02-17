@@ -27,7 +27,7 @@ class Classroom::Database
       config[:database]
     end
 
-    def clean!(target = default_database_name)
+    def clean!
       client.collections.each(&:drop)
     end
 
