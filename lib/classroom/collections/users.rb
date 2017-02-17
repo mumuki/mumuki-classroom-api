@@ -3,22 +3,16 @@ module Classroom::Collection
     extend Mumukit::Service::Collection
 
     def self.upsert_permissions!(uid, permissions)
-      Classroom::Database.connect_transient! :classroom do
-        upsert_attributes!({uid: uid}, {permissions: permissions.as_json})
-      end
+      upsert_attributes!({uid: uid}, {permissions: permissions.as_json})
     end
 
     def self.find_by_uid!(uid)
-      Classroom::Database.connect_transient! :classroom do
-        find_by! uid: uid
-      end
+      find_by! uid: uid
     end
 
     def self.for_profile(profile)
-      Classroom::Database.connect_transient! :classroom do
-        upsert_by! :uid, Classroom::User.new(profile)
-        find_by_uid! profile.uid
-      end
+      upsert_by! :uid, Classroom::User.new(profile)
+      find_by_uid! profile.uid
     end
 
     private

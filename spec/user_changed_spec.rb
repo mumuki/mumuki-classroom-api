@@ -15,7 +15,6 @@ describe Classroom::Event::UserChanged do
   describe 'execute!' do
 
     context 'save new permissions' do
-      before { Classroom::Database.ensure! 'example' }
       before do
         expect(Classroom::Event::UserChanged).to receive(:student_added)
         expect(Classroom::Event::UserChanged).to receive(:teacher_added)

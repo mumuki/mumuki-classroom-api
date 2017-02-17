@@ -7,20 +7,18 @@ class Classroom::PermissionsPersistence::Mongo
   end
 
   def set!(uid, permissions)
-    Classroom::Database.connect_transient! :classroom do
-      update_one(
-        { 'uid': uid },
-        { '$set': { permissions: permissions.as_json } },
-        { 'upsert': true }
-      )
-    end
+    Classroom::Database.connect!
+    update_one(
+      {'uid': uid},
+      {'$set': {permissions: permissions.as_json}},
+      {'upsert': true}
+    )
   end
 
   def get(uid)
-    Classroom::Database.connect_transient! :classroom do
-      permissions = find_by(uid: uid)&.permissions || {}
-      Mumukit::Auth::Permissions.parse permissions.as_json
-    end
+    Classroom::Database.connect!
+    permissions = find_by(uid: uid)&.permissions || {}
+    Mumukit::Auth::Permissions.parse permissions.as_json
   end
 
   def close

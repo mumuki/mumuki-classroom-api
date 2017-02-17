@@ -3,6 +3,7 @@ module Classroom::FailedSubmission
   #FIXME this code should be added to a failed submission document
 
   def self.reprocess!(uid, destination)
+    Classroom::Database.connect!
     reprocess_from_organization uid, destination, destination
     reprocess_from_organization uid, :central, destination
   end
@@ -17,7 +18,6 @@ module Classroom::FailedSubmission
   private
 
   def self.reprocess_from_organization(uid, source, destination)
-    Classroom::Database.connect! source
     Classroom::Collection::FailedSubmissions.for(source).find_by_uid(uid).each do |failed_submission|
       delete_failed_submission failed_submission, source
       try_reprocess failed_submission, source, destination
@@ -34,19 +34,16 @@ module Classroom::FailedSubmission
   end
 
   def self.insert_failed_submission(failed_submission, source)
-    Classroom::Database.connect! source
     Classroom::Collection::FailedSubmissions.for(source).insert! failed_submission
   end
 
   def self.reprocess_failed_submission(destination, it)
     json = it.raw
     json['organization'] = destination
-    Classroom::Database.connect! destination
     Classroom::Submission.process! json
   end
 
   def self.delete_failed_submission(it, source)
-    Classroom::Database.connect! source
     Classroom::Collection::FailedSubmissions.for(source).delete! it.id
   end
 

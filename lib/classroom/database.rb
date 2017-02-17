@@ -23,27 +23,15 @@ class Classroom::Database
       end
     end
 
-    def organization
-      client.database.name
-    end
-
     def default_database_name
       config[:database]
     end
 
-    def database_names
-      client.database_names
-    end
-
     def clean!(target = default_database_name)
-      connect_transient!(target) { client.collections.each(&:drop) }
+      client.collections.each(&:drop)
     end
 
-    def ensure!(target = default_database_name)
-      connect_transient!(target) { client[default_database_name].insert_one classroom_db: true }
-    end
-
-    def connect!(_)
+    def connect!
       if client
         self.client = client.use(default_database_name)
       else
@@ -51,29 +39,6 @@ class Classroom::Database
       end
     end
 
-    def connect_each!(&block)
-      database_names.each do |organization|
-        connect_transient!(organization) { block.call organization }
-      end
-    end
-
-    def connect_transient!(new_organization, &block)
-      if new_organization == organization
-        block.call
-      else
-        swap_and_call!(block, new_organization)
-      end
-    end
-
-    private
-
-    def swap_and_call!(block, new_organization)
-      old_organization = organization
-      connect! new_organization
-      block.call
-    ensure
-      connect! old_organization
-    end
   end
 end
 

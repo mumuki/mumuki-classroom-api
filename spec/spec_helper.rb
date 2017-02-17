@@ -48,7 +48,7 @@ Mumukit::Auth.configure do |c|
   c.clients.default = {id: 'test-client', secret: 'thisIsATestSecret'}
 end
 
-Classroom::Database.connect! :classroom_test
+Classroom::Database.connect!
 
 def build_mumuki_auth_header(permissions, sub='github|user123456')
   Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
@@ -58,16 +58,6 @@ end
 def build_auth_header(permissions, sub='github|user123456')
   Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
   Mumukit::Auth::Token.encode sub, {}
-end
-
-def with_organization(organization, &block)
-  Classroom::Database.connect_transient! organization, &block
-end
-
-def with_client(organization, &block)
-  with_organization organization do
-    block.call Classroom::Database.client
-  end
 end
 
 def app

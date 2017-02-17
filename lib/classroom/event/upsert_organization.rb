@@ -4,9 +4,8 @@ module Classroom
       def self.execute!(payload)
         organization = payload['organization']
 
-        Classroom::Database.connect_transient! organization['name'] do
-          Classroom::Collection::Organizations.upsert! organization
-        end
+        Classroom::Database.connect!
+        Classroom::Collection::Organizations.upsert! organization
       end
     end
 

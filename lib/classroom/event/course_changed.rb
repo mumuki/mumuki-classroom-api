@@ -4,10 +4,9 @@ class Classroom::Event::CourseChanged
     def execute!(course)
       course_h = course[:course]
       uid = course_h[:uid]
-      Classroom::Database.connect_transient! uid.to_mumukit_slug.organization do
-        Classroom::Collection::Courses.ensure_new! uid
-        Classroom::Collection::Courses.upsert! course_h
-      end
+      Classroom::Database.connect!
+      Classroom::Collection::Courses.ensure_new! uid
+      Classroom::Collection::Courses.upsert! course_h
     end
 
   end
