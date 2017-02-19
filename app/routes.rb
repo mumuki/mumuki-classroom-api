@@ -15,11 +15,17 @@ Mumukit::Login.configure_login_routes! self
 helpers do
   Mumukit::Login.configure_controller! self
   Mumukit::Login.configure_login_controller! self
-end
 
-helpers do
   def authenticate!
     halt 401 unless current_user?
+  end
+
+  def json_body
+    @json_body ||= JSON.parse(request.body.read).with_indifferent_access rescue nil
+  end
+
+  def with_organization_and_course(hash = {})
+    {organization: organization, course: course_slug}.merge hash
   end
 
   def authorization_slug

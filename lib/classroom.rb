@@ -1,6 +1,7 @@
 module Classroom
 end
 
+require 'mongoid'
 require 'mumukit/core'
 require 'mumukit/service'
 require 'mumukit/inspection'
@@ -15,6 +16,7 @@ require_relative './profile'
 require_relative './classroom/database'
 require_relative './classroom/json_wrapper'
 
+require_relative './classroom/models'
 require_relative './classroom/collections'
 require_relative './classroom/documents'
 require_relative './classroom/reports'
@@ -24,6 +26,8 @@ require_relative './classroom/failed_submission'
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 require_relative './classroom/permissions_persistence'
+
+Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'])
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
