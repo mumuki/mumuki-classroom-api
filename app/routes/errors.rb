@@ -21,3 +21,8 @@ end
 error Classroom::TeacherExistsError do
   halt 400
 end
+
+error Mongoid::Errors::DocumentNotFound do
+  halt 404
+end
+

@@ -27,7 +27,7 @@ require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 require_relative './classroom/permissions_persistence'
 
-Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'])
+Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'

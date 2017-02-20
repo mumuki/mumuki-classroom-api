@@ -1,47 +1,54 @@
 helpers do
-  def create_exam
-    exam_id = Classroom::Collection::Exams.for(organization, course).insert! json_body
-    notify_upsert_exam(exam_id)
-    {status: :created}.merge(exam_id)
+  def exam_id
+    params[:exam_id]
+  end
+
+  def exam_query
+    with_organization_and_course(id: exam_id)
   end
 end
 
 get '/courses/:course/exams' do
   authorize! :teacher
-  Classroom::Collection::Exams.for(organization, course).all.as_json
+  {exams: Exam.where(with_organization_and_course).as_json}
 end
 
 get '/api/courses/:course/exams' do
   authorize! :teacher
-  Classroom::Collection::Exams.for(organization, course).all.as_json
+  {exams: Exam.where(with_organization_and_course).as_json}
 end
 
 post '/courses/:course/exams' do
   authorize! :teacher
-  create_exam
+  exam = Exam.create! with_organization_and_course(json_body)
+  exam.notify!
+  {status: :created}.merge(id: exam.id)
 end
 
 post '/api/courses/:course/exams' do
   authorize! :teacher
-  create_exam
+  exam = Exam.create! with_organization_and_course(json_body)
+  exam.notify!
+  {status: :created}.merge(id: exam.id)
 end
 
-put '/courses/:course/exams/:exam' do
+put '/courses/:course/exams/:exam_id' do
   authorize! :teacher
-  exam_id = Classroom::Collection::Exams.for(organization, course).update! params[:exam], json_body
-  notify_upsert_exam(exam_id)
-  {status: :updated}.merge(exam_id)
+  exam = Exam.find_by!(exam_query)
+  exam.update_attributes! json_body
+  exam.notify!
+  {status: :updated}.merge(id: exam_id)
 end
 
-post '/api/courses/:course/exams/:exam/students/:uid' do
+post '/api/courses/:course/exams/:exam_id/students/:uid' do
   authorize! :teacher
-  exam_id = Classroom::Collection::Exams.for(organization, course).add_student! params[:exam], params[:uid]
-  @json_body = Classroom::Collection::Exams.for(organization, course).find_by(exam_id).as_json
-  notify_upsert_exam(exam_id)
-  {status: :updated}.merge(exam_id)
+  exam = Exam.find_by!(exam_query)
+  exam.add_student! params[:uid]
+  exam.notify!
+  {status: :updated}.merge(id: exam_id)
 end
 
 get '/courses/:course/exams/:exam_id' do
   authorize! :teacher
-  Classroom::Collection::Exams.for(organization, course).find(params[:exam_id]).as_json
+  Exam.find_by!(exam_query).as_json
 end

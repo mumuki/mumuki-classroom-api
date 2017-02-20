@@ -1,6 +1,4 @@
-class Follower
-
-  include Mongoid::Document
+class Follower < Document
 
   field :uids, type: Array
   field :email, type: String
@@ -15,10 +13,6 @@ class Follower
 
   def remove!(uid)
     self.pull uids: uid
-  end
-
-  def as_json(options = {})
-    super options.merge(except: :_id)
   end
 
 end
