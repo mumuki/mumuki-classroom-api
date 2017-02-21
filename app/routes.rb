@@ -30,10 +30,6 @@ helpers do
     current_user.permissions
   end
 
-  def token(client = :auth0)
-    @token ||= Mumukit::Auth::Token.decode_header(authorization_header, client).tap { |it| it.verify_client! client }
-  end
-
   def course
     params[:course]
   end
