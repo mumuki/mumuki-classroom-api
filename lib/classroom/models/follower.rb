@@ -1,4 +1,8 @@
-class Follower < Document
+class Follower
+
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include WithoutMongoId
 
   field :uids, type: Array
   field :email, type: String

@@ -1,6 +1,10 @@
-class Exam < Document
+class Exam
 
-  field :id, type: String, default: generate_id
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include WithoutMongoId
+
+  field :id, type: BSON::ObjectId, default: Mumukit::Service::IdGenerator.next
   field :uids, type: Array
   field :name, type: String
   field :slug, type: String

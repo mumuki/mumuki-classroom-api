@@ -25,7 +25,7 @@ describe Exam do
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: []}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example', course: 'example/foo' }
 
-    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge('organization' => 'example', 'id' => kind_of(String))) }
+    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge('organization' => 'example', 'id' => kind_of(BSON::ObjectId))) }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/exams', exam_json.to_json }
 
@@ -33,7 +33,7 @@ describe Exam do
     it { expect(last_response.body).to json_like({status: 'created'}, {except: :id}) }
     it { expect(Exam.where(organization: 'example', course: 'example/foo').count).to eq 1 }
     it { expect(exam_fetched.id).to be_truthy }
-    it { expect(exam_fetched.id).to be_instance_of(String) }
+    it { expect(exam_fetched.id).to be_instance_of(BSON::ObjectId) }
     it { expect(exam_fetched.as_json).to json_like(exam_json.merge(organization: 'example', course: 'example/foo'), except_fields) }
   end
 
@@ -41,7 +41,7 @@ describe Exam do
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: []}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example', course: 'example/foo' }
 
-    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge('organization' => 'example', 'id' => kind_of(String))) }
+    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge('organization' => 'example', 'id' => kind_of(BSON::ObjectId))) }
     before { header 'Authorization', build_mumuki_auth_header('*') }
     before { post '/api/courses/foo/exams', exam_json.to_json }
 
