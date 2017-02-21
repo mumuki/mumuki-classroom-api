@@ -10,14 +10,16 @@ gem 'bson_ext'
 
 gem 'bunny'
 
-gem 'rest-client', '~> 2.0'
-
 gem 'mumukit-core', '~> 0.4'
-gem 'mumukit-auth', '~> 4.0'
 gem 'mumukit-nuntius', '~> 2.3'
-gem 'mumukit-service', '~> 1.0'
+
+gem 'mumukit-auth', '~> 6.1'
+gem 'mumukit-service', '~> 2.0'
+gem 'mumukit-login', '~> 1.2'
 
 gem 'mumukit-inspection', '~> 0.1'
+
+gem 'sinatra-contrib'
 
 group :test do
   gem 'rspec', '~> 2.99'

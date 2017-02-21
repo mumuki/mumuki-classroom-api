@@ -45,29 +45,19 @@ end
 
 require 'base64'
 Mumukit::Auth.configure do |c|
-  c.client_ids = {auth0: 'foo', auth: 'bar'}
-  c.client_secrets = {auth0: Base64.encode64('bar'), auth: Base64.encode64('foo')}
-  c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
+  c.clients.default = {id: 'test-client', secret: 'thisIsATestSecret'}
 end
 
 Classroom::Database.connect! 'example'
 
-def build_auth_header(permissions_string, sub='github|user123456')
-  Mumukit::Auth::Store.set!(sub, {owner: permissions_string})
-  encoded_token = JWT.encode(
-    {aud: Mumukit::Auth.config.client_ids[:auth0],
-     sub: sub},
-    Mumukit::Auth::Token.decoded_secret)
-  'dummy token ' + encoded_token
+def build_mumuki_auth_header(permissions, sub='github|user123456')
+  Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
+  Mumukit::Auth::Token.encode sub, {}
 end
 
-def build_mumuki_auth_header(permissions_string, sub='github|user123456')
-  Mumukit::Auth::Store.set!(sub, {owner: permissions_string})
-  encoded_token = JWT.encode(
-    {aud: Mumukit::Auth.config.client_ids[:auth],
-     sub: sub},
-    Mumukit::Auth::Token.decoded_secret(:auth))
-  'dummy token ' + encoded_token
+def build_auth_header(permissions, sub='github|user123456')
+  Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
+  Mumukit::Auth::Token.encode sub, {}
 end
 
 def with_organization(organization, &block)

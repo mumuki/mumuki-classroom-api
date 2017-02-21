@@ -6,6 +6,7 @@ require 'mumukit/service'
 require 'mumukit/inspection'
 require 'mumukit/nuntius'
 require 'mumukit/auth'
+require 'mumukit/login'
 
 require_relative './class'
 require_relative './consumer'
@@ -39,5 +40,10 @@ Mumukit::Auth.configure do |c|
     auth0: ENV['MUMUKI_AUTH0_CLIENT_SECRET']
   }
   c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
+end
+
+Mumukit::Login.configure do |config|
+  config.user_class = Classroom::Collection::Users
+  config.framework = Mumukit::Login::Framework::Sinatra
 end
 
