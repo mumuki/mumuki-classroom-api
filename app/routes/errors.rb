@@ -25,4 +25,3 @@ end
 error Mongoid::Errors::DocumentNotFound do
   halt 404
 end
-

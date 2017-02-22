@@ -15,7 +15,7 @@ class Exam
   field :start_time, type: String
   field :organization, type: String
 
-  index organization: 1, course: 1, id: 1
+  index({organization: 1, course: 1, id: 1}, {unique: true})
 
   def add_student!(uid)
     add_to_set uids: uid

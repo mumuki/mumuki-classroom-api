@@ -19,12 +19,12 @@ class Classroom::Collection::CourseStudents < Classroom::Collection::Organizatio
     mongo_collection.update_many({'student.uid': sub_student[:'student.uid']}, {'$set': sub_student})
   end
 
-  def create!(user, course_uid)
-    course = course_uid.to_mumukit_slug.course
-    ensure_new! user[:uid], course_uid
-    Classroom::Collection::Courses.for(organization).ensure_exist! course_uid
+  def create!(user, course_slug)
+    course = course_slug.to_mumukit_slug.course
+    ensure_new! user[:uid], course_slug
+    Course.ensure_exist! organization: organization, slug: course_slug
     Classroom::Collection::Students.for(organization, course).ensure_new! user[:uid]
-    json = {student: user, course: {uid: course_uid}}
+    json = {student: user, course: {slug: course_slug}}
     Classroom::Collection::CourseStudents.for(organization).insert! json
     Classroom::Collection::Students.for(organization, course).insert! user
   end
@@ -42,21 +42,21 @@ class Classroom::Collection::CourseStudents < Classroom::Collection::Organizatio
   end
 
   def course_key(uid)
-    query 'course.uid': uid
+    query 'course.slug': uid
   end
 
-  def key(course_uid, student_uid)
-    student_key(student_uid).merge(course_key course_uid)
+  def key(course_slug, student_uid)
+    student_key(student_uid).merge(course_key course_slug)
   end
 
-  def delete_student!(course_uid, student_uid)
-    mongo_collection.delete_one(key course_uid, student_uid)
+  def delete_student!(course_slug, student_uid)
+    mongo_collection.delete_one(key course_slug, student_uid)
   end
 
   private
 
   def pk
-    super.merge 'student.uid': 1, 'course.uid': 1
+    super.merge 'student.uid': 1, 'course.slug': 1
   end
 end
 

@@ -174,7 +174,7 @@ describe Classroom::Collection::Students do
     let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example/foo'}} }
     let(:created_at) { 'created_at' }
     before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
-    before { Classroom::Collection::Courses.for('example').insert!({name: 'foo', slug: 'example/foo'}) }
+    before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo' }
     before { Classroom::Collection::CourseStudents.for('example').insert! json }
     before { Classroom::Collection::Students.for('example', 'foo').insert!(student.merge(uid: 'auth0|1')) }
     before { header 'Authorization', build_auth_header('*') }
@@ -234,7 +234,7 @@ describe Classroom::Collection::Students do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Classroom::Collection::Courses.for('example').insert!({name: 'foo', slug: 'example/foo', uid: 'example/foo'}) }
+        before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo', uid: 'example/foo' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
@@ -303,7 +303,7 @@ describe Classroom::Collection::Students do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Classroom::Collection::Courses.for('example').insert! name: 'foo', slug: 'example/foo', uid: 'example/foo' }
+        before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo', uid: 'example/foo' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }

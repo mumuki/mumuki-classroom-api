@@ -28,7 +28,7 @@ class Classroom::Database
     end
 
     def clean!
-      client.collections.each(&:drop)
+      client.collections.each(&:delete_many)
     end
 
     def connect!

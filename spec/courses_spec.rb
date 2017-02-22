@@ -1,10 +1,12 @@
 require 'spec_helper'
 
-describe Classroom::Collection::Courses do
+describe Course do
 
   before do
     Classroom::Database.clean!
   end
+
+  let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   describe 'get /courses/' do
     before { header 'Authorization', build_auth_header('*') }
@@ -17,62 +19,63 @@ describe Classroom::Collection::Courses do
     end
 
     context 'when there are courses' do
-      before { Classroom::Collection::Courses.for('example').insert!({name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz'}) }
+      let(:course) { {name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz', organization: 'example'} }
+      before { Course.create!(course) }
       before { get '/courses' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq courses: [{name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz', organization: 'example'}] }
+      it { expect(last_response.body).to json_like({courses: [course]}, except_fields) }
     end
   end
 
   describe 'post /courses' do
-    let(:course_json) { {code: 'K2001',
-                         days: %w(monday saturday),
-                         period: '2016',
-                         shifts: ['morning'],
-                         description: 'haskell',
-                         uid: 'example/2016-K2001',
-                         slug: 'example/2016-K2001'}.to_json }
-    let(:created_uid) { Classroom::Collection::Courses.for('example').find_by(uid: 'example/2016-K2001').uid }
+    let(:course) { {code: 'K2001',
+                    days: %w(monday saturday),
+                    period: '2016',
+                    shifts: ['morning'],
+                    description: 'haskell',
+                    organization: 'example',
+                    slug: 'example/2016-K2001'} }
+    let(:created_uid) { Course.last.uid }
 
     context 'when is normal teacher' do
-      it 'rejects course creation' do
-        header 'Authorization', build_auth_header('test/my-course')
+      context 'rejects course creation' do
+        before { header 'Authorization', build_auth_header('test/my-course') }
+        before { post '/courses', course.to_json }
 
-        post '/courses', course_json
-
-        expect(last_response).to_not be_ok
-        expect(Classroom::Collection::Courses.for('example').count).to eq 0
+        it { expect(last_response).to_not be_ok }
+        it { expect(Course.count).to eq 0 }
       end
     end
 
     context 'when is org admin' do
       before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
       before { header 'Authorization', build_auth_header('example/*') }
-      before { post '/courses', course_json }
+      before { post '/courses', course.to_json }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
-      it { expect(Classroom::Collection::Courses.for('example').count).to eq 1 }
+      it { expect(Course.count).to eq 1 }
       it { expect(created_uid).to eq 'example/2016-K2001' }
     end
 
     context 'when is global admin' do
       before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/courses', course_json }
+      before { post '/courses', course.to_json }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
-      it { expect(Classroom::Collection::Courses.for('example').count).to eq 1 }
+      it { expect(Course.count).to eq 1 }
       it { expect(created_uid).to eq 'example/2016-K2001' }
     end
 
     context 'when course already exists' do
-      before { Classroom::Collection::Courses.for('example').insert!({uid: 'example/2016-K2001'}.wrap_json) }
+      before { Course.create! course }
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/courses', course_json }
+      before { post '/courses', course.to_json }
 
+      it { expect(Course.count).to eq 1 }
       it { expect(last_response).to_not be_ok }
       it { expect(last_response.body).to json_eq message: 'example/2016-K2001 does already exist' }
 

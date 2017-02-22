@@ -1,6 +1,6 @@
 helpers do
   def allowed_courses(grants)
-    Classroom::Collection::Courses.for(organization).allowed(grants).as_json
+    {courses: Course.where(with_organization).allowed(grants).as_json}
   end
 end
 
@@ -13,14 +13,8 @@ get '/api/courses' do
 end
 
 post '/courses' do
-  json = json_body.with_indifferent_access
-  course = json.merge(uid: json[:slug])
-  permissions.protect! :janitor, json[:slug]
-
-  Classroom::Collection::Courses.for(organization).ensure_new! json[:uid]
-  Classroom::Collection::Courses.for(organization).upsert! course
-
-  Mumukit::Nuntius::EventPublisher.publish('CourseChanged', {course: course})
-
+  permissions.protect! :janitor, json_body[:slug]
+  course = Course.create! with_organization(json_body.merge uid: json_body[:slug])
+  course.notify!
   {status: :created}
 end

@@ -34,8 +34,8 @@ describe Classroom::Event::UserChanged do
 
     context 'update models' do
       before do
-        Classroom::Collection::Courses.for('example').insert!({uid: 'example/foo'})
-        Classroom::Collection::Courses.for('example').insert!({uid: 'example/bar'})
+        Course.create! organization: 'example', slug: 'example/foo'
+        Course.create! organization: 'example', slug: 'example/bar'
         Classroom::Collection::Students.for('example', 'foo').insert! user
         Classroom::Collection::CourseStudents.for('example').insert!({course: {uid: 'example/foo'}, student: user})
       end

@@ -24,15 +24,19 @@ helpers do
     @json_body ||= JSON.parse(request.body.read).with_indifferent_access rescue nil
   end
 
+  def with_organization(hash = {})
+    {organization: organization}.merge hash
+  end
+
   def with_organization_and_course(hash = {})
-    {organization: organization, course: course_slug}.merge hash
+    with_organization.merge(course: course_slug).merge hash
   end
 
   def authorization_slug
     slug
   end
 
-  def permissions(client = :auth0)
+  def permissions
     current_user.permissions
   end
 
@@ -52,8 +56,8 @@ helpers do
     {'guide.slug': repo_slug, 'student.uid': uid}
   end
 
-  def by_permissions(key, client = :auth0, &query)
-    grants = permissions_to_regex client
+  def by_permissions(key, &query)
+    grants = permissions_to_regex
     if grants.to_s.blank?
       {}.tap { |it| it[key] = [] }
     else
@@ -61,8 +65,8 @@ helpers do
     end
   end
 
-  def permissions_to_regex(client)
-    permissions(client).to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+  def permissions_to_regex
+    permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
 
   def tenant
@@ -90,7 +94,7 @@ helpers do
   end
 
   def ensure_course_existence!
-    Classroom::Collection::Courses.for(organization).ensure_exist! course_slug
+    Course.ensure_exist! with_organization(slug: course_slug)
   end
 
   def ensure_course_student_existence!(uid)

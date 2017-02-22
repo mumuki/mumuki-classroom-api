@@ -9,7 +9,7 @@ class Follower
   field :course, type: String
   field :organization, type: String
 
-  index organization: 1, course: 1, email: 1
+  index({organization: 1, course: 1, email: 1}, {unique: true})
 
   def add!(uid)
     self.add_to_set uids: uid
