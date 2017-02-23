@@ -3,9 +3,7 @@ module Classroom
     class UpsertOrganization
       def self.execute!(payload)
         organization = payload['organization']
-
-        Classroom::Database.connect!
-        Classroom::Collection::Organizations.upsert! organization
+        Organization.find_or_create_by!(name: organization[:name]).update_attributes! organization
       end
     end
 

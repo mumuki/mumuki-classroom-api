@@ -11,7 +11,7 @@ describe Classroom::Collection::ExerciseStudentProgress do
   end
 
   before do
-    Classroom::Collection::Organizations.insert!({locale: 'es', name: 'example'}.wrap_json)
+    Organization.create!(locale: 'es', name: 'example')
   end
 
   describe 'get' do

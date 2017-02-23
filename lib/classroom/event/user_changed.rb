@@ -16,7 +16,7 @@ class Classroom::Event::UserChanged
     end
 
     def update_user_model(user)
-      Classroom::Collection::Organizations.all.map(&:name).each do |organization|
+      Organization.pluck(:name).each do |organization|
         update_student organization, user
         changes[organization]&.each do |change|
           message = change.description

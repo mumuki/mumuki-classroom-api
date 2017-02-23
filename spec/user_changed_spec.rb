@@ -10,7 +10,7 @@ describe Classroom::Event::UserChanged do
 
   before { Classroom::Database.clean! }
   before { Classroom::Collection::Users.upsert_permissions! uid, old_permissions }
-  before { Classroom::Collection::Organizations.insert!({name: 'example'}.wrap_json) }
+  before { Organization.create!(name: 'example') }
 
   describe 'execute!' do
 
@@ -22,7 +22,7 @@ describe Classroom::Event::UserChanged do
       end
       before { Classroom::Event::UserChanged.execute! event }
 
-      it { expect(Classroom::Collection::Organizations.all.map(&:name)).to include 'example' }
+      it { expect(Organization.pluck(:name)).to include 'example' }
       it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
              .to json_like(changes: [

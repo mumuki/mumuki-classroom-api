@@ -21,7 +21,7 @@ class User
   end
 
   def self.for_profile(profile)
-    where(uid: profile.uid).first_or_create.tap do |user|
+    find_or_create_by!(uid: profile.uid).tap do |user|
       user.update_attributes! profile
     end
   end
