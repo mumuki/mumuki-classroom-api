@@ -9,6 +9,8 @@ require 'mumukit/nuntius'
 require 'mumukit/auth'
 require 'mumukit/login'
 
+Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
+
 require_relative './class'
 require_relative './consumer'
 require_relative './profile'
@@ -26,8 +28,6 @@ require_relative './classroom/failed_submission'
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 require_relative './classroom/permissions_persistence'
-
-Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
