@@ -37,7 +37,7 @@ class Mumukit::Auth::Permissions
     end
 
     def as_json(options = {})
-      {role: @role, grant: @grant, type: @type}.as_json(options)
+      {role: @role, grant: @grant, type: @type}.as_json options
     end
   end
 
@@ -75,7 +75,7 @@ class Mumukit::Auth::Permissions
     end
 
     def as_json(options = {})
-      {changes: @changes.as_json(options)}
+      {changes: @changes}.as_json options
     end
   end
 end
