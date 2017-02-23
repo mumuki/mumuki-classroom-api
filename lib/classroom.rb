@@ -47,7 +47,7 @@ Mumukit::Auth.configure do |c|
 end
 
 Mumukit::Login.configure do |config|
-  config.user_class = User
+  config.user_class = Classroom::Collection::Users
   config.framework = Mumukit::Login::Framework::Sinatra
 end
 

@@ -13,6 +13,7 @@ require_relative './collections/exercise_student_progress'
 require_relative './collections/guides'
 require_relative './collections/exams'
 require_relative './collections/organizations'
+require_relative './collections/users'
 
 
 

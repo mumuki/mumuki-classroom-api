@@ -106,7 +106,7 @@ helpers do
   end
 
   def organization_json
-    @organization_json ||= Organization.find_by!(name: organization).as_json
+    @organization_json ||= Organization.find_by(name: organization).as_json
   end
 
   def update_and_notify_student_metadata(uid, method)

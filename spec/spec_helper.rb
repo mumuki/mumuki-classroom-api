@@ -61,12 +61,12 @@ end
 Classroom::Database.connect!
 
 def build_mumuki_auth_header(permissions, sub='github|user123456')
-  User.find_by_uid!(sub).update! permissions: {owner: permissions}
+  Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
   Mumukit::Auth::Token.encode sub, {}
 end
 
 def build_auth_header(permissions, sub='github|user123456')
-  User.find_by_uid!(sub).update! permissions: {owner: permissions}
+  Classroom::Collection::Users.upsert_permissions! sub, {owner: permissions}
   Mumukit::Auth::Token.encode sub, {}
 end
 
