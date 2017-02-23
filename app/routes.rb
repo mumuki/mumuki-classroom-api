@@ -182,12 +182,12 @@ end
 
 get '/courses/:course/guides' do
   authorize! :teacher
-  Classroom::Collection::Guides.for(organization, course).all.as_json
+  {guides: Guide.where(with_organization_and_course).as_json}
 end
 
 get '/api/courses/:course/guides' do
   authorize! :teacher
-  Classroom::Collection::Guides.for(organization, course).all.as_json
+  {guides: Guide.where(with_organization_and_course).as_json}
 end
 
 get '/courses/:course/guides/:organization/:repository' do

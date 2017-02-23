@@ -6,6 +6,8 @@ describe Classroom::Submission do
     Classroom::Database.clean!
   end
 
+  let(:except_fields) { {except: [:created_at, :updated_at]} }
+
   describe do
     let(:submitter) { {
       uid: 'github|123456'
@@ -188,13 +190,13 @@ describe Classroom::Submission do
       let(:course_student) { {course: {slug: 'example/course1'}, student: submitter} }
       let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 
-      let(:guide_fetched) { Classroom::Collection::Guides.for('example', 'course1').all.as_json[:guides].first }
+      let(:guide_fetched) { Guide.first.as_json }
 
       before { Classroom::Collection::Students.for('example', 'course1').insert! student }
       before { Classroom::Collection::CourseStudents.for('example').insert! course_student }
       before { Classroom::Submission.process!(submission_without_chapter) }
 
-      it { expect(guide_fetched.to_json).to json_eq(submission_without_chapter[:guide].merge(organization: 'example', course: 'example/course1')) }
+      it { expect(guide_fetched).to json_like(submission_without_chapter[:guide].merge(organization: 'example', course: 'example/course1'), except_fields) }
 
     end
 

@@ -98,14 +98,14 @@ describe Classroom::Collection::Students do
 
     context 'delete student from students' do
 
-      let(:guides) { Classroom::Collection::Guides.for('example', 'example').all.as_json.deep_symbolize_keys[:guides] }
+      let(:guides) { Guide.where organization: 'example', course: 'example/example' }
       let(:students) { example_students.all.as_json.deep_symbolize_keys[:students] }
       let(:course_students) { Classroom::Collection::CourseStudents.for('example').all.raw }
       let(:guide_students_progress) { example_guide_student_progresses.all.as_json.deep_symbolize_keys[:guide_students_progress] }
       let(:exercise_student_progress) { example_student_progresses.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
 
-      before { Classroom::Collection::Guides.for('example', 'example').insert! guide1 }
-      before { Classroom::Collection::Guides.for('example', 'example').insert! guide2 }
+      before { Guide.create! guide1.merge(organization: 'example', course: 'example/example') }
+      before { Guide.create! guide2.merge(organization: 'example', course: 'example/example') }
 
       before { Classroom::Collection::CourseStudents.for('example').insert!({student: student1, course: {slug: 'example/example'}}) }
       before { Classroom::Collection::CourseStudents.for('example').insert!({student: student2, course: {slug: 'example/example'}}) }

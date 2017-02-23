@@ -47,7 +47,7 @@ class Classroom::Collection::Students < Classroom::Collection::People
     Classroom::Collection::CourseStudents.for(organization).delete_many(student.merge('course.slug': course_slug, organization: organization))
     Classroom::Collection::GuideStudentsProgress.for(organization, course).delete_many(student.merge(organization: organization))
     Classroom::Collection::ExerciseStudentProgress.for(organization, course).delete_many(student.merge(organization: organization))
-    Classroom::Collection::Guides.for(organization, course).delete_if_has_no_progress
+    Guide.delete_if_has_no_progress(organization, course_slug)
   end
 
 

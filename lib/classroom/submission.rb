@@ -34,9 +34,11 @@ module Classroom::Submission
   end
 
   def self.update_guide(json)
-    Classroom::Collection::Guides
-      .for(organization(json), course_prefix(json))
-      .update!(guide_from json)
+    organization = organization(json)
+    course_slug = course_slug(json)
+    slug = guide_from(json)[:slug]
+    guide = Guide.find_or_create_by!(organization: organization, course: course_slug, slug: slug)
+    guide.update_attributes!(guide_from json)
   end
 
   def self.update_student_progress(json)
@@ -86,6 +88,10 @@ module Classroom::Submission
 
       Mumukit::Auth::Slug.parse(json[:course][:uid]).course
     end
+  end
+
+  def self.course_slug(json)
+    json[:course][:slug] || json[:course][:slug]
   end
 
   def self.guide_students_progress_from(json)
