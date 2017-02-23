@@ -9,7 +9,7 @@ get '/courses' do
 end
 
 get '/api/courses' do
-  by_permissions(:courses, :auth) { |grants| allowed_courses grants }
+  by_permissions(:courses) { |grants| allowed_courses grants }
 end
 
 post '/courses' do

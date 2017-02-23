@@ -1,4 +1,5 @@
 class Course
+  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -16,15 +17,10 @@ class Course
 
   scope :allowed, -> (grants_pattern) { where slug: {'$regex': "^#{grants_pattern}$"} }
 
-  index({organization: 1, slug: 1}, {unique: true})
+  create_index({organization: 1, slug: 1}, {unique: true})
 
   def notify!
     Mumukit::Nuntius::EventPublisher.publish('CourseChanged', {course: self.as_json})
-  end
-
-  def self.create!(json)
-    ensure_new! json
-    super json
   end
 
   def self.ensure_new!(json)

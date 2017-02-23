@@ -1,4 +1,5 @@
 require_relative './models/concerns/without_mongo_id'
+require_relative './models/concerns/with_mongo_index'
 require_relative './models/follower'
 require_relative './models/course'
 require_relative './models/exam'

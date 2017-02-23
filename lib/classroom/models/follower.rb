@@ -1,4 +1,5 @@
 class Follower
+  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -9,7 +10,7 @@ class Follower
   field :course, type: String
   field :organization, type: String
 
-  index({organization: 1, course: 1, email: 1}, {unique: true})
+  create_index({organization: 1, course: 1, email: 1}, {unique: true})
 
   def add!(uid)
     self.add_to_set uids: uid
