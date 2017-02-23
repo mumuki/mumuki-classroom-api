@@ -77,7 +77,7 @@ describe Course do
 
       it { expect(Course.count).to eq 1 }
       it { expect(last_response).to_not be_ok }
-      it { expect(last_response.body).to json_eq message: 'example/2016-K2001 does already exist' }
+      it { expect(last_response.status).to eq 422 }
 
     end
   end
