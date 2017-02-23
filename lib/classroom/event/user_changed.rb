@@ -12,7 +12,7 @@ class Classroom::Event::UserChanged
 
     def update_user_permissions(user)
       set_diff_permissions user
-      Classroom::Collection::Users.upsert_permissions! user[:uid], user[:permissions]
+      Classroom::Collection::Users.find_by_uid!(user[:uid]).update!(permissions: user[:permissions])
     end
 
     def update_user_model(user)
