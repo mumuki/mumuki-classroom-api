@@ -25,15 +25,15 @@ describe Classroom::Collection::Exams do
     let(:result_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: []}.stringify_keys }
     let(:exam_fetched) { Classroom::Collection::Exams.for('example', 'foo').where({}).as_json[:exams].first }
 
-    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge(tenant: 'example', id: kind_of(String))) }
+    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge('tenant' => 'example', 'id' => instance_of(String))) }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/exams', exam_json.to_json }
 
     it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_eq(status: 'created', id: kind_of(String)) }
+    it { expect(last_response.body).to json_like({status: 'created'}, {except: :id}) }
     it { expect(Classroom::Collection::Exams.for('example', 'foo').count).to eq 1 }
     it { expect(exam_fetched['id']).to be_truthy }
-    it { expect(exam_fetched.except('id').to_json).to eq({organization: 'example', course: 'example/foo'}.merge(result_json).to_json) }
+    it { expect(exam_fetched.except('id')).to json_eq({organization: 'example', course: 'example/foo'}.merge(result_json)) }
 
   end
 
@@ -42,15 +42,15 @@ describe Classroom::Collection::Exams do
     let(:result_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: []}.stringify_keys }
     let(:exam_fetched) { Classroom::Collection::Exams.for('example', 'foo').all.as_json[:exams].first }
 
-    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge(tenant: 'example', id: kind_of(String))) }
+    before { expect(Mumukit::Nuntius::EventPublisher).to receive(:publish).with('UpsertExam', exam_json.merge('tenant' => 'example', 'id' => kind_of(String))) }
     before { header 'Authorization', build_mumuki_auth_header('*') }
     before { post '/api/courses/foo/exams', exam_json.to_json }
 
     it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_eq(status: 'created', id: kind_of(String)) }
+    it { expect(last_response.body).to json_like({status: 'created'}, {except: :id}) }
     it { expect(Classroom::Collection::Exams.for('example', 'foo').count).to eq 1 }
     it { expect(exam_fetched['id']).to be_truthy }
-    it { expect(exam_fetched.except('id').to_json).to eq({organization: 'example', course: 'example/foo'}.merge(result_json).to_json) }
+    it { expect(exam_fetched.except('id')).to json_eq({organization: 'example', course: 'example/foo'}.merge(result_json)) }
 
   end
 
@@ -79,7 +79,7 @@ describe Classroom::Collection::Exams do
       before { put "/courses/foo/exams/#{id[:id]}", exam_json2.to_json }
 
       it { expect(last_response.body).to be_truthy }
-      it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
+      it { expect(last_response.body).to json_like({status: 'updated'}, {except: :id}) }
       it { expect(Classroom::Collection::Exams.for('example', 'foo').count).to eq 1 }
       it { expect(exam_fetched['id']).to eq(id[:id]) }
       it { expect(exam_fetched.except('id').to_json).to json_eq result_json.merge(organization: 'example', course: 'example/foo') }
@@ -104,7 +104,7 @@ describe Classroom::Collection::Exams do
       before { post "/api/courses/foo/exams/#{id[:id]}/students/agus@mumuki.org" }
 
       it { expect(last_response.body).to be_truthy }
-      it { expect(last_response.body).to json_eq(status: 'updated', id: kind_of(String)) }
+      it { expect(last_response.body).to json_like({status: 'updated'}, {except: :id}) }
       it { expect(Classroom::Collection::Exams.for('example', 'foo').count).to eq 1 }
       it { expect(exam_fetched['uids'].last).to eq('agus@mumuki.org') }
     end

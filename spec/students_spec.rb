@@ -118,14 +118,14 @@ describe Classroom::Collection::Students do
       before { example_students.delete!('github|123456') }
 
       it { expect(course_students.size).to eq 2 }
-      it { expect(course_students.first).to json_like organization: 'example',
-                                                      student: {uid: 'github|123456',
-                                                                first_name: 'John'},
-                                                      course: {slug: 'example/foo'} }
-      it { expect(course_students.second).to json_like organization: 'example',
-                                                       student: {uid: 'github|234567',
-                                                                 first_name: 'Dorothy'},
-                                                       course: {slug: 'example/example'} }
+      it { expect(course_students.first.as_json).to json_like organization: 'example',
+                                                              student: {uid: 'github|123456',
+                                                                        first_name: 'John'},
+                                                              course: {slug: 'example/foo'} }
+      it { expect(course_students.second.as_json).to json_like organization: 'example',
+                                                               student: {uid: 'github|234567',
+                                                                         first_name: 'Dorothy'},
+                                                               course: {slug: 'example/example'} }
       it { expect(guides.size).to eq 1 }
       it { expect(students.size).to eq 1 }
       it { expect(guide_students_progress.size).to eq 1 }
@@ -262,8 +262,8 @@ describe Classroom::Collection::Students do
             end
           end
           context 'should not publish int resubmissions queue' do
-            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
             before { post '/courses/foo/students', student_json }
+            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
             context 'and user already exists by uid' do
               before { post '/courses/foo/students', student_json }
 
@@ -331,8 +331,8 @@ describe Classroom::Collection::Students do
             end
           end
           context 'should not publish int resubmissions queue' do
-            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
             before { post '/courses/foo/students', student_json }
+            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
             context 'and user already exists by uid' do
               before { post '/courses/foo/students', student_json }
 

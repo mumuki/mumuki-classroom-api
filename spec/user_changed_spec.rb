@@ -24,7 +24,7 @@ describe Classroom::Event::UserChanged do
 
       it { expect(Classroom::Collection::Organizations.all.map(&:name)).to include 'example' }
       it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
-      it { expect(Mumukit::Auth::Permissions::Diff.diff old_permissions, new_permissions)
+      it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
              .to json_like(changes: [
                {role: 'student', grant: 'example/foo', type: 'removed'},
                {role: 'student', grant: 'example/bar', type: 'added'},

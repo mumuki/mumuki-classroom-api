@@ -35,6 +35,10 @@ class Mumukit::Auth::Permissions
     def granted_slug
       grant.to_mumukit_slug
     end
+
+    def as_json(options = {})
+      {role: @role, grant: @grant, type: @type}.as_json(options)
+    end
   end
 
   class Diff
@@ -68,6 +72,10 @@ class Mumukit::Auth::Permissions
           it.compare_grants! role, new_permissions, old_permissions, :added
         end
       end
+    end
+
+    def as_json(options = {})
+      {changes: @changes.as_json(options)}
     end
   end
 end
