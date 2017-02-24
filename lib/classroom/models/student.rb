@@ -21,10 +21,6 @@ class Student
 
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
 
-  def self.exists_exception
-    Classroom::StudentExistsError
-  end
-
   def self.report(criteria, &block)
     where(criteria).select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
   end

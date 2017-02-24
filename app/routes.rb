@@ -196,14 +196,13 @@ get '/courses/:course/guides/:organization/:repository' do
 end
 
 get '/courses/:course/guides/:organization/:repository/:uid' do
-  Classroom::Collection::ExerciseStudentProgress
-    .for(organization, course)
-    .where(exercise_student_progress_query).as_json
+  authorize! :teacher
+  {exercise_student_progress: Assignment.where(with_organization_and_course exercise_student_progress_query).as_json}
 end
 
 get '/courses/:course/progress' do
   authorize! :teacher
-  Classroom::Collection::ExerciseStudentProgress.for(organization, course).all.as_json
+  {exercise_student_progress: Assignment.where(with_organization_and_course).as_json}
 end
 
 get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do

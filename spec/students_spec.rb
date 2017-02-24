@@ -60,7 +60,7 @@ describe Student do
   } }
   let(:example_students) { -> (student) { Student.create!(student.merge(organization: 'example', course: 'example/example')) } }
   let(:students) { Student.where(organization: 'example', course: 'example/example') }
-  let(:example_student_progresses) { Classroom::Collection::ExerciseStudentProgress.for('example', 'example') }
+  let(:example_student_progresses) { -> (exercise) { Assignment.create! exercise.merge(organization: 'example', course: 'example/example') } }
   let(:example_guide_student_progresses) { Classroom::Collection::GuideStudentsProgress.for('example', 'example') }
 
   describe do
@@ -68,10 +68,10 @@ describe Student do
     before { example_students.call student1 }
     before { example_students.call student2 }
 
-    before { example_student_progresses.insert! exercise1 }
-    before { example_student_progresses.insert! exercise2 }
-    before { example_student_progresses.insert! exercise3 }
-    before { example_student_progresses.insert! exercise4 }
+    before { example_student_progresses.call exercise1 }
+    before { example_student_progresses.call exercise2 }
+    before { example_student_progresses.call exercise3 }
+    before { example_student_progresses.call exercise4 }
 
     describe '#report' do
       let(:report) { Student.report({organization: 'example', course: 'example/example'}) }
@@ -113,7 +113,7 @@ describe Student do
       it { expect(guides.size).to eq 1 }
       it { expect(students.size).to eq 1 }
       it { expect(guide_students_progress.size).to eq 1 }
-      it { expect(exercise_student_progress.size).to eq 1 }
+      it { expect(Assignment.count).to eq 1 }
 
 
     end

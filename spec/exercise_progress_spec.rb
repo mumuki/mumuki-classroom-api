@@ -14,6 +14,8 @@ describe Classroom::Collection::ExerciseStudentProgress do
     Organization.create!(locale: 'es', name: 'example')
   end
 
+  let(:except_fields) { {except: [:created_at, :updated_at, :id]} }
+
   describe 'get' do
     let(:progress1) { {
       guide: {slug: 'example/foo'},
@@ -33,22 +35,22 @@ describe Classroom::Collection::ExerciseStudentProgress do
       submissions: [{status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}]}, {status: :passed}]} }
 
 
-    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert! progress1 }
-    before { Classroom::Collection::ExerciseStudentProgress.for('example', 'k2048').insert! progress2 }
+    before { Assignment.create! progress1.merge(organization: 'example', course: 'example/k2048') }
+    before { Assignment.create! progress2.merge(organization: 'example', course: 'example/k2048') }
     before { header 'Authorization', build_auth_header('*') }
 
     context 'get /courses/:course/guides/:organization/:repository/:student_id' do
       before { get '/courses/k2048/guides/example/foo/github%7c123456' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq({exercise_student_progress: [with_course(progress1), with_course(result2)]}.to_json) }
+      it { expect(last_response.body).to json_like({exercise_student_progress: [with_course(progress1), with_course(result2)]}, except_fields) }
     end
 
     context '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
       before { get '/courses/k2048/guides/example/foo/github%7c123456/178' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq(with_course(result2).to_json) }
+      it { expect(last_response.body).to json_like(with_course(result2), except_fields) }
     end
   end
 
