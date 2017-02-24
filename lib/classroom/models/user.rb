@@ -26,6 +26,10 @@ class User
     end
   end
 
+  def self.upsert_permissions!(uid, permissions)
+    find_or_create_by!(uid: uid).update_attributes! permissions: permissions.as_json
+  end
+
   def permissions
     Mumukit::Auth::Permissions.parse self[:permissions]
   end

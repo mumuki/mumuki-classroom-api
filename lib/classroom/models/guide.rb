@@ -16,10 +16,14 @@ class Guide
 
   def self.delete_if_has_no_progress(organization, course_slug)
     where(organization: organization, course: course_slug).each do |guide|
-      unless Classroom::Collection::GuideStudentsProgress.for(guide.organization, guide.course).any?('guide.slug' => guide.slug)
+      unless Classroom::Collection::GuideStudentsProgress.for(guide.organization, guide.course_name).any?('guide.slug' => guide.slug)
         guide.destroy
       end
     end
+  end
+
+  def course_name
+    course.to_mumukit_slug.course
   end
 
   def transfer(destination)

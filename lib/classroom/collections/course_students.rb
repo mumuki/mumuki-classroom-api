@@ -20,13 +20,11 @@ class Classroom::Collection::CourseStudents < Classroom::Collection::Organizatio
   end
 
   def create!(user, course_slug)
-    course = course_slug.to_mumukit_slug.course
     ensure_new! user[:uid], course_slug
     Course.ensure_exist! organization: organization, slug: course_slug
-    Classroom::Collection::Students.for(organization, course).ensure_new! user[:uid]
     json = {student: user, course: {slug: course_slug}}
     Classroom::Collection::CourseStudents.for(organization).insert! json
-    Classroom::Collection::Students.for(organization, course).insert! user
+    Student.create!(user.merge(organization: organization, course: course_slug))
   end
 
   def ensure_new!(uid, course_slug)

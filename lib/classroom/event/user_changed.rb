@@ -44,22 +44,22 @@ class Classroom::Event::UserChanged
       course_slug = course_h[:uid] || course_h[:slug]
       course = course_slug.to_mumukit_slug.course
       sub_student = student_h.transform_keys { |field| "student.#{field}".to_sym }
-      Classroom::Collection::Students.for(organization, course).update! student_h
+      Student.find_by!(uid: student_h[:uid], organization: organization, course: course_slug).update_attributes!
       Classroom::Collection::CourseStudents.for(organization).update_student! sub_student
       Classroom::Collection::GuideStudentsProgress.for(organization, course).update_student! sub_student
       Classroom::Collection::ExerciseStudentProgress.for(organization, course).update_student! sub_student
     end
 
     def student_added(organization, user, granted_slug)
-      if Classroom::Collection::Students.for(organization, granted_slug.course).exists? user[:uid]
-        Classroom::Collection::Students.for(organization, granted_slug.course).attach! user[:uid]
+      if Student.where(uid: user[:uid], organization: organization, course: granted_slug.to_s).exists?
+        Student.find_by!(uid: user[:uid], organization: organization, course: granted_slug.to_s).attach!
       else
         Classroom::Collection::CourseStudents.for(organization).create! user, granted_slug.to_s
       end
     end
 
     def student_removed(organization, user, granted_slug)
-      Classroom::Collection::Students.for(organization, granted_slug.course).detach! user[:uid]
+      Student.find_by!(uid: user[:uid], organization: organization, course: granted_slug.to_s).detach!
     end
 
     def teacher_added(organization, user, granted_slug)

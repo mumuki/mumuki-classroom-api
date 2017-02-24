@@ -26,11 +26,7 @@ module Classroom::Submission
   end
 
   def self.find_student_from(json)
-    Classroom::Collection::Students
-      .for(organization(json), course_prefix(json))
-      .find_by(uid: uid(json))
-      .as_json
-      .deep_symbolize_keys
+    Student.find_by(organization: organization(json), course: course_slug(json), uid: uid(json)).as_json
   end
 
   def self.update_guide(json)
@@ -42,15 +38,11 @@ module Classroom::Submission
   end
 
   def self.update_student_progress(json)
-    Classroom::Collection::Students
-      .for(organization(json), course_prefix(json))
-      .update_all_stats_for(student_from(json)[:uid])
+    Student.find_by!(organization: organization(json), course: course_slug(json), uid: uid(json)).update_all_stats
   end
 
   def self.update_student_last_assignment(json)
-    Classroom::Collection::Students
-      .for(organization(json), course_prefix(json))
-      .update_last_assignment_for(student_from(json)[:uid])
+    Student.find_by!(organization: organization(json), course: course_slug(json), uid: uid(json)).update_last_assignment_for
   end
 
   def self.update_exercise_student_progress(json)

@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 describe Classroom::Event::UserChanged do
 
   let(:uid) { 'agus@mumuki.org' }
@@ -7,6 +8,7 @@ describe Classroom::Event::UserChanged do
   let(:old_permissions) { {student: 'example/foo'}.with_indifferent_access }
   let(:new_permissions) { {student: 'example/bar', teacher: 'example/foo'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
+  let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   before { Classroom::Database.clean! }
   before { Classroom::Collection::Users.upsert_permissions! uid, old_permissions }
@@ -36,7 +38,7 @@ describe Classroom::Event::UserChanged do
       before do
         Course.create! organization: 'example', slug: 'example/foo'
         Course.create! organization: 'example', slug: 'example/bar'
-        Classroom::Collection::Students.for('example', 'foo').insert! user
+        Student.create! user.merge(organization: 'example', course: 'example/foo')
         Classroom::Collection::CourseStudents.for('example').insert!({course: {uid: 'example/foo'}, student: user})
       end
       before { Classroom::Event::UserChanged.execute! event }
@@ -44,18 +46,18 @@ describe Classroom::Event::UserChanged do
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
       let(:event) { {user: user2.merge(permissions: new_permissions)} }
 
-      let(:student_foo_fetched) { Classroom::Collection::Students.for('example', 'foo').find_by(uid: uid) }
-      let(:student_bar_fetched) { Classroom::Collection::Students.for('example', 'bar').find_by(uid: uid) }
+      let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/foo') }
+      let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/bar') }
       let(:teacher_foo_fetched) { Classroom::Collection::Teachers.for('example', 'foo').find_by(uid: uid) }
 
       it { expect(student_foo_fetched.detached).to eq true }
-      it { expect(student_foo_fetched.social_id).to eq 'foo' }
+      it { expect(student_foo_fetched.uid).to eq uid }
       it { expect(student_foo_fetched.first_name).to eq 'Agustín' }
 
-      it { expect(student_bar_fetched.as_json(except: [:created_at])).to eq user2.merge(organization: 'example', course: 'example/bar') }
+      it { expect(student_bar_fetched.as_json(except_fields)).to eq user2.merge(organization: 'example', course: 'example/bar') }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_foo_fetched.as_json(except: [:created_at])).to eq user2.merge(organization: 'example', course: 'example/foo') }
+      it { expect(teacher_foo_fetched.as_json(except_fields)).to eq user2.merge(organization: 'example', course: 'example/foo') }
     end
 
   end

@@ -31,9 +31,5 @@ class Classroom::Collection::People < Classroom::Collection::CourseCollection
 
   private
 
-  def pk
-    super.merge uid: 1
-  end
-
 end
 
