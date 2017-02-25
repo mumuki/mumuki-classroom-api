@@ -13,8 +13,11 @@ class Assignment
   field :course, type: Mumukit::Auth::Slug
 
   store_in collection: 'exercise_student_progress'
-  create_index({'organization': 1, 'course': 1, 'exercise.id': 1})
+  create_index({'organization': 1, 'course': 1, 'exercise.id': 1, 'student.uid': 1})
 
+  def comment!(comment, submission_id)
+    submissions.find_by!(id: submission_id).push(comments: comment)
+  end
 
 end
 
