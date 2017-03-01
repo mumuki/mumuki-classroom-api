@@ -1,9 +1,18 @@
-module WithoutMongoId
+module Mongoid
+  module Document
 
-  def as_json(options = {})
-    super(options).except('_id', :_id).deep_compact.with_indifferent_access
+    def as_json(options = {})
+      super(options).except('_id', :_id).deep_compact.with_indifferent_access
+    end
+
+    module ClassMethods
+      def create_index(*args)
+        index *args
+        create_indexes
+      end
+    end
+
   end
-
 end
 
 class Hash
@@ -27,15 +36,5 @@ class Array
       end
       self.delete(e) if e.nil?
     end
-  end
-end
-
-module BSON
-  class ObjectId
-    def as_json(*args)
-      to_s
-    end
-
-    alias :to_json :as_json
   end
 end

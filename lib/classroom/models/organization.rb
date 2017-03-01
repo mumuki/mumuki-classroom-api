@@ -1,9 +1,7 @@
 class Organization
-  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithoutMongoId
 
   field :id, type: Numeric
   field :icon, type: String

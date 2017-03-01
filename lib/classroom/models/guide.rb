@@ -1,9 +1,7 @@
 class Guide
-  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithoutMongoId
 
   field :slug, type: Mumukit::Auth::Slug
   field :name, type: String

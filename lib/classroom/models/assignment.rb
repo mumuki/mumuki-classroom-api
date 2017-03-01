@@ -1,9 +1,7 @@
 class Assignment
-  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithoutMongoId
 
   embeds_one :guide
   embeds_one :student
@@ -25,7 +23,6 @@ end
 class Submission
 
   include Mongoid::Document
-  include WithoutMongoId
 
   field :id, type: String
   field :content, type: String
@@ -44,7 +41,6 @@ end
 class Exercise
 
   include Mongoid::Document
-  include WithoutMongoId
 
   field :id, type: Numeric
   field :name, type: String

@@ -1,5 +1,5 @@
-require_relative './models/concerns/without_mongo_id'
-require_relative './models/concerns/with_mongo_index'
+require_relative './models/concerns/extensions'
+
 require_relative './models/organization'
 require_relative './models/assignment'
 require_relative './models/follower'

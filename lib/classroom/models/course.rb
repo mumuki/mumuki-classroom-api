@@ -1,9 +1,7 @@
 class Course
-  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithoutMongoId
 
   field :uid, type: String
   field :slug, type: String

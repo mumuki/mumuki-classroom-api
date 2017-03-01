@@ -1,9 +1,7 @@
 class User
-  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithoutMongoId
   include Mumukit::Login::UserPermissionsHelpers
 
   field :uid, type: String

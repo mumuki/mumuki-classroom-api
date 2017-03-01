@@ -1,11 +1,9 @@
 class Exam
-  extend WithMongoIndex
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithoutMongoId
 
-  field :id, type: String, default: -> { Mumukit::Service::IdGenerator.next }
+  field :_id, type: String, default: -> { Mumukit::Service::IdGenerator.next }
   field :uids, type: Array
   field :name, type: String
   field :slug, type: String
@@ -24,6 +22,10 @@ class Exam
 
   def notify!
     Mumukit::Nuntius::EventPublisher.publish 'UpsertExam', json_to_notify
+  end
+
+  def as_json(options = {})
+    {id: _id}.as_json(options).merge(super options)
   end
 
   private
