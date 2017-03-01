@@ -29,6 +29,7 @@ class Submission
 
   field :id, type: String
   field :content, type: String
+  field :comments, type: Array
   field :created_at, type: Time
   field :expectation_results, type: Array
   field :feedback, type: String

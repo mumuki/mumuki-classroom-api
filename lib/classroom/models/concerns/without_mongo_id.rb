@@ -7,7 +7,7 @@ module WithoutMongoId
 end
 
 class Hash
-  def deep_compact()
+  def deep_compact
     compact
     each_pair do |k, v|
       if self[k].respond_to? :deep_compact
@@ -19,7 +19,7 @@ class Hash
 end
 
 class Array
-  def deep_compact()
+  def deep_compact
     compact
     each do |e|
       if e.respond_to? :deep_compact
@@ -27,5 +27,15 @@ class Array
       end
       self.delete(e) if e.nil?
     end
+  end
+end
+
+module BSON
+  class ObjectId
+    def as_json(*args)
+      to_s
+    end
+
+    alias :to_json :as_json
   end
 end

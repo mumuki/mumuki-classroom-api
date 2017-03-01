@@ -27,12 +27,6 @@ def as_json(obj, options = {})
   end
 end
 
-RSpec::Matchers.define :json_eq do |expected_json_hash|
-  match do |actual_json|
-    as_json(expected_json_hash) == as_json(actual_json)
-  end
-end
-
 RSpec::Matchers.define :json_like do |expected, options={}|
   match do |actual|
     as_json(actual, options) == as_json(expected, options)
@@ -49,6 +43,26 @@ RSpec::Matchers.define :json_like do |expected, options={}|
     <<-EOS
     expected: value != #{as_json(expected, options)} (#{expected.class})
          got:          #{as_json(actual, options)} (#{actual.class})
+    EOS
+  end
+end
+
+RSpec::Matchers.define :json_eq do |expected|
+  match do |actual|
+    as_json(actual) == as_json(expected)
+  end
+
+  failure_message_for_should do |actual|
+    <<-EOS
+    expected: #{as_json(expected)} (#{expected.class})
+         got: #{as_json(actual)} (#{actual.class})
+    EOS
+  end
+
+  failure_message_for_should_not do |actual|
+    <<-EOS
+    expected: value != #{as_json(expected)} (#{expected.class})
+         got:          #{as_json(actual)} (#{actual.class})
     EOS
   end
 end

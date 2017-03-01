@@ -30,17 +30,8 @@ class Classroom::Collection::ExerciseStudentProgress < Classroom::Collection::Co
     mongo_collection.update_many(student_query(uid), '$unset': {detached: ''})
   end
 
-  def comment!(data)
-    json = data.deep_symbolize_keys
-    eid = json[:exercise_id]
-    sid = json[:submission_id]
-    uid = json[:uid]
-    comment = json[:comment]
-    mongo_collection.update_one(
-      query('student.uid': uid, 'exercise.id': eid, 'submissions.id': sid),
-      {'$push': {'submissions.$.comments': comment}}
-    )
-
+  def comment!(comment, sid)
+    submissions[sid].push comments: comment
   end
 
   def wrap(it)

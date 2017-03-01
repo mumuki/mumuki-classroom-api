@@ -5,7 +5,7 @@ class Exam
   include Mongoid::Timestamps
   include WithoutMongoId
 
-  field :id, type: BSON::ObjectId, default: Mumukit::Service::IdGenerator.next
+  field :id, type: String, default: -> { Mumukit::Service::IdGenerator.next }
   field :uids, type: Array
   field :name, type: String
   field :slug, type: String
