@@ -44,4 +44,17 @@ class Assignment
     where(query).destroy
   end
 
+  def self.all_stats_by(query)
+    where(query)
+      .map { |assignment| assignment.submissions.max_by(&:created_at) }
+      .group_by { |submission| submission.status }
+      .reduce(empty_stats) { |json, (key, value)| json.tap { json[key.to_sym] = value.size || 0 } }
+      .slice(*empty_stats.keys)
+  end
+
+  def self.empty_stats
+    {passed: 0, failed: 0, passed_with_warnings: 0}
+  end
+
+
 end

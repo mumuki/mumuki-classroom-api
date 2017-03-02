@@ -45,7 +45,7 @@ class Student
   end
 
   def update_all_stats
-    all_stats = Classroom::Collection::ExerciseStudentProgress.for(organization, course_name).all_stats(uid)
+    all_stats = Assignment.all_stats_by(sub_student_query uid)
     update_attributes!(stats: all_stats)
   end
 
