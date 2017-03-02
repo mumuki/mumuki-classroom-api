@@ -12,20 +12,23 @@ describe 'comments' do
 
     context 'when authenticated' do
       before { Assignment.create!({student: {uid: '1'}, exercise: {id: 2}, submissions: [{id: '3'}]}.merge organization: 'example', course: 'example/bar') }
-      before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments) }
+      before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments).with({comment: comment,
+                                                                                       submission_id: '3',
+                                                                                       exercise_id: 2,
+                                                                                       tenant: 'example'}.as_json) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses/bar/comments', comment_to_post }
 
       let(:exercise) { Assignment.last }
 
-      it { expect(exercise.submissions.first.as_json).to json_like({id: '3', comments: [comment]}) }
+      it { expect(exercise.submissions.first.as_json).to json_like({id: '3', comments: [comment]}, {except: [:_id, :date]}) }
     end
 
     context 'reject unauthorized requests' do
       before { header 'Authorization', build_auth_header('foo/bar') }
       before { post '/courses/baz/comments', comment_to_post }
 
-      it { expect(last_response.body).to json_eq message: 'Unauthorized access to example/baz as teacher. Scope is ``' }
+      it { expect(last_response.body).to json_like message: 'Unauthorized access to example/baz as teacher. Scope is ``' }
     end
 
   end

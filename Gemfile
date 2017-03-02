@@ -23,6 +23,12 @@ gem 'mumukit-inspection', '~> 0.1'
 gem 'sinatra-contrib'
 
 group :test do
+  gem 'pry'
+  gem 'pry-remote'
+  gem 'pry-byebug' unless Gem.win_platform?
+  gem 'pry-stack_explorer'
+  gem 'binding_of_caller'
+
   gem 'rspec', '~> 2.99'
   gem 'rack-test'
   gem 'factory_girl'

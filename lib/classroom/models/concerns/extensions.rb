@@ -15,6 +15,7 @@ module Mongoid
   end
 end
 
+
 class Hash
   def deep_compact
     compact
@@ -26,6 +27,7 @@ class Hash
     end
   end
 end
+
 
 class Array
   def deep_compact
