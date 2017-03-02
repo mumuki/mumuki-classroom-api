@@ -2,7 +2,7 @@ module Mongoid
   module Document
 
     def as_json(options = {})
-      super(options).except('_id', :_id).deep_compact.with_indifferent_access
+      super(options).as_json(except: ['_id', :_id]).deep_compact.with_indifferent_access
     end
 
     module ClassMethods

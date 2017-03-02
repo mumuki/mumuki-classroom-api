@@ -11,7 +11,7 @@ describe 'comments' do
     let(:comment_to_post) { {uid: '1', exercise_id: 2, submission_id: '3', comment: comment}.to_json }
 
     context 'when authenticated' do
-      before { Assignment.create!({student: {uid: '1'}, exercise: {id: 2}, submissions: [{id: '3'}]}.merge organization: 'example', course: 'example/bar') }
+      before { Assignment.create!({student: {uid: '1'}, exercise: {id: 2}, submissions: [{sid: '3'}]}.merge organization: 'example', course: 'example/bar') }
       before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments).with({comment: comment,
                                                                                        submission_id: '3',
                                                                                        exercise_id: 2,
@@ -21,7 +21,7 @@ describe 'comments' do
 
       let(:exercise) { Assignment.last }
 
-      it { expect(exercise.submissions.first.as_json).to json_like({id: '3', comments: [comment]}, {except: [:_id, :date]}) }
+      it { expect(exercise.submissions.first.as_json).to json_like({sid: '3', comments: [comment]}, {except: [:_id, :date]}) }
     end
 
     context 'reject unauthorized requests' do

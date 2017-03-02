@@ -37,7 +37,7 @@ describe Classroom::Submission do
       number: 1
     } }
     let(:submission) { {
-      id: 1,
+      sid: '1',
       status: 'passed',
       result: 'result',
       content: 'find f = head.filter f',
@@ -63,7 +63,7 @@ describe Classroom::Submission do
 
       context 'and student is registered to a course' do
         let(:guide_progress) { Classroom::Collection::GuideStudentsProgress.for('example', 'course1').all.as_json[:guide_students_progress] }
-        let(:exercise_progress) { Classroom::Collection::ExerciseStudentProgress.for('example', 'course1').all.as_json[:exercise_student_progress] }
+        let(:exercise_progress) { Assignment.where(organization: 'example', course: 'example/course1').as_json }
         let(:course_student) { {course: {slug: 'example/course1'}, student: submitter} }
         let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 
@@ -96,7 +96,7 @@ describe Classroom::Submission do
         end
         context 'and is the second exercise submission' do
           let(:submission2) { submission.merge({
-                                                 id: 2,
+                                                 sid: '2',
                                                  status: 'failed',
                                                  content: 'find = (.) head filter',
                                                  created_at: '2016-01-01 00:00:01'
@@ -134,7 +134,7 @@ describe Classroom::Submission do
         context 'and is the second exercise submission' do
           let(:exercise2) { {id: 2, name: 'exercise_name2', number: 2} }
           let(:submission2) { submission.merge({
-                                                 id: 2,
+                                                 sid: '2',
                                                  status: 'passed_with_warnings',
                                                  content: 'find f = head . filter ((==True).f)',
                                                  created_at: '2016-01-01 00:00:01'

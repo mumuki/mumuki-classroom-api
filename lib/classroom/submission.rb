@@ -145,7 +145,7 @@ module Classroom::Submission
   end
 
   def self.submission_from(json)
-    {id: json[:id],
+    {sid: json[:sid],
      status: json[:status],
      result: json[:result],
      content: json[:content],
