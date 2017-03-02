@@ -90,8 +90,8 @@ describe Student do
       before { Student.update_all_stats(organization: 'example', course: 'example/example') }
 
       it { expect(students.size).to eq 2 }
-      it { expect(students.first.as_json).to json_like(student1.merge(stats: {passed: 2, passed_with_warnings: 0, failed: 1}, organization: 'example', course: 'example/example'), except_fields) }
       it { expect(students.second.as_json).to json_like(student2.merge(stats: {passed: 0, passed_with_warnings: 1, failed: 0}, organization: 'example', course: 'example/example'), except_fields) }
+      it { expect(students.first.as_json).to json_like(student1.merge(stats: {passed: 2, passed_with_warnings: 0, failed: 1}, organization: 'example', course: 'example/example'), except_fields) }
     end
 
     context 'delete student from students' do

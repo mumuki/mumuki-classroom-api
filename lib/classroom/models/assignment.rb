@@ -8,7 +8,6 @@ class Assignment
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
   field :exercise, type: Hash
-
   embeds_many :submissions
 
   store_in collection: 'exercise_student_progress'
@@ -33,27 +32,16 @@ class Assignment
     }.as_json
   end
 
-end
+  def self.detach_all_by!(query)
+    where(query).set(detached: true)
+  end
 
+  def self.attach_all_by!(query)
+    where(query).unset(:detached)
+  end
 
-class Submission
-
-  include Mongoid::Document
-
-  field :sid, type: String
-  field :content, type: String
-  field :created_at, type: String
-  field :expectation_results, type: Array
-  field :feedback, type: String
-  field :result, type: String
-  field :status, type: String
-  field :submissions_count, type: Numeric
-  field :test_results, type: Array
-  field :comments, type: Array
-
-  def comment!(comment)
-    self.comments ||= []
-    self.comments << comment
+  def self.destroy_all_by!(query)
+    where(query).destroy
   end
 
 end
