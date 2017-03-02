@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::Collection::ExerciseStudentProgress do
+describe Assignment do
 
   def with_course(json)
     {organization: 'example', course: 'example/k2048'}.merge(json)
@@ -14,7 +14,7 @@ describe Classroom::Collection::ExerciseStudentProgress do
     Organization.create!(locale: 'es', name: 'example')
   end
 
-  let(:except_fields) { {except: [:created_at, :updated_at, :id]} }
+  let(:except_fields) { {except: [:created_at, :updated_at, :_id]} }
 
   describe 'get' do
     let(:progress1) { {
@@ -28,7 +28,7 @@ describe Classroom::Collection::ExerciseStudentProgress do
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
       exercise: {id: 178, name: 'foo'},
       submissions: [{status: :failed, expectation_results: [{binding: 'f', inspection: 'HasComposition', result: 'failed'}]}, {status: :passed}]} }
-    let(:result2) { {
+    let(:progress3) { {
       guide: {slug: 'example/foo'},
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
       exercise: {id: 178, name: 'foo'},
@@ -37,20 +37,22 @@ describe Classroom::Collection::ExerciseStudentProgress do
 
     before { Assignment.create! progress1.merge(organization: 'example', course: 'example/k2048') }
     before { Assignment.create! progress2.merge(organization: 'example', course: 'example/k2048') }
+    before { Assignment.create! progress3.merge(organization: 'example', course: 'example/k1024') }
+
     before { header 'Authorization', build_auth_header('*') }
 
     context 'get /courses/:course/guides/:organization/:repository/:student_id' do
       before { get '/courses/k2048/guides/example/foo/github%7c123456' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like({exercise_student_progress: [with_course(progress1), with_course(result2)]}, except_fields) }
+      it { expect(last_response.body).to json_like({exercise_student_progress: [with_course(progress1), with_course(progress2)]}, except_fields) }
     end
 
     context '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
-      before { get '/courses/k2048/guides/example/foo/github%7c123456/178' }
+      before { get '/courses/k1024/guides/example/foo/github%7c123456/178' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like(with_course(result2), except_fields) }
+      it { expect(last_response.body).to json_like(with_course(progress3.merge(course: 'example/k1024')), except_fields) }
     end
   end
 

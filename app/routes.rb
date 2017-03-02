@@ -206,9 +206,7 @@ get '/courses/:course/progress' do
 end
 
 get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
-  Classroom::Collection::ExerciseStudentProgress
-    .for(organization, course)
-    .find_by(exercise_student_progress_query.merge('exercise.id' => exercise_id)).as_json
+  Assignment.find_by!(with_organization_and_course exercise_student_progress_query.merge('exercise._id': exercise_id)).as_json
 end
 
 get '/permissions' do
