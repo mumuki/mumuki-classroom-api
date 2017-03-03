@@ -15,13 +15,13 @@ class Assignment
 
   def comment!(comment, sid)
     submissions.find_by!(sid: sid).comment! comment
-    update_attributes! submissions: submissions
+    update_submissions!
     notify_comment! comment, sid
   end
 
   def add_submission!(submission)
-    self.submissions << submission
-    update_attributes! submissions: submissions
+    self.submissions << Submission.new(submission.as_json)
+    update_submissions!
   end
 
   def notify_comment!(comment, sid)
@@ -37,29 +37,36 @@ class Assignment
     }.as_json
   end
 
-  def self.detach_all_by!(query)
-    where(query).set(detached: true)
+  private
+
+  def update_submissions!
+    update_attributes! submissions: submissions
   end
 
-  def self.attach_all_by!(query)
-    where(query).unset(:detached)
-  end
+  class << self
+    def detach_all_by!(query)
+      where(query).set(detached: true)
+    end
 
-  def self.destroy_all_by!(query)
-    where(query).destroy
-  end
+    def attach_all_by!(query)
+      where(query).unset(:detached)
+    end
 
-  def self.stats_by(query)
-    where(query)
-      .map { |assignment| assignment.submissions.max_by(&:created_at) }
-      .group_by { |submission| submission.status }
-      .reduce(empty_stats) { |json, (key, value)| json.tap { json[key.to_sym] = value.size || 0 } }
-      .slice(*empty_stats.keys)
-  end
+    def destroy_all_by!(query)
+      where(query).destroy
+    end
 
-  def self.empty_stats
-    {passed: 0, failed: 0, passed_with_warnings: 0}
-  end
+    def empty_stats
+      {passed: 0, failed: 0, passed_with_warnings: 0}
+    end
 
+    def stats_by(query)
+      where(query)
+        .map { |assignment| assignment.submissions.max_by(&:created_at) }
+        .group_by { |submission| submission.status }
+        .reduce(empty_stats) { |json, (key, value)| json.tap { json[key.to_sym] = value.size || 0 } }
+        .slice(*empty_stats.keys)
+    end
+  end
 
 end

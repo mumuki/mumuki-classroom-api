@@ -46,11 +46,10 @@ module Classroom::Submissions
   end
 
   def self.update_exercise_student_progress(json)
-    assignment = Assignment
-                   .where(assigment_query(json))
-                   .first_or_create! assignment_from(json).except(:submission)
-    assignment.submissions << Submission.new(submission_from(json))
-    assignment.update_attributes! submissions: assignment.submissions
+    Assignment
+      .where(assigment_query(json))
+      .first_or_create!(assignment_from(json).except(:submission))
+      .add_submission! submission_from(json)
   end
 
   def self.assigment_query(json)
