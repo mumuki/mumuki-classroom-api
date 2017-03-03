@@ -151,7 +151,7 @@ end
 
 get '/api/courses/:course/students/:uid' do
   authorize! :teacher
-  Classroom::Collection::GuideStudentsProgress.for(organization, course).where('student.uid': uid).as_json
+  {guide_students_progress: GuideProgress.where(with_organization_and_course 'student.uid': uid).as_json}
 end
 
 post '/courses/:course/students/:uid' do
@@ -192,7 +192,7 @@ end
 
 get '/courses/:course/guides/:organization/:repository' do
   authorize! :teacher
-  Classroom::Collection::GuideStudentsProgress.for(organization, course).where('guide.slug': repo_slug).as_json
+  {guide_students_progress: GuideProgress.where(with_organization_and_course 'guide.slug': repo_slug).as_json}
 end
 
 get '/courses/:course/guides/:organization/:repository/:uid' do

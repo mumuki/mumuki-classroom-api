@@ -1,8 +1,11 @@
 require_relative './models/concerns/extensions'
 
-require_relative './models/organization'
 require_relative './models/submission'
 require_relative './models/exercise'
+require_relative './models/last_assignment'
+
+require_relative './models/organization'
+require_relative './models/guide_progress'
 require_relative './models/assignment'
 require_relative './models/follower'
 require_relative './models/student'

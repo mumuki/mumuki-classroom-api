@@ -3,37 +3,39 @@ require 'spec_helper'
 describe Classroom::Collection::Courses do
 
   def with_course(json)
-    {organization: 'example', course: 'example/k2048'}.merge(json)
+    {organization: 'example', course: 'example/k2048'}.merge json
   end
 
   before do
     Classroom::Database.clean!
   end
 
+  let(:except_fields) { {except: [:created_at, :updated_at]} }
+
   let(:guide_progress1) { {
     guide: {slug: 'example/foo'},
-    student: {first_name: 'jon'},
-    stats: {passed: 0, warnings: 0, failed: 1},
-    last_assignment: {exercise: {id: 1}, submission: {status: :failure}}
+    student: {uid: 'agus@mumuki.org'},
+    stats: {passed: 1, passed_with_warnings: 0, failed: 0},
+    last_assignment: {exercise: {eid: 2}, submission: {status: :passed}}
   } }
 
   let(:guide_progress2) { {
     guide: {slug: 'example/foo'},
-    student: {uid: 'agus@mumuki.org'},
-    stats: {passed: 1, warnings: 0, failed: 0},
-    last_assignment: {exercise: {id: 2}, submission: {status: :passed}}
+    student: {uid: 'jon@gmail.com'},
+    stats: {passed: 0, passed_with_warnings: 0, failed: 1},
+    last_assignment: {exercise: {eid: 1}, submission: {status: :failure}}
   } }
 
   let(:guide_progress3) { {
     guide: {slug: 'example/bar'},
     student: {uid: 'agus@mumuki.org'},
     stats: {passed: 0, passed_with_warnings: 1, failed: 0},
-    last_assignment: {exercise: {id: 1}, submission: {status: :passed_with_warnings}}
+    last_assignment: {exercise: {eid: 1}, submission: {status: :passed_with_warnings}}
   } }
 
-  before { Classroom::Collection::GuideStudentsProgress.for('example', 'k2048').insert!(guide_progress1) }
-  before { Classroom::Collection::GuideStudentsProgress.for('example', 'k2048').insert!(guide_progress2) }
-  before { Classroom::Collection::GuideStudentsProgress.for('example', 'k2048').insert!(guide_progress3) }
+  before { GuideProgress.create! guide_progress1.merge(organization: 'example', course: 'example/k2048') }
+  before { GuideProgress.create! guide_progress2.merge(organization: 'example', course: 'example/k2048') }
+  before { GuideProgress.create! guide_progress3.merge(organization: 'example', course: 'example/k2048') }
 
   describe 'get /courses/:course/guides/:org/:repo' do
 
@@ -43,8 +45,8 @@ describe Classroom::Collection::Courses do
       before { get '/courses/k2048/guides/example/foo' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq({guide_students_progress: [with_course(guide_progress1),
-                                                                       with_course(guide_progress2)]}.to_json) }
+      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1),
+                                                                              with_course(guide_progress2)]}, except_fields) }
     end
 
   end
@@ -57,8 +59,8 @@ describe Classroom::Collection::Courses do
       before { get '/api/courses/k2048/students/agus@mumuki.org' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to eq({guide_students_progress: [with_course(guide_progress2),
-                                                                       with_course(guide_progress3)]}.to_json) }
+      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress3),
+                                                                              with_course(guide_progress1)]}, except_fields) }
     end
 
   end
