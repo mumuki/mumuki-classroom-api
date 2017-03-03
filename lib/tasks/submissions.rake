@@ -8,7 +8,7 @@ namespace :submissions do
       Classroom::Database.connect!
       begin
         Mumukit::Nuntius::Logger.info "Processing submission #{body['id']}"
-        Classroom::Submission.process! body
+        Classroom::Submissions.process! body
       rescue => e
         Mumukit::Nuntius::Logger.warn "Submission failed #{e}. body was: #{body}"
         Classroom::Collection::FailedSubmissions.for(organization).insert! body

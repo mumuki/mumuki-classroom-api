@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::Submission do
+describe Classroom::Submissions do
 
   before do
     Classroom::Database.clean!
@@ -57,7 +57,7 @@ describe Classroom::Submission do
     describe 'when new submission is consumed' do
 
       context 'and student is no registered to a course' do
-        it { expect { Classroom::Submission.process!(atheneum_submission) }
+        it { expect { Classroom::Submissions.process!(atheneum_submission) }
                .to raise_error(Mumukit::Service::DocumentNotFoundError) }
       end
 
@@ -69,7 +69,7 @@ describe Classroom::Submission do
 
         before { Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
         before { Classroom::Collection::CourseStudents.for('example').insert! course_student }
-        before { Classroom::Submission.process!(atheneum_submission) }
+        before { Classroom::Submissions.process!(atheneum_submission) }
 
         context 'and is the first exercise submission' do
           it { expect(guide_progress.size).to eq 1 }
@@ -107,7 +107,7 @@ describe Classroom::Submission do
                                                            exercise: exercise,
                                                            guide: guide.merge(chapter: chapter)
                                                          }) }
-          before { Classroom::Submission.process!(atheneum_submission2) }
+          before { Classroom::Submissions.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
           it { expect(guide_progress.first.as_json).to json_eq(guide: guide,
                                                                organization: 'example',
@@ -145,7 +145,7 @@ describe Classroom::Submission do
                                                            exercise: exercise2,
                                                            guide: guide.merge(chapter: chapter)
                                                          }) }
-          before { Classroom::Submission.process!(atheneum_submission2) }
+          before { Classroom::Submissions.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
           it { expect(guide_progress.first.as_json).to json_eq(guide: guide,
                                                                organization: 'example',
@@ -194,7 +194,7 @@ describe Classroom::Submission do
 
       before { Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
       before { Classroom::Collection::CourseStudents.for('example').insert! course_student }
-      before { Classroom::Submission.process!(submission_without_chapter) }
+      before { Classroom::Submissions.process!(submission_without_chapter) }
 
       it { expect(guide_fetched).to json_like(submission_without_chapter[:guide].merge(organization: 'example', course: 'example/course1'), except_fields) }
 

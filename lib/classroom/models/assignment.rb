@@ -19,6 +19,11 @@ class Assignment
     notify_comment! comment, sid
   end
 
+  def add_submission!(submission)
+    self.submissions << submission
+    update_attributes! submissions: submissions
+  end
+
   def notify_comment!(comment, sid)
     Mumukit::Nuntius.notify! 'comments', json_to_notify(comment, sid)
   end
