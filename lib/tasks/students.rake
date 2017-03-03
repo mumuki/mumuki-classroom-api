@@ -7,8 +7,7 @@ namespace :students do
       to = args[:to].try { |it| Date.parse(it) } || 1.day.since
       format = args[:format]
 
-      Classroom::Database.connect!
-      stats = Classroom::Collection::Students.for(args[:organization], args[:course]).report do |user|
+      stats = Students.report(organzation: args[:organization], course: args[:course]).each do |user|
         user.created_at >= from && user.created_at < to
       end
       puts Classroom::Reports::Formats.format_report(format, stats)
@@ -21,8 +20,7 @@ namespace :students do
       to = args[:to].try { |it| Date.parse(it) } || 1.day.since
       format = args[:format]
 
-      Classroom::Database.connect!
-      stats = Classroom::Collection::Students.for(args[:organization], args[:course]).report do |user|
+      stats = Students.report(organization: args[:organization], course: args[:course]).each do |user|
         (user.detached_at.blank? || user.detached_at >= from) && user.created_at < to
       end
       puts Classroom::Reports::Formats.format_report(format, stats)
