@@ -4,7 +4,7 @@ helpers do
   end
 
   def exam_query
-    with_organization_and_course(id: exam_id)
+    with_organization_and_course(eid: exam_id)
   end
 end
 
@@ -22,14 +22,14 @@ post '/courses/:course/exams' do
   authorize! :teacher
   exam = Exam.create! with_organization_and_course(json_body)
   exam.notify!
-  {status: :created}.merge(id: exam.id)
+  {status: :created}.merge(id: exam.eid)
 end
 
 post '/api/courses/:course/exams' do
   authorize! :teacher
   exam = Exam.create! with_organization_and_course(json_body)
   exam.notify!
-  {status: :created}.merge(id: exam.id)
+  {status: :created}.merge(id: exam.eid)
 end
 
 put '/courses/:course/exams/:exam_id' do
