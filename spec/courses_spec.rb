@@ -83,7 +83,7 @@ describe Course do
   end
 
   describe 'get courses/:course/progress' do
-    let(:exercise_progress) { {student: {uid: '1'}, guide: {slug: 'foo/bar'}, exercise: {id: 1}} }
+    let(:exercise_progress) { {student: {uid: '1'}, guide: {slug: 'foo/bar'}, exercise: {eid: 1}} }
     before { Assignment.create! exercise_progress.merge(organization: 'example', course: 'example/foo') }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/progress' }

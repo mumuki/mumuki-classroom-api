@@ -206,7 +206,7 @@ get '/courses/:course/progress' do
 end
 
 get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
-  Assignment.find_by!(with_organization_and_course exercise_student_progress_query.merge('exercise.id': exercise_id)).as_json
+  Assignment.find_by!(with_organization_and_course exercise_student_progress_query.merge('exercise.eid': exercise_id)).as_json
 end
 
 get '/permissions' do

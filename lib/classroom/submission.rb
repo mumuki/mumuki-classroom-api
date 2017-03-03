@@ -46,9 +46,22 @@ module Classroom::Submission
   end
 
   def self.update_exercise_student_progress(json)
-    Classroom::Collection::ExerciseStudentProgress
-      .for(organization(json), course_prefix(json))
-      .update!(exercise_student_progress_from json)
+    assignment = Assignment
+                   .where(assigment_query(json))
+                   .first_or_create! assignment_from(json).except(:submission)
+    assignment.submissions << Submission.new(submission_from(json))
+    assignment.update_attributes! submissions: assignment.submissions
+  end
+
+  def self.assigment_query(json)
+    guide_progress_query(json).merge 'exercise.eid': exercise_from(json)[:eid]
+  end
+
+  def self.guide_progress_query(json)
+    {'organization': organization(json),
+     'course': course_slug(json),
+     'student.uid': uid(json),
+     'guide.slug': guide_from(json)[:slug]}
   end
 
   def self.update_guide_student_progress_with_stats(json)
@@ -63,10 +76,7 @@ module Classroom::Submission
   end
 
   def self.student_stats_for(json)
-    Classroom::Collection::ExerciseStudentProgress
-      .for(organization(json), course_prefix(json))
-      .stats(exercise_student_progress_from json)
-      .deep_symbolize_keys
+    Assignment.stats_by guide_progress_query(json)
   end
 
   def self.uid(json)
@@ -77,7 +87,6 @@ module Classroom::Submission
     if json[:course][:slug].present?
       Mumukit::Auth::Slug.parse(json[:course][:slug]).course
     else
-
       Mumukit::Auth::Slug.parse(json[:course][:uid]).course
     end
   end
@@ -94,7 +103,7 @@ module Classroom::Submission
                        submission: submission_from(json)}}
   end
 
-  def self.exercise_student_progress_from(json)
+  def self.assignment_from(json)
     {guide: guide_from(json),
      student: student_from(json),
      exercise: exercise_from(json),
@@ -139,7 +148,7 @@ module Classroom::Submission
   def self.exercise_from(json)
     exercise = json[:exercise]
 
-    {id: exercise[:id],
+    {eid: exercise[:eid],
      name: exercise[:name],
      number: exercise[:number]}.compact
   end

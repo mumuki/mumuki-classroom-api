@@ -32,7 +32,7 @@ describe Classroom::Submission do
       }
     } }
     let(:exercise) { {
-      id: 1,
+      eid: 1,
       name: 'exercise_name',
       number: 1
     } }
@@ -43,7 +43,7 @@ describe Classroom::Submission do
       content: 'find f = head.filter f',
       feedback: 'feedback',
       created_at: '2016-01-01 00:00:00',
-      test_results: 'test_results',
+      test_results: ['test_results'],
       submissions_count: 1,
       expectation_results: []
     } }
@@ -87,12 +87,12 @@ describe Classroom::Submission do
                                                                  submission: submission
                                                                }) }
           it { expect(exercise_progress.size).to eq 1 }
-          it { expect(exercise_progress.first.as_json).to json_eq(guide: guide,
-                                                                  organization: 'example',
-                                                                  course: 'example/course1',
-                                                                  student: student,
-                                                                  exercise: exercise,
-                                                                  submissions: [submission]) }
+          it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
+                                                                     organization: 'example',
+                                                                     course: 'example/course1',
+                                                                     student: student,
+                                                                     exercise: exercise,
+                                                                     submissions: [submission]}, except_fields) }
         end
         context 'and is the second exercise submission' do
           let(:submission2) { submission.merge({
@@ -123,16 +123,16 @@ describe Classroom::Submission do
                                                                  submission: submission2
                                                                }) }
           it { expect(exercise_progress.size).to eq 1 }
-          it { expect(exercise_progress.first.as_json).to json_eq(guide: guide,
-                                                                  organization: 'example',
-                                                                  course: 'example/course1',
-                                                                  student: student,
-                                                                  exercise: exercise,
-                                                                  submissions: [submission, submission2]) }
+          it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
+                                                                     organization: 'example',
+                                                                     course: 'example/course1',
+                                                                     student: student,
+                                                                     exercise: exercise,
+                                                                     submissions: [submission, submission2]}, except_fields) }
 
         end
         context 'and is the second exercise submission' do
-          let(:exercise2) { {id: 2, name: 'exercise_name2', number: 2} }
+          let(:exercise2) { {eid: 2, name: 'exercise_name2', number: 2} }
           let(:submission2) { submission.merge({
                                                  sid: '2',
                                                  status: 'passed_with_warnings',
@@ -161,18 +161,18 @@ describe Classroom::Submission do
                                                                  submission: submission2
                                                                }) }
           it { expect(exercise_progress.size).to eq 2 }
-          it { expect(exercise_progress.first.as_json).to json_like(guide: guide,
-                                                                    organization: 'example',
-                                                                    course: 'example/course1',
-                                                                    student: student,
-                                                                    exercise: exercise,
-                                                                    submissions: [submission]) }
-          it { expect(exercise_progress.second.as_json).to json_like(guide: guide,
+          it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
                                                                      organization: 'example',
                                                                      course: 'example/course1',
                                                                      student: student,
-                                                                     exercise: exercise2,
-                                                                     submissions: [submission2]) }
+                                                                     exercise: exercise,
+                                                                     submissions: [submission]}, except_fields) }
+          it { expect(exercise_progress.second.as_json).to json_like({guide: guide,
+                                                                      organization: 'example',
+                                                                      course: 'example/course1',
+                                                                      student: student,
+                                                                      exercise: exercise2,
+                                                                      submissions: [submission2]}, except_fields) }
         end
       end
 

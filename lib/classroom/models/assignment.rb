@@ -7,11 +7,11 @@ class Assignment
   field :student, type: Hash
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
-  field :exercise, type: Hash
+  embeds_one :exercise
   embeds_many :submissions
 
   store_in collection: 'exercise_student_progress'
-  create_index({'organization': 1, 'course': 1, 'exercise.id': 1, 'student.uid': 1})
+  create_index({'organization': 1, 'course': 1, 'exercise.eid': 1, 'student.uid': 1})
 
   def comment!(comment, sid)
     submissions.find_by!(sid: sid).comment! comment
@@ -27,7 +27,7 @@ class Assignment
     {
       comment: comment,
       submission_id: sid,
-      exercise_id: exercise[:id],
+      exercise_id: exercise.eid,
       tenant: organization
     }.as_json
   end
@@ -44,7 +44,7 @@ class Assignment
     where(query).destroy
   end
 
-  def self.all_stats_by(query)
+  def self.stats_by(query)
     where(query)
       .map { |assignment| assignment.submissions.max_by(&:created_at) }
       .group_by { |submission| submission.status }

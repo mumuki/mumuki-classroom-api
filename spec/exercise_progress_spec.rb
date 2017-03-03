@@ -20,18 +20,18 @@ describe Assignment do
     let(:progress1) { {
       guide: {slug: 'example/foo'},
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
-      exercise: {id: 177, name: 'foo'},
+      exercise: {eid: 177, name: 'foo'},
       submissions: [{status: :passed}]} }
 
     let(:progress2) { {
       guide: {slug: 'example/foo'},
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
-      exercise: {id: 178, name: 'foo'},
+      exercise: {eid: 178, name: 'foo'},
       submissions: [{status: :failed, expectation_results: [{binding: 'f', inspection: 'HasComposition', result: 'failed'}]}, {status: :passed}]} }
     let(:progress3) { {
       guide: {slug: 'example/foo'},
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
-      exercise: {id: 178, name: 'foo'},
+      exercise: {eid: 178, name: 'foo'},
       submissions: [{status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}]}, {status: :passed}]} }
 
 

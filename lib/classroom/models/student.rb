@@ -45,7 +45,7 @@ class Student
   end
 
   def update_all_stats
-    all_stats = Assignment.all_stats_by(sub_student_query uid)
+    all_stats = Assignment.stats_by(sub_student_query uid)
     update_attributes!(stats: all_stats)
   end
 
