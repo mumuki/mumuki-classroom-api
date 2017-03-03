@@ -156,7 +156,6 @@ describe Student do
     let(:created_at) { 'created_at' }
     before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
     before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo' }
-    before { Classroom::Collection::CourseStudents.for('example').insert! json }
     before { Student.create!(student.merge(uid: 'auth0|1', organization: 'example', course: 'example/foo')) }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/student/auth0%7c1' }

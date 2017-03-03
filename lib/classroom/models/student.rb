@@ -19,25 +19,11 @@ class Student
 
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
 
-  def self.report(criteria, &block)
-    where(criteria).select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
-  end
-
-  def self.update_all_stats(options)
-    where(options).each(&:update_all_stats)
-  end
-
-  def self.find_by_uid!(uid)
-    find_by!(uid: uid)
-  end
-
   def course_name
     course.to_mumukit_slug.course
   end
 
   def destroy_cascade!
-    student = {'student.uid': uid}
-    Classroom::Collection::CourseStudents.for(organization).delete_many(student.merge('course.slug': course, organization: organization))
     GuideProgress.destroy_all_by!(sub_student_query uid)
     Assignment.destroy_all_by!(sub_student_query uid)
     Guide.delete_if_has_no_progress(organization, course)
@@ -67,6 +53,24 @@ class Student
 
   def update_last_assignment_for
     update_attributes!(last_assignment: GuideProgress.last_assignment_by(sub_student_query uid))
+  end
+
+  class << self
+    def report(criteria, &block)
+      where(criteria).select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
+    end
+
+    def update_all_stats(options)
+      where(options).each(&:update_all_stats)
+    end
+
+    def last_updated_student_by(query)
+      where(query).order_by(updated_at: :desc).first
+    end
+
+    def ensure_not_exists!(query)
+      raise Classroom::StudentExistsError, 'Student already exist' if Student.where(query).exists?
+    end
   end
 
 end

@@ -97,8 +97,8 @@ helpers do
     Course.ensure_exist! with_organization(slug: course_slug)
   end
 
-  def ensure_course_student_existence!(uid)
-    Classroom::Collection::CourseStudents.for(organization).ensure_exist! uid, course_slug
+  def ensure_student_not_exists!
+    Student.ensure_not_exists! with_organization uid: json_body[:email]
   end
 
   def set_locale!(org)
@@ -218,17 +218,18 @@ end
 post '/courses/:course/students' do
   authorize! :janitor
   ensure_course_existence!
-  Classroom::Collection::CourseStudents.for(organization).ensure_new! json_body['email'], course_slug
+  ensure_student_not_exists!
 
-  json = {student: json_body.merge(uid: json_body['email']), course: {slug: course_slug}}
-  Classroom::Collection::CourseStudents.for(organization).insert! json
+  json = {student: json_body.merge(uid: json_body[:email]), course: {slug: course_slug}}
+  uid = json[:student][:uid]
+
   Student.create!(with_organization_and_course json[:student])
 
-  Mumukit::Nuntius.notify! 'resubmissions', uid: json[:student][:uid], tenant: tenant
-
-  perm = current_user.permissions
+  perm = User.where(uid: uid).first_or_create!(json[:student].except(:first_name, :last_name)).permissions
   perm.add_permission!(:student, course_slug)
-  User.upsert_permissions! json[:student][:uid], perm
+  User.upsert_permissions! uid, perm
+
+  Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
   Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].merge(permissions: perm)
 
   {status: :created}

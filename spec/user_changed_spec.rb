@@ -35,12 +35,10 @@ describe Classroom::Event::UserChanged do
     end
 
     context 'update models' do
-      before do
-        Course.create! organization: 'example', slug: 'example/foo'
-        Course.create! organization: 'example', slug: 'example/bar'
-        Student.create! user.merge(organization: 'example', course: 'example/foo')
-        Classroom::Collection::CourseStudents.for('example').insert!({course: {uid: 'example/foo'}, student: user})
-      end
+
+      before { Course.create! organization: 'example', slug: 'example/foo' }
+      before { Course.create! organization: 'example', slug: 'example/bar' }
+      before { Student.create! user.merge(organization: 'example', course: 'example/foo') }
       before { Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }

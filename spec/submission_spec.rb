@@ -68,7 +68,6 @@ describe Classroom::Submissions do
         let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 
         before { Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
-        before { Classroom::Collection::CourseStudents.for('example').insert! course_student }
         before { Classroom::Submissions.process!(atheneum_submission) }
 
         context 'and is the first exercise submission' do
@@ -193,7 +192,6 @@ describe Classroom::Submissions do
       let(:guide_fetched) { Guide.first.as_json }
 
       before { Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
-      before { Classroom::Collection::CourseStudents.for('example').insert! course_student }
       before { Classroom::Submissions.process!(submission_without_chapter) }
 
       it { expect(guide_fetched).to json_like(submission_without_chapter[:guide].merge(organization: 'example', course: 'example/course1'), except_fields) }

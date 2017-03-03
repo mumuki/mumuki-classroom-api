@@ -18,11 +18,9 @@ module Classroom::Submissions
   end
 
   def self.find_submission_course!(json)
-    Classroom::Collection::CourseStudents
-      .for(organization json)
-      .find_by_uid!(uid json)
-      .course
-      .deep_symbolize_keys
+    student = Student.last_updated_student_by(organization: organization(json), uid: uid(json))
+    raise Mumukit::Service::DocumentNotFoundError unless student
+    student.course
   end
 
   def self.find_student_from(json)
@@ -80,16 +78,8 @@ module Classroom::Submissions
     json[:submitter][:uid]
   end
 
-  def self.course_prefix(json)
-    if json[:course][:slug].present?
-      Mumukit::Auth::Slug.parse(json[:course][:slug]).course
-    else
-      Mumukit::Auth::Slug.parse(json[:course][:uid]).course
-    end
-  end
-
   def self.course_slug(json)
-    json[:course][:slug] || json[:course][:slug]
+    json[:course]
   end
 
   def self.guide_progress_from(json)
