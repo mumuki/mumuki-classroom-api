@@ -18,7 +18,7 @@ class Course
   create_index({organization: 1, slug: 1}, {unique: true})
 
   def notify!
-    Mumukit::Nuntius::EventPublisher.publish('CourseChanged', {course: self.as_json})
+    Mumukit::Nuntius.notify_event! 'CourseChanged', {course: self.as_json}
   end
 
   def self.ensure_new!(json)

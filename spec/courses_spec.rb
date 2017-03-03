@@ -49,7 +49,6 @@ describe Course do
     end
 
     context 'when is org admin' do
-      before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
       before { header 'Authorization', build_auth_header('example/*') }
       before { post '/courses', course.to_json }
 
@@ -60,7 +59,6 @@ describe Course do
     end
 
     context 'when is global admin' do
-      before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses', course.to_json }
 

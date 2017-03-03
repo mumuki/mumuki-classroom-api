@@ -12,10 +12,10 @@ describe 'comments' do
 
     context 'when authenticated' do
       before { Assignment.create!({student: {uid: '1'}, exercise: {eid: 2}, submissions: [{sid: '3'}]}.merge organization: 'example', course: 'example/bar') }
-      before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_comments).with({comment: comment,
-                                                                                       submission_id: '3',
-                                                                                       exercise_id: 2,
-                                                                                       tenant: 'example'}.as_json) }
+      before { expect(Mumukit::Nuntius).to receive(:notify!).with('comments', {comment: comment,
+                                                                               submission_id: '3',
+                                                                               exercise_id: 2,
+                                                                               tenant: 'example'}.as_json) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses/bar/comments', comment_to_post }
 

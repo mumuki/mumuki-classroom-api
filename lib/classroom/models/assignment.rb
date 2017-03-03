@@ -20,7 +20,7 @@ class Assignment
   end
 
   def notify_comment!(comment, sid)
-    Mumukit::Nuntius::Publisher.publish_comments json_to_notify(comment, sid)
+    Mumukit::Nuntius.notify! 'comments', json_to_notify(comment, sid)
   end
 
   def json_to_notify(comment, sid)

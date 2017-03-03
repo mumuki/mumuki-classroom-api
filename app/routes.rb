@@ -115,12 +115,12 @@ helpers do
     Student.find_by(with_organization_and_course uid: uid).try do |user|
       user_as_json = user.as_json(only: [:first_name, :last_name, :email])
       user_to_notify = user_as_json.merge(uid: uid, permissions: permissions)
-      Mumukit::Nuntius::EventPublisher.publish('UserChanged', {user: user_to_notify})
+      Mumukit::Nuntius.notify_event! 'UserChanged', {user: user_to_notify}
     end
   end
 
   def notify_upsert_exam(exam_id)
-    Mumukit::Nuntius::EventPublisher.publish('UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id))
+    Mumukit::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
   end
 
 end
@@ -156,7 +156,7 @@ end
 
 post '/courses/:course/students/:uid' do
   authorize! :janitor
-  Mumukit::Nuntius::Publisher.publish_resubmissions(uid: uid, tenant: tenant)
+  Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
   {status: :created}
 end
 
@@ -224,12 +224,12 @@ post '/courses/:course/students' do
   Classroom::Collection::CourseStudents.for(organization).insert! json
   Student.create!(with_organization_and_course json[:student])
 
-  Mumukit::Nuntius::Publisher.publish_resubmissions(uid: json[:student][:uid], tenant: tenant)
+  Mumukit::Nuntius.notify! 'resubmissions', uid: json[:student][:uid], tenant: tenant
 
   perm = current_user.permissions
   perm.add_permission!(:student, course_slug)
   User.upsert_permissions! json[:student][:uid], perm
-  Mumukit::Nuntius::EventPublisher.publish 'UserChanged', user: json[:student].merge(permissions: perm)
+  Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].merge(permissions: perm)
 
   {status: :created}
 end

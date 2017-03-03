@@ -21,7 +21,7 @@ class Exam
   end
 
   def notify!
-    Mumukit::Nuntius::EventPublisher.publish 'UpsertExam', json_to_notify
+    Mumukit::Nuntius.notify_event! 'UpsertExam', json_to_notify
   end
 
   def as_json(options = {})

@@ -167,7 +167,7 @@ describe Student do
 
   describe 'post /courses/:course/students/:student_id' do
 
-    before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions).with(uid: 'github|123456', tenant: 'example') }
+    before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', uid: 'github|123456', tenant: 'example') }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/students/github%7C123456' }
 
@@ -178,7 +178,6 @@ describe Student do
   describe 'when needs mumuki-user' do
     let(:fetched_student) { Student.find_by(uid: 'github|123456', organization: 'example', course: 'example/example') }
 
-    before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
@@ -227,9 +226,8 @@ describe Student do
         context 'when authenticated' do
           before { header 'Authorization', build_auth_header('*') }
 
-          context 'should publish int resubmissions queue' do
-            before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions) }
-            before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
+          context 'should publish in resubmissions queue' do
+            before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
               let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
@@ -244,7 +242,8 @@ describe Student do
           end
           context 'should not publish int resubmissions queue' do
             before { post '/courses/foo/students', student_json }
-            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+            before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
+            before { post '/courses/foo/students', student_json }
             context 'and user already exists by uid' do
               before { post '/courses/foo/students', student_json }
 
@@ -265,8 +264,7 @@ describe Student do
       end
 
       context 'when course does not exist' do
-        before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
-        before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
+        before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
 
         it 'rejects creating a student' do
           header 'Authorization', build_auth_header('*')
@@ -297,8 +295,7 @@ describe Student do
           before { header 'Authorization', build_auth_header('*') }
 
           context 'should publish int resubmissions queue' do
-            before { expect(Mumukit::Nuntius::Publisher).to receive(:publish_resubmissions) }
-            before { allow(Mumukit::Nuntius::EventPublisher).to receive(:publish) }
+            before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
               let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
@@ -313,7 +310,7 @@ describe Student do
           end
           context 'should not publish int resubmissions queue' do
             before { post '/courses/foo/students', student_json }
-            before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+            before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
             context 'and user already exists by uid' do
               before { post '/courses/foo/students', student_json }
 
@@ -334,7 +331,7 @@ describe Student do
       end
 
       context 'when course does not exist' do
-        before { expect(Mumukit::Nuntius::Publisher).to_not receive(:publish_resubmissions) }
+        before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
 
         it 'rejects creating a student' do
           header 'Authorization', build_auth_header('*')
