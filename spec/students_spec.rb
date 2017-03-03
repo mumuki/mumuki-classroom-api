@@ -61,7 +61,7 @@ describe Student do
   let(:example_students) { -> (student) { Student.create!(student.merge(organization: 'example', course: 'example/example')) } }
   let(:students) { Student.where(organization: 'example', course: 'example/example') }
   let(:example_student_progresses) { -> (exercise) { Assignment.create! exercise.merge(organization: 'example', course: 'example/example') } }
-  let(:example_guide_student_progresses) { Classroom::Collection::GuideStudentsProgress.for('example', 'example') }
+  let(:example_guide_student_progresses) { -> (guide_progress) { GuideProgress.create! guide_progress.merge organization: 'example', course: 'example/example' } }
 
   describe do
 
@@ -98,15 +98,15 @@ describe Student do
 
       let(:guides) { Guide.where organization: 'example', course: 'example/example' }
       let(:students) { Student.where organization: 'example', course: 'example/example' }
-      let(:guide_students_progress) { example_guide_student_progresses.all.as_json.deep_symbolize_keys[:guide_students_progress] }
+      let(:guide_students_progress) { GuideProgress.where(organization: 'example', course: 'example/example').as_json }
       let(:exercise_student_progress) { example_student_progresses.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
 
       before { Guide.create! guide1.merge(organization: 'example', course: 'example/example') }
       before { Guide.create! guide2.merge(organization: 'example', course: 'example/example') }
 
-      before { example_guide_student_progresses.insert! guide_student_progress1 }
-      before { example_guide_student_progresses.insert! guide_student_progress2 }
-      before { example_guide_student_progresses.insert! guide_student_progress3 }
+      before { example_guide_student_progresses.call guide_student_progress1 }
+      before { example_guide_student_progresses.call guide_student_progress2 }
+      before { example_guide_student_progresses.call guide_student_progress3 }
 
       before { Student.find_by!(uid: 'github|123456').destroy_cascade! }
 

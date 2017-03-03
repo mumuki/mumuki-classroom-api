@@ -14,7 +14,7 @@ class Guide
 
   def self.delete_if_has_no_progress(organization, course_slug)
     where(organization: organization, course: course_slug).each do |guide|
-      unless Classroom::Collection::GuideStudentsProgress.for(guide.organization, guide.course_name).any?('guide.slug' => guide.slug)
+      unless GuideProgress.find_by(organization: guide.organization, course: guide.course, 'guide.slug': guide.slug)
         guide.destroy
       end
     end

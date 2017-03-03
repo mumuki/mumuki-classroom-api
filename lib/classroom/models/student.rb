@@ -10,12 +10,12 @@ class Student
   field :email, type: String
   field :image_url, type: String
   field :social_id, type: String
-  field :last_assignment, type: Hash
   field :stats, type: Hash
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
   field :detached, type: Mongoid::Boolean
   field :detached_at, type: Time
+  embeds_one :last_assignment
 
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
 
@@ -38,7 +38,7 @@ class Student
   def destroy_cascade!
     student = {'student.uid': uid}
     Classroom::Collection::CourseStudents.for(organization).delete_many(student.merge('course.slug': course, organization: organization))
-    Classroom::Collection::GuideStudentsProgress.for(organization, course_name).delete_many(student.merge(organization: organization))
+    GuideProgress.destroy_all_by!(sub_student_query uid)
     Assignment.destroy_all_by!(sub_student_query uid)
     Guide.delete_if_has_no_progress(organization, course)
     destroy!
@@ -56,18 +56,17 @@ class Student
   def detach!
     update_attributes! detached: true, detached_at: Time.now
     Assignment.detach_all_by! sub_student_query(uid)
-    Classroom::Collection::GuideStudentsProgress.for(organization, course_name).detach_student! uid
+    GuideProgress.detach_all_by! sub_student_query(uid)
   end
 
   def attach!
     unset :detached, :detached_at
     Assignment.attach_all_by! sub_student_query(uid)
-    Classroom::Collection::GuideStudentsProgress.for(organization, course_name).attach_student! uid
+    GuideProgress.attach_all_by! sub_student_query(uid)
   end
 
   def update_last_assignment_for
-    last_assignment = Classroom::Collection::GuideStudentsProgress.for(organization, course_name).last_assignment_for(uid)
-    update_attributes!(last_assignment: last_assignment)
+    update_attributes!(last_assignment: GuideProgress.last_assignment_by(sub_student_query uid))
   end
 
 end

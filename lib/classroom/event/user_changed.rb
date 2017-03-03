@@ -42,11 +42,10 @@ class Classroom::Event::UserChanged
 
     def update_student!(organization, course_h, student_h)
       course_slug = course_h[:uid] || course_h[:slug]
-      course = course_slug.to_mumukit_slug.course
       sub_student = student_h.transform_keys { |field| "student.#{field}".to_sym }
       Student.find_by!(uid: student_h[:uid], organization: organization, course: course_slug).update_attributes! student_h
       Classroom::Collection::CourseStudents.for(organization).update_student! sub_student
-      Classroom::Collection::GuideStudentsProgress.for(organization, course).update_student! sub_student
+      GuideProgress.where(organization: organization, course: course_slug).update_all sub_student
       Assignment.where(organization: organization, course: course_slug).update_all sub_student
     end
 

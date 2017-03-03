@@ -4,7 +4,7 @@ class Submission
 
   field :sid, type: String
   field :content, type: String
-  field :created_at, type: String
+  field :created_at, type: Time
   field :expectation_results, type: Array
   field :feedback, type: String
   field :result, type: String

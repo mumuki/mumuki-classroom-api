@@ -62,7 +62,7 @@ describe Classroom::Submissions do
       end
 
       context 'and student is registered to a course' do
-        let(:guide_progress) { Classroom::Collection::GuideStudentsProgress.for('example', 'course1').all.as_json[:guide_students_progress] }
+        let(:guide_progress) { GuideProgress.where(organization: 'example', course: 'example/course1').as_json }
         let(:exercise_progress) { Assignment.where(organization: 'example', course: 'example/course1').as_json }
         let(:course_student) { {course: {slug: 'example/course1'}, student: submitter} }
         let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
@@ -73,19 +73,19 @@ describe Classroom::Submissions do
 
         context 'and is the first exercise submission' do
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.as_json).to json_eq(guide: guide,
-                                                               student: student,
-                                                               organization: 'example',
-                                                               course: 'example/course1',
-                                                               stats: {
-                                                                 passed: 1,
-                                                                 failed: 0,
-                                                                 passed_with_warnings: 0,
-                                                               },
-                                                               last_assignment: {
-                                                                 exercise: exercise,
-                                                                 submission: submission
-                                                               }) }
+          it { expect(guide_progress.first.as_json).to json_like({guide: guide,
+                                                                  student: student,
+                                                                  organization: 'example',
+                                                                  course: 'example/course1',
+                                                                  stats: {
+                                                                    passed: 1,
+                                                                    failed: 0,
+                                                                    passed_with_warnings: 0,
+                                                                  },
+                                                                  last_assignment: {
+                                                                    exercise: exercise,
+                                                                    submission: submission
+                                                                  }}, except_fields) }
           it { expect(exercise_progress.size).to eq 1 }
           it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
                                                                      organization: 'example',
@@ -109,19 +109,19 @@ describe Classroom::Submissions do
                                                          }) }
           before { Classroom::Submissions.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.as_json).to json_eq(guide: guide,
-                                                               organization: 'example',
-                                                               course: 'example/course1',
-                                                               student: student,
-                                                               stats: {
-                                                                 passed: 0,
-                                                                 failed: 1,
-                                                                 passed_with_warnings: 0,
-                                                               },
-                                                               last_assignment: {
-                                                                 exercise: exercise,
-                                                                 submission: submission2
-                                                               }) }
+          it { expect(guide_progress.first.as_json).to json_like({guide: guide,
+                                                                  organization: 'example',
+                                                                  course: 'example/course1',
+                                                                  student: student,
+                                                                  stats: {
+                                                                    passed: 0,
+                                                                    failed: 1,
+                                                                    passed_with_warnings: 0,
+                                                                  },
+                                                                  last_assignment: {
+                                                                    exercise: exercise,
+                                                                    submission: submission2
+                                                                  }}, except_fields) }
           it { expect(exercise_progress.size).to eq 1 }
           it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
                                                                      organization: 'example',
@@ -147,19 +147,19 @@ describe Classroom::Submissions do
                                                          }) }
           before { Classroom::Submissions.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.as_json).to json_eq(guide: guide,
-                                                               organization: 'example',
-                                                               course: 'example/course1',
-                                                               student: student,
-                                                               stats: {
-                                                                 passed: 1,
-                                                                 failed: 0,
-                                                                 passed_with_warnings: 1,
-                                                               },
-                                                               last_assignment: {
-                                                                 exercise: exercise2,
-                                                                 submission: submission2
-                                                               }) }
+          it { expect(guide_progress.first.as_json).to json_like({guide: guide,
+                                                                  organization: 'example',
+                                                                  course: 'example/course1',
+                                                                  student: student,
+                                                                  stats: {
+                                                                    passed: 1,
+                                                                    failed: 0,
+                                                                    passed_with_warnings: 1,
+                                                                  },
+                                                                  last_assignment: {
+                                                                    exercise: exercise2,
+                                                                    submission: submission2
+                                                                  }}, except_fields) }
           it { expect(exercise_progress.size).to eq 2 }
           it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
                                                                      organization: 'example',

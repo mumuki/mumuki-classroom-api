@@ -7,8 +7,8 @@ module Classroom::Submissions
     json[:student] = find_student_from json
 
     update_guide json
-    update_exercise_student_progress json
-    update_guide_student_progress_with_stats json
+    update_assignment json
+    update_guide_progress json
     update_student_progress json
     update_student_last_assignment json
   end
@@ -45,14 +45,15 @@ module Classroom::Submissions
     Student.find_by!(organization: organization(json), course: course_slug(json), uid: uid(json)).update_last_assignment_for
   end
 
-  def self.update_exercise_student_progress(json)
-    Assignment
-      .where(assigment_query(json))
-      .first_or_create!(assignment_from(json).except(:submission))
-      .add_submission! submission_from(json)
+  def self.update_assignment(json)
+    assignment = Assignment
+                   .where(assignment_query(json))
+                   .first_or_create!(assignment_without_submission_from(json))
+    assignment.upsert_attributes(assignment_without_submission_from(json))
+    assignment.add_submission! submission_from(json)
   end
 
-  def self.assigment_query(json)
+  def self.assignment_query(json)
     guide_progress_query(json).merge 'exercise.eid': exercise_from(json)[:eid]
   end
 
@@ -63,15 +64,12 @@ module Classroom::Submissions
      'guide.slug': guide_from(json)[:slug]}
   end
 
-  def self.update_guide_student_progress_with_stats(json)
+  def self.update_guide_progress(json)
     json[:stats] = student_stats_for json
-    update_guide_student_progress json
-  end
-
-  def self.update_guide_student_progress(json)
-    Classroom::Collection::GuideStudentsProgress
-      .for(organization(json), course_prefix(json))
-      .update!(guide_students_progress_from json)
+    GuideProgress
+      .where(guide_progress_query(json))
+      .first_or_create!(guide_progress_from json)
+      .upsert_attributes(guide_progress_from json)
   end
 
   def self.student_stats_for(json)
@@ -94,7 +92,7 @@ module Classroom::Submissions
     json[:course][:slug] || json[:course][:slug]
   end
 
-  def self.guide_students_progress_from(json)
+  def self.guide_progress_from(json)
     {guide: guide_from(json),
      student: student_from(json),
      stats: stats_from(json),
@@ -102,11 +100,14 @@ module Classroom::Submissions
                        submission: submission_from(json)}}
   end
 
-  def self.assignment_from(json)
+  def self.assignment_without_submission_from(json)
     {guide: guide_from(json),
      student: student_from(json),
-     exercise: exercise_from(json),
-     submission: submission_from(json)}
+     exercise: exercise_from(json)}
+  end
+
+  def self.assignment_from(json)
+    assignment_without_submission_from.merge submission: submission_from(json)
   end
 
   def self.stats_from(json)
