@@ -137,6 +137,7 @@ def copy_from_to(from_database, from_collection, to_database, to_collection, mer
 end
 
 def insert_with_bson_size_limit(doc, to_collection, merge_options)
+  dateify! doc
   to_insert = doc['created_at'] ? doc : doc.merge(created_at: doc['_id'].generation_time)
   to_insert = to_insert.merge(merge_options)
   Classroom::Database.client[to_collection].insert_one to_insert
@@ -144,6 +145,23 @@ rescue Mongo::Error::MaxBSONSize => _
   puts "        [WARNING] :: {_id: ObjectId('#{doc['_id']}')} is to large and some submissions will be removed"
   to_insert['submissions'] = to_insert['submissions'].first_and_last(10)
   Classroom::Database.client[to_collection].insert_one to_insert
+rescue Mongo::Error::OperationFailure => _
+  puts "        [WARNING] :: {uid: '#{doc['uid']}')} is duplicated"
+end
+
+def dateify!(doc)
+  do_dateify! doc
+  if doc.dig('last_assignment', 'submission').present?
+    do_dateify! doc['last_assignment']['submission']
+  end
+  if doc['submissions'].present?
+    doc['submissions'].each { |d| do_dateify! d }
+  end
+end
+
+def do_dateify!(doc)
+  doc['created_at'] = Time.parse doc['created_at'] if doc['created_at'].is_a? String
+  doc['updated_at'] = Time.parse doc['updated_at'] if doc['updated_at'].is_a? String
 end
 
 class Array
