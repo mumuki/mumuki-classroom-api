@@ -1,4 +1,4 @@
 get '/courses/:course/teachers' do
   authorize! :teacher
-  Classroom::Collection::Teachers.for(organization, course).all.as_json
+  {teachers: Teacher.where(with_organization_and_course).as_json}
 end

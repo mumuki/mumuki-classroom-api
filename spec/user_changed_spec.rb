@@ -46,16 +46,16 @@ describe Classroom::Event::UserChanged do
 
       let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/foo') }
       let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/bar') }
-      let(:teacher_foo_fetched) { Classroom::Collection::Teachers.for('example', 'foo').find_by(uid: uid) }
+      let(:teacher_foo_fetched) { Teacher.find_by(uid: uid, organization: 'example', course: 'example/foo') }
 
       it { expect(student_foo_fetched.detached).to eq true }
       it { expect(student_foo_fetched.uid).to eq uid }
       it { expect(student_foo_fetched.first_name).to eq 'Agustín' }
 
-      it { expect(student_bar_fetched.as_json(except_fields)).to eq user2.merge(organization: 'example', course: 'example/bar') }
+      it { expect(student_bar_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/bar'), except_fields }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_foo_fetched.as_json(except_fields)).to eq user2.merge(organization: 'example', course: 'example/foo') }
+      it { expect(teacher_foo_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/foo'), except_fields }
     end
 
   end

@@ -47,19 +47,22 @@ class Classroom::Event::UserChanged
     end
 
     def student_added(organization, user, granted_slug)
-      if Student.where(uid: user[:uid], organization: organization, course: granted_slug.to_s).exists?
-        Student.find_by!(uid: user[:uid], organization: organization, course: granted_slug.to_s).attach!
+      students = Student.where(uid: user[:uid], organization: organization, course: granted_slug.to_s)
+      if students.exists?
+        students.first.attach!
       else
         Student.create! user.merge(organization: organization, course: granted_slug.to_s)
       end
     end
 
     def student_removed(organization, user, granted_slug)
-      Student.find_by!(uid: user[:uid], organization: organization, course: granted_slug.to_s).detach!
+      student = Student.find_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
+      student.detach!
     end
 
     def teacher_added(organization, user, granted_slug)
-      Classroom::Collection::Teachers.for(organization, granted_slug.course).upsert! user
+      teacher = Teacher.find_or_create_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
+      teacher.update_attributes! user
     end
 
   end
