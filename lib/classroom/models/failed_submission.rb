@@ -3,6 +3,8 @@ class FailedSubmission
   include Mongoid::Document
   include Mongoid::Attributes::Dynamic
 
+  field :created_at, type: Time
+
   create_index 'organization': 1, 'submitter.uid': 1
 
   scope :for, -> (organization) { where 'organization': organization }
