@@ -4,7 +4,7 @@ Mumukit::Nuntius::EventConsumer.handle do
     Classroom::Event::UserChanged.execute! payload[:user]
   end
 
-  event :CourseChanged do |payload|
+  event 'CourseChanged' do |payload|
     Course.import_from_json! payload[:course]
   end
 

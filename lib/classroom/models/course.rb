@@ -37,7 +37,9 @@ class Course
 
   def self.import_from_json!(json)
     slug = json[:slug]
-    Course.where(slug: slug).first_or_create.update_attributes(json)
+    json.delete(:organization_id)
+    json[:organization] = Mumukit::Auth::Slug.parse(json[:slug]).organization
+    Course.where(slug: slug).first_or_create.update_attributes(json.except(:subscription_mode))
   end
 
 end
