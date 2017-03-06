@@ -8,13 +8,18 @@ class Organization
   field :name, type: String
   field :locale, type: String
   field :book_id, type: Numeric
-  field :private, type: Mongoid::Boolean
+  field :books, type: Array
+  field :public, type: Mongoid::Boolean
   field :logo_url, type: String
   field :lock_json, type: Hash
   field :description, type: String
   field :contact_email, type: String
   field :socialBigButtons, type: Mongoid::Boolean
   field :disableResetAction, type: Mongoid::Boolean
+  field :terms_of_service, type: String
+  field :theme_stylesheet_url, type: String
+  field :extension_javascript_url, type: String
+  field :login_methods, type: String
 
   create_index({name: 1}, {unique: true})
 
