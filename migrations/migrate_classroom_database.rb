@@ -129,7 +129,10 @@ end
 def copy_from_to(from_database, from_collection, to_database, to_collection, merge_options = {})
   puts "      Copying documents from #{from_database}.#{from_collection} to #{to_database}.#{to_collection}"
   Classroom::Database.connect_transient! from_database.to_sym do
-    docs = Classroom::Database.client[from_collection].find
+    docs = Classroom::Database.client[from_collection].find.as_json
+    if to_collection == 'exams'
+      docs.each { |d| d.merge!(eid: d.delete('id')) }
+    end
     Classroom::Database.connect_transient! to_database.to_sym do
       docs.each { |doc| insert_with_bson_size_limit doc, to_collection, merge_options }
     end
@@ -138,6 +141,8 @@ end
 
 def insert_with_bson_size_limit(doc, to_collection, merge_options)
   dateify! doc
+  migrate_ids! doc
+  doc['_id'] = BSON::ObjectId.from_string(doc.delete('_id')['$oid'])
   to_insert = doc['created_at'] ? doc : doc.merge(created_at: doc['_id'].generation_time)
   to_insert = to_insert.merge(merge_options)
   Classroom::Database.client[to_collection].insert_one to_insert
@@ -162,6 +167,21 @@ end
 def do_dateify!(doc)
   doc['created_at'] = Time.parse doc['created_at'] if doc['created_at'].is_a? String
   doc['updated_at'] = Time.parse doc['updated_at'] if doc['updated_at'].is_a? String
+end
+
+def migrate_ids!(doc)
+  if doc.dig('exercise', 'id').present?
+    doc['exercise']['eid'] = doc['exercise'].delete 'id'
+  end
+  if doc.dig('last_assignment', 'exercise', 'id').present?
+    doc['last_assignment']['exercise']['eid'] = doc['last_assignment']['exercise'].delete 'id'
+  end
+  if doc.dig('last_assignment', 'submission', 'id').present?
+    doc['last_assignment']['submission']['sid'] = doc['last_assignment']['submission'].delete 'id'
+  end
+  if doc['submissions'].present?
+    doc['submissions'].each { |d| d['sid'] = d.delete 'id' }
+  end
 end
 
 class Array
