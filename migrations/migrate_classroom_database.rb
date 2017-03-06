@@ -167,6 +167,7 @@ end
 def do_dateify!(doc)
   doc['created_at'] = Time.parse doc['created_at'] if doc['created_at'].is_a? String
   doc['updated_at'] = Time.parse doc['updated_at'] if doc['updated_at'].is_a? String
+  doc['detached_at'] = Time.parse doc['detached_at'] if doc['detached_at'].is_a? String
 end
 
 def migrate_ids!(doc)
