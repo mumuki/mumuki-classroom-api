@@ -22,14 +22,14 @@ post '/courses/:course/exams' do
   authorize! :teacher
   exam = Exam.create! with_organization_and_course(json_body)
   exam.notify!
-  {status: :created}.merge(id: exam.eid)
+  {status: :created}.merge(eid: exam.eid)
 end
 
 post '/api/courses/:course/exams' do
   authorize! :teacher
   exam = Exam.create! with_organization_and_course(json_body)
   exam.notify!
-  {status: :created}.merge(id: exam.eid)
+  {status: :created}.merge(eid: exam.eid)
 end
 
 put '/courses/:course/exams/:exam_id' do
@@ -37,7 +37,7 @@ put '/courses/:course/exams/:exam_id' do
   exam = Exam.find_by!(exam_query)
   exam.update_attributes! json_body
   exam.notify!
-  {status: :updated}.merge(id: exam_id)
+  {status: :updated}.merge(eid: exam_id)
 end
 
 post '/api/courses/:course/exams/:exam_id/students/:uid' do
@@ -45,7 +45,7 @@ post '/api/courses/:course/exams/:exam_id/students/:uid' do
   exam = Exam.find_by!(exam_query)
   exam.add_student! params[:uid]
   exam.notify!
-  {status: :updated}.merge(id: exam_id)
+  {status: :updated}.merge(eid: exam_id)
 end
 
 get '/courses/:course/exams/:exam_id' do
