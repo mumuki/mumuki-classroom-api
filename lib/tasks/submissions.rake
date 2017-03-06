@@ -4,14 +4,14 @@ namespace :submissions do
 
     Mumukit::Nuntius::Consumer.negligent_start! 'submissions' do |body|
       organization = body.delete('tenant')
-      body['organization'] = organization
+      body[:organization] = organization
       Classroom::Database.connect!
       begin
         Mumukit::Nuntius::Logger.info "Processing submission #{body['id']}"
         Classroom::Submissions.process! body
       rescue => e
         Mumukit::Nuntius::Logger.warn "Submission failed #{e}. body was: #{body}"
-        Classroom::Collection::FailedSubmissions.for(organization).insert! body
+        FailedSubmission.create! body
       end
     end
   end

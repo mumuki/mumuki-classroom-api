@@ -8,17 +8,10 @@ module Classroom::FailedSubmission
     reprocess_from_organization uid, :central, destination
   end
 
-  def self.from(exercise_student_progress)
-    progress = exercise_student_progress.raw.deep_symbolize_keys
-    progress[:submissions].each do |it|
-      Classroom::Collection::FailedSubmissions.insert! new_failed_submission(progress, it).wrap_json
-    end
-  end
-
   private
 
   def self.reprocess_from_organization(uid, source, destination)
-    Classroom::Collection::FailedSubmissions.for(source).find_by_uid(uid).each do |failed_submission|
+    FailedSubmission.for(source).find_by_uid(uid).each do |failed_submission|
       delete_failed_submission failed_submission, source
       try_reprocess failed_submission, source, destination
     end
@@ -28,29 +21,29 @@ module Classroom::FailedSubmission
     begin
       reprocess_failed_submission destination, failed_submission
     rescue => e
-      Mumukit::Nuntius::Logger.warn "Resubmission failed #{e}. it was: #{failed_submission.raw}"
+      Mumukit::Nuntius::Logger.warn "Resubmission failed #{e}. it was: #{failed_submission.as_json}"
       insert_failed_submission failed_submission, source
     end
   end
 
   def self.insert_failed_submission(failed_submission, source)
-    Classroom::Collection::FailedSubmissions.for(source).insert! failed_submission
+    FailedSubmission.create! failed_submission.as_json.merge(organization: source)
   end
 
   def self.reprocess_failed_submission(destination, it)
-    json = it.raw
+    json = it.as_json
     json['organization'] = destination
     Classroom::Submissions.process! json
   end
 
   def self.delete_failed_submission(it, source)
-    Classroom::Collection::FailedSubmissions.for(source).delete! it.id
+    FailedSubmission.for(source).where(_id: it._id).destroy_all
   end
 
   def self.new_failed_submission(progress, submission)
     submission.merge({
-                       exercise: guide_from(progress[:exercise]),
-                       guide: guide_from(progress[:exercise]),
+                       exercise: exercise_from(progress[:exercise]),
+                       guide: guide_from(progress[:guide]),
                        submitter: submitter_from(progress[:student])
                      })
   end
@@ -77,7 +70,7 @@ module Classroom::FailedSubmission
 
   def self.exercise_from(exercise)
     {
-      id: exercise[:id],
+      eid: exercise[:eid],
       name: exercise[:name],
       number: exercise[:number]
     }.compact

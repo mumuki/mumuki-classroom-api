@@ -154,7 +154,6 @@ describe Student do
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
     let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example/foo'}} }
     let(:created_at) { 'created_at' }
-    before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
     before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo' }
     before { Student.create!(student.merge(uid: 'auth0|1', organization: 'example', course: 'example/foo')) }
     before { header 'Authorization', build_auth_header('*') }
@@ -231,7 +230,6 @@ describe Student do
             context 'and user does not exist' do
               let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
               let(:created_at) { 'created_at' }
-              before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
@@ -299,7 +297,6 @@ describe Student do
             context 'and user does not exist' do
               let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
               let(:created_at) { 'created_at' }
-              before { allow_any_instance_of(BSON::ObjectId).to receive(:generation_time).and_return(created_at) }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
