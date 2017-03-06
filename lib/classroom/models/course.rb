@@ -35,4 +35,9 @@ class Course
     find_by(organization: course[:organization], slug: course[:slug]).present?
   end
 
+  def self.import_from_json!(json)
+    slug = json[:slug]
+    Course.where(slug: slug).first_or_create.update_attributes(json)
+  end
+
 end
