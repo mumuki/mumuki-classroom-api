@@ -11,7 +11,6 @@ class GuideProgress
   embeds_one :student
   embeds_one :last_assignment
 
-  store_in collection: 'guide_students_progress'
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1})
 
   class << self

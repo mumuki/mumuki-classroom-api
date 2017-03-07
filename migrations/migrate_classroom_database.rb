@@ -97,7 +97,7 @@ def do_migrate!
     migrate_collections_without_suffix organization
     migrate_collections_with_suffix organization
   end
-  rename_permissions_to_users
+  rename_collection 'permissions', 'users'
 rescue Exception => e
   puts "[Error - #{e.class}]#{e}"
 end
@@ -105,7 +105,7 @@ end
 def migrate_collections_without_suffix(organization)
   puts "   Migrating collections without suffix from #{organization}"
   copy_from_to(organization, 'organizations', DATABASE, 'organizations')
-  %w(course_students courses failed_submissions).each do |collection|
+  %w(courses failed_submissions).each do |collection|
     copy_from_to(organization, collection, DATABASE, collection, organization: organization)
   end
 end
@@ -116,14 +116,21 @@ def migrate_collections_with_suffix(organization)
     course_slug = course_object['slug'] || course_object['uid']
     course = course_slug.to_mumukit_slug.course.underscore
     %w(exams exercise_student_progress followers guide_students_progress guides students teachers).each do |collection|
-      copy_from_to organization, "#{collection}_#{course}", DATABASE, collection,
+      copy_from_to organization, "#{collection}_#{course}", DATABASE, collection_name(collection),
                    organization: organization, course: course_slug
     end
   end
 end
 
-def rename_permissions_to_users
-  copy_from_to(DATABASE, 'permissions', DATABASE, 'users')
+def collection_name(collection)
+  return 'assignments' if collection == 'exercise_student_progress'
+  return 'guide_progresses' if collection == 'guide_students_progress'
+  collection
+end
+
+def rename_collection(source, destination)
+  copy_from_to(DATABASE, source, DATABASE, destination)
+  Classroom::Database.client[source].drop
 end
 
 def copy_from_to(from_database, from_collection, to_database, to_collection, merge_options = {})

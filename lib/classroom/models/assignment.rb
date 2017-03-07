@@ -10,7 +10,6 @@ class Assignment
   embeds_one :exercise
   embeds_many :submissions
 
-  store_in collection: 'exercise_student_progress'
   create_index({'organization': 1, 'course': 1, 'exercise.eid': 1, 'student.uid': 1})
 
   def comment!(comment, sid)
