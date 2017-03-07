@@ -26,7 +26,7 @@ describe Classroom::FailedSubmission do
     end
 
     context 'and submission.process! works' do
-      before { expect(Classroom::Submissions).to receive(:process!).exactly(3).times }
+      before { expect(Submission).to receive(:process!).exactly(3).times }
       before { expect(FailedSubmission).to_not receive(:create!) }
       before { Classroom::FailedSubmission.reprocess!(submitter[:uid], :example) }
 
@@ -35,7 +35,7 @@ describe Classroom::FailedSubmission do
     end
 
     context 'and submission.process! does not work' do
-      before { allow(Classroom::Submissions).to receive(:process!).and_raise(StandardError) }
+      before { allow(Submission).to receive(:process!).and_raise(StandardError) }
       before { Classroom::FailedSubmission.reprocess!('github|234567', :example) }
 
       it { expect(central_count).to eq(2) }
@@ -43,8 +43,8 @@ describe Classroom::FailedSubmission do
     end
 
     context 'and submission.process! does not work one time' do
-      before { expect(Classroom::Submissions).to receive(:process!).once.and_raise(StandardError) }
-      before { expect(Classroom::Submissions).to receive(:process!).twice }
+      before { expect(Submission).to receive(:process!).once.and_raise(StandardError) }
+      before { expect(Submission).to receive(:process!).twice }
       before { Classroom::FailedSubmission.reprocess!('github|123456', :example) }
 
       it { expect(central_count).to eq(1) }

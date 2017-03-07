@@ -32,7 +32,7 @@ module Classroom::FailedSubmission
   def self.reprocess_failed_submission(destination, it)
     json = it.as_json
     json['organization'] = destination
-    Classroom::Submissions.process! json
+    Submission.process! json
   end
 
   def self.delete_failed_submission(it, source)
