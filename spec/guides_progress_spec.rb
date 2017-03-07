@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::Collection::Courses do
+describe Course do
 
   def with_course(json)
     {organization: 'example', course: 'example/k2048'}.merge json

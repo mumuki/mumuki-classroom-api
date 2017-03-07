@@ -74,3 +74,7 @@ class Student
   end
 
 end
+
+class Classroom::StudentExistsError < Exception
+end
+

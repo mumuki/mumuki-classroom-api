@@ -43,3 +43,9 @@ class Course
   end
 
 end
+
+class Classroom::CourseExistsError < Exception
+end
+
+class Classroom::CourseNotExistsError < Exception
+end
