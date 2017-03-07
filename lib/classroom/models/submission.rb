@@ -1,5 +1,6 @@
 class Submission
 
+  extend WithSubmissionProcess
   include Mongoid::Document
 
   field :sid, type: String

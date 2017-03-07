@@ -102,7 +102,7 @@ helpers do
   end
 
   def set_locale!(org)
-    I18n.locale = org['locale']
+    I18n.locale = org['locale'].include?('-') ? org['locale'].split('-').first : org['locale']
   end
 
   def organization_json
