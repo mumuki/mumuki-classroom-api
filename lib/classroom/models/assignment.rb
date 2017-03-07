@@ -61,11 +61,14 @@ class Assignment
     end
 
     def stats_by(query)
-      where(query)
-        .map { |assignment| assignment.submissions.max_by(&:created_at) }
-        .group_by { |submission| submission.status }
-        .reduce(empty_stats) { |json, (key, value)| json.tap { json[key.to_sym] = value.size || 0 } }
-        .slice(*empty_stats.keys)
+      stats = where(query)
+                .map { |assignment| assignment.submissions.max_by(&:created_at) }
+                .group_by { |submission| submission.status }
+                .map { |status, submissions| [status.to_sym, submissions.size] }
+                .to_h.compact
+      stats = empty_stats.merge(stats)
+      stats[:failed] += stats.delete(:errored) || 0
+      stats.slice(*empty_stats.keys)
     end
   end
 
