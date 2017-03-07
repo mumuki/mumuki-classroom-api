@@ -110,7 +110,7 @@ helpers do
   end
 
   def update_and_notify_student_metadata(uid, method)
-    permissions = Classroom::Collection::Users.find_by_uid!(uid).permissions
+    permissions = User.find_by_uid!(uid).permissions
     permissions.send("#{method}_permission!", 'student', course_slug)
     Student.find_by(with_organization_and_course uid: uid).try do |user|
       user_as_json = user.as_json(only: [:first_name, :last_name, :email])

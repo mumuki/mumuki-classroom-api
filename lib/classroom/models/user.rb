@@ -12,7 +12,7 @@ class User
   field :social_id, type: String
   field :email, type: String
   field :image_url, type: String
-  field :permissions, type: Mumukit::Auth::Permissions
+  field :permissions, type: Hash
 
   create_index({uid: 1}, {unique: true})
 
@@ -27,7 +27,7 @@ class User
   end
 
   def self.upsert_permissions!(uid, permissions)
-    find_or_create_by!(uid: uid).update_attributes! permissions: permissions.as_json
+    find_or_create_by!(uid: uid).update! permissions: permissions.as_json
   end
 
   def permissions

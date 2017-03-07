@@ -4,7 +4,7 @@ describe Student do
 
   before do
     Classroom::Database.clean!
-    Classroom::Collection::Users.upsert_permissions! 'github|123456', {}
+    User.upsert_permissions! 'github|123456', {}
   end
 
   let(:date) { Time.now }
