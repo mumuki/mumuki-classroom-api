@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::FailedSubmission do
+describe FailedSubmission do
 
   let(:submitter) { {uid: 'github|123456'} }
   let(:chapter) { {id: 'guide_chapter_id', name: 'guide_chapter_name'} }
@@ -28,7 +28,7 @@ describe Classroom::FailedSubmission do
     context 'and submission.process! works' do
       before { expect(Submission).to receive(:process!).exactly(3).times }
       before { expect(FailedSubmission).to_not receive(:create!) }
-      before { Classroom::FailedSubmission.reprocess!(submitter[:uid], :example) }
+      before { FailedSubmission.reprocess!(submitter[:uid], :example) }
 
       it { expect(central_count).to eq(1) }
       it { expect(example_count).to eq(0) }
@@ -36,7 +36,7 @@ describe Classroom::FailedSubmission do
 
     context 'and submission.process! does not work' do
       before { allow(Submission).to receive(:process!).and_raise(StandardError) }
-      before { Classroom::FailedSubmission.reprocess!('github|234567', :example) }
+      before { FailedSubmission.reprocess!('github|234567', :example) }
 
       it { expect(central_count).to eq(2) }
       it { expect(example_count).to eq(2) }
@@ -45,7 +45,7 @@ describe Classroom::FailedSubmission do
     context 'and submission.process! does not work one time' do
       before { expect(Submission).to receive(:process!).once.and_raise(StandardError) }
       before { expect(Submission).to receive(:process!).twice }
-      before { Classroom::FailedSubmission.reprocess!('github|123456', :example) }
+      before { FailedSubmission.reprocess!('github|123456', :example) }
 
       it { expect(central_count).to eq(1) }
       it { expect(example_count).to eq(1) }

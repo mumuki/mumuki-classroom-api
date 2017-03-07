@@ -1,5 +1,6 @@
 require_relative './models/concerns/extensions'
 require_relative './models/concerns/with_submission_process'
+require_relative './models/concerns/with_failed_submission_reprocess'
 
 require_relative './models/submission'
 require_relative './models/exercise'

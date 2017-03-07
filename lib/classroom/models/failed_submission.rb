@@ -1,5 +1,7 @@
 class FailedSubmission
 
+  extend WithFailedSubmissionReprocess
+ 
   include Mongoid::Document
   include Mongoid::Attributes::Dynamic
 
@@ -9,5 +11,6 @@ class FailedSubmission
 
   scope :for, -> (organization) { where 'organization': organization }
   scope :find_by_uid, -> (uid) { where 'submitter.uid': uid }
+
 
 end
