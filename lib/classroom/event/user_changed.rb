@@ -3,16 +3,17 @@ class Classroom::Event::UserChanged
 
     attr_accessor :changes
 
-    def execute!(user)
-      update_user_permissions user[:user]
-      update_user_model user[:user].except(:permissions)
+    def execute!(user_h)
+      user = user_h.compact
+      update_user_permissions user
+      update_user_model user.except(:permissions)
     end
 
     private
 
     def update_user_permissions(user)
       set_diff_permissions user
-      Classroom::Collection::Users.find_by_uid!(user[:uid]).update!(permissions: user[:permissions])
+      User.where(uid: user[:uid]).first_or_create.upsert_attributes(user)
     end
 
     def update_user_model(user)
@@ -26,7 +27,7 @@ class Classroom::Event::UserChanged
     end
 
     def set_diff_permissions(user)
-      permissions = Classroom::Collection::Users.find_by_uid!(user[:uid]).permissions
+      permissions = User.find_or_create_by!(uid: user[:uid]).permissions
       self.changes = Mumukit::Auth::Permissions::Diff.diff(permissions, user[:permissions]).changes_by_organization
     end
 
