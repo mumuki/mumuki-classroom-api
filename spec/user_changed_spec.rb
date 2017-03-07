@@ -1,17 +1,16 @@
 require 'spec_helper'
 
-
 describe Classroom::Event::UserChanged do
 
   let(:uid) { 'agus@mumuki.org' }
-  let(:event) { {user: user.merge(permissions: new_permissions)} }
+  let(:event) { user.merge(permissions: new_permissions) }
   let(:old_permissions) { {student: 'example/foo'}.with_indifferent_access }
   let(:new_permissions) { {student: 'example/bar', teacher: 'example/foo'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   before { Classroom::Database.clean! }
-  before { Classroom::Collection::Users.upsert_permissions! uid, old_permissions }
+  before { User.create! uid: uid, permissions: old_permissions }
   before { Organization.create!(name: 'example') }
 
   describe 'execute!' do
@@ -42,7 +41,7 @@ describe Classroom::Event::UserChanged do
       before { Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
-      let(:event) { {user: user2.merge(permissions: new_permissions)} }
+      let(:event) { user2.merge(permissions: new_permissions) }
 
       let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/foo') }
       let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/bar') }
