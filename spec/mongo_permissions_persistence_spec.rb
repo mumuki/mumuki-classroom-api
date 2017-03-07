@@ -2,8 +2,6 @@ require 'spec_helper'
 
 describe Classroom::PermissionsPersistence::Mongo do
 
-  after { Classroom::Database.clean! }
-
   let(:uid) { 'agus@mumuki.org' }
   let(:mongo) { Classroom::PermissionsPersistence::Mongo.new }
   let(:agus_permissions) { mongo.get uid }

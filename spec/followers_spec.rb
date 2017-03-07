@@ -2,8 +2,6 @@ require 'spec_helper'
 
 describe Follower do
 
-  before { Classroom::Database.clean! }
-
   let(:follower_json) { {email: 'aguspina87@gmail.com', uid: 'social|1'}.to_json }
   let(:follower) { Follower.find_by(organization: 'example', course: 'example/bar', email: 'aguspina87@gmail.com').as_json(except: [:created_at, :updated_at]) }
 

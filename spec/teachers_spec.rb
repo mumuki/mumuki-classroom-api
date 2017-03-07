@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe Teacher do
 
-  before do
-    Classroom::Database.clean!
-  end
-
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   describe 'get /courses/:course/teachers' do

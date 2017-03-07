@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe Classroom::FailedSubmission do
 
-  before do
-    Classroom::Database.clean!
-  end
-
   let(:submitter) { {uid: 'github|123456'} }
   let(:chapter) { {id: 'guide_chapter_id', name: 'guide_chapter_name'} }
   let(:parent) { {type: 'Lesson', name: 'A lesson name', position: '1', chapter: chapter} }

@@ -126,7 +126,6 @@ helpers do
 end
 
 before do
-  Classroom::Database.connect!
   set_locale! organization_json if organization_json
 end
 

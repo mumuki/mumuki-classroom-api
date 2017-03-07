@@ -6,10 +6,6 @@ describe Guide do
     {organization: 'example', course: 'example/foo'}.merge json
   end
 
-  before do
-    Classroom::Database.clean!
-  end
-
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   describe 'get /courses/:course/guides' do

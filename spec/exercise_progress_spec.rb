@@ -7,10 +7,6 @@ describe Assignment do
   end
 
   before do
-    Classroom::Database.clean!
-  end
-
-  before do
     Organization.create!(locale: 'es', name: 'example')
   end
 

@@ -9,7 +9,6 @@ describe Classroom::Event::UserChanged do
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
-  before { Classroom::Database.clean! }
   before { User.create! uid: uid, permissions: old_permissions }
   before { Organization.create!(name: 'example') }
 

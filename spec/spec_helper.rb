@@ -15,6 +15,10 @@ Mongo::Logger.logger.level = ::Logger::INFO
 RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include FactoryGirl::Syntax::Methods
+
+  config.before(:each) do
+    Mongoid::Clients.default.collections.each(&:delete_many)
+  end
 end
 
 def as_json(obj, options = {})
@@ -72,8 +76,6 @@ require 'base64'
 Mumukit::Auth.configure do |c|
   c.clients.default = {id: 'test-client', secret: 'thisIsATestSecret'}
 end
-
-Classroom::Database.connect!
 
 def build_mumuki_auth_header(permissions, sub='github|user123456')
   User.upsert_permissions! sub, {owner: permissions}

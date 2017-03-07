@@ -3,7 +3,6 @@ module Classroom::FailedSubmission
   #FIXME this code should be added to a failed submission document
 
   def self.reprocess!(uid, destination)
-    Classroom::Database.connect!
     reprocess_from_organization uid, destination, destination
     reprocess_from_organization uid, :central, destination
   end

@@ -2,10 +2,7 @@ require 'spec_helper'
 
 describe Student do
 
-  before do
-    Classroom::Database.clean!
-    User.upsert_permissions! 'github|123456', {}
-  end
+  before { User.upsert_permissions! 'github|123456', {} }
 
   let(:date) { Time.now }
 

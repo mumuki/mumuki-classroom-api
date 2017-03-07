@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe 'comments' do
 
-  before do
-    Classroom::Database.clean!
-  end
-
   describe 'post /courses/:course/comments' do
     let(:comment) { {content: 'hola', type: 'good'} }
     let(:comment_to_post) { {uid: '1', exercise_id: 2, submission_id: '3', comment: comment}.to_json }

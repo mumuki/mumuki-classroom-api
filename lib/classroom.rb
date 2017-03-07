@@ -15,8 +15,6 @@ require_relative './consumer'
 require_relative './profile'
 require_relative './events'
 
-require_relative './classroom/database'
-
 require_relative './classroom/models'
 require_relative './classroom/reports'
 

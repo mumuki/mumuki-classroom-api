@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe Exam do
 
-  after do
-    Classroom::Database.clean!
-  end
-
   let(:except_fields) { {except: [:eid, :created_at, :updated_at]} }
 
   describe 'get /courses/:course/exams' do

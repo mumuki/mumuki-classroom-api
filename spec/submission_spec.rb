@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe Classroom::Submissions do
 
-  before do
-    Classroom::Database.clean!
-  end
-
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   describe do

@@ -9,8 +9,6 @@ namespace :resubmissions do
 
         Mumukit::Nuntius::Logger.info "Processing resubmission #{uid}"
         Classroom::FailedSubmission.reprocess! uid, destination
-      ensure
-        Classroom::Database.disconnect!
       end
     end
   end

@@ -6,10 +6,6 @@ describe Course do
     {organization: 'example', course: 'example/k2048'}.merge json
   end
 
-  before do
-    Classroom::Database.clean!
-  end
-
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   let(:guide_progress1) { {
