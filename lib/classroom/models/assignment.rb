@@ -10,7 +10,8 @@ class Assignment
   embeds_one :exercise
   embeds_many :submissions
 
-  create_index({'organization': 1, 'course': 1, 'exercise.eid': 1, 'student.uid': 1})
+  create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'exercise.eid': 1, 'student.uid': 1})
+  create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
   def comment!(comment, sid)
     submissions.find_by!(sid: sid).comment! comment

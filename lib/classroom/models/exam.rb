@@ -10,7 +10,7 @@ class Exam
   field :course, type: String
   field :end_time, type: String
   field :language, type: String
-  field :duration, type: Numeric
+  field :duration, type: Integer
   field :start_time, type: String
   field :organization, type: String
 

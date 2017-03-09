@@ -3,11 +3,11 @@ class Organization
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :id, type: Numeric
+  field :id, type: Integer
   field :icon, type: String
   field :name, type: String
   field :locale, type: String
-  field :book_id, type: Numeric
+  field :book_id, type: Integer
   field :books, type: Array
   field :public, type: Mongoid::Boolean
   field :logo_url, type: String

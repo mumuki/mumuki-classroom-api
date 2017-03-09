@@ -18,6 +18,7 @@ class Student
   embeds_one :last_assignment
 
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
+  create_index({'last_assignment.guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
   def course_name
     course.to_mumukit_slug.course

@@ -2,8 +2,8 @@ class Exercise
 
   include Mongoid::Document
 
-  field :eid, type: Numeric
-  field :number, type: Numeric
+  field :eid, type: Integer
+  field :number, type: Integer
   field :name, type: String
 
 end

@@ -10,7 +10,7 @@ class Submission
   field :feedback, type: String
   field :result, type: String
   field :status, type: String
-  field :submissions_count, type: Numeric
+  field :submissions_count, type: Integer
   field :test_results, type: Array
   field :comments, type: Array
 
