@@ -20,7 +20,6 @@ require_relative './classroom/reports'
 
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
-require_relative './classroom/permissions_persistence'
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
@@ -36,7 +35,6 @@ Mumukit::Auth.configure do |c|
     auth: ENV['MUMUKI_AUTH_CLIENT_SECRET'],
     auth0: ENV['MUMUKI_AUTH0_CLIENT_SECRET']
   }
-  c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
 end
 
 Mumukit::Login.configure do |config|

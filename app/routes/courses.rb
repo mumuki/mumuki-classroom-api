@@ -13,7 +13,7 @@ get '/api/courses' do
 end
 
 post '/courses' do
-  permissions.protect! :janitor, json_body[:slug]
+  current_user.protect! :janitor, json_body[:slug]
   course = Course.create! with_organization(json_body.merge uid: json_body[:slug])
   course.notify!
   {status: :created}
