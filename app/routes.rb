@@ -110,13 +110,10 @@ helpers do
   end
 
   def update_and_notify_student_metadata(uid, method)
-    permissions = User.find_by_uid!(uid).permissions
-    permissions.send("#{method}_permission!", 'student', course_slug)
-    Student.find_by(with_organization_and_course uid: uid).try do |user|
-      user_as_json = user.as_json(only: [:first_name, :last_name, :email])
-      user_to_notify = user_as_json.merge(uid: uid, permissions: permissions)
-      Mumukit::Nuntius.notify_event! 'UserChanged', {user: user_to_notify}
-    end
+    user = User.find_by_uid!(uid)
+    user.send("#{method}_permission!", 'student', course_slug)
+    user.upsert_permissions! user.permissions
+    user.notify!
   end
 
   def notify_upsert_exam(exam_id)

@@ -27,7 +27,16 @@ class User
   end
 
   def self.upsert_permissions!(uid, permissions)
-    find_or_create_by!(uid: uid).update! permissions: permissions.as_json
+    user = find_or_create_by!(uid: uid)
+    user.upsert_permissions! permissions
+  end
+
+  def upsert_permissions!(permissions)
+    self.update! permissions: permissions.as_json
+  end
+
+  def notify!
+    Mumukit::Nuntius.notify_event! 'UserChanged', {user: as_json}
   end
 
   def permissions
