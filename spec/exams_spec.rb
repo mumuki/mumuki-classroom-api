@@ -5,7 +5,7 @@ describe Exam do
   let(:except_fields) { {except: [:eid, :created_at, :updated_at]} }
 
   describe 'get /courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'today', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', organization: 'example', course: 'example/foo'} }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'today', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', organization: 'example', course: 'example/foo'} }
 
     before { header 'Authorization', build_auth_header('*') }
     before { Exam.create!(exam_json) }
@@ -18,7 +18,7 @@ describe Exam do
   end
 
   describe 'post /courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: []}.as_json }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: []}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example', course: 'example/foo' }
 
     before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example', 'eid' => kind_of(String))) }
@@ -34,7 +34,7 @@ describe Exam do
   end
 
   describe 'post /api/courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: []}.as_json }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: []}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example', course: 'example/foo' }
 
     before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example', 'eid' => kind_of(String))) }
@@ -50,7 +50,7 @@ describe Exam do
 
   describe 'get /courses/:course/exams/:exam_id' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example', course: 'example/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: []} }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: []} }
 
     before { header 'Authorization', build_auth_header('*') }
     before { get "/courses/foo/exams/#{exam_id}", exam_json.to_json }
@@ -61,7 +61,7 @@ describe Exam do
 
   describe 'put /courses/:course/exams/:exam' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example', course: 'example/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']}.as_json }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']}.as_json }
     let(:exam_json2) { exam_json.merge(uids: ['auth0|123456'], eid: exam_id).as_json }
     let(:exam_fetched) { Exam.last }
 
@@ -81,7 +81,7 @@ describe Exam do
 
   describe 'post /api/courses/:course/exams/:exam/students/:uid' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example', course: 'example/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: '150', language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']}.stringify_keys }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']}.stringify_keys }
     let(:exam_fetched) { Exam.last }
 
     context 'when existing exam' do
