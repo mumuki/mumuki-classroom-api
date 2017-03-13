@@ -3,18 +3,18 @@ require 'spec_helper'
 describe Classroom::Event::UserChanged do
 
   let(:uid) { 'agus@mumuki.org' }
-  let(:event) { {user: user.merge(permissions: new_permissions)} }
+  let(:event) { user.merge(permissions: new_permissions) }
   let(:old_permissions) { {student: 'example/foo'}.with_indifferent_access }
   let(:new_permissions) { {student: 'example/bar', teacher: 'example/foo'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
+  let(:except_fields) { {except: [:created_at, :updated_at]} }
 
-  before { Classroom::Database.clean! }
-  before { Classroom::Collection::Users.upsert_permissions! uid, old_permissions }
+  before { User.create! uid: uid, permissions: old_permissions }
+  before { Organization.create!(name: 'example') }
 
   describe 'execute!' do
 
     context 'save new permissions' do
-      before { Classroom::Database.ensure! 'example' }
       before do
         expect(Classroom::Event::UserChanged).to receive(:student_added)
         expect(Classroom::Event::UserChanged).to receive(:teacher_added)
@@ -22,9 +22,9 @@ describe Classroom::Event::UserChanged do
       end
       before { Classroom::Event::UserChanged.execute! event }
 
-      it { expect(Classroom::Database.database_names).to include 'example' }
+      it { expect(Organization.pluck(:name)).to include 'example' }
       it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
-      it { expect(Mumukit::Auth::Permissions::Diff.diff old_permissions, new_permissions)
+      it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
              .to json_like(changes: [
                {role: 'student', grant: 'example/foo', type: 'removed'},
                {role: 'student', grant: 'example/bar', type: 'added'},
@@ -33,29 +33,27 @@ describe Classroom::Event::UserChanged do
     end
 
     context 'update models' do
-      before do
-        Classroom::Collection::Courses.insert!({uid: 'example/foo'}.wrap_json)
-        Classroom::Collection::Courses.insert!({uid: 'example/bar'}.wrap_json)
-        Classroom::Collection::Students.for('foo').insert! user.wrap_json
-        Classroom::Collection::CourseStudents.insert!({course: {uid: 'example/foo'}, student: user}.wrap_json)
-      end
+
+      before { Course.create! organization: 'example', slug: 'example/foo' }
+      before { Course.create! organization: 'example', slug: 'example/bar' }
+      before { Student.create! user.merge(organization: 'example', course: 'example/foo') }
       before { Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
-      let(:event) { {user: user2.merge(permissions: new_permissions)} }
+      let(:event) { user2.merge(permissions: new_permissions) }
 
-      let(:student_foo_fetched) { Classroom::Collection::Students.for('foo').find_by(uid: uid) }
-      let(:student_bar_fetched) { Classroom::Collection::Students.for('bar').find_by(uid: uid) }
-      let(:teacher_foo_fetched) { Classroom::Collection::Teachers.for('foo').find_by(uid: uid) }
+      let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/foo') }
+      let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/bar') }
+      let(:teacher_foo_fetched) { Teacher.find_by(uid: uid, organization: 'example', course: 'example/foo') }
 
       it { expect(student_foo_fetched.detached).to eq true }
-      it { expect(student_foo_fetched.social_id).to eq 'foo' }
+      it { expect(student_foo_fetched.uid).to eq uid }
       it { expect(student_foo_fetched.first_name).to eq 'Agustín' }
 
-      it { expect(student_bar_fetched.as_json(except: [:created_at])).to eq user2 }
+      it { expect(student_bar_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/bar'), except_fields }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_foo_fetched.as_json(except: [:created_at])).to eq user2 }
+      it { expect(teacher_foo_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/foo'), except_fields }
     end
 
   end

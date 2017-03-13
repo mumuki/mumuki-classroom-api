@@ -1,6 +1,7 @@
 post '/courses/:course/comments' do
   authorize! :teacher
-  Classroom::Collection::ExerciseStudentProgress.for(course).comment!(json_body)
-  Mumukit::Nuntius::Publisher.publish_comments tenantized_json_body.except(:social_id, :uid)
+  Assignment
+    .find_by!(with_organization_and_course 'exercise.eid': json_body[:exercise_id], 'student.uid': json_body[:uid])
+    .comment! json_body[:comment], json_body[:submission_id]
   {status: :created}
 end

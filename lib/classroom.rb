@@ -1,6 +1,7 @@
 module Classroom
 end
 
+require 'mongoid'
 require 'mumukit/core'
 require 'mumukit/service'
 require 'mumukit/inspection'
@@ -8,22 +9,17 @@ require 'mumukit/nuntius'
 require 'mumukit/auth'
 require 'mumukit/login'
 
-require_relative './class'
+Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
+
 require_relative './consumer'
 require_relative './profile'
+require_relative './events'
 
-require_relative './classroom/database'
-require_relative './classroom/json_wrapper'
-
-require_relative './classroom/collections'
-require_relative './classroom/documents'
+require_relative './classroom/models'
 require_relative './classroom/reports'
 
-require_relative './classroom/submission'
-require_relative './classroom/failed_submission'
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
-require_relative './classroom/permissions_persistence'
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
@@ -39,11 +35,10 @@ Mumukit::Auth.configure do |c|
     auth: ENV['MUMUKI_AUTH_CLIENT_SECRET'],
     auth0: ENV['MUMUKI_AUTH0_CLIENT_SECRET']
   }
-  c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
 end
 
 Mumukit::Login.configure do |config|
-  config.user_class = Classroom::Collection::Users
+  config.user_class = User
   config.framework = Mumukit::Login::Framework::Sinatra
 end
 
