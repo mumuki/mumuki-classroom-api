@@ -6,4 +6,4 @@ script:
 - bundle exec rspec
 services:
 - mongodb
-env: RACK_ENV=development
+env: RACK_ENV=test
