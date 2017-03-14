@@ -45,3 +45,16 @@ class Array
     end
   end
 end
+
+module Mumukit::Login::LoginControllerHelpers
+  private
+  def save_current_user_session!(user)
+    mumukit_controller.shared_session.tap do |it|
+      it.uid = user.uid
+      it.profile = {user_name: user.name,
+                    user_uid: user.uid,
+                    user_image_url: user.image_url}
+    end
+  end
+end
+
