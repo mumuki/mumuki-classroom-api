@@ -12,6 +12,7 @@ class Submission
   field :status, type: String
   field :submissions_count, type: Integer
   field :test_results, type: Array
+  field :comments, type: Array
 
   embeds_many :messages
 
