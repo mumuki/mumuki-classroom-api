@@ -12,11 +12,11 @@ class Submission
   field :status, type: String
   field :submissions_count, type: Integer
   field :test_results, type: Array
-  field :comments, type: Array
 
-  def comment!(comment)
-    self.comments ||= []
-    self.comments << comment
+  embeds_many :messages
+
+  def add_message!(message)
+    self.messages << Message.new(message.as_json)
   end
 
   def expectation_results

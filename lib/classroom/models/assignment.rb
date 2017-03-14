@@ -15,10 +15,10 @@ class Assignment
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1, 'exercise.eid': 1})
   create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
-  def comment!(comment, sid)
-    submissions.find_by!(sid: sid).comment! comment
+  def add_message!(message, sid)
+    submissions.find_by!(sid: sid).add_message! message
     update_submissions!
-    notify_comment! comment, sid
+    notify_message! message, sid
   end
 
   def add_submission!(submission)
@@ -26,13 +26,13 @@ class Assignment
     update_submissions!
   end
 
-  def notify_comment!(comment, sid)
-    Mumukit::Nuntius.notify! 'comments', json_to_notify(comment, sid)
+  def notify_message!(message, sid)
+    Mumukit::Nuntius.notify! 'messages', json_to_notify(message, sid)
   end
 
-  def json_to_notify(comment, sid)
+  def json_to_notify(message, sid)
     {
-      comment: comment,
+      message: message,
       submission_id: sid,
       exercise_id: exercise.eid,
       tenant: organization
