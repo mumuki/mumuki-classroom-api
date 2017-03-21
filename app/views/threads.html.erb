@@ -1,0 +1,17 @@
+<div class="messages">
+  <ol class="chat">
+    <li><a href="">Ver mas</a></li>
+    <% threads.each do |thread| %>
+        <p> <%= thread[:content] %></p>
+        <% thread[:messages].each do |message| %>
+            <li>
+              <div class="msg">
+                <p> <%= message.content %></p>
+                <div class="sender"><%= message.sender %></div>
+                <time><%= message.created_at %></time>
+              </div>
+            </li>
+        <% end %>
+    <% end %>
+  </ol>
+</div>

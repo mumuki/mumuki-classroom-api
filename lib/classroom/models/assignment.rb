@@ -39,6 +39,10 @@ class Assignment
     }.as_json
   end
 
+  def threads
+    submissions.map(&:thread).compact
+  end
+
   private
 
   def update_submissions!

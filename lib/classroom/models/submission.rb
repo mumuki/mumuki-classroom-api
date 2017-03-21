@@ -26,4 +26,8 @@ class Submission
     end
   end
 
+  def thread
+    {content: content, messages: messages} if messages.present?
+  end
+
 end
