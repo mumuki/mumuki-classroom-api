@@ -32,12 +32,10 @@ end
 
 Mumukit::Auth.configure do |c|
   c.client_ids = {
-    auth: ENV['MUMUKI_AUTH_CLIENT_ID'],
-    auth0: ENV['MUMUKI_AUTH0_CLIENT_ID']
+    auth: ENV['MUMUKI_AUTH_CLIENT_ID']
   }
   c.client_secrets = {
-    auth: ENV['MUMUKI_AUTH_CLIENT_SECRET'],
-    auth0: ENV['MUMUKI_AUTH0_CLIENT_SECRET']
+    auth: ENV['MUMUKI_AUTH_CLIENT_SECRET']
   }
   c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
 end
