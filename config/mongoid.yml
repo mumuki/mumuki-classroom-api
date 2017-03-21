@@ -15,7 +15,7 @@ test:
     default:
       database: classroom_test
       hosts:
-        - <%=ENV['MONGO_PORT_27017_TCP_ADDR'] || 'localhost' %>:<%=ENV['MONGO_PORT_27017_TCP_PORT'] || 27017 %>
+        - "<%=ENV['MONGO_PORT_27017_TCP_ADDR'] || 'localhost' %>:<%=ENV['MONGO_PORT_27017_TCP_PORT'] || 27017 %>"
       options:
         max_pool_size: 1
   options:
@@ -24,13 +24,13 @@ test:
 production:
   clients:
     default:
-      database: <%=ENV['MUMUKI_MONGODB_DATABASE']%>
+      database: "<%=ENV['MUMUKI_MONGODB_DATABASE']%>"
       hosts:
-        - <%=ENV['MUMUKI_MONGODB_HOST']%>:<%=ENV['MUMUKI_MONGODB_PORT']%>
+        - "<%=ENV['MUMUKI_MONGODB_HOST']%>:<%=ENV['MUMUKI_MONGODB_PORT']%>"
       options:
         max_pool_size: 8
         min_pool_size: 1
-        user: <%=ENV['MUMUKI_MONGODB_USERNAME']%>
-        password: <%=ENV['MUMUKI_MONGODB_PASSWORD']%>
+        user: "<%=ENV['MUMUKI_MONGODB_USERNAME']%>"
+        password: "<%=ENV['MUMUKI_MONGODB_PASSWORD']%>"
   options:
     raise_not_found_error: false
