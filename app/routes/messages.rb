@@ -11,5 +11,5 @@ end
 get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id/messages' do
   authorize! :student
   threads = Assignment.find_by!(with_organization_and_course exercise_student_progress_query.merge('exercise.eid': exercise_id)).threads
-  erb :'threads.html', locals: {threads: threads}
+  erb :'threads.html', locals: {threads: threads, user: current_user}
 end

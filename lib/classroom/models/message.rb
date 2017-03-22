@@ -9,4 +9,8 @@ class Message
   field :type, type: String
   field :date, type: String
 
+  def content
+    Mumukit::ContentType::Markdown.to_html(self[:content])
+  end
+
 end
