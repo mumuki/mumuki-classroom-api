@@ -1,25 +1,27 @@
 <div class="messages">
   <ol class="chat">
     <% threads.each_with_index do |thread, index| %>
-        <div class="solution">
-          <a onclick="toggleCollapse('content-<%= index %>')">
-            <i class="fa fa-compress">
+        <div class="thread">
+          <div class="solution">
+            <a onclick="toggleCollapse('content-<%= index %>')">
+              <i class="fa fa-<%= threads.last == thread ? 'minus' : 'plus' %>-square-o content-<%= index %>"></i>
+              <span>&nbsp;</span>
               <span> Ver solución </span>
-            </i>
-          </a>
-          <div id="content-<%= index %>" class="collapse">
-            <%= thread[:content] %>
+            </a>
+            <div id="content-<%= index %>" class="collapse <%= threads.last == thread ? 'in' : '' %>">
+              <%= thread[:content] %>
+            </div>
           </div>
+          <% thread[:messages].each do |message| %>
+              <li class="<%= message.sender == user.uid ? 'self' : 'other' %>">
+                <div class="msg">
+                  <p> <%= message.content %></p>
+                  <div class="sender"><%= message.sender %></div>
+                  <time><%= message.created_at %></time>
+                </div>
+              </li>
+          <% end %>
         </div>
-        <% thread[:messages].each do |message| %>
-            <li class="<%= message.sender == user.uid ? 'self' : 'other' %>">
-              <div class="msg">
-                <p> <%= message.content %></p>
-                <div class="sender"><%= message.sender %></div>
-                <time><%= message.created_at %></time>
-              </div>
-            </li>
-        <% end %>
     <% end %>
   </ol>
 </div>
@@ -28,8 +30,15 @@
 <script>
   function toggleCollapse(target) {
     var $target = $('#' + target);
+    var $icon = $('i.' + target);
+    $icon.toggleClass('fa-minus-square-o');
+    $icon.toggleClass('fa-plus-square-o');
     $target.slideToggle('fast', function () {
       $target.toggleClass('in');
-    })
+    });
   }
+
+  $('.view-messages time').each(function (i, e) {
+    return e.innerText = moment(e.innerText).fromNow();
+  });
 </script>
