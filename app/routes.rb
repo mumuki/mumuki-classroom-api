@@ -8,6 +8,8 @@ require_relative '../lib/classroom'
 
 configure do
   set :app_name, 'classroom'
+  set :static, true
+  set :public_folder, 'public'
 end
 
 Mumukit::Login.configure_login_routes! self
