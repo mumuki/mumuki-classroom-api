@@ -8,7 +8,7 @@ Mumukit::Nuntius::EventConsumer.handle do
     Course.import_from_json! payload[:course]
   end
 
-  event 'OrganizationUpdated' do |payload|
+  event 'OrganizationChanged' do |payload|
     organization = payload[:organization]
     Organization.find_by!(name: organization[:name]).update! organization
   end
