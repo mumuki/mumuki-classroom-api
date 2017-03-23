@@ -2,7 +2,8 @@ source 'https://rubygems.org'
 
 gem 'rake'
 
-gem 'sinatra'
+gem 'sinatra', '2.0.0.rc2'
+gem 'sinatra-contrib', '2.0.0.rc2'
 gem 'sinatra-cross_origin', '~> 0.3.1'
 
 gem 'mongo', '~> 2.1'
@@ -22,6 +23,7 @@ gem 'mumukit-platform', '~> 0.1'
 gem 'mumukit-inspection', '~> 1.0'
 
 gem 'sinatra-contrib'
+gem 'mumukit-content-type', '~> 0.5'
 
 group :test do
   gem 'pry'
