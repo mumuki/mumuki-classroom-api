@@ -1,7 +1,16 @@
 <div class="messages">
   <ol class="chat">
-    <% threads.each do |thread| %>
-        <%= thread[:content] %>
+    <% threads.each_with_index do |thread, index| %>
+        <div class="solution">
+          <a onclick="toggleCollapse('content-<%= index %>')">
+            <i class="fa fa-compress">
+              <span> Ver solución </span>
+            </i>
+          </a>
+          <div id="content-<%= index %>" class="collapse">
+            <%= thread[:content] %>
+          </div>
+        </div>
         <% thread[:messages].each do |message| %>
             <li class="<%= message.sender == user.uid ? 'self' : 'other' %>">
               <div class="msg">
@@ -14,3 +23,13 @@
     <% end %>
   </ol>
 </div>
+
+
+<script>
+  function toggleCollapse(target) {
+    var $target = $('#' + target);
+    $target.slideToggle('fast', function () {
+      $target.toggleClass('in');
+    })
+  }
+</script>
