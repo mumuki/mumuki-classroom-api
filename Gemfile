@@ -23,8 +23,7 @@ gem 'mumukit-platform', '~> 0.1'
 
 gem 'mumukit-inspection', '~> 1.0'
 
-gem 'sinatra-contrib'
-gem 'mumukit-content-type', '~> 0.5'
+gem 'mumukit-content-type', '~> 1.0'
 
 group :test do
   gem 'pry'
