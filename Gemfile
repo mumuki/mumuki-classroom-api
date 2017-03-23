@@ -5,6 +5,7 @@ gem 'rake'
 gem 'sinatra', '2.0.0.rc2'
 gem 'sinatra-contrib', '2.0.0.rc2'
 gem 'sinatra-cross_origin', '~> 0.3.1'
+gem 'rouge', git: 'https://github.com/mumuki/rouge', ref: '5a8db3387f3a67232569969cd3da40ee04eb9dc3'
 
 gem 'mongo', '~> 2.1'
 gem 'mongoid', '~> 6.1'

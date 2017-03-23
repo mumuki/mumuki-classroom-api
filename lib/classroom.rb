@@ -2,7 +2,9 @@ module Classroom
 end
 
 require 'mongoid'
+require 'rouge'
 require 'mumukit/core'
+require 'mumukit/content_type'
 require 'mumukit/service'
 require 'mumukit/inspection'
 require 'mumukit/nuntius'

@@ -2,7 +2,7 @@ ENV['RACK_ENV'] = 'test'
 
 require 'byebug'
 require 'codeclimate-test-reporter'
-CodeClimate::TestReporter.start
+SimpleCov.start
 
 require 'factory_girl'
 require 'rack/test'

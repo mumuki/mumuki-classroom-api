@@ -33,32 +33,3 @@ class Submission
   end
 
 end
-
-module Mumukit
-  module ContentType
-    class Markdown
-
-      #TODO: Remove this module when mumukit-content-type gem is fixed
-      def self.to_html(markdown)
-        if ENV['RACK_ENV'] != 'test'
-          uri = URI('http://bibliotheca-api.localmumuki.io:9292/markdown')
-          req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
-          req.body = {markdown: markdown}.to_json
-
-          response = Net::HTTP.start(uri.hostname, uri.port) do |http|
-            http.request(req)
-          end
-
-          JSON.parse(response.body)['markdown']
-        else
-          markdown
-        end
-      end
-
-      #TODO: Fix this method into mumukit-content-type class
-      def self.highlighted_code(language, code)
-        "```#{language}\n#{code}\n```"
-      end
-    end
-  end
-end
