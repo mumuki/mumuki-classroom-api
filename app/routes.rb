@@ -219,9 +219,7 @@ post '/courses/:course/students' do
 
   Mumukit::Nuntius::Publisher.publish_resubmissions(uid: json[:student][:uid], tenant: tenant)
 
-  perm = current_user.permissions
-  perm.add_permission!(:student, course_slug)
-  Classroom::Collection::Users.upsert_permissions!(json[:student][:uid], perm)
+  perm = Classroom::Collection::Users.upsert_permissions! json[:student][:uid], {student: course_slug}
   Mumukit::Nuntius::EventPublisher.publish 'UserChanged', user: json[:student].merge(permissions: perm)
 
   {status: :created}
