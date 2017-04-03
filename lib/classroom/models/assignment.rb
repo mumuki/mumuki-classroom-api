@@ -35,7 +35,7 @@ class Assignment
       message: message,
       submission_id: sid,
       exercise_id: exercise.eid,
-      tenant: organization
+      organization: organization
     }.as_json
   end
 

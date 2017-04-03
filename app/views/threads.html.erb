@@ -2,16 +2,17 @@
   <ol class="chat">
     <% threads.each_with_index do |thread, index| %>
         <div class="thread">
-          <div class="solution">
-            <a onclick="toggleCollapse('content-<%= index %>')">
-              <i class="fa fa-<%= threads.last == thread ? 'minus' : 'plus' %>-square-o content-<%= index %>"></i>
+          <li class="solution self">
+            <a onclick="toggleCollapse('magia-<%= index %>')">
+              <i class="fa fa-<%= threads.last == thread ? 'minus' : 'plus' %>-square-o magia-<%= index %>"></i>
               <span>&nbsp;</span>
               <span> Ver solución </span>
             </a>
-            <div id="content-<%= index %>" class="collapse <%= threads.last == thread ? 'in' : '' %>">
+            <div id="magia-<%= index %>" class="<%= thread[:status] %> msg magia-no">
               <%= thread[:content] %>
+              <time style="font-weight: bold;"><%= thread[:created_at] %></time>
             </div>
-          </div>
+          </li>
           <% thread[:messages].each do |message| %>
               <li class="<%= message.sender == user.uid ? 'self' : 'other' %>">
                 <div class="msg">
@@ -33,9 +34,7 @@
     var $icon = $('i.' + target);
     $icon.toggleClass('fa-minus-square-o');
     $icon.toggleClass('fa-plus-square-o');
-    $target.slideToggle('fast', function () {
-      $target.toggleClass('in');
-    });
+    $target.toggleClass('magia');
   }
 
   $('.view-messages time').each(function (i, e) {
