@@ -44,6 +44,16 @@ helpers do
     params[:exercise_id].to_i
   end
 
+  def login_settings
+    Mumukit::Login::Settings.new mumukit_login_methods
+  end
+
+  def mumukit_login_methods
+    Mumukit::Login::Settings::LOCK_LOGIN_METHODS
+      .select { |_, value| organization_json['lock_json']['connections'].include? value }
+      .keys
+  end
+
   def exercise_student_progress_query
     {'guide.slug': repo_slug, 'student.uid': uid}
   end
