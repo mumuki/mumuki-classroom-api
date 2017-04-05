@@ -1,12 +1,12 @@
 get '/courses' do
-  by_permissions :courses do |grants|
-    Classroom::Collection::Courses.allowed(grants).as_json
+  by_permissions :courses do |permissions|
+    Classroom::Collection::Courses.allowed(permissions).as_json
   end
 end
 
 get '/api/courses' do
-  by_permissions :courses, :auth do |grants|
-    Classroom::Collection::Courses.allowed(grants).as_json
+  by_permissions :courses, :auth do |permissions|
+    Classroom::Collection::Courses.allowed(permissions).as_json
   end
 end
 

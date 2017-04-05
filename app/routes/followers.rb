@@ -6,8 +6,13 @@ post '/courses/:course/followers' do
 end
 
 get '/courses/:course/followers/:email' do
-  by_permissions :followers do |grants|
-    Classroom::Collection::Followers.for(course).where(email: params[:email], course: {'$regex' => grants}).as_json
+  by_permissions :followers do |permissions|
+    Classroom::Collection::Followers
+      .for(course)
+      .where(email: params[:email])
+      .raw
+      .select { |it| permissions.has_permission? :teacher, it.course }
+      .as_json
   end
 end
 

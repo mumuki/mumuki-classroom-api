@@ -2,8 +2,8 @@ module Classroom::Collection::Courses
 
   extend Mumukit::Service::Collection
 
-  def self.allowed(grants_pattern)
-    where(uid: {'$regex' => grants_pattern})
+  def self.allowed(permissions)
+    all.select { |course| permissions.has_permission? :teacher, course.uid }
   end
 
   def self.ensure_new!(uid)

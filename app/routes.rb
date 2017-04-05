@@ -59,12 +59,7 @@ helpers do
   end
 
   def by_permissions(key, client = :auth0, &query)
-    grants = permissions_to_regex client
-    if grants.to_s.blank?
-      {}.tap { |it| it[key] = [] }
-    else
-      query.call(grants)
-    end
+    {"#{key}": query.call(permissions client)}
   end
 
   def permissions_to_regex(client)
