@@ -35,6 +35,18 @@ Mumukit::Auth.configure do |c|
   }
 end
 
+module Mumukit::Login::LoginControllerHelpers
+  def save_current_user_session!(user)
+    mumukit_controller.shared_session.tap do |it|
+      it.uid = user.uid
+      it.profile = {user_uid: user.uid,
+                    user_name: user.name,
+                    user_image_url: user.image_url}
+    end
+  end
+end
+
+
 Mumukit::Login.configure do |config|
   config.user_class = User
   config.framework = Mumukit::Login::Framework::Sinatra
