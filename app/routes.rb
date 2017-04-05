@@ -68,19 +68,6 @@ helpers do
     {'guide.slug': repo_slug, 'student.uid': uid}
   end
 
-  def by_permissions(key, &query)
-    grants = permissions_to_regex
-    if grants.to_s.blank?
-      {}.tap { |it| it[key] = [] }
-    else
-      query.call(grants)
-    end
-  end
-
-  def permissions_to_regex
-    permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
-  end
-
   def tenant
     request.first_subdomain
   end

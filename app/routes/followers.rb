@@ -21,9 +21,12 @@ post '/courses/:course/followers/:email' do
 end
 
 get '/courses/:course/followers/:email' do
-  by_permissions :followers do |grants|
-    {followers: Follower.where(follower_query.merge(course: {'$regex': grants})).as_json}
-  end
+  {followers: Follower
+                .where(follower_query)
+                .where(email: params[:email])
+                .select { |it| permissions.has_permission? :teacher, it.course }
+                .as_json
+  }
 end
 
 delete '/courses/:course/followers/:email/:uid' do

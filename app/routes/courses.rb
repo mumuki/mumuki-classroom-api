@@ -1,15 +1,15 @@
 helpers do
-  def allowed_courses(grants)
-    {courses: Course.where(with_organization).allowed(grants).as_json}
+  def allowed_courses(permissions)
+    {courses: Course.allowed(organization, permissions).as_json}
   end
 end
 
 get '/courses' do
-  by_permissions(:courses) { |grants| allowed_courses grants }
+  allowed_courses permissions
 end
 
 get '/api/courses' do
-  by_permissions(:courses) { |grants| allowed_courses grants }
+  allowed_courses permissions
 end
 
 post '/courses' do
