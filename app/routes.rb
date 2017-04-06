@@ -28,7 +28,7 @@ helpers do
     slug
   end
 
-  def permissions(client = :auth0)
+  def permissions
     current_user.permissions
   end
 
@@ -58,12 +58,12 @@ helpers do
     {'guide.slug': repo_slug, 'student.uid': uid}
   end
 
-  def by_permissions(key, client = :auth0, &query)
-    {"#{key}": query.call(permissions client)}
+  def by_permissions(key, &query)
+    {"#{key}": query.call(permissions)}
   end
 
-  def permissions_to_regex(client)
-    permissions(client).to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
+  def permissions_to_regex
+    permissions.to_s.gsub(/[:]/, '|').gsub(/[*]/, '.*')
   end
 
   def tenant

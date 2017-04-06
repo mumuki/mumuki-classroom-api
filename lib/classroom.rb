@@ -31,13 +31,8 @@ Mumukit::Nuntius.configure do |c|
 end
 
 Mumukit::Auth.configure do |c|
-  c.client_ids = {
-    auth: ENV['MUMUKI_AUTH_CLIENT_ID']
-  }
-  c.client_secrets = {
-    auth: ENV['MUMUKI_AUTH_CLIENT_SECRET']
-  }
-  c.persistence_strategy = Classroom::PermissionsPersistence::Mongo.new
+  c.client_id = Mumukit::Service::Env.auth0_client_id
+  c.client_secret = Mumukit::Service::Env.auth0_client_secret
 end
 
 module Mumukit::Login::LoginControllerHelpers
