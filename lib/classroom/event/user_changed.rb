@@ -26,7 +26,7 @@ class Classroom::Event::UserChanged
     end
 
     def set_diff_permissions(user)
-      permissions = Classroom::Collection::Users.find_by_uid!(user[:uid]).permissions
+      permissions = Classroom::Collection::Users.find_by_uid(user[:uid])&.permissions || Mumukit::Auth::Permissions.new
       self.changes = Mumukit::Auth::Permissions::Diff.diff(permissions, user[:permissions]).changes_by_organization
     end
 

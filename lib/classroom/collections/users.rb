@@ -14,6 +14,12 @@ module Classroom::Collection
       end
     end
 
+    def self.find_by_uid(uid)
+      Classroom::Database.connect_transient! :classroom do
+        find_by uid: uid
+      end
+    end
+
     def self.for_profile(profile)
       Classroom::Database.connect_transient! :classroom do
         upsert_by! :uid, Classroom::User.new(profile)
