@@ -11,7 +11,7 @@ describe 'messages' do
       before { expect(Mumukit::Nuntius).to receive(:notify!).with('messages', {message: message,
                                                                                submission_id: '3',
                                                                                exercise_id: 2,
-                                                                               tenant: 'example'}.as_json) }
+                                                                               organization: 'example'}.as_json) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses/bar/messages', message_to_post }
 
