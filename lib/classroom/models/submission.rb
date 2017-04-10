@@ -28,10 +28,10 @@ class Submission
     end
   end
 
-  def thread
+  def thread(language)
     {
       status: status,
-      content: Mumukit::ContentType::Markdown.to_html(Mumukit::ContentType::Markdown.highlighted_code 'haskell', content),
+      content: Mumukit::ContentType::Markdown.to_html(Mumukit::ContentType::Markdown.highlighted_code language, content),
       messages: messages,
       created_at: created_at
     } if messages.present?

@@ -40,7 +40,7 @@ class Assignment
   end
 
   def threads
-    submissions.map(&:thread).compact
+    submissions.map { |it| it.thread guide[:language][:name] }.compact
   end
 
   private
