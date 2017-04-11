@@ -50,7 +50,7 @@ helpers do
 
   def mumukit_login_methods
     Mumukit::Login::Settings::LOCK_LOGIN_METHODS
-      .select { |key, _| Classroom::Collection::Organizations.login_method_present? organization_json, key }
+      .select { |key, _| Classroom::Collection::Organizations.login_method_present? organization_json, key.to_s }
       .values
   end
 
