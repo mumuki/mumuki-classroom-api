@@ -4,10 +4,18 @@ module Classroom::Collection::Organizations
 
   def self.upsert!(organization)
     mongo_collection.update_one(
-      { :name => organization['name'] },
-      { :$set => organization },
-      { :upsert => true }
+      {:name => organization['name']},
+      {:$set => organization},
+      {:upsert => true}
     )
+  end
+
+  def login_method_present?(organization, login_method)
+    if organization['lock_json'].present?
+      organization['lock_json']['connections'].include? login_method
+    else
+      organization['login_methods'].include? login_method
+    end
   end
 
   private
