@@ -60,8 +60,8 @@ helpers do
 
   def mumukit_login_methods
     Mumukit::Login::Settings::LOCK_LOGIN_METHODS
-      .select { |_, value| Classroom::Collection::Organizations.login_method_present? organization_json, value }
-      .keys
+      .select { |key, _| Classroom::Collection::Organizations.login_method_present? organization_json, key }
+      .values
   end
 
   def exercise_student_progress_query
