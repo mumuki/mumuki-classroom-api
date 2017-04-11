@@ -10,11 +10,12 @@ module Classroom::Collection::Organizations
     )
   end
 
-  def self.login_method_present?(organization, login_method)
+  def self.login_method_present?(organization, key, value)
     if organization['lock_json'].present?
-      organization['lock_json']['connections'].include? login_method
+      (organization['lock_json']['connections'] & [key, value]).present?
     else
-      organization['login_methods'].include? login_method
+      organization['login_methods'].include? key
+      (organization['login_methods'] & [key, value]).present?
     end
   end
 
