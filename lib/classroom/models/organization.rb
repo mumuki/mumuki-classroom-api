@@ -23,4 +23,17 @@ class Organization
 
   create_index({name: 1}, {unique: true})
 
+  def login_method_present?(key, value)
+    if lock_json.present?
+      (lock_json['connections'] & [key, value]).present?
+    else
+      login_methods.include? key
+      (login_methods & [key, value]).present?
+    end
+  end
+
+  def login_methods
+    self[:login_methods]
+  end
+
 end

@@ -60,7 +60,7 @@ helpers do
 
   def mumukit_login_methods
     Mumukit::Login::Settings::LOCK_LOGIN_METHODS
-      .select { |key, value| Classroom::Collection::Organizations.login_method_present? organization_json, key.to_s, value }
+      .select { |key, value| current_organization.login_method_present? key.to_s, value }
       .keys
   end
 
@@ -105,7 +105,11 @@ helpers do
   end
 
   def organization_json
-    @organization_json ||= Organization.find_by(name: organization).as_json
+    @organization_json ||= current_organization.as_json
+  end
+
+  def current_organization
+    @current_organization ||= Organization.find_by(name: organization)
   end
 
   def update_and_notify_student_metadata(uid, method)
