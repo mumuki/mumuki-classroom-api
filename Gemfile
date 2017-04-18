@@ -16,7 +16,7 @@ gem 'mumukit-nuntius', '~> 4.1'
 
 gem 'mumukit-auth', '~> 6.1'
 gem 'mumukit-service', '~> 2.0'
-gem 'mumukit-login', '~> 1.2'
+gem 'mumukit-login', '~> 2.0'
 
 gem 'mumukit-inspection', '~> 0.1'
 
