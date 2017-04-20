@@ -42,13 +42,13 @@ class Classroom::Event::UserChanged
 
     def update_student!(organization, course_slug, student_h)
       sub_student = student_h.transform_keys { |field| "student.#{field}".to_sym }
-      Student.find_by!(uid: student_h[:uid], organization: organization, course: course_slug).update_attributes! student_h
+      Student.find_by!(organization: organization, course: course_slug, uid: student_h[:uid]).update_attributes! student_h
       GuideProgress.where(organization: organization, course: course_slug).update_all sub_student
       Assignment.where(organization: organization, course: course_slug).update_all sub_student
     end
 
     def student_added(organization, user, granted_slug)
-      students = Student.where(uid: user[:uid], organization: organization, course: granted_slug.to_s)
+      students = Student.where(organization: organization, course: granted_slug.to_s, uid: user[:uid])
       if students.exists?
         students.first.attach!
       else
