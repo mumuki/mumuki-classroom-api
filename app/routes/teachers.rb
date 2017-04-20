@@ -3,7 +3,7 @@ get '/courses/:course/teachers' do
   {teachers: Teacher.where(with_organization_and_course).as_json}
 end
 
-post '/courses/:course/teacher' do
+post '/courses/:course/teachers' do
   authorize! :headmaster
   json = with_organization_and_course teacher: json_body.merge(uid: json_body[:email])
   uid = json[:teacher][:uid]

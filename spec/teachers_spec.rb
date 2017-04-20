@@ -19,13 +19,13 @@ describe Teacher do
 
   end
 
-  describe 'post /courses/:course/teacher' do
+  describe 'post /courses/:course/teachers' do
 
     let(:teacher) { {email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar'} }
 
     context 'when success' do
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/courses/foo/teacher', teacher.to_json }
+      before { post '/courses/foo/teachers', teacher.to_json }
 
       it { expect(last_response).to be_ok }
       it { expect(Teacher.count).to eq 1 }
@@ -34,7 +34,7 @@ describe Teacher do
 
     context 'when no permissions' do
       before { header 'Authorization', build_auth_header('') }
-      before { post '/courses/foo/teacher', teacher.to_json }
+      before { post '/courses/foo/teachers', teacher.to_json }
 
       it { expect(last_response).to_not be_ok }
       it { expect(Teacher.count).to eq 0 }
