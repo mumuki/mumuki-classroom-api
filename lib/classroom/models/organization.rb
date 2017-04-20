@@ -19,7 +19,7 @@ class Organization
   field :terms_of_service, type: String
   field :theme_stylesheet_url, type: String
   field :extension_javascript_url, type: String
-  field :login_methods, type: String
+  field :login_methods, type: Array
 
   create_index({name: 1}, {unique: true})
 
@@ -30,10 +30,6 @@ class Organization
       login_methods.include? key
       (login_methods & [key, value]).present?
     end
-  end
-
-  def login_methods
-    self[:login_methods]
   end
 
 end
