@@ -58,7 +58,7 @@ describe Classroom::Event::UserChanged do
       it { expect(teacher_foo_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/foo'), except_fields }
     end
 
-    context 'update assignments too' do
+    context 'when there are assignments for several users, user changed event only updates the assignment for that student' do
       let(:chapter) { {
         id: 'guide_chapter_id',
         name: 'guide_chapter_name'
