@@ -114,8 +114,9 @@ helpers do
 
   def update_and_notify_student_metadata(uid, method)
     user = User.find_by_uid!(uid)
-    user.send("#{method}_permission!", 'student', course_slug)
-    user.upsert_permissions! user.permissions
+    permissions = user.permissions
+    permissions.send("#{method}_permission!", 'student', course_slug)
+    user.upsert_permissions! permissions
     user.notify!
   end
 
