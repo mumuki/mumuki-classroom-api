@@ -3,10 +3,12 @@ require 'spec_helper'
 describe Classroom::Event::UserChanged do
 
   let(:uid) { 'agus@mumuki.org' }
+  let(:uid2) { 'fedescarpa@mumuki.org' }
   let(:event) { user.merge(permissions: new_permissions) }
   let(:old_permissions) { {student: 'example/foo'}.with_indifferent_access }
   let(:new_permissions) { {student: 'example/bar', teacher: 'example/foo'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
+  let(:user2) { {uid: uid2, email: uid2, last_name: 'Scarpa', first_name: 'Federico'}.with_indifferent_access }
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   before { User.create! uid: uid, permissions: old_permissions }
@@ -54,6 +56,71 @@ describe Classroom::Event::UserChanged do
       it { expect(student_bar_fetched.detached).to eq nil }
 
       it { expect(teacher_foo_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/foo'), except_fields }
+    end
+
+    context 'update assignments too' do
+      let(:chapter) { {
+        id: 'guide_chapter_id',
+        name: 'guide_chapter_name'
+      } }
+      let(:parent) { {
+        type: 'Lesson',
+        name: 'A lesson name',
+        position: '1',
+        chapter: chapter
+      } }
+      let(:guide) { {
+        slug: 'guide_slug',
+        name: 'guide_name',
+        parent: parent,
+        language: {
+          name: 'guide_language_name',
+          devicon: 'guide_language_devicon'
+        }
+      } }
+      let(:exercise) { {
+        eid: 1,
+        name: 'exercise_name',
+        number: 1
+      } }
+      let(:submission) { {
+        sid: '1',
+        status: 'passed',
+        result: 'result',
+        content: 'find f = head.filter f',
+        feedback: 'feedback',
+        created_at: '2016-01-01 00:00:00',
+        test_results: ['test_results'],
+        submissions_count: 1,
+        expectation_results: []
+      } }
+      let(:agus_submission) { submission.merge({
+                                                 organization: 'example',
+                                                 submitter: user,
+                                                 exercise: exercise,
+                                                 guide: guide
+                                               }) }
+      let(:fede_submission) { submission.merge({
+                                                 organization: 'example',
+                                                 submitter: user2,
+                                                 exercise: exercise,
+                                                 guide: guide
+                                               }) }
+      let(:event2) { user2.merge(last_name: 'Otro', permissions: old_permissions) }
+      before { User.create! uid: uid2, permissions: old_permissions }
+      before { Course.create! organization: 'example', slug: 'example/foo' }
+      before { Course.create! organization: 'example', slug: 'example/bar' }
+      before { Student.create! user.merge(organization: 'example', course: 'example/foo') }
+      before { Student.create! user2.merge(organization: 'example', course: 'example/foo') }
+      before { Submission.process!(agus_submission) }
+      before { Submission.process!(fede_submission) }
+      before { Classroom::Event::UserChanged.execute! event2 }
+
+      it { expect(Assignment.where('student.uid': uid).count).to eq 1 }
+      it { expect(Assignment.where('student.uid': uid2).count).to eq 1 }
+      it { expect(GuideProgress.where('student.uid': uid).count).to eq 1 }
+      it { expect(GuideProgress.where('student.uid': uid2).count).to eq 1 }
+
     end
 
   end

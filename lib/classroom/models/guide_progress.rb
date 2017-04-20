@@ -11,7 +11,7 @@ class GuideProgress
   embeds_one :student
   embeds_one :last_assignment
 
-  create_index({'organization': 1, 'course': 1})
+  create_index({'organization': 1, 'course': 1, 'student.uid': 1})
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1})
   create_index({'guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
