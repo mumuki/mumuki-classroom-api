@@ -57,8 +57,8 @@ module WithSubmissionProcess
   def guide_progress_query(json)
     {'organization': organization(json),
      'course': course_slug(json),
-     'student.uid': uid(json),
-     'guide.slug': guide_from(json)[:slug]}
+     'guide.slug': guide_from(json)[:slug],
+     'student.uid': uid(json)}
   end
 
   def update_guide_progress(json)
