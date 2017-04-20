@@ -30,7 +30,5 @@ production:
       options:
         max_pool_size: 8
         min_pool_size: 1
-        user: "<%=ENV['MUMUKI_MONGODB_USERNAME']%>"
-        password: "<%=ENV['MUMUKI_MONGODB_PASSWORD']%>"
   options:
     raise_not_found_error: false
