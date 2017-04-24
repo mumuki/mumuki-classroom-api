@@ -11,6 +11,7 @@ class Assignment
   embeds_many :submissions
 
   create_index({'organization': 1, 'course': 1, 'student.uid': 1})
+  create_index({'organization': 1, 'exercise.eid': 1, 'student.uid': 1})
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'exercise.eid': 1, 'student.uid': 1})
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1, 'exercise.eid': 1})
   create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
