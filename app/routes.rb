@@ -5,6 +5,8 @@ require 'mumukit/service/routes'
 require_relative './session_store'
 require_relative './omniauth'
 require_relative '../lib/classroom'
+require_relative './organization_mapper'
+
 
 configure do
   set :app_name, 'classroom'
@@ -69,7 +71,7 @@ helpers do
   end
 
   def tenant
-    request.first_subdomain
+    Mumukit::Platform.organization_name(request)
   end
 
   def organization
