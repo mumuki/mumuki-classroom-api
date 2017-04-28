@@ -26,9 +26,8 @@ Mumukit::Nuntius.configure do |c|
   c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
 end
 
-Mumukit::Auth.configure do |c|
-  c.client_id = Mumukit::Service::Env.auth0_client_id
-  c.client_secret = Mumukit::Service::Env.auth0_client_secret
+Mumukit::Auth.configure do |_config|
+
 end
 
 module Mumukit::Login::LoginControllerHelpers
