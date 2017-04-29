@@ -141,6 +141,7 @@ require_relative './routes/organization'
 require_relative './routes/ping'
 require_relative './routes/teachers'
 require_relative './routes/students'
+require_relative './routes/permissions'
 
 get '/courses/:course/guides' do
   authorize! :teacher
@@ -169,12 +170,6 @@ end
 
 get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
   Assignment.find_by!(with_organization_and_course exercise_student_progress_query.merge('exercise.eid': exercise_id)).as_json
-end
-
-get '/permissions' do
-  authorize! :teacher
-
-  {permissions: permissions}
 end
 
 post '/courses/:course/students' do
