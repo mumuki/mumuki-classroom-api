@@ -8,6 +8,7 @@ require 'mumukit/inspection'
 require 'mumukit/nuntius'
 require 'mumukit/auth'
 require 'mumukit/login'
+require 'mumukit/platform'
 
 Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
 
@@ -41,9 +42,13 @@ module Mumukit::Login::LoginControllerHelpers
   end
 end
 
-
 Mumukit::Login.configure do |config|
   config.user_class = User
   config.framework = Mumukit::Login::Framework::Sinatra
+end
+
+Mumukit::Platform.configure do |config|
+  config.application = Mumukit::Platform.classroom_api
+  config.web_framework = Mumukit::Platform::WebFramework::Sinatra
 end
 

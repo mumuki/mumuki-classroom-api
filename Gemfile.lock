@@ -65,6 +65,8 @@ GEM
     mumukit-nuntius (5.0.0)
       bunny (~> 2.3)
       mumukit-core (~> 1.0)
+    mumukit-platform (0.1.1)
+      mumukit-core (~> 1.0)
     mumukit-service (3.0.0)
       bson_ext
       mongo (~> 2.1)
@@ -161,6 +163,7 @@ DEPENDENCIES
   mumukit-inspection (~> 1.0)
   mumukit-login (~> 3.0)
   mumukit-nuntius (~> 5.0)
+  mumukit-platform (~> 0.1)
   mumukit-service (~> 3.0)
   pry
   pry-byebug

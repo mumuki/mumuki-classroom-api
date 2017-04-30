@@ -5,7 +5,6 @@ require 'mumukit/service/routes'
 require_relative './session_store'
 require_relative './omniauth'
 require_relative '../lib/classroom'
-require_relative './organization_mapper'
 
 
 configure do
