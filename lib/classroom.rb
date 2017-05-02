@@ -8,6 +8,7 @@ require 'mumukit/inspection'
 require 'mumukit/nuntius'
 require 'mumukit/auth'
 require 'mumukit/login'
+require 'mumukit/platform'
 
 Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
 
@@ -26,9 +27,8 @@ Mumukit::Nuntius.configure do |c|
   c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
 end
 
-Mumukit::Auth.configure do |c|
-  c.client_id = Mumukit::Service::Env.auth0_client_id
-  c.client_secret = Mumukit::Service::Env.auth0_client_secret
+Mumukit::Auth.configure do |_config|
+
 end
 
 module Mumukit::Login::LoginControllerHelpers
@@ -42,9 +42,13 @@ module Mumukit::Login::LoginControllerHelpers
   end
 end
 
-
 Mumukit::Login.configure do |config|
   config.user_class = User
   config.framework = Mumukit::Login::Framework::Sinatra
+end
+
+Mumukit::Platform.configure do |config|
+  config.application = Mumukit::Platform.classroom_api
+  config.web_framework = Mumukit::Platform::WebFramework::Sinatra
 end
 
