@@ -22,8 +22,12 @@ class Notification
     allowed({organization: organization, read: false}, permissions)
   end
 
+  def read!
+    update! read: true
+  end
+
   def with_assignment
-    as_json.except('assignment_id').merge(assignment: assignment)
+    as_json.except('assignment_id').merge(assignment: assignment, id: id.to_s)
   end
 
 end
