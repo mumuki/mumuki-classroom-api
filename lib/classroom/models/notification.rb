@@ -1,6 +1,7 @@
 class Notification
 
   include Mongoid::Document
+  include Mongoid::Timestamps
 
   field :organization, type: String
   field :course, type: String

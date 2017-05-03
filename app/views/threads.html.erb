@@ -1,21 +1,21 @@
-<div class="messages">
-  <ol class="chat">
+<div class="mu-messages">
+  <ol class="mu-chat">
     <% threads.each_with_index do |thread, index| %>
         <div class="thread">
           <li class="solution self">
-            <a onclick="toggleCollapse('magia-<%= index %>')">
-              <i class="fa fa-<%= threads.last == thread ? 'minus' : 'plus' %>-square-o magia-<%= index %>"></i>
+            <a onclick="toggleCollapse('toggle-<%= index %>')">
+              <i class="fa fa-<%= threads.last == thread ? 'minus' : 'plus' %>-square-o toggle-<%= index %>"></i>
               <span>&nbsp;</span>
               <span> Ver solución </span>
             </a>
-            <div id="magia-<%= index %>" class="<%= thread[:status] %> msg magia-no">
+            <div id="toggle-<%= index %>" class="<%= thread[:status] %> message visible">
               <%= thread[:content] %>
               <time style="font-weight: bold;"><%= thread[:created_at] %></time>
             </div>
           </li>
           <% thread[:messages].each do |message| %>
               <li class="<%= message.sender == user.uid ? 'self' : 'other' %>">
-                <div class="msg">
+                <div class="message">
                   <p> <%= message.content %></p>
                   <div class="sender"><%= message.sender %></div>
                   <time><%= message.created_at %></time>
@@ -34,10 +34,10 @@
     var $icon = $('i.' + target);
     $icon.toggleClass('fa-minus-square-o');
     $icon.toggleClass('fa-plus-square-o');
-    $target.toggleClass('magia');
+    $target.toggleClass('hidden');
   }
 
-  $('.view-messages time').each(function (i, e) {
+  $('.mu-view-messages time').each(function (i, e) {
     return e.innerText = moment(e.innerText).fromNow();
   });
 </script>
