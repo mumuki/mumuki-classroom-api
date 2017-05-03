@@ -6,6 +6,7 @@ class Notification
   field :course, type: String
   field :type, type: String
   field :read, type: Mongoid::Boolean, default: false
+  field :sender, type: String
   field :created_at, type: Time
 
   belongs_to :assignment
