@@ -17,7 +17,7 @@ describe 'messages' do
 
       let(:exercise) { Assignment.last }
 
-      it { expect(exercise.submissions.first.as_json).to json_like({sid: '3', messages: [content: "<p>hola</p>\n"]}, {except: [:_id, :date]}) }
+      it { expect(exercise.submissions.first.as_json).to json_like({sid: '3', messages: [content: "<p>hola</p>\n"]}, {except: [:_id, :date, :created_at, :updated_at]}) }
     end
 
     context 'reject unauthorized requests' do
