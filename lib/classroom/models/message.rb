@@ -14,9 +14,9 @@ class Message
   end
 
   def self.import_from_json!(json)
-    Assignment
-      .find_by!(organization: json[:organization], 'exercise.eid': json[:exercise][:bibliotheca_id], 'student.uid': json[:sender])
-      .add_message!({content: json[:content], sender: json[:sender]}, json[:submission_id])
+    assignment = Assignment.find_by!(organization: json[:organization], 'exercise.eid': json[:exercise][:bibliotheca_id], 'student.uid': json[:sender])
+    assignment.add_message!({content: json[:content], sender: json[:sender]}, json[:submission_id])
+    assignment
   end
 
 end

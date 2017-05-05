@@ -8,7 +8,6 @@ class Notification
   field :type, type: String
   field :read, type: Mongoid::Boolean, default: false
   field :sender, type: String
-  field :created_at, type: Time
 
   belongs_to :assignment
 
@@ -21,6 +20,14 @@ class Notification
 
   def self.unread(organization, permissions)
     allowed({organization: organization, read: false}, permissions)
+  end
+
+  def self.import_from_json!(type, assignment)
+    Notification.create! organization: assignment.organization,
+                         course: assignment.course,
+                         type: type,
+                         sender: assignment.student[:uid],
+                         assignment: assignment
   end
 
   def read!
