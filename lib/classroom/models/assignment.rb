@@ -19,7 +19,6 @@ class Assignment
   def add_message!(message, sid)
     submissions.find_by!(sid: sid).add_message! message
     update_submissions!
-    notify_message! message, sid
   end
 
   def add_submission!(submission)
