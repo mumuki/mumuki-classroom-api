@@ -18,6 +18,15 @@ class Notification
     where(options).select { |course| permissions.has_permission? :teacher, course }.map(&:with_assignment)
   end
 
+  def self.page(organization, permissions, page, per_page)
+    where(organization: organization)
+      .sort(created_at: :desc)
+      .skip(per_page * (page - 1))
+      .limit(per_page)
+      .select { |course| permissions.has_permission? :teacher, course }
+      .map(&:with_assignment)
+  end
+
   def self.unread(organization, permissions)
     allowed({organization: organization, read: false}, permissions)
   end
@@ -32,6 +41,10 @@ class Notification
 
   def read!
     update! read: true
+  end
+
+  def unread!
+    update! read: false
   end
 
   def with_assignment
