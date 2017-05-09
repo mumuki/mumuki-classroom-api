@@ -27,7 +27,7 @@ class Assignment
   end
 
   def notify_message!(message, sid)
-    Mumukit::Nuntius.notify! 'messages', json_to_notify(message, sid)
+    Mumukit::Nuntius.notify! 'teacher-messages', json_to_notify(message, sid)
   end
 
   def json_to_notify(message, sid)
