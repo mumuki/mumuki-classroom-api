@@ -3,7 +3,20 @@
 # Mumuki Classroom (API)
 > Tools for tracking students' progress within Mumuki
 
+## Quick start
+
+If you want to start the server quickly in developer environment, 
+you can just do the following: 
+
+```bash
+./devstart
+```
+
+This will install your dependencies and boot the server. 
+
 ## Installing the server
+
+If you just want to install dependencies, just do: 
 
 ```
 bundle install
@@ -11,9 +24,32 @@ bundle install
 
 ## Running the server
 
+You can boot the server by using the standard rackup command: 
+
 ```
+# using defaults from config/puma.rb and rackup default port 9292
 bundle exec rackup
+
+# changing port
+bundle exec rackup -p 8080
+
+# changing threads count
+MUMUKI_CLASSROOM_API_THREADS=30 bundle exec rackup
 ```
+
+Or you can also start it with `puma` command, which gives you more control: 
+
+```
+# using defaults from config/puma.rb
+bundle exec puma
+
+# changing ports and threads count, using puma-specific options:
+bundle exec puma -t 2:30 -p 8080
+
+# changing ports and threads count, using environment variables:
+MUMUKI_CLASSROOM_API_PORT=8080 MUMUKI_CLASSROOM_API_THREADS=30 bundle exec puma
+```
+
 
 ## Running tasks
 
