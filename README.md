@@ -3,21 +3,113 @@
 # Mumuki Classroom (API)
 > Tools for tracking students' progress within Mumuki
 
-## Installing the server
+## Preparing environment
+
+### TL;DR install
+
+1. Install [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+2. Run `curl https://raw.githubusercontent.com/mumuki/mumuki-devinstaller/master/install.sh | bash`
+3. `cd mumuki && vagrant ssh` and then - **inside Vagrant VM** - `cd /vagrant/classroom-api`
+4. Go to [Installing and Running](#installing-and-running)
+
+### 1. Install essentials and base libraries
+
+> First, we need to install some software: MongoDB and some common Ruby on Rails native dependencies
+
+1. Follow [MongoDB installation guide](https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-ubuntu/)
+2. Run:
+
+```bash
+sudo apt-get install autoconf curl git build-essential libssl-dev autoconf bison libreadline6 libreadline6-dev zlib1g zlib1g-dev
+```
+
+### 2. Install rbenv
+
+> [rbenv](https://github.com/rbenv/rbenv) is a ruby versions manager, similar to rvm, nvm, and so on.
+
+```bash
+curl https://raw.githubusercontent.com/fesplugas/rbenv-installer/master/bin/rbenv-installer | bash
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc # or .bash_profile
+echo 'eval "$(rbenv init -)"' >> ~/.bashrc # or .bash_profile
+```
+
+### 3. Install ruby
+
+> Now we have rbenv installed, we can install ruby and [bundler](http://bundler.io/)
+
+```bash
+rbenv install 2.3.1
+rbenv global 2.3.1
+rbenv rehash
+gem install bundler
+gem install escualo
+```
+
+### 4. Clone this repository
+
+> Because, err... we need to clone this repostory before developing it :stuck_out_tongue:
+
+```bash
+git clone https://github.com/mumuki/mumuki-classroom-api classroom-api
+cd classroom-api
+```
+
+## Installing and Running
+
+### Quick start
+
+If you want to start the server quickly in developer environment,
+you can just do the following:
+
+```bash
+./devstart
+```
+
+This will install your dependencies and boot the server.
+
+### Installing the server
+
+If you just want to install dependencies, just do:
 
 ```
 bundle install
 ```
 
-## Running the server
+### Running the server
+
+You can boot the server by using the standard rackup command:
 
 ```
+# using defaults from config/puma.rb and rackup default port 9292
 bundle exec rackup
+
+# changing port
+bundle exec rackup -p 8080
+
+# changing threads count
+MUMUKI_CLASSROOM_API_THREADS=30 bundle exec rackup
+```
+
+Or you can also start it with `puma` command, which gives you more control:
+
+```
+# using defaults from config/puma.rb
+bundle exec puma
+
+# changing ports and threads count, using puma-specific options:
+bundle exec puma -t 2:30 -p 8080
+
+# changing ports and threads count, using environment variables:
+MUMUKI_CLASSROOM_API_PORT=8080 MUMUKI_CLASSROOM_API_THREADS=30 bundle exec puma
+```
+
+## Running tests
+
+```bash
+bundle exec rspec
 ```
 
 ## Running tasks
-
-### Queues processing
 
 ```bash
 # starts commands consumer
@@ -30,7 +122,7 @@ bundle exec rake submissions:listen
 bundle exec rake resubmissions:listen
 ```
 
-### Reports
+## Running Reports
 
 ```bash
 # registered and active users reports
@@ -38,7 +130,7 @@ bundle exec rake students:reports:registered[<organization>,<course>,<from>,<to>
 bundle exec rake students:reports:active[<organization>,<course>,<from>,<to>,<json|table|csv>]
 ```
 
-### Migrations
+## Running Migrations
 
 ```bash
 # migration_name is the name of the migration file in ./migrations/, without extension and the "migrate_" prefix
@@ -176,7 +268,7 @@ GET /api/courses/:course/students
       }
   ]
 }
-``` 
+```
 
 **Forbidden Response**
 ```json
@@ -258,7 +350,7 @@ GET /api/courses/:course/students/:uid
         }
     ]
 }
-``` 
+```
 
 **Forbidden Response**
 ```json

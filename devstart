@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+
+echo ''
+echo '_________ .__                                                         _____         .__ '
+echo '\_   ___ \|  | _____    ______ _____________  ____   ____   _____    /  _  \ ______ |__|'
+echo '/    \  \/|  | \__  \  /  ___//  ___/\_  __ \/  _ \ /  _ \ /     \  /  /_\  \\____ \|  |'
+echo '\     \___|  |__/ __ \_\___ \ \___ \  |  | \(  <_> |  <_> )  Y Y  \/    |    \  |_> >  |'
+echo ' \______  /____(____  /____  >____  > |__|   \____/ \____/|__|_|  /\____|__  /   __/|__|'
+echo '        \/          \/     \/     \/                            \/         \/|__|       '
+echo ''
+
+echo "[MumukiDevstart::ClassroomApi] Installing dependencies...."
+bundle install --quiet
+
+echo "[MumukiDevstart::ClassroomApi] Starting server...."
+bundle exec puma
