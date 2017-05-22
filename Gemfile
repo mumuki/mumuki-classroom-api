@@ -2,10 +2,9 @@ source 'https://rubygems.org'
 
 gem 'rake'
 
-gem 'sinatra', '2.0.0.rc2'
-gem 'sinatra-contrib', '2.0.0.rc2'
+gem 'sinatra', '~> 1.4'
+gem 'sinatra-contrib', '~> 1.4'
 gem 'sinatra-cross_origin', '~> 0.3.1'
-gem 'rouge', git: 'https://github.com/mumuki/rouge', ref: '5a8db3387f3a67232569969cd3da40ee04eb9dc3'
 
 gem 'mongo', '~> 2.1'
 gem 'mongoid', '~> 6.1'
@@ -23,7 +22,16 @@ gem 'mumukit-platform', '~> 0.1'
 
 gem 'mumukit-inspection', '~> 1.0'
 
-gem 'mumukit-content-type', '~> 1.0'
+gem 'mumukit-content-type',
+    git: 'https://github.com/mumuki/mumukit-content-type',
+    require: 'mumukit/content_type',
+    ref: 'v1.1.0-mumuki-rouge'
+gem 'rouge',
+    git: 'https://github.com/mumuki/rouge',
+    ref: '5a8db3387f3a67232569969cd3da40ee04eb9dc3'
+
+gem 'activemodel', '~> 5.0'
+gem 'activesupport', '~> 5.0'
 
 group :test do
   gem 'pry'
