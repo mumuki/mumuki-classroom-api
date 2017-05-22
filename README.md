@@ -1,4 +1,9 @@
 [![Build Status](https://travis-ci.org/mumuki/mumuki-classroom-api.svg?branch=master)](https://travis-ci.org/mumuki/mumuki-classroom-api)
+[![Code Climate](https://codeclimate.com/github/mumuki/mumuki-classroom-api/badges/gpa.svg)](https://codeclimate.com/github/mumuki/mumuki-classroom-api)
+[![Test Coverage](https://codeclimate.com/github/mumuki/mumuki-classroom-api/badges/coverage.svg)](https://codeclimate.com/github/mumuki/mumuki-classroom-api)
+[![Issue Count](https://codeclimate.com/github/mumuki/mumuki-classroom-api/badges/issue_count.svg)](https://codeclimate.com/github/mumuki/mumuki-classroom-api)
+
+
 
 # Mumuki Classroom (API)
 > Tools for tracking students' progress within Mumuki
