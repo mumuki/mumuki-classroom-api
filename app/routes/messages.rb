@@ -6,17 +6,17 @@ Mumukit::Platform.map_organization_routes!(self) do
     assignment.notify_message! json_body[:message], json_body[:submission_id]
     {status: :created}
   end
+  get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id/messages' do
+    authorize! :student
+    threads = Assignment.find_by!(with_organization_and_course exercise_student_progress_query.merge('exercise.eid': exercise_id)).threads
+    erb :'threads.html', locals: {threads: threads, user: current_user}
+  end
+
+  get '/api/guides/:organization/:repository/:uid/:exercise_id/messages' do
+    authorize! :student
+    course_slug = Student.last_updated_student_by(with_organization uid: uid).course
+    threads = Assignment.find_by!(with_organization exercise_student_progress_query.merge(course: course_slug, 'exercise.eid': exercise_id)).threads
+    erb :'threads.html', locals: {threads: threads, user: current_user}
+  end
 end
 
-get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id/messages' do
-  authorize! :student
-  threads = Assignment.find_by!(with_organization_and_course exercise_student_progress_query.merge('exercise.eid': exercise_id)).threads
-  erb :'threads.html', locals: {threads: threads, user: current_user}
-end
-
-get '/api/guides/:organization/:repository/:uid/:exercise_id/messages' do
-  authorize! :student
-  course_slug = Student.last_updated_student_by(with_organization uid: uid).course
-  threads = Assignment.find_by!(with_organization exercise_student_progress_query.merge(course: course_slug, 'exercise.eid': exercise_id)).threads
-  erb :'threads.html', locals: {threads: threads, user: current_user}
-end
