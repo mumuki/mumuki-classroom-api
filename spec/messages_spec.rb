@@ -8,7 +8,7 @@ describe 'messages' do
 
     context 'when authenticated' do
       before { Assignment.create!({student: {uid: '1'}, exercise: {eid: 2}, submissions: [{sid: '3'}]}.merge organization: 'example', course: 'example/bar') }
-      before { expect(Mumukit::Nuntius).to receive(:notify!).with('messages', {message: message,
+      before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
                                                                                submission_id: '3',
                                                                                exercise_id: 2,
                                                                                organization: 'example'}.as_json) }
