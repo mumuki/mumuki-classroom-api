@@ -14,7 +14,7 @@
             </div>
           </li>
           <% thread[:messages].each do |message| %>
-              <li class="<%= message.sender == user.uid ? 'self' : 'other' %>">
+              <li class="<%= message.sended_by?(user) ? 'self' : 'other' %>">
                 <div class="message">
                   <p> <%= message.content %></p>
                   <div class="sender"><%= message.sender %></div>

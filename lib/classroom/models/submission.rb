@@ -37,4 +37,12 @@ class Submission
     } if messages.present?
   end
 
+  def with_full_messages(user)
+    self.tap do |submission|
+      submission[:messages] = messages.map do |message|
+        message.with_full_messages user
+      end
+    end
+  end
+
 end

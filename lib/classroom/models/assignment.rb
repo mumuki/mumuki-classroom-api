@@ -43,6 +43,14 @@ class Assignment
     submissions.map { |it| it.thread guide[:language][:name] }.compact
   end
 
+  def with_full_messages(user)
+    self.tap do |assignment|
+      assignment[:submissions] = submissions.map do |submission|
+        submission.with_full_messages user
+      end
+    end
+  end
+
   private
 
   def update_submissions!
@@ -64,6 +72,11 @@ class Assignment
 
     def empty_stats
       {passed: 0, failed: 0, passed_with_warnings: 0}
+    end
+
+    def with_full_messages(query, user)
+      where(query)
+        .map { |assignment| assignment.with_full_messages(user) }
     end
 
     def stats_by(query)
