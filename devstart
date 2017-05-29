@@ -13,5 +13,8 @@ echo ''
 echo "[MumukiDevstart::ClassroomApi] Installing dependencies...."
 bundle install --quiet
 
+echo "[MumukiDevstart::ClassroomApi] Starting MongoDB server...."
+mongod 2>&1 > /dev/null &
+
 echo "[MumukiDevstart::ClassroomApi] Starting server...."
 bundle exec puma
