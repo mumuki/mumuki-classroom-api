@@ -98,7 +98,7 @@ helpers do
   end
 
   def ensure_student_not_exists!
-    Student.ensure_not_exists! with_organization uid: json_body[:email]
+    Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
   end
 
   def set_locale!(org)
