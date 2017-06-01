@@ -210,6 +210,7 @@ describe Student do
 
       context 'when course exists' do
         before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo', uid: 'example/foo' }
+        before { Course.create! organization: 'example', name: 'bar', slug: 'example/bar', uid: 'example/bar' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
@@ -234,24 +235,23 @@ describe Student do
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example', course: 'example/foo'), except_fields) }
             end
           end
-          context 'should not publish int resubmissions queue' do
+          context 'add student to a course if exists' do
             before { post '/courses/foo/students', student_json }
-            before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
-            before { post '/courses/foo/students', student_json }
-            context 'and user already exists by uid' do
+            context 'in same course, should fails' do
+              before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
               before { post '/courses/foo/students', student_json }
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
               it { expect(last_response.body).to json_eq(message: 'Student already exist') }
             end
-            context 'and user already exists by email' do
+            context 'in different course, should works' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
-              before { post '/courses/foo/students', student_json }
+              before { post '/courses/bar/students', student_json }
 
-              it { expect(last_response).to_not be_ok }
-              it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+              it { expect(last_response).to be_ok }
+              it { expect(last_response.status).to eq 200 }
+              it { expect(last_response.body).to json_eq(status: 'created') }
             end
           end
         end
