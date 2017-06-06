@@ -1,10 +1,12 @@
 Mumukit::Platform.map_organization_routes!(self) do
   post '/courses/:course/messages' do
     authorize! :teacher
+    message = json_body[:message]
+    message[:sender] = current_user.uid
     assignment = Assignment.find_by!(with_organization_and_course 'exercise.eid': json_body[:exercise_id], 'student.uid': json_body[:uid])
-    assignment.add_message! json_body[:message], json_body[:submission_id]
-    assignment.notify_message! json_body[:message], json_body[:submission_id]
-    {status: :created}
+    assignment.add_message! message, json_body[:submission_id]
+    assignment.notify_message! message, json_body[:submission_id]
+    {status: :created, message: message}
   end
   get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id/messages' do
     authorize! :student
