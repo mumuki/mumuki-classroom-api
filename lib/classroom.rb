@@ -13,6 +13,7 @@ require 'mumukit/login'
 require 'mumukit/platform'
 
 Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
+I18n.load_translations_path File.join(__dir__, '..', 'config', 'locales', '*.yml')
 
 require_relative './consumer'
 require_relative './profile'

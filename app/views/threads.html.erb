@@ -6,7 +6,7 @@
             <a onclick="toggleCollapse('toggle-<%= index %>')">
               <i class="fa fa-<%= threads.last == thread ? 'minus' : 'plus' %>-square-o toggle-<%= index %>"></i>
               <span>&nbsp;</span>
-              <span> Ver solución </span>
+              <span> <%= I18n.t(:view_solution) %> </span>
             </a>
             <div id="toggle-<%= index %>" class="<%= thread[:status] %> message visible">
               <%= thread[:content] %>
