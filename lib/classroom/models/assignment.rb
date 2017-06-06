@@ -39,8 +39,9 @@ class Assignment
     }.as_json
   end
 
-  def threads
-    submissions.map { |it| it.thread guide[:language][:name] }.compact
+  def threads(language)
+    language = guide[:language][:name] if language.blank?
+    submissions.map { |it| it.thread(language) }.compact
   end
 
   def with_full_messages(user)
