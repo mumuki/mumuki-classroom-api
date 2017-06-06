@@ -5,6 +5,7 @@ gem 'rake'
 gem 'sinatra', '~> 1.4'
 gem 'sinatra-contrib', '~> 1.4'
 gem 'sinatra-cross_origin', '~> 0.3.1'
+gem 'sinatra-rake-routes'
 
 gem 'mongo', '~> 2.1'
 gem 'mongoid', '~> 6.1'
@@ -33,13 +34,14 @@ gem 'rouge',
 gem 'activemodel', '~> 5.0'
 gem 'activesupport', '~> 5.0'
 
-group :test do
+group :test, :development do
   gem 'pry'
   gem 'pry-remote'
   gem 'pry-byebug' unless Gem.win_platform?
   gem 'pry-stack_explorer'
   gem 'binding_of_caller'
 
+  gem 'sinatra-rake-routes'
   gem 'rspec', '~> 2.99'
   gem 'rack-test'
   gem 'factory_girl'
