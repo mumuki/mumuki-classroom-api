@@ -13,13 +13,13 @@ class Message
     Mumukit::ContentType::Markdown.to_html(self[:content])
   end
 
-  def sended_by?(user)
+  def sent_by?(user)
     sender == user.uid
   end
 
   def with_full_messages(user)
     self.tap do |message|
-      message[:is_me] = message.sended_by? user
+      message[:is_me] = message.sent_by? user
     end
   end
 
