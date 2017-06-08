@@ -11,14 +11,14 @@ class Assignment
   embeds_many :submissions
 
   create_index({'organization': 1, 'course': 1, 'student.uid': 1})
+  create_index({'organization': 1, 'exercise.eid': 1, 'student.uid': 1})
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'exercise.eid': 1, 'student.uid': 1})
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1, 'exercise.eid': 1})
   create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
-  def comment!(comment, sid)
-    submissions.find_by!(sid: sid).comment! comment
+  def add_message!(message, sid)
+    submissions.find_by!(sid: sid).add_message! message
     update_submissions!
-    notify_comment! comment, sid
   end
 
   def add_submission!(submission)
@@ -26,17 +26,27 @@ class Assignment
     update_submissions!
   end
 
-  def notify_comment!(comment, sid)
-    Mumukit::Nuntius.notify! 'comments', json_to_notify(comment, sid)
+  def notify_message!(message, sid)
+    Mumukit::Nuntius.notify! 'teacher-messages', json_to_notify(message, sid)
   end
 
-  def json_to_notify(comment, sid)
+  def json_to_notify(message, sid)
     {
-      comment: comment,
+      message: message,
       submission_id: sid,
       exercise_id: exercise.eid,
-      tenant: organization
+      organization: organization
     }.as_json
+  end
+
+  def threads(language)
+    language = guide[:language][:name] if language.blank?
+    submissions.map { |it| it.thread(language) }.compact
+  end
+
+  def with_full_messages(user)
+    self[:submissions] = submissions.map { |it| it.with_full_messages user }
+    self
   end
 
   private
@@ -62,6 +72,11 @@ class Assignment
       {passed: 0, failed: 0, passed_with_warnings: 0}
     end
 
+    def with_full_messages(query, user)
+      where(query)
+        .map { |assignment| assignment.with_full_messages(user) }
+    end
+
     def stats_by(query)
       stats = where(query)
                 .map { |assignment| assignment.submissions.max_by(&:created_at) }
@@ -72,6 +87,13 @@ class Assignment
       stats[:failed] += stats.delete(:errored) || 0
       stats.slice(*empty_stats.keys)
     end
+
+    def add_message_to_submission!(message, sid, assignment_query)
+      assignment = Assignment.find_by!(assignment_query)
+      assignment.add_message! message, sid
+      assignment.notify_message! message, sid
+    end
+
   end
 
 end

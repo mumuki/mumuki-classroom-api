@@ -1,3 +1,5 @@
+require 'net/http'
+
 class Submission
 
   extend WithSubmissionProcess
@@ -14,14 +16,32 @@ class Submission
   field :test_results, type: Array
   field :comments, type: Array
 
-  def comment!(comment)
-    self.comments ||= []
-    self.comments << comment
+  embeds_many :messages
+
+  def add_message!(message)
+    self.messages << Message.new(message.as_json)
   end
 
   def expectation_results
     self[:expectation_results]&.map do |expectation|
       {html: Mumukit::Inspection::I18n.t(expectation), result: expectation['result']}
+    end
+  end
+
+  def thread(language)
+    {
+      status: status,
+      content: Mumukit::ContentType::Markdown.to_html(Mumukit::ContentType::Markdown.highlighted_code language, content),
+      messages: messages,
+      created_at: created_at
+    } if messages.present?
+  end
+
+  def with_full_messages(user)
+    self.tap do |submission|
+      submission[:messages] = messages.map do |message|
+        message.with_full_messages user
+      end
     end
   end
 

@@ -2,7 +2,9 @@ module Classroom
 end
 
 require 'mongoid'
+require 'rouge'
 require 'mumukit/core'
+require 'mumukit/content_type'
 require 'mumukit/service'
 require 'mumukit/inspection'
 require 'mumukit/nuntius'
@@ -11,6 +13,7 @@ require 'mumukit/login'
 require 'mumukit/platform'
 
 Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
+I18n.load_translations_path File.join(__dir__, '..', 'config', 'locales', '*.yml')
 
 require_relative './consumer'
 require_relative './profile'
@@ -29,17 +32,6 @@ end
 
 Mumukit::Auth.configure do |_config|
 
-end
-
-module Mumukit::Login::LoginControllerHelpers
-  def save_current_user_session!(user)
-    mumukit_controller.shared_session.tap do |it|
-      it.uid = user.uid
-      it.profile = {user_uid: user.uid,
-                    user_name: user.name,
-                    user_image_url: user.image_url}
-    end
-  end
 end
 
 Mumukit::Login.configure do |config|
