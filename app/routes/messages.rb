@@ -28,11 +28,11 @@ Mumukit::Platform.map_organization_routes!(self) do
     {status: :created, message: Message.new(message)}
   end
 
-  get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id/messages' do
+  get '/courses/:course/guides/:organization/:repository/:exercise_id/student/:uid/messages' do
     render_threads(course_slug)
   end
 
-  get '/api/guides/:organization/:repository/:uid/:exercise_id/messages' do
+  get '/api/guides/:organization/:repository/:exercise_id/student/:uid/messages' do
     render_threads Student.last_updated_student_by(with_organization uid: uid).course
   end
 end
