@@ -45,11 +45,8 @@ class Assignment
   end
 
   def with_full_messages(user)
-    self.tap do |assignment|
-      assignment[:submissions] = submissions.map do |submission|
-        submission.with_full_messages user
-      end
-    end
+    self[:submissions] = submissions.map { |it| it.with_full_messages user }
+    self
   end
 
   private
@@ -89,6 +86,10 @@ class Assignment
       stats = empty_stats.merge(stats)
       stats[:failed] += stats.delete(:errored) || 0
       stats.slice(*empty_stats.keys)
+    end
+
+    def for_student(org, course, eid, uid)
+      find_by!(organization: org, course: course, 'exercise.eid': eid, 'student.uid': uid)
     end
   end
 
