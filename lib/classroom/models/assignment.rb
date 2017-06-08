@@ -88,9 +88,12 @@ class Assignment
       stats.slice(*empty_stats.keys)
     end
 
-    def for_student(org, course, eid, uid)
-      find_by!(organization: org, course: course, 'exercise.eid': eid, 'student.uid': uid)
+    def add_message_to_submission!(message, sid, assignment_query)
+      assignment = Assignment.find_by!(assignment_query)
+      assignment.add_message! message, sid
+      assignment.notify_message! message, sid
     end
+
   end
 
 end
