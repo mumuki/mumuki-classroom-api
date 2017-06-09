@@ -5,6 +5,10 @@ helpers do
     message
   end
 
+  def suggestion_for(assignment, submission)
+    message.merge(guide_slug: assignment.guide['slug'], exercise: assignment.exercise, submissions: [submission])
+  end
+
   def render_threads(course)
     authorize! :student
     query = with_organization exercise_student_progress_query.merge(course: course, 'exercise.eid': exercise_id)
@@ -24,7 +28,9 @@ end
 Mumukit::Platform.map_organization_routes!(self) do
   post '/courses/:course/messages' do
     authorize! :teacher
-    Assignment.find_by!(assignment_query).add_message_to_submission!(message, submission_id)
+    assignment = Assignment.find_by!(assignment_query)
+    submission = assignment.add_message_to_submission!(message, submission_id)
+    Suggestion.create suggestion_for(assignment, submission)
 
     {status: :created, message: Message.new(message)}
   end
