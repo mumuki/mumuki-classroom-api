@@ -13,5 +13,11 @@ echo ''
 echo "[MumukiDevstart::ClassroomApi] Installing dependencies...."
 bundle install --quiet
 
+if ! pgrep -x "mongod" > /dev/null
+then
+  echo "[MumukiDevstart::ClassroomApi] MongoDB server not running. Starting...."
+  mongod 2>&1 > /dev/null &
+fi
+
 echo "[MumukiDevstart::ClassroomApi] Starting server...."
 bundle exec puma
