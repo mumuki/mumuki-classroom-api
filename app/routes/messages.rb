@@ -24,7 +24,8 @@ end
 Mumukit::Platform.map_organization_routes!(self) do
   post '/courses/:course/messages' do
     authorize! :teacher
-    Assignment.add_message_to_submission!(message, submission_id, assignment_query)
+    Assignment.find_by!(assignment_query).add_message_to_submission!(message, submission_id)
+
     {status: :created, message: Message.new(message)}
   end
 
