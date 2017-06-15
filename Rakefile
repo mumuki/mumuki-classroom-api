@@ -11,5 +11,3 @@ task :routes do
   # Tell SinatraRakeRoutes what your Sinatra::Base application class is called:
   SinatraRakeRoutes.set_app_class(Sinatra::Application)
 end
-
-require 'sinatra-rake-routes/tasks'
