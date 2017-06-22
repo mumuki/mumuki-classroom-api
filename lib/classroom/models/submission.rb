@@ -6,7 +6,7 @@ class Submission
   include Mongoid::Document
 
   field :sid, type: String
-  field :content, type: String
+  field :content
   field :created_at, type: Time
   field :expectation_results, type: Array
   field :feedback, type: String
@@ -31,7 +31,7 @@ class Submission
   def thread(language)
     {
       status: status,
-      content: Mumukit::ContentType::Markdown.to_html(Mumukit::ContentType::Markdown.highlighted_code language, content),
+      content: Mumukit::ContentType::Markdown.to_html(Mumukit::ContentType::Markdown.highlighted_code language, content || ''),
       messages: messages,
       created_at: created_at
     } if messages.present?
