@@ -15,7 +15,7 @@ class Notification
   create_index({'organization': 1, 'read': 1})
 
   def self.allowed(options, permissions)
-    where(options).select { |course| permissions.has_permission? :teacher, course }.map(&:with_assignment)
+    where(options).select {|notification| permissions.has_permission? :teacher, notification.course}.map(&:with_assignment)
   end
 
   def self.page(organization, permissions, page, per_page)
@@ -23,7 +23,7 @@ class Notification
       .sort(created_at: :desc)
       .skip(per_page * (page - 1))
       .limit(per_page)
-      .select { |course| permissions.has_permission? :teacher, course }
+      .select {|course| permissions.has_permission? :teacher, course}
       .map(&:with_assignment)
   end
 
