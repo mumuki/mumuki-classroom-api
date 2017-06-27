@@ -22,4 +22,8 @@ class Suggestion
     self.submissions << submission
     self.update_attributes! submissions: submissions
   end
+
+  def self.create_from(message, assignment, submission)
+    self.create message.merge(guide_slug: assignment.guide['slug'], exercise: assignment.exercise, submissions: [submission])
+  end
 end
