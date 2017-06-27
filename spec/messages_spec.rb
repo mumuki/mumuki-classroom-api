@@ -23,10 +23,9 @@ describe 'messages' do
 
         context 'creates a new suggestion' do
           let(:suggestion) { Suggestion.last }
-          it { expect(suggestion.times_used).to eq 0 }
+          it { expect(suggestion.times_used).to eq 1 }
           it { expect(suggestion.guide_slug).to eq 'mumukiproject/example' }
           it { expect(suggestion.exercise.as_json).to json_like exercise }
-          it { expect(suggestion.submissions.size).to eq 1 }
         end
       end
 
