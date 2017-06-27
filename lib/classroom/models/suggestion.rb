@@ -15,6 +15,11 @@ class Suggestion
   create_index({'guide_slug': 1, 'exercise_id': 1})
 
   def times_used
-    submissions.count
+    self.submissions.count
+  end
+
+  def add_submission!(submission)
+    self.submissions << submission
+    self.update_attributes! submissions: submissions
   end
 end

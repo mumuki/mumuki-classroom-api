@@ -27,6 +27,23 @@ describe 'messages' do
           it { expect(suggestion.guide_slug).to eq 'mumukiproject/example' }
           it { expect(suggestion.exercise.as_json).to json_like exercise }
         end
+
+        context 'updates existing suggestion when used' do
+          let(:message_from_suggestion_to_post) { {uid: '2', exercise_id: 2, submission_id: '5', message: message, suggestion_id: Suggestion.last.id}.to_json }
+
+          before { Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: { slug: 'mumukiproject/example' }, submissions: [{sid: '5'}]}.merge organization: 'example', course: 'example/bar') }
+
+          before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
+                                                                                           submission_id: '5',
+                                                                                           exercise_id: 2,
+                                                                                           organization: 'example'}.as_json) }
+
+          before { post '/courses/bar/messages', message_from_suggestion_to_post }
+
+
+          it { expect(Suggestion.count).to eq 1 }
+          it { expect(Suggestion.last.times_used).to eq 2 }
+        end
       end
 
       context 'when no content' do

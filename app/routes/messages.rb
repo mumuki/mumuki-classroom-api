@@ -23,6 +23,10 @@ helpers do
   def submission_id
     json_body[:submission_id]
   end
+
+  def suggestion_id
+    json_body[:suggestion_id]
+  end
 end
 
 Mumukit::Platform.map_organization_routes!(self) do
@@ -30,7 +34,12 @@ Mumukit::Platform.map_organization_routes!(self) do
     authorize! :teacher
     assignment = Assignment.find_by!(assignment_query)
     submission = assignment.add_message_to_submission!(message, submission_id)
-    Suggestion.create suggestion_for(assignment, submission)
+    puts "\n\n\n#{Suggestion.all.as_json}\n\n\n"
+    if suggestion_id
+      Suggestion.find(suggestion_id).add_submission!(submission)
+    else
+      Suggestion.create suggestion_for(assignment, submission)
+    end
 
     {status: :created, message: Message.new(message)}
   end
