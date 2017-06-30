@@ -12,7 +12,7 @@ class Suggestion
   embeds_one :exercise
   embeds_many :submissions
 
-  create_index({'guide_slug': 1, 'exercise_id': 1})
+  create_index({'guide_slug': 1, 'exercise.eid': 1})
 
   def times_used
     self.submissions.count

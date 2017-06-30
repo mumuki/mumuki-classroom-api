@@ -142,4 +142,5 @@ require_relative './routes/teachers'
 require_relative './routes/students'
 require_relative './routes/permissions'
 require_relative './routes/notifications'
+require_relative './routes/suggestions'
 
