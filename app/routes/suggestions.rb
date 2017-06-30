@@ -7,6 +7,6 @@ end
 Mumukit::Platform.map_organization_routes!(self) do
   get '/suggestions/:organization/:repository/:exercise_id' do
     authorize! :teacher
-    Suggestion.where(guide_slug: repo_slug, 'exercise.eid': exercise_id)
+    Suggestion.where(guide_slug: repo_slug, 'exercise.eid': exercise_id).sort(times_used: :desc)
   end
 end
