@@ -16,6 +16,10 @@ helpers do
     with_organization_and_course 'exercise.eid': json_body[:exercise_id], 'student.uid': json_body[:uid], 'guide.slug': json_body[:guide_slug]
   end
 
+  def find_or_create_suggestion(assignment)
+    suggestion_id ? Suggestion.find(suggestion_id) : Suggestion.create_from(message, assignment)
+  end
+
   def submission_id
     json_body[:submission_id]
   end
@@ -30,12 +34,13 @@ Mumukit::Platform.map_organization_routes!(self) do
     authorize! :teacher
     assignment = Assignment.find_by!(assignment_query)
     submission = assignment.add_message_to_submission!(message, submission_id)
-    puts "\n\n\n#{Suggestion.all.as_json}\n\n\n"
+
     if suggestion_id
       Suggestion.find(suggestion_id).add_submission!(submission)
     else
       Suggestion.create_from(message, assignment, submission)
     end
+    find_or_create_suggestion(assignment).add_submission!(submission)
 
     {status: :created, message: Message.new(message)}
   end
