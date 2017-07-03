@@ -19,16 +19,16 @@ class Suggestion
 
   def add_submission!(submission)
     self.submissions << submission
-    self.update_attributes! submissions: submissions
+    update_attributes! submissions: submissions
   end
 
   def self.create_from(message, assignment)
-    self.create message.merge(guide_slug: assignment.guide['slug'], exercise: assignment.exercise)
+    create message.merge(guide_slug: assignment.guide['slug'], exercise: assignment.exercise)
   end
 
   private
 
   def update_times_used
-    self.times_used = self.submissions.size
+    self.times_used = submissions.size
   end
 end

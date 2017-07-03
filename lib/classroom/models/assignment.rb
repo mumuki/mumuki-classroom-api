@@ -52,8 +52,8 @@ class Assignment
   end
 
   def add_message_to_submission!(message, sid)
-    submission = self.add_message! message, sid
-    self.notify_message! message, sid
+    submission = add_message! message, sid
+    notify_message! message, sid
     submission
   end
 
