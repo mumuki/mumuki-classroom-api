@@ -13,7 +13,7 @@ helpers do
   end
 
   def assignment_query
-    with_organization_and_course 'exercise.eid': json_body[:exercise_id], 'student.uid': json_body[:uid]
+    with_organization_and_course 'exercise.eid': json_body[:exercise_id], 'student.uid': json_body[:uid], 'guide.slug': json_body[:guide_slug]
   end
 
   def submission_id
