@@ -29,7 +29,7 @@ describe 'messages' do
         end
 
         context 'updates existing suggestion when used' do
-          let(:message_from_suggestion_to_post) { {uid: '2', exercise_id: 2, submission_id: '5', message: message, suggestion_id: Suggestion.last.id}.to_json }
+          let(:message_from_suggestion_to_post) { {uid: '2', exercise_id: 2, submission_id: '5', message: message, guide_slug: 'mumukiproject/example', suggestion_id: Suggestion.last.id}.to_json }
 
           before { Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: { slug: 'mumukiproject/example' }, submissions: [{sid: '5'}]}.merge organization: 'example', course: 'example/bar') }
 

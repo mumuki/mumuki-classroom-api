@@ -34,12 +34,6 @@ Mumukit::Platform.map_organization_routes!(self) do
     authorize! :teacher
     assignment = Assignment.find_by!(assignment_query)
     submission = assignment.add_message_to_submission!(message, submission_id)
-
-    if suggestion_id
-      Suggestion.find(suggestion_id).add_submission!(submission)
-    else
-      Suggestion.create_from(message, assignment, submission)
-    end
     find_or_create_suggestion(assignment).add_submission!(submission)
 
     {status: :created, message: Message.new(message)}
