@@ -17,8 +17,10 @@ class Assignment
   create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
   def add_message!(message, sid)
-    submissions.find_by!(sid: sid).add_message! message
+    submission = submissions.find_by!(sid: sid)
+    submission.add_message! message
     update_submissions!
+    submission
   end
 
   def add_submission!(submission)
@@ -47,6 +49,12 @@ class Assignment
   def with_full_messages(user)
     self[:submissions] = submissions.map { |it| it.with_full_messages user }
     self
+  end
+
+  def add_message_to_submission!(message, sid)
+    submission = add_message! message, sid
+    notify_message! message, sid
+    submission
   end
 
   private
@@ -87,13 +95,6 @@ class Assignment
       stats[:failed] += stats.delete(:errored) || 0
       stats.slice(*empty_stats.keys)
     end
-
-    def add_message_to_submission!(message, sid, assignment_query)
-      assignment = Assignment.find_by!(assignment_query)
-      assignment.add_message! message, sid
-      assignment.notify_message! message, sid
-    end
-
   end
 
 end
