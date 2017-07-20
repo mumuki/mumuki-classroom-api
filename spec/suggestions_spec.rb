@@ -19,7 +19,9 @@ describe 'suggestions' do
       before { get '/suggestions/mumukiproject/foo/3' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like([{content: "<p>Check the arity of the <code>foo</code> function.</p>\n", times_used: 3}, {content: "<p>Wrong arity.</p>\n", times_used: 1}], only: [:content, :times_used]) }
+      it { expect(last_response.body).to json_like([
+        {content: 'Check the arity of the `foo` function.', content_html: "<p>Check the arity of the <code>foo</code> function.</p>\n", times_used: 3},
+        {content: 'Wrong arity.', content_html: "<p>Wrong arity.</p>\n", times_used: 1}], only: [:content, :content_html, :times_used]) }
     end
 
     context 'reject unauthorized requests' do

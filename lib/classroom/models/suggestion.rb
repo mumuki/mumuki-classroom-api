@@ -22,8 +22,8 @@ class Suggestion
     update_attributes! submissions: submissions
   end
 
-  def content
-    Mumukit::ContentType::Markdown.to_html self[:content]
+  def content_html
+    Mumukit::ContentType::Markdown.to_html content
   end
 
   def self.create_from(message, assignment)
