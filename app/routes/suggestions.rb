@@ -7,6 +7,6 @@ end
 Mumukit::Platform.map_organization_routes!(self) do
   get '/suggestions/:organization/:repository/:exercise_id' do
     authorize! :teacher
-    Suggestion.where(guide_slug: repo_slug, 'exercise.eid': exercise_id).sort(times_used: :desc)
+    Suggestion.where(guide_slug: repo_slug, 'exercise.eid': exercise_id).sort(updated_at: :desc).map { |s| s.as_json(methods: :content_html).merge(id: s.id) }
   end
 end

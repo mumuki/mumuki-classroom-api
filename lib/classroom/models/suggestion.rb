@@ -22,6 +22,10 @@ class Suggestion
     update_attributes! submissions: submissions
   end
 
+  def content_html
+    Mumukit::ContentType::Markdown.to_html content
+  end
+
   def self.create_from(message, assignment)
     create message.merge(guide_slug: assignment.guide['slug'], exercise: assignment.exercise)
   end
