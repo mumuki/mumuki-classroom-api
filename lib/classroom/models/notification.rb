@@ -23,7 +23,7 @@ class Notification
       .sort(created_at: :desc)
       .skip(per_page * (page - 1))
       .limit(per_page)
-      .select {|course| permissions.has_permission? :teacher, course}
+      .select {|notification| permissions.has_permission? :teacher, notification.course}
       .map(&:with_assignment)
   end
 
