@@ -12,7 +12,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/api/courses/:course/students/:uid' do
     authorize! :teacher
-    {guide_students_progress: GuideProgress.where(with_organization_and_course 'student.uid': uid).as_json}
+    {guide_students_progress: GuideProgress.where(with_organization_and_course 'student.uid': uid).sort(created_at: :asc).as_json}
   end
 
   post '/courses/:course/students/:uid' do

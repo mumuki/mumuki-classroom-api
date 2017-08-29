@@ -55,8 +55,8 @@ describe Course do
       before { get '/api/courses/k2048/students/agus@mumuki.org' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress3),
-                                                                              with_course(guide_progress1)]}, except_fields) }
+      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1),
+                                                                              with_course(guide_progress3)]}, except_fields) }
     end
 
   end
