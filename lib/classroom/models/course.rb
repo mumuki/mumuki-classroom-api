@@ -27,7 +27,7 @@ class Course
   end
 
   def notify_invitation!
-    Mumukit::Nuntius.notify_event! 'InvitationCreated', {invitation: self[:invitation]}
+    Mumukit::Nuntius.notify_event! 'InvitationCreated', {invitation: self[:invitation].as_json}
   end
 
   def notify!

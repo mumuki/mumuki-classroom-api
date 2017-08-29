@@ -15,6 +15,10 @@ class Invitation
     end
   end
 
+  def as_json
+    {code: code, course: course_slug, expiration_date: expiration_date}.as_json
+  end
+
   def expired?
     Time.now > expiration_date
   end

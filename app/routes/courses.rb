@@ -20,6 +20,11 @@ Mumukit::Platform.map_organization_routes!(self) do
     {status: :created}
   end
 
+  get '/courses/:course' do
+    authorize! :teacher
+    {course: Course.find_by!(with_organization slug: course_slug)}
+  end
+
   post '/courses/:course/invitation' do
     authorize! :teacher
     course = Course.find_by! with_organization slug: course_slug

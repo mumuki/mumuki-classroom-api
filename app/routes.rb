@@ -8,6 +8,7 @@ require_relative '../lib/classroom'
 
 
 configure do
+  enable :cross_origin
   set :app_name, 'classroom'
   set :static, true
   set :public_folder, 'public'
@@ -144,3 +145,8 @@ require_relative './routes/permissions'
 require_relative './routes/notifications'
 require_relative './routes/suggestions'
 
+options '*' do
+  response.headers['Allow'] = settings.allow_methods.map { |it| it.to_s.upcase }.join(',')
+  response.headers['Access-Control-Allow-Headers'] = 'X-Mumuki-Auth-Token, X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept, Authorization'
+  200
+end
