@@ -15,7 +15,7 @@ class Invitation
     end
   end
 
-  def as_json(option={})
+  def as_json(*)
     {code: code, course: course_slug, expiration_date: expiration_date}
   end
 
