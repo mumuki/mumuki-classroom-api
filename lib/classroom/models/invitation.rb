@@ -11,7 +11,7 @@ class Invitation
 
   def check_if_expired!
     if expired?
-      raise Exception.new "Must be in future"
+      raise 'Must be in future'
     end
   end
 
