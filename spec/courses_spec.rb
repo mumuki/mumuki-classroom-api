@@ -74,6 +74,43 @@ describe Course do
       it { expect(last_response.status).to eq 422 }
 
     end
+
+    context 'create course does not create invitation link' do
+      let(:created) { Course.create! course }
+
+      it { expect(created.invitation).to be nil }
+    end
+
+    context 'create invitation link to existing course' do
+      let(:time) { Time.now + 10.minutes }
+      let(:created) { Course.create! course }
+      let(:invitation) { created.invitation_link! time }
+
+      it { expect(invitation).to be_truthy }
+      it { expect(invitation.expiration_date).to eq time }
+      it { expect(invitation.course_slug).to eq created.slug }
+      it { expect(invitation.code.length).to eq 6 }
+    end
+
+    context 'should not create invitation link if already exists and is not expired' do
+      let(:time) { Time.now + 10.minutes }
+      let(:created) { Course.create!(course) }
+      let(:invitation) { created.invitation_link! time }
+      let(:invitation2) { created.invitation_link! time + 20.minutes }
+
+      it { expect(invitation.code).to eq invitation2.code }
+      it { expect(invitation.course_slug).to eq invitation2.course_slug }
+      it { expect(invitation.expiration_date).to eq invitation2.expiration_date }
+    end
+
+    context 'should not create invitation link if expired date is in past' do
+      let!(:time) { Time.now }
+
+      let(:created) { Course.create!(course) }
+      let(:invitation) { created.invitation_link! time - 10 }
+
+      it { expect { invitation }.to raise_exception }
+    end
   end
 
   describe 'get courses/:course/progress' do

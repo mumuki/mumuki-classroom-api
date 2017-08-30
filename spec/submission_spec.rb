@@ -58,8 +58,8 @@ describe Submission do
       end
 
       context 'and student is registered to a course' do
-        let(:guide_progress) { GuideProgress.where(organization: 'example', course: 'example/course1').as_json }
-        let(:exercise_progress) { Assignment.where(organization: 'example', course: 'example/course1').as_json }
+        let(:guide_progress) { GuideProgress.where(organization: 'example', course: 'example/course1').sort(created_at: :asc).as_json }
+        let(:exercise_progress) { Assignment.where(organization: 'example', course: 'example/course1').sort(created_at: :asc).as_json }
         let(:course_student) { {course: {slug: 'example/course1'}, student: submitter} }
         let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 

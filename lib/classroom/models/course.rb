@@ -12,8 +12,23 @@ class Course
   field :period, type: String
   field :description, type: String
   field :organization, type: String
+  embeds_one :invitation
 
   create_index({organization: 1, slug: 1}, {unique: true})
+
+  def invitation_link!(expiration_date)
+    generate_invitation expiration_date if invitation.blank? || invitation.expired?
+    invitation
+  end
+
+  def generate_invitation(expiration_date)
+    update_attribute :invitation, expiration_date: expiration_date, course_slug: slug, code: Invitation.generate_code
+    notify_invitation!
+  end
+
+  def notify_invitation!
+    Mumukit::Nuntius.notify_event! 'InvitationCreated', {invitation: invitation.as_json}
+  end
 
   def notify!
     Mumukit::Nuntius.notify_event! 'CourseChanged', {course: self.as_json}

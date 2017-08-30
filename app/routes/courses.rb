@@ -20,6 +20,17 @@ Mumukit::Platform.map_organization_routes!(self) do
     {status: :created}
   end
 
+  get '/courses/:course' do
+    authorize! :teacher
+    {course: Course.find_by!(with_organization slug: course_slug)}
+  end
+
+  post '/courses/:course/invitation' do
+    authorize! :teacher
+    course = Course.find_by! with_organization slug: course_slug
+    {invitation: course.invitation_link!(json_body[:expiration_date])}
+  end
+
   get '/courses/:course/guides' do
     authorize! :teacher
     {guides: Guide.where(with_organization_and_course).as_json}
@@ -37,7 +48,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/guides/:organization/:repository/:uid' do
     authorize! :teacher
-    {exercise_student_progress: Assignment.with_full_messages(with_organization_and_course(exercise_student_progress_query), current_user) }
+    {exercise_student_progress: Assignment.with_full_messages(with_organization_and_course(exercise_student_progress_query), current_user)}
   end
 
   get '/courses/:course/progress' do

@@ -8,6 +8,7 @@ require_relative '../lib/classroom'
 
 
 configure do
+  enable :cross_origin
   set :app_name, 'classroom'
   set :static, true
   set :public_folder, 'public'
@@ -143,4 +144,3 @@ require_relative './routes/students'
 require_relative './routes/permissions'
 require_relative './routes/notifications'
 require_relative './routes/suggestions'
-
