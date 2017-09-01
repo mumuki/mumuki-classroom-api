@@ -19,5 +19,7 @@ then
   mongod 2>&1 > /dev/null &
 fi
 
+mongo < seed-central.js
+
 echo "[MumukiDevstart::ClassroomApi] Starting server...."
 bundle exec puma
