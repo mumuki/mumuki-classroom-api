@@ -10,6 +10,7 @@ class Organization
   field :book_id, type: Integer
   field :books, type: Array
   field :public, type: Mongoid::Boolean
+  field :raise_hand_enabled, type: Mongoid::Boolean
   field :logo_url, type: String
   field :lock_json, type: Hash
   field :description, type: String
@@ -19,6 +20,7 @@ class Organization
   field :terms_of_service, type: String
   field :theme_stylesheet_url, type: String
   field :extension_javascript_url, type: String
+  field :community_link, type: String
   field :login_methods, type: Array
 
   create_index({name: 1}, {unique: true})
