@@ -36,7 +36,7 @@ end
 
 Mumukit::Login.configure do |config|
   config.user_class = User
-  config.framework = Mumukit::Login::Framework::Sinatra
+  config.framework = Mumukit::Platform::WebFramework::Sinatra
 end
 
 Mumukit::Platform.configure do |config|
