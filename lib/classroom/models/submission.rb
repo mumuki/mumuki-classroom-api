@@ -15,8 +15,14 @@ class Submission
   field :submissions_count, type: Integer
   field :test_results, type: Array
   field :comments, type: Array
+  field :manual_correction, type: String
 
   embeds_many :messages
+
+  def correct!(correction, status)
+    self.status = status
+    self.manual_correction = correction
+  end
 
   def add_message!(message)
     self.messages << Message.new(message.as_json)
@@ -35,6 +41,10 @@ class Submission
       messages: messages,
       created_at: created_at
     } if messages.present?
+  end
+
+  def manual_correction
+    Mumukit::ContentType::Markdown.to_html(self[:manual_correction]) if self[:manual_correction]
   end
 
   def with_full_messages(user)

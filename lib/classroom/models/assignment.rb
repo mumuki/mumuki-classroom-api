@@ -16,6 +16,12 @@ class Assignment
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1, 'exercise.eid': 1})
   create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
+  def correct!(sid, correction, status)
+    submission = submissions.find_by! sid: sid
+    submission.correct! correction, status
+    update_submissions!
+  end
+
   def add_message!(message, sid)
     submission = submissions.find_by!(sid: sid)
     submission.add_message! message
