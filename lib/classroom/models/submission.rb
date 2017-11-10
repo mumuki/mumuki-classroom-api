@@ -15,8 +15,14 @@ class Submission
   field :submissions_count, type: Integer
   field :test_results, type: Array
   field :comments, type: Array
+  field :manual_evaluation, type: String
 
   embeds_many :messages
+
+  def evaluate_manually!(comment, status)
+    self.status = status
+    self.manual_evaluation = comment
+  end
 
   def add_message!(message)
     self.messages << Message.new(message.as_json)
@@ -35,6 +41,10 @@ class Submission
       messages: messages,
       created_at: created_at
     } if messages.present?
+  end
+
+  def manual_evaluation
+    Mumukit::ContentType::Markdown.to_html(self[:manual_evaluation]) if self[:manual_evaluation]
   end
 
   def with_full_messages(user)
