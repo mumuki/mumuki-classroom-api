@@ -15,13 +15,13 @@ class Submission
   field :submissions_count, type: Integer
   field :test_results, type: Array
   field :comments, type: Array
-  field :manual_correction, type: String
+  field :manual_evaluation, type: String
 
   embeds_many :messages
 
-  def correct!(correction, status)
+  def evaluate_manually!(comment, status)
     self.status = status
-    self.manual_correction = correction
+    self.manual_evaluation = comment
   end
 
   def add_message!(message)
@@ -43,8 +43,8 @@ class Submission
     } if messages.present?
   end
 
-  def manual_correction
-    Mumukit::ContentType::Markdown.to_html(self[:manual_correction]) if self[:manual_correction]
+  def manual_evaluation
+    Mumukit::ContentType::Markdown.to_html(self[:manual_evaluation]) if self[:manual_evaluation]
   end
 
   def with_full_messages(user)

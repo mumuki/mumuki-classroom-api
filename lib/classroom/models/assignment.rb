@@ -16,14 +16,18 @@ class Assignment
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1, 'exercise.eid': 1})
   create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
-  def correct!(sid, correction, status)
-    submission = submissions.find_by! sid: sid
-    submission.correct! correction, status
+  def evaluate_manually!(sid, comment, status)
+    submission = submission(sid)
+    submission.evaluate_manually! comment, status
     update_submissions!
   end
 
+  def submission(sid)
+    submissions.find_by!(sid: sid)
+  end
+
   def add_message!(message, sid)
-    submission = submissions.find_by!(sid: sid)
+    submission = submission(sid)
     submission.add_message! message
     update_submissions!
     submission
@@ -36,6 +40,11 @@ class Assignment
 
   def notify_message!(message, sid)
     Mumukit::Nuntius.notify! 'teacher-messages', json_to_notify(message, sid)
+  end
+
+  def notify_manual_evaluation!(sid)
+    assignment = {submission_id: sid}.merge(submission(sid).as_json only: [:status, :manual_evaluation])
+    Mumukit::Nuntius.notify_event! 'ManualEvaluation', assignment: assignment
   end
 
   def json_to_notify(message, sid)
