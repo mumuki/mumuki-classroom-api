@@ -133,6 +133,7 @@ before do
 end
 
 require_relative './routes/courses'
+require_relative './routes/guides'
 require_relative './routes/messages'
 require_relative './routes/errors'
 require_relative './routes/exams'
