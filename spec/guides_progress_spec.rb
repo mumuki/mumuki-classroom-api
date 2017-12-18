@@ -6,7 +6,7 @@ describe Course do
     {organization: 'example', course: 'example/k2048'}.merge json
   end
 
-  let(:except_fields) { {except: [:created_at, :updated_at]} }
+  let(:except_fields) { {except: [:created_at, :updated_at, :page, :total]} }
 
   let(:guide_progress1) { {
     guide: {slug: 'example/foo'},

@@ -6,7 +6,7 @@ describe Student do
 
   let(:date) { Time.now }
 
-  let(:except_fields) { {except: [:created_at, :updated_at]} }
+  let(:except_fields) { {except: [:created_at, :updated_at, :page, :total]} }
 
   let(:student1) { {uid: 'github|123456', first_name: 'Dorothy'} }
   let(:student2) { {uid: 'twitter|123456', first_name: 'John'} }

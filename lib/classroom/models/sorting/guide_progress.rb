@@ -1,7 +1,7 @@
 module Sorting::GuideProgress
   def self.from(sort_by, ordering)
     order = "#{Criteria.name}::#{ordering.to_s.camelize}".constantize
-    "#{name}::By#{sort_by.to_s.camelize}".constantize.order_by order
+    "Sorting::GuideProgress::By#{sort_by.to_s.camelize}".constantize.order_by order
   end
 
   module ByName
