@@ -43,7 +43,16 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/guides/:organization/:repository' do
     authorize! :teacher
-    {guide_students_progress: GuideProgress.where(with_organization_and_course 'guide.slug': repo_slug).as_json}
+    sorting_criteria = Sorting::GuideProgress.from(sort_by, order_by)
+    guide_progress_where = GuideProgress
+                             .where(with_organization_and_course 'guide.slug': repo_slug)
+                             .with_detached(with_detached)
+                             .search(query)
+    {
+      page: page + 1,
+      total: guide_progress_where.count,
+      guide_students_progress: guide_progress_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
+    }
   end
 
   get '/courses/:course/guides/:organization/:repository/:uid' do

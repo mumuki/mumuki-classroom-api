@@ -2,6 +2,7 @@ class Student
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  include WithPagination
 
   field :uid, type: String
   field :first_name, type: String
@@ -21,21 +22,6 @@ class Student
   create_index({organization: 1, uid: 1})
   create_index({'last_assignment.guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
   create_index({first_name: 'text', last_name: 'text', email: 'text'})
-
-  scope :search, -> (string) {
-    if string.strip.present?
-      where '$text': {'$search': string, '$language': 'none'}
-    else
-      where({})
-    end
-  }
-  scope :with_detached, -> (detached) {
-    if detached
-      where({})
-    else
-      where 'detached': {'$exists': false}
-    end
-  }
 
   def course_name
     course.to_mumukit_slug.course

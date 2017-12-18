@@ -2,6 +2,7 @@ class GuideProgress
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  include WithPagination
 
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
@@ -14,6 +15,7 @@ class GuideProgress
   create_index({'organization': 1, 'course': 1, 'student.uid': 1})
   create_index({'organization': 1, 'course': 1, 'guide.slug': 1, 'student.uid': 1})
   create_index({'guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
+  create_index({'student.first_name': 'text', 'student.last_name': 'text', 'student.email': 'text'})
 
   class << self
     def detach_all_by!(query)
