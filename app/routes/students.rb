@@ -13,7 +13,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     {
       page: page + 1,
       total: student_where.count,
-      list: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
+      students: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
     }
   end
 
