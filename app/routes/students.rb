@@ -6,9 +6,10 @@ Mumukit::Platform.map_organization_routes!(self) do
     per_page = (params[:per_page] || 30).to_i
     sort_by = params[:sort_by] || :name
     with_detached = params[:with_detached].boolean_value
+    query = params[:q] || ''
     order_by = params[:order_by] || :asc
     sorting_criteria = Sorting::Student.from(sort_by, order_by)
-    student_where = Student.where(with_organization_and_course).with_detached with_detached
+    student_where = Student.where(with_organization_and_course).with_detached(with_detached).search(query)
     {
       page: page + 1,
       total: student_where.count,
