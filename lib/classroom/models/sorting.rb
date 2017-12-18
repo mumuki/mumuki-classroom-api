@@ -2,7 +2,7 @@ module Sorting
   module Student
     def self.from(sort_by, ordering)
       order = "Criteria::#{ordering.to_s.camelize}".constantize
-      "#{name}::#{sort_by.to_s.camelize}".constantize.order_by order
+      "#{name}::By#{sort_by.to_s.camelize}".constantize.order_by order
     end
 
     module ByName

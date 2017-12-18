@@ -45,3 +45,28 @@ class Array
     end
   end
 end
+
+
+class String
+  def boolean_value
+    downcase.strip == 'true'
+  end
+end
+
+class TrueClass
+  def boolean_value
+    self
+  end
+end
+
+class FalseClass
+  def boolean_value
+    self
+  end
+end
+
+class NilClass
+  def boolean_value
+    false
+  end
+end

@@ -21,6 +21,14 @@ class Student
   create_index({organization: 1, uid: 1})
   create_index({'last_assignment.guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
+  scope :with_detached, -> (detached) {
+    if detached
+      where({})
+    else
+      where 'detached': {'$exists': false}
+    end
+  }
+
   def course_name
     course.to_mumukit_slug.course
   end

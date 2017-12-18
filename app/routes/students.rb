@@ -4,14 +4,15 @@ Mumukit::Platform.map_organization_routes!(self) do
     authorize! :teacher
     page = (params[:page] || 1).to_i - 1
     per_page = (params[:per_page] || 30).to_i
-    sort_by = params[:sort_by] || :by_name
+    sort_by = params[:sort_by] || :name
+    with_detached = params[:with_detached].boolean_value
     order_by = params[:order_by] || :asc
     sorting_criteria = Sorting::Student.from(sort_by, order_by)
-    student_where = Student.where(with_organization_and_course)
+    student_where = Student.where(with_organization_and_course).with_detached with_detached
     {
       page: page + 1,
       total: student_where.count,
-      students: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
+      list: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
     }
   end
 
