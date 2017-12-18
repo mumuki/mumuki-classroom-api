@@ -1,6 +1,7 @@
 require_relative './models/concerns/extensions'
 require_relative './models/concerns/with_submission_process'
 require_relative './models/concerns/with_failed_submission_reprocess'
+require_relative './models/concerns/with_pagination'
 
 require_relative './models/message'
 require_relative './models/submission'
@@ -21,3 +22,5 @@ require_relative './models/user'
 require_relative './models/notification'
 require_relative './models/suggestion'
 require_relative './models/invitation'
+
+require_relative './models/sorting'

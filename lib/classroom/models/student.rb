@@ -2,6 +2,7 @@ class Student
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  include WithPagination
 
   field :uid, type: String
   field :first_name, type: String
@@ -20,6 +21,7 @@ class Student
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
   create_index({organization: 1, uid: 1})
   create_index({'last_assignment.guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
+  create_index({first_name: 'text', last_name: 'text', email: 'text'})
 
   def course_name
     course.to_mumukit_slug.course
