@@ -2,7 +2,17 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/students' do
     authorize! :teacher
-    {students: Student.where(with_organization_and_course)}
+    page = (params[:page] || 1).to_i - 1
+    per_page = (params[:per_page] || 30).to_i
+    sort_by = params[:sort_by] || :by_name
+    order_by = params[:order_by] || :asc
+    sorting_criteria = Sorting::Student.from(sort_by, order_by)
+    student_where = Student.where(with_organization_and_course)
+    {
+      page: page + 1,
+      total: student_where.count,
+      students: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
+    }
   end
 
   get '/api/courses/:course/students' do

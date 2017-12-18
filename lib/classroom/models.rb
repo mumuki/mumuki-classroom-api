@@ -21,3 +21,5 @@ require_relative './models/user'
 require_relative './models/notification'
 require_relative './models/suggestion'
 require_relative './models/invitation'
+
+require_relative './models/sorting'
