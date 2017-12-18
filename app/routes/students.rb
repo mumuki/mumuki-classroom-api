@@ -1,25 +1,16 @@
 Mumukit::Platform.map_organization_routes!(self) do
 
-  get '/courses/:course/students' do
-    authorize! :teacher
-    page = (params[:page] || 1).to_i - 1
-    per_page = (params[:per_page] || 30).to_i
-    sort_by = params[:sort_by] || :name
-    with_detached = params[:with_detached].boolean_value
-    query = params[:q] || ''
-    order_by = params[:order_by] || :asc
-    sorting_criteria = Sorting::Student.from(sort_by, order_by)
-    student_where = Student.where(with_organization_and_course).with_detached(with_detached).search(query)
-    {
-      page: page + 1,
-      total: student_where.count,
-      students: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
-    }
-  end
-
-  get '/api/courses/:course/students' do
-    authorize! :teacher
-    {students: Student.where(with_organization_and_course)}
+  ['/api', ''].each do |endpoint|
+    get "#{endpoint}/courses/:course/students" do
+      authorize! :teacher
+      sorting_criteria = Sorting::Student.from(sort_by, order_by)
+      student_where = Student.where(with_organization_and_course).with_detached(with_detached).search(query)
+      {
+        page: page + 1,
+        total: student_where.count,
+        students: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
+      }
+    end
   end
 
   get '/api/courses/:course/students/:uid' do

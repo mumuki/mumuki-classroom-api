@@ -126,6 +126,30 @@ helpers do
     Mumukit::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
   end
 
+  def page
+    (params[:page] || 1).to_i - 1
+  end
+
+  def per_page
+    (params[:per_page] || 30).to_i
+  end
+
+  def sort_by
+    params[:sort_by] || :name
+  end
+
+  def with_detached
+    params[:with_detached].boolean_value
+  end
+
+  def query
+    params[:q] || ''
+  end
+
+  def order_by
+    params[:order_by] || :asc
+  end
+
 end
 
 before do
