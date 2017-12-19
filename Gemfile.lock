@@ -84,7 +84,7 @@ GEM
       mumukit-core (~> 1.0)
     mumukit-platform (0.4.0)
       mumukit-core (~> 1.0)
-    mumukit-service (3.0.0)
+    mumukit-service (3.0.1)
       bson_ext
       mongo (~> 2.1)
       mumukit-core (~> 1.0)
@@ -124,7 +124,7 @@ GEM
       binding_of_caller (>= 0.7)
       pry (>= 0.9.11)
     public_suffix (3.0.0)
-    puma (3.8.2)
+    puma (3.11.0)
     rack (1.6.8)
     rack-protection (1.5.3)
       rack
