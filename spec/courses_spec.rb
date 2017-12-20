@@ -121,4 +121,52 @@ describe Course do
     it { expect(last_response.body).to json_like({exercise_student_progress: [exercise_progress.merge(organization: 'example', course: 'example/foo')]}, except_fields) }
   end
 
+  describe 'get courses/:course/report' do
+    let(:student) { {
+      organization: 'example',
+      course: 'example/foo',
+      uid: 'foo@bar.com',
+      email: 'foo@bar.com',
+      first_name: 'Foo',
+      last_name: 'Bar',
+      last_assignment: {
+        exercise: {
+          eid: 1,
+          name: 'Test',
+          number: 1,
+        },
+        guide: {
+          name: 'Exam Test',
+          slug: 'foo/bar',
+          language: {
+            name: 'javascript'
+          },
+          parent: {
+            type: 'Exam',
+            name: 'Exam Test'
+          }
+        },
+        submission: {
+          created_at: '2016-08-01T18:39:57.481Z',
+          sid: '6a6ea7df6e55fbba',
+          status: 'failed'
+        }
+      },
+      stats: {
+        failed: 27,
+        passed: 117,
+        passed_with_warnings: 1
+      }
+    } }
+    before { Student.create! student }
+    before { header 'Authorization', build_auth_header('*') }
+    before { get '/courses/foo/report' }
+    it do
+      expect(last_response.body).to eq <<TEST
+last_name,first_name,email,last_submission_date,passed_count,last_lesson_type,last_lesson_name,last_exercise_number,last_exercise_name,last_chapter
+Bar,Foo,foo@bar.com,2016-08-01T18:39:57.481Z,117,Exam,Exam Test,1,Test
+TEST
+    end
+  end
+
 end
