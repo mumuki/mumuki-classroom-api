@@ -150,6 +150,16 @@ helpers do
     params[:order_by] || :asc
   end
 
+  def paginated_params
+    {
+      page: page,
+      sort_by: sort_by,
+      order_by: order_by,
+      per_page: per_page,
+      with_detached: with_detached
+    }
+  end
+
 end
 
 before do

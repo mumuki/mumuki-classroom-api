@@ -1,13 +1,21 @@
+helpers do
+  def students_query
+    with_organization_and_course.tap do |it|
+      it.merge! 'detached': {'$exists': false} unless with_detached
+      it.merge! '$text': {'$search': query} unless query.empty?
+    end
+  end
+end
+
 Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/students' do
     authorize! :teacher
-    sorting_criteria = Sorting::Student.from(sort_by, order_by)
-    student_where = Student.where(with_organization_and_course).with_detached(with_detached).search(query)
+    count, students = Sorting.aggregate(Student, students_query, paginated_params)
     {
       page: page + 1,
-      total: student_where.count,
-      students: student_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
+      total: count,
+      students: students
     }
   end
 
