@@ -161,10 +161,9 @@ helpers do
   end
 
   def with_detached_and_search(params)
-    hash = params
-    hash = params.merge 'detached': {'$exists': false} unless with_detached
-    hash = params.merge '$text': {'$search': params} unless query.empty?
-    hash
+    params
+      .merge_unless(with_detached, 'detached': {'$exists': false})
+      .merge_unless(query.empty?, '$text': {'$search': params})
   end
 
 end

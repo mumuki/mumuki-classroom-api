@@ -1,6 +1,6 @@
 module Sorting
   module Student
-    module ByName
+    class ByName < SortBy
       def self.order_by(ordering)
         order = ordering.value
         {'last_name': order,
@@ -8,18 +8,8 @@ module Sorting
       end
     end
 
-    module ByProgress
-      def self.pipeline
-        [
-          {
-            '$addFields': {
-              'stats.total': {
-                '$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)
-              }
-            }
-          }
-        ]
-      end
+    class ByProgress < SortBy
+      extend WithTotalStatsPipeline
 
       def self.order_by(ordering)
         order = ordering.value
@@ -33,7 +23,7 @@ module Sorting
       end
     end
 
-    module BySignupDate
+    class BySignupDate < SortBy
       def self.order_by(ordering)
         order = ordering.value
         revert = ordering.negated.value
@@ -43,7 +33,7 @@ module Sorting
       end
     end
 
-    module ByLastSubmissionDate
+    class ByLastSubmissionDate < SortBy
       def self.order_by(ordering)
         order = ordering.value
         revert = ordering.negated.value

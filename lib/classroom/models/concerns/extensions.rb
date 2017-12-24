@@ -31,6 +31,11 @@ class Hash
       self.delete(k) if self[k].nil?
     end
   end
+
+  def merge_unless(criterion, hash)
+    merge hash unless criterion
+    self
+  end
 end
 
 

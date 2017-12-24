@@ -9,7 +9,7 @@ module Sorting
   def self.pipeline(query, params, sorting, ordering)
     pipeline = []
     pipeline << {'$match': query}
-    pipeline.concat sorting.pipeline if sorting.respond_to? :pipeline
+    pipeline.concat sorting.pipeline
     pipeline << {'$project': projection}
     pipeline << {'$sort': sorting.order_by(ordering)}
     pipeline << {'$skip': params[:page] * params[:per_page]}
@@ -28,6 +28,12 @@ module Sorting
       'last_assignment.exercise._id': 0,
       'last_assignment.submission._id': 0,
     }
+  end
+
+  class SortBy
+    def self.pipeline
+      []
+    end
   end
 
 end

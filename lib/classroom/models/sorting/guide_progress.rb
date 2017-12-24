@@ -1,6 +1,6 @@
 module Sorting
   module GuideProgress
-    module ByMessages
+    class ByMessages < SortBy
       def self.pipeline
         [
           {'$lookup': lookup_notifications},
@@ -113,7 +113,7 @@ module Sorting
       end
     end
 
-    module ByName
+    class ByName < SortBy
       def self.order_by(ordering)
         order = ordering.value
         {'student.last_name': order,
@@ -121,18 +121,8 @@ module Sorting
       end
     end
 
-    module ByProgress
-      def self.pipeline
-        [
-          {
-            '$addFields': {
-              'stats.total': {
-                '$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)
-              }
-            }
-          }
-        ]
-      end
+    class ByProgress < SortBy
+      extend WithTotalStatsPipeline
 
       def self.order_by(ordering)
         order = ordering.value
@@ -146,7 +136,7 @@ module Sorting
       end
     end
 
-    module ByLastSubmissionDate
+    class ByLastSubmissionDate < SortBy
       def self.order_by(ordering)
         order = ordering.value
         revert = ordering.negated.value
