@@ -70,8 +70,8 @@ Mumukit::Platform.map_organization_routes!(self) do
     authorize! :teacher
     count, guide_progress = Sorting.aggregate(GuideProgress, guide_progress_query, paginated_params)
     {
-      page: page + 1,
       total: count,
+      page: page + 1,
       guide_students_progress: guide_progress
     }
   end
