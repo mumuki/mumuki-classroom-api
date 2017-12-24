@@ -9,7 +9,7 @@ module Sorting
   def self.pipeline(ordering, params, query, sorting)
     pipeline = []
     pipeline << {'$match': query}
-    pipeline << {'$addFields': sorting.add_fields} if sorting.respond_to? :add_fields
+    pipeline.concat sorting.pipeline if sorting.respond_to? :pipeline
     pipeline << {'$sort': sorting.order_by(ordering)}
     pipeline << {'$limit': params[:per_page]}
     pipeline << {'$skip': params[:page] * params[:per_page]}

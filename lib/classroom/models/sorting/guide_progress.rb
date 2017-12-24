@@ -9,29 +9,70 @@ module Sorting
     end
 
     module ByMessages
-      def self.lookup
+      def self.lookup_notifications
         {
           'from': 'notifications',
-          'let': {
-
-          }
+          'localField': 'organization',
+          'foreignField': 'organization',
+          'as': 'notifications'
         }
+      end
+
+      def self.lookup_assignment
+        {
+          'from': 'assignments',
+          'localField': 'notifications.assignments',
+          'foreignField': '_id',
+          'as': 'assignment'
+        }
+      end
+
+      def self.match
+        {
+          'notifications.course': '$course',
+          'notifications.read': false,
+          'notifications.sender': '$student.uid',
+          'assignment.guide.slug': '$guide.slug'
+        }
+      end
+
+      def self.group
+        {
+          '_id': '$notifications.sender',
+          'guide_progress': '$$ROOT',
+          'guide_progress.notifications_count': {'$sum': 1},
+        }
+      end
+
+      def self.pipeline
+        [
+          {'$lookup': lookup_notifications},
+          {'$lookup': lookup_assignment},
+          {'$match': match},
+          {'$group': group},
+          {'$replaceRoot': {'newRoot': 'guide_progress'}},
+        ]
       end
 
       def self.order_by(ordering)
         order = ordering.value
-        {'student.last_name': order,
+        {'notifications_count': order,
+         'student.last_name': order,
          'student.first_name': order}
       end
     end
 
     module ByProgress
-      def self.add_fields
-        {
-          'stats.total': {
-            '$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)
+      def self.pipeline
+        [
+          {
+            '$addFields': {
+              'stats.total': {
+                '$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)
+              }
+            }
           }
-        }
+        ]
       end
 
       def self.order_by(ordering)

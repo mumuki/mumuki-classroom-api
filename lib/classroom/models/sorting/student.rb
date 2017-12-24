@@ -9,12 +9,16 @@ module Sorting
     end
 
     module ByProgress
-      def self.add_fields
-        {
-          'stats.total': {
-            '$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)
+      def self.pipeline
+        [
+          {
+            '$addFields': {
+              'stats.total': {
+                '$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)
+              }
+            }
           }
-        }
+        ]
       end
 
       def self.order_by(ordering)
