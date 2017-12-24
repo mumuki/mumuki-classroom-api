@@ -106,18 +106,16 @@ module Sorting
       end
 
       def self.order_by(ordering)
-        order = ordering.value
-        {'unread': order,
-         'student.last_name': order,
-         'student.first_name': order}
+        {'unread': ordering,
+         'student.last_name': ordering,
+         'student.first_name': ordering}
       end
     end
 
     class ByName < SortBy
       def self.order_by(ordering)
-        order = ordering.value
-        {'student.last_name': order,
-         'student.first_name': order}
+        {'student.last_name': ordering,
+         'student.first_name': ordering}
       end
     end
 
@@ -125,24 +123,20 @@ module Sorting
       extend WithTotalStatsPipeline
 
       def self.order_by(ordering)
-        order = ordering.value
-        revert = ordering.negated.value
-        {'stats.total': order,
-         'stats.failed': revert,
-         'stats.passed_with_warnings': revert,
-         'stats.passed': revert,
-         'student.last_name': order,
-         'student.first_name': order}
+        {'stats.total': ordering,
+         'stats.failed': !ordering,
+         'stats.passed_with_warnings': !ordering,
+         'stats.passed': !ordering,
+         'student.last_name': ordering,
+         'student.first_name': ordering}
       end
     end
 
     class ByLastSubmissionDate < SortBy
       def self.order_by(ordering)
-        order = ordering.value
-        revert = ordering.negated.value
-        {'last_assignment.submission.created_at': revert,
-         'last_name': order,
-         'first_name': order}
+        {'last_assignment.submission.created_at': !ordering,
+         'last_name': ordering,
+         'first_name': ordering}
       end
     end
   end

@@ -39,7 +39,23 @@ module Sorting
 end
 
 module Criteria
+  module Base
+    def bson_type
+      value.bson_type
+    end
+
+    def to_bson(*args)
+      value.to_bson(*args)
+    end
+
+    def !
+      negated
+    end
+  end
+
   module Asc
+    extend Criteria::Base
+
     def self.value
       1
     end
@@ -50,6 +66,8 @@ module Criteria
   end
 
   module Desc
+    extend Criteria::Base
+
     def self.value
       -1
     end
