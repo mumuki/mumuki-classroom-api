@@ -119,9 +119,7 @@ module Sorting
       end
     end
 
-    class ByProgress < SortBy
-      extend WithTotalStatsPipeline
-
+    class ByProgress < TotalStatsSortBy
       def self.order_by(ordering)
         {'stats.total': ordering,
          'stats.failed': !ordering,

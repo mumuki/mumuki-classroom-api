@@ -78,5 +78,6 @@ module Criteria
   end
 end
 
+require_relative './sorting/total_stats_sort_by'
 require_relative './sorting/student'
 require_relative './sorting/guide_progress'
