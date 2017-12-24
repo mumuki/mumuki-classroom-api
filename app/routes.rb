@@ -150,28 +150,13 @@ helpers do
     params[:order_by] || :asc
   end
 
-  def paginated_params
-    {
-      page: page,
-      sort_by: sort_by,
-      order_by: order_by,
-      per_page: per_page,
-      with_detached: with_detached
-    }
-  end
-
-  def with_detached_and_search(params)
-    params
-      .merge_unless(with_detached, 'detached': {'$exists': false})
-      .merge_unless(query.empty?, '$text': {'$search': params})
-  end
-
 end
 
 before do
   set_locale! organization_json if organization_json
 end
 
+require_relative './routes/pagination'
 require_relative './routes/courses'
 require_relative './routes/guides'
 require_relative './routes/messages'
