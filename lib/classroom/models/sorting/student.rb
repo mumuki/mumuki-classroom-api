@@ -36,7 +36,8 @@ module Sorting
     module BySignupDate
       def self.order_by(ordering)
         order = ordering.value
-        {'created_at': order,
+        revert = ordering.negated.value
+        {'created_at': revert,
          'last_name': order,
          'first_name': order}
       end
@@ -45,7 +46,8 @@ module Sorting
     module ByLastSubmissionDate
       def self.order_by(ordering)
         order = ordering.value
-        {'last_assignment.submission.created_at': order,
+        revert = ordering.negated.value
+        {'last_assignment.submission.created_at': revert,
          'last_name': order,
          'first_name': order}
       end

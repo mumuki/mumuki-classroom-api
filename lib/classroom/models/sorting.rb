@@ -10,9 +10,10 @@ module Sorting
     pipeline = []
     pipeline << {'$match': query}
     pipeline.concat sorting.pipeline if sorting.respond_to? :pipeline
+    pipeline << {'$project': {'_id': false}}
     pipeline << {'$sort': sorting.order_by(ordering)}
-    pipeline << {'$limit': params[:per_page]}
     pipeline << {'$skip': params[:page] * params[:per_page]}
+    pipeline << {'$limit': params[:per_page]}
   end
 
 end

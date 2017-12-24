@@ -1,13 +1,5 @@
 module Sorting
   module GuideProgress
-    module ByName
-      def self.order_by(ordering)
-        order = ordering.value
-        {'student.last_name': order,
-         'student.first_name': order}
-      end
-    end
-
     module ByMessages
       def self.lookup_notifications
         {
@@ -18,46 +10,66 @@ module Sorting
         }
       end
 
-      def self.lookup_assignment
+      def self.project_notifications
         {
-          'from': 'assignments',
-          'localField': 'notifications.assignments',
-          'foreignField': '_id',
-          'as': 'assignment'
+          'notifications': {
+            '$filter': {
+              'as': 'notification',
+              'input': '$notifications',
+              'cond': {
+                '$and': [
+                  {'$eq': ['$$notification.organization', '$organization']},
+                  {'$eq': ['$$notification.sender', '$student.uid']},
+                  {'$eq': ['$$notification.course', '$course']},
+                  {'$eq': ['$$notification.read', false]}
+                ]
+              }
+            }
+          }
         }
       end
 
-      def self.match
+      def self.project_notifications_count
         {
-          'notifications.course': '$course',
-          'notifications.read': false,
-          'notifications.sender': '$student.uid',
-          'assignment.guide.slug': '$guide.slug'
+          'unread': {
+            '$size': '$notifications'
+          }
         }
       end
 
-      def self.group
+      def self.final_projection
         {
-          '_id': '$notifications.sender',
-          'guide_progress': '$$ROOT',
-          'guide_progress.notifications_count': {'$sum': 1},
+          'guide._id': 0,
+          'student._id': 0,
+          'notifications': 0,
+          'last_assignment._id': 0,
+          'last_assignment.guide._id': 0,
+          'last_assignment.exercise._id': 0,
+          'last_assignment.submission._id': 0,
         }
       end
 
       def self.pipeline
         [
           {'$lookup': lookup_notifications},
-          {'$lookup': lookup_assignment},
-          {'$match': match},
-          {'$group': group},
-          {'$replaceRoot': {'newRoot': 'guide_progress'}},
+          {'$addFields': project_notifications},
+          {'$addFields': project_notifications_count},
+          {'$project': final_projection},
         ]
       end
 
       def self.order_by(ordering)
         order = ordering.value
-        {'notifications_count': order,
+        {'unread': order,
          'student.last_name': order,
+         'student.first_name': order}
+      end
+    end
+
+    module ByName
+      def self.order_by(ordering)
+        order = ordering.value
+        {'student.last_name': order,
          'student.first_name': order}
       end
     end
@@ -90,7 +102,8 @@ module Sorting
     module ByLastSubmissionDate
       def self.order_by(ordering)
         order = ordering.value
-        {'last_assignment.submission.created_at': order,
+        revert = ordering.negated.value
+        {'last_assignment.submission.created_at': revert,
          'last_name': order,
          'first_name': order}
       end
