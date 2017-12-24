@@ -2,7 +2,6 @@ class Student
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithPagination
 
   field :uid, type: String
   field :first_name, type: String

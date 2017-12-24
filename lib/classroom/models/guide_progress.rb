@@ -2,7 +2,6 @@ class GuideProgress
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include WithPagination
 
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug

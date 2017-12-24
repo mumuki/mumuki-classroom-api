@@ -1,44 +1,38 @@
-module Sorting::Student
-  def self.from(sort_by, ordering)
-    order = "#{Criteria.name}::#{ordering.to_s.camelize}".constantize
-    "Sorting::Student::By#{sort_by.to_s.camelize}".constantize.order_by order
-  end
-
-  module ByName
-    def self.order_by(ordering)
-      order = ordering.value
-      {'last_name': order,
-       'first_name': order}
+module Sorting
+  module Student
+    class ByName < SortBy
+      def self.order_by(ordering)
+        {'last_name': ordering,
+         'first_name': ordering}
+      end
     end
-  end
 
-  module ByProgress
-    def self.order_by(ordering)
-      order = ordering.value
-      revert = ordering.negated.value
-      {'stats.failed': revert,
-       'stats.passed_with_warnings': revert,
-       'stats.passed': revert,
-       'last_name': order,
-       'first_name': order}
+    class ByProgress < TotalStatsSortBy
+
+      def self.order_by(ordering)
+        {'stats.total': ordering,
+         'stats.failed': !ordering,
+         'stats.passed_with_warnings': !ordering,
+         'stats.passed': !ordering,
+         'last_name': ordering,
+         'first_name': ordering}
+      end
     end
-  end
 
-  module BySignupDate
-    def self.order_by(ordering)
-      order = ordering.value
-      {'created_at': order,
-       'last_name': order,
-       'first_name': order}
+    class BySignupDate < SortBy
+      def self.order_by(ordering)
+        {'created_at': !ordering,
+         'last_name': ordering,
+         'first_name': ordering}
+      end
     end
-  end
 
-  module ByLastSubmissionDate
-    def self.order_by(ordering)
-      order = ordering.value
-      {'updated_at': order,
-       'last_name': order,
-       'first_name': order}
+    class ByLastSubmissionDate < SortBy
+      def self.order_by(ordering)
+        {'last_assignment.submission.created_at': !ordering,
+         'last_name': ordering,
+         'first_name': ordering}
+      end
     end
   end
 end

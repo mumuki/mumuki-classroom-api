@@ -3,6 +3,10 @@ helpers do
     {courses: Course.allowed(organization, permissions).as_json}
   end
 
+  def guide_progress_query
+    with_detached_and_search with_organization_and_course('guide.slug': repo_slug)
+  end
+
   def projection
     {
       '_id': 0,
@@ -64,15 +68,11 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/guides/:organization/:repository' do
     authorize! :teacher
-    sorting_criteria = Sorting::GuideProgress.from(sort_by, order_by)
-    guide_progress_where = GuideProgress
-                             .where(with_organization_and_course 'guide.slug': repo_slug)
-                             .with_detached(with_detached)
-                             .search(query)
+    count, guide_progress = Sorting.aggregate(GuideProgress, guide_progress_query, paginated_params)
     {
+      total: count,
       page: page + 1,
-      total: guide_progress_where.count,
-      guide_students_progress: guide_progress_where.order_by(sorting_criteria).limit(per_page).skip(page * per_page)
+      guide_students_progress: guide_progress
     }
   end
 

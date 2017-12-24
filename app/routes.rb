@@ -156,6 +156,7 @@ before do
   set_locale! organization_json if organization_json
 end
 
+require_relative './routes/pagination'
 require_relative './routes/courses'
 require_relative './routes/guides'
 require_relative './routes/messages'
