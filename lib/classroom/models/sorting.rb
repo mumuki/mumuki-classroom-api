@@ -3,17 +3,31 @@ module Sorting
   def self.aggregate(collection, query, params)
     ordering = "#{Criteria.name}::#{params[:order_by].to_s.camelize}".constantize
     sorting = "#{name}::#{collection.name}::By#{params[:sort_by].to_s.camelize}".constantize
-    [collection.where(query).count, collection.collection.aggregate(pipeline ordering, params, query, sorting)]
+    [collection.where(query).count, collection.collection.aggregate(pipeline query, params, sorting, ordering)]
   end
 
-  def self.pipeline(ordering, params, query, sorting)
+  def self.pipeline(query, params, sorting, ordering)
     pipeline = []
     pipeline << {'$match': query}
     pipeline.concat sorting.pipeline if sorting.respond_to? :pipeline
-    pipeline << {'$project': {'_id': false}}
+    pipeline << {'$project': projection}
     pipeline << {'$sort': sorting.order_by(ordering)}
     pipeline << {'$skip': params[:page] * params[:per_page]}
     pipeline << {'$limit': params[:per_page]}
+  end
+
+  def self.projection
+    {
+      '_id': 0,
+      'assignments': 0,
+      'notifications': 0,
+      'guide._id': 0,
+      'student._id': 0,
+      'last_assignment._id': 0,
+      'last_assignment.guide._id': 0,
+      'last_assignment.exercise._id': 0,
+      'last_assignment.submission._id': 0,
+    }
   end
 
 end

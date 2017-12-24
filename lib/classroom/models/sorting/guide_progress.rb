@@ -1,7 +1,6 @@
 module Sorting
   module GuideProgress
     module ByMessages
-
       def self.pipeline
         [
           {'$lookup': lookup_notifications},
@@ -13,20 +12,7 @@ module Sorting
           {'$addFields': generate_guide_progress},
           {'$addFields': add_progress_count},
           {'$replaceRoot': progress_to_document_root},
-          {'$project': project_useless_fields}
         ]
-      end
-
-      def self.project_useless_fields
-        {
-          'guide._id': 0,
-          'assignments': 0,
-          'student._id': 0,
-          'notifications': 0,
-          'last_assignment._id': 0,
-          'last_assignment.exercise._id': 0,
-          'last_assignment.submission._id': 0,
-        }
       end
 
       def self.progress_to_document_root
