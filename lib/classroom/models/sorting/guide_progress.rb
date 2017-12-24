@@ -11,8 +11,10 @@ module Sorting
     module ByMessages
       def self.lookup
         {
-          from: 'notifications',
-          
+          'from': 'notifications',
+          'let': {
+
+          }
         }
       end
 
@@ -24,21 +26,30 @@ module Sorting
     end
 
     module ByProgress
+      def self.add_fields
+        {
+          'stats.total': {
+            '$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)
+          }
+        }
+      end
+
       def self.order_by(ordering)
         order = ordering.value
         revert = ordering.negated.value
-        {'stats.passed': revert,
-         'stats.passed_with_warnings': revert,
+        {'stats.total': order,
          'stats.failed': revert,
-         'last_name': order,
-         'first_name': order}
+         'stats.passed_with_warnings': revert,
+         'stats.passed': revert,
+         'student.last_name': order,
+         'student.first_name': order}
       end
     end
 
     module ByLastSubmissionDate
       def self.order_by(ordering)
         order = ordering.value
-        {'updated_at': order,
+        {'last_assignment.submission.created_at': order,
          'last_name': order,
          'first_name': order}
       end
