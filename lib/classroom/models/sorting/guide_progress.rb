@@ -1,16 +1,97 @@
 module Sorting
   module GuideProgress
     module ByMessages
-      def self.lookup_notifications
+
+      def self.pipeline
+        [
+          {'$lookup': lookup_notifications},
+          {'$addFields': filter_unread_notifications},
+          {'$unwind': unwind_notifications},
+          {'$lookup': lookup_assignments},
+          {'$addFields': filter_guide_assignments},
+          {'$group': group_by_students_uid},
+          {'$addFields': generate_guide_progress},
+          {'$addFields': add_progress_count},
+          {'$replaceRoot': progress_to_document_root},
+          {'$project': project_useless_fields}
+        ]
+      end
+
+      def self.project_useless_fields
         {
-          'from': 'notifications',
-          'localField': 'organization',
-          'foreignField': 'organization',
-          'as': 'notifications'
+          'guide._id': 0,
+          'assignments': 0,
+          'student._id': 0,
+          'notifications': 0,
+          'last_assignment._id': 0,
+          'last_assignment.exercise._id': 0,
+          'last_assignment.submission._id': 0,
         }
       end
 
-      def self.project_notifications
+      def self.progress_to_document_root
+        {'newRoot': '$progresses'}
+      end
+
+      def self.add_progress_count
+        {
+          'progresses.unread': '$count'
+        }
+      end
+
+      def self.generate_guide_progress
+        {
+          'progresses': {'$arrayElemAt': ['$progresses', 0]},
+        }
+      end
+
+      def self.group_by_students_uid
+        {
+          '_id': '$student.uid',
+          'progresses': {'$push': '$$ROOT'},
+          'count': {
+            '$sum': {
+              '$cond': {
+                'if': {'$anyElementTrue': ['$assignments']},
+                'then': 1,
+                'else': 0
+              }
+            }
+          }
+        }
+      end
+
+      def self.filter_guide_assignments
+        {
+          'assignments': {
+            '$filter': {
+              'as': 'assignment',
+              'input': '$assignments',
+              'cond': {
+                '$eq': %w($$assignment.guide.slug $guide.slug),
+              }
+            }
+          }
+        }
+      end
+
+      def self.lookup_assignments
+        {
+          'from': 'assignments',
+          'localField': 'notifications.assignment_id',
+          'foreignField': '_id',
+          'as': 'assignments'
+        }
+      end
+
+      def self.unwind_notifications
+        {
+          'path': '$notifications',
+          'preserveNullAndEmptyArrays': true
+        }
+      end
+
+      def self.filter_unread_notifications
         {
           'notifications': {
             '$filter': {
@@ -18,9 +99,9 @@ module Sorting
               'input': '$notifications',
               'cond': {
                 '$and': [
-                  {'$eq': ['$$notification.organization', '$organization']},
-                  {'$eq': ['$$notification.sender', '$student.uid']},
-                  {'$eq': ['$$notification.course', '$course']},
+                  {'$eq': %w($$notification.organization $organization)},
+                  {'$eq': %w($$notification.sender $student.uid)},
+                  {'$eq': %w($$notification.course $course)},
                   {'$eq': ['$$notification.read', false]}
                 ]
               }
@@ -29,33 +110,13 @@ module Sorting
         }
       end
 
-      def self.project_notifications_count
+      def self.lookup_notifications
         {
-          'unread': {
-            '$size': '$notifications'
-          }
+          'from': 'notifications',
+          'localField': 'organization',
+          'foreignField': 'organization',
+          'as': 'notifications'
         }
-      end
-
-      def self.final_projection
-        {
-          'guide._id': 0,
-          'student._id': 0,
-          'notifications': 0,
-          'last_assignment._id': 0,
-          'last_assignment.guide._id': 0,
-          'last_assignment.exercise._id': 0,
-          'last_assignment.submission._id': 0,
-        }
-      end
-
-      def self.pipeline
-        [
-          {'$lookup': lookup_notifications},
-          {'$addFields': project_notifications},
-          {'$addFields': project_notifications_count},
-          {'$project': final_projection},
-        ]
       end
 
       def self.order_by(ordering)
