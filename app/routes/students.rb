@@ -1,9 +1,6 @@
 helpers do
   def students_query
-    with_organization_and_course.tap do |it|
-      it.merge! 'detached': {'$exists': false} unless with_detached
-      it.merge! '$text': {'$search': query} unless query.empty?
-    end
+    with_detached_and_search with_organization_and_course
   end
 end
 
