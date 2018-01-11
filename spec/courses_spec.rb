@@ -126,6 +126,7 @@ describe Course do
       organization: 'example',
       course: 'example/foo',
       uid: 'foo@bar.com',
+      created_at: '2016-08-01T18:39:57.000Z',
       email: 'foo@bar.com',
       first_name: 'Foo',
       last_name: 'Bar',
@@ -159,12 +160,18 @@ describe Course do
       }
     } }
     before { Student.create! student }
+    before { Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', stats: {failed: 27, passed: 100, passed_with_warnings: 1} }
+    before { Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', stats: {failed: 27, passed: 120, passed_with_warnings: 1} }
+    before { Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', stats: {failed: 27, passed: 120, passed_with_warnings: 1} }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/report' }
     it do
       expect(last_response.body).to eq <<TEST
-last_name,first_name,email,last_submission_date,passed_count,last_lesson_type,last_lesson_name,last_exercise_number,last_exercise_name,last_chapter
-Bar,Foo,foo@bar.com,2016-08-01T18:39:57.481Z,117,Exam,Exam Test,1,Test
+last_name,first_name,email,created_at,last_submission_date,passed_count,last_lesson_type,last_lesson_name,last_exercise_number,last_exercise_name,last_chapter
+Bar,Bar,bar@foo.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,Exam,Exam Test,1,Test
+Bar,Foo,baz@bar.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,Exam,Exam Test,1,Test
+Bar,Foo,foo@bar.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,117,Exam,Exam Test,1,Test
+Bar,Foo,bar@baz.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,100,Exam,Exam Test,1,Test
 TEST
     end
   end

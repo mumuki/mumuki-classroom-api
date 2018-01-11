@@ -13,6 +13,7 @@ helpers do
       'last_name': '$last_name',
       'first_name': '$first_name',
       'email': '$email',
+      'created_at': '$created_at',
       'last_submission_date': '$last_assignment.submission.created_at',
       'passed_count': '$stats.passed',
       'last_lesson_type': '$last_assignment.guide.parent.type',
@@ -88,7 +89,8 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/report' do
     aggregation = Student.where(with_organization_and_course).project(projection)
-    json = Student.collection.aggregate(aggregation.pipeline).as_json
+    pipeline_with_sort_criterion = aggregation.pipeline << {'$sort': {passed_count: -1, last_name: 1, first_name: 1}}
+    json = Student.collection.aggregate(pipeline_with_sort_criterion).as_json
     content_type 'application/csv'
     csv_with_headers Classroom::Reports::Formats.format_report('csv', json)
   end
