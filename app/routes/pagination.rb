@@ -11,7 +11,7 @@ helpers do
 
   def with_detached_and_search(params)
     params
-    .merge_unless(with_detached, 'detached': {'$exists': false})
-    .merge_unless(query.empty?, '$text': {'$search': params})
+      .merge_unless(with_detached, 'detached': {'$exists': false})
+      .merge_unless(query.empty?, '$text': {'$search': query})
   end
 end

@@ -33,7 +33,7 @@ class Hash
   end
 
   def merge_unless(criterion, hash)
-    merge hash unless criterion
+    return merge hash unless criterion
     self
   end
 end
