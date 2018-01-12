@@ -337,4 +337,52 @@ describe Student do
       end
     end
   end
+
+  describe 'students routes with params' do
+
+    describe 'get /courses/:course/students' do
+
+      let(:except_fields) { {except: [:created_at, :updated_at]} }
+
+      let(:student1) { {uid: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar', organization: 'example', course: 'example/foo'} }
+      let(:student2) { {uid: 'jondoe@gmail.com', first_name: 'jon', last_name: 'doe', organization: 'example', course: 'example/foo'} }
+      let(:student3) { {uid: 'walter@gmail.com', first_name: 'wal', last_name: 'ter', organization: 'example', course: 'example/foo'} }
+      let(:student4) { {uid: 'zzztop@gmail.com', first_name: 'zzz', last_name: 'top', organization: 'example', course: 'example/foo', detached: true} }
+
+      before { Student.create! student1 }
+      before { Student.create! student2 }
+      before { Student.create! student3 }
+      before { Student.create! student4 }
+
+      before { header 'Authorization', build_auth_header('*') }
+
+      context 'with default values' do
+        before { get '/courses/foo/students' }
+        it { expect(last_response.body).to json_like({page: 1, students: [student1, student2, student3], total: 3}, except_fields) }
+      end
+
+      context 'with specific page' do
+        before { get '/courses/foo/students?page=2' }
+        it { expect(last_response.body).to json_like({page: 2, students: [], total: 3}, except_fields) }
+      end
+
+      context 'with specific page and items per page' do
+        before { get '/courses/foo/students?page=2&per_page=1' }
+        it { expect(last_response.body).to json_like({page: 2, students: [student2], total: 3}, except_fields) }
+      end
+
+      context 'with name descending sort and detached' do
+        before { get '/courses/foo/students?with_detached=true&sort_by=name&order_by=desc' }
+        it { expect(last_response.body).to json_like({page: 1, students: [student4, student3, student2, student1], total: 4}, except_fields) }
+      end
+
+      context 'with query filter' do
+        before { get '/courses/foo/students?q="foo"' }
+        it { expect(last_response.body).to json_like({page: 1, students: [student1], total: 1}, except_fields) }
+      end
+
+    end
+  end
+
+
 end
