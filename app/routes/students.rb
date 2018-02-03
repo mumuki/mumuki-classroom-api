@@ -60,7 +60,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     json = {student: json_body.merge(uid: json_body[:email]), course: {slug: course_slug}}
     uid = json[:student][:uid]
 
-    Student.create!(with_organization_and_course json[:student])
+    Student.create!(with_organization_and_course json[:student].merge(national_id: json_body[:national_id]))
 
     perm = User.where(uid: uid).first_or_create!(json[:student].except(:first_name, :last_name)).permissions
     perm.add_permission!(:student, course_slug)
