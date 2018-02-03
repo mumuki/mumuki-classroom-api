@@ -272,7 +272,7 @@ describe Student do
     end
 
     describe 'post /courses/:course/students' do
-      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', national_id: '1234'} }
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
@@ -321,6 +321,7 @@ describe Student do
             end
           end
         end
+
       end
 
       context 'when course does not exist' do
