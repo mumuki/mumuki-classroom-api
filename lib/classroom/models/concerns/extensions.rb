@@ -15,6 +15,14 @@ module Mongoid
         index *args
         create_indexes
       end
+
+      def drop_index(index_name)
+        collection.indexes.drop_one(index_name) if has_index_named?(index_name)
+      end
+
+      def has_index_named?(index_name)
+        collection.indexes.any? { |spec| spec['name'] == index_name }
+      end
     end
 
   end

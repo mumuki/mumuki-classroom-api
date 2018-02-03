@@ -22,8 +22,7 @@ class Student
   create_index({organization: 1, uid: 1})
   create_index({'last_assignment.guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
 
-  text_search_key = 'first_name_text_last_name_text_email_text'
-  collection.indexes.drop_one(text_search_key) if index_keys.include? text_search_key
+  drop_index 'first_name_text_last_name_text_email_text'
   create_index({first_name: 'text', last_name: 'text', email: 'text', national_id: 'text'})
 
   def course_name
