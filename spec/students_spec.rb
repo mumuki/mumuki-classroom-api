@@ -272,7 +272,7 @@ describe Student do
     end
 
     describe 'post /courses/:course/students' do
-      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', national_id: '1234'} }
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', personal_id: '1234'} }
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
@@ -292,6 +292,16 @@ describe Student do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
+              let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
+              let(:created_at) { 'created_at' }
+
+              it { expect(last_response).to be_ok }
+              it { expect(last_response.body).to json_eq status: 'created' }
+              it { expect(Student.where(organization: 'example', course: 'example/foo').count).to eq 1 }
+              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example', course: 'example/foo'), except_fields) }
+            end
+            context 'and user does not exist' do
+              let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
               let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
               let(:created_at) { 'created_at' }
 

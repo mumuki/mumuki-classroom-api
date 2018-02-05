@@ -4,7 +4,7 @@ class Student
   include Mongoid::Timestamps
 
   field :uid, type: String
-  field :national_id, type: String
+  field :personal_id, type: String
   field :first_name, type: String
   field :last_name, type: String
   field :name, type: String
@@ -21,9 +21,7 @@ class Student
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
   create_index({organization: 1, uid: 1})
   create_index({'last_assignment.guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
-
-  drop_index 'first_name_text_last_name_text_email_text'
-  create_index({first_name: 'text', last_name: 'text', email: 'text', national_id: 'text'})
+  create_index({first_name: 'text', last_name: 'text', email: 'text', personal_id: 'text'})
 
   def course_name
     course.to_mumukit_slug.course
