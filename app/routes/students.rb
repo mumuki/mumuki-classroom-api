@@ -71,7 +71,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     User.upsert_permissions! uid, perm
 
     Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].merge(permissions: perm)
+    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].except(:personal_id).merge(permissions: perm)
 
     {status: :created}
   end

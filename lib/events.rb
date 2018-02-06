@@ -1,20 +1,20 @@
 Mumukit::Nuntius::EventConsumer.handle do
 
   event 'UserChanged' do |payload|
-    Classroom::Event::UserChanged.execute! payload[:user]
+    Classroom::Event::UserChanged.execute! payload[:user].except(:created_at, :updated_at)
   end
 
   event 'CourseChanged' do |payload|
-    Course.import_from_json! payload[:course]
+    Course.import_from_json! payload[:course].except(:created_at, :updated_at)
   end
 
   event 'OrganizationChanged' do |payload|
-    organization = payload[:organization]
+    organization = payload[:organization].except(:created_at, :updated_at)
     Organization.find_by!(name: organization[:name]).update! organization
   end
 
   event 'OrganizationCreated' do |payload|
-    Organization.create! payload[:organization]
+    Organization.create! payload[:organization].except(:created_at, :updated_at)
   end
 
   event 'ExerciseChanged' do |payload|

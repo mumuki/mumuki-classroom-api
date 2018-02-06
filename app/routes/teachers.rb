@@ -11,10 +11,10 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     Teacher.create!(with_organization_and_course json[:teacher])
 
-    perm = User.where(uid: uid).first_or_create!(json[:teacher].except(:first_name, :last_name)).permissions
+    perm = User.where(uid: uid).first_or_create!(json[:teacher].except(:first_name, :last_name, :personal_id)).permissions
     perm.add_permission!(:teacher, course_slug)
     User.upsert_permissions! uid, perm
 
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:teacher].merge(permissions: perm)
+    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:teacher].except(:personal_id).merge(permissions: perm)
   end
 end

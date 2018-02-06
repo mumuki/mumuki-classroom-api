@@ -36,7 +36,7 @@ class User
   end
 
   def notify!
-    Mumukit::Nuntius.notify_event! 'UserChanged', {user: as_json}
+    Mumukit::Nuntius.notify_event! 'UserChanged', {user: as_json(except: [:created_at, :updated_at])}
   end
 
   def permissions
