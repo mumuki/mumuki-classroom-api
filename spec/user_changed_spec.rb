@@ -16,6 +16,20 @@ describe Classroom::Event::UserChanged do
 
   describe 'execute!' do
 
+    context 'event with no permissions attribute' do
+      let(:event) { user }
+      before do
+        expect(Classroom::Event::UserChanged).to_not receive(:student_added)
+        expect(Classroom::Event::UserChanged).to_not receive(:teacher_added)
+        expect(Classroom::Event::UserChanged).to_not receive(:student_removed)
+      end
+      before { Classroom::Event::UserChanged.execute! event }
+
+      it { expect(Organization.pluck(:name)).to include 'example' }
+      it { expect(Classroom::Event::UserChanged.changes).to be_empty }
+    end
+
+
     context 'save new permissions' do
       before do
         expect(Classroom::Event::UserChanged).to receive(:student_added)

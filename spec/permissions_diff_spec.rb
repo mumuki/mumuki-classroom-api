@@ -23,6 +23,11 @@ describe Mumukit::Auth::Permissions::Diff do
   end
 
   describe '.diff' do
+    context 'no perimssions information' do
+      let(:new_permissions) { nil }
+      it { expect(diff.as_json).to json_like(changes: []) }
+    end
+
     context 'student and teacher changed' do
       let(:new_permissions) { {student: 'foo/bar:foo/fiz'} }
 
