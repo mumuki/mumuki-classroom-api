@@ -64,6 +64,8 @@ class Mumukit::Auth::Permissions
     end
 
     def self.diff(old_permissions, new_permissions)
+      return Mumukit::Auth::Permissions::Diff.new if new_permissions.nil?
+
       old_permissions = old_permissions.to_mumukit_permissions
       new_permissions = new_permissions.to_mumukit_permissions
       new.tap do |it|
