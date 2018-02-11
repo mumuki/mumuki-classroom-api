@@ -36,12 +36,12 @@ Mumukit::Auth.configure do |_config|
 
 end
 
-Mumukit::Login.configure do |config|
-  config.user_class = User
-  config.framework = Mumukit::Platform::WebFramework::Sinatra
+Mumukit::Login.configure do |_config|
 end
 
 Mumukit::Platform.configure do |config|
+  config.user_class = User
+  config.organization_class = Organization
   config.application = Mumukit::Platform.classroom_api
   config.web_framework = Mumukit::Platform::WebFramework::Sinatra
 end
