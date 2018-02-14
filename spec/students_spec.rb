@@ -384,7 +384,7 @@ describe Student do
 
       context 'with name descending sort and detached' do
         before { get '/courses/foo/students?with_detached=true&sort_by=name&order_by=desc' }
-        it { expect(last_response.body).to json_like({page: 1, students: [student4, student3, student2, student1], total: 4}, except_fields) }
+        it { expect(last_response.body).to json_like({page: 1, students: [student4], total: 1}, except_fields) }
       end
 
       context 'with query filter' do
