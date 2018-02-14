@@ -128,6 +128,7 @@ describe Course do
       uid: 'foo@bar.com',
       created_at: '2016-08-01T18:39:57.000Z',
       email: 'foo@bar.com',
+      personal_id: '1234',
       first_name: 'Foo',
       last_name: 'Bar',
       last_assignment: {
@@ -160,18 +161,18 @@ describe Course do
       }
     } }
     before { Student.create! student }
-    before { Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
-    before { Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', stats: {failed: 27, passed: 120, passed_with_warnings: 2} }
-    before { Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', stats: {failed: 27, passed: 120, passed_with_warnings: 1} }
+    before { Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
+    before { Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2} }
+    before { Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', personal_id: '2222', stats: {failed: 27, passed: 120, passed_with_warnings: 1} }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/report' }
     it do
       expect(last_response.body).to eq <<TEST
-last_name,first_name,email,created_at,last_submission_date,passed_count,passed_with_warnings_count,failed_count,last_lesson_type,last_lesson_name,last_exercise_number,last_exercise_name,last_chapter
-Bar,Foo,baz@bar.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,2,27,Exam,Exam Test,1,Test
-Bar,Bar,bar@foo.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,1,27,Exam,Exam Test,1,Test
-Bar,Foo,foo@bar.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,117,1,27,Exam,Exam Test,1,Test
-Bar,Foo,bar@baz.com,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,100,2,27,Exam,Exam Test,1,Test
+last_name,first_name,email,personal_id,created_at,last_submission_date,passed_count,passed_with_warnings_count,failed_count,last_lesson_type,last_lesson_name,last_exercise_number,last_exercise_name,last_chapter
+Bar,Foo,baz@bar.com,1212,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,2,27,Exam,Exam Test,1,Test
+Bar,Bar,bar@foo.com,2222,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,1,27,Exam,Exam Test,1,Test
+Bar,Foo,foo@bar.com,1234,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,117,1,27,Exam,Exam Test,1,Test
+Bar,Foo,bar@baz.com,9191,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,100,2,27,Exam,Exam Test,1,Test
 TEST
     end
   end
