@@ -26,7 +26,7 @@ production:
     default:
       database: "<%=ENV['MUMUKI_MONGODB_DATABASE']%>"
       hosts:
-        - "<%=ENV['MUMUKI_MONGODB_HOST']%>:<%=ENV['MUMUKI_MONGODB_PORT']%>"
+<%= (ENV['MUMUKI_MONGODB_CONNECTION_STRING'] || '').split(',').map { |it| "        - #{it}\n" }.join %>
       options:
         max_pool_size: 8
         min_pool_size: 1
