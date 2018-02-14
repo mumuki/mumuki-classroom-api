@@ -13,6 +13,7 @@ helpers do
       'last_name': '$last_name',
       'first_name': '$first_name',
       'email': '$email',
+      'personal_id': '$personal_id',
       'created_at': '$created_at',
       'last_submission_date': '$last_assignment.submission.created_at',
       'passed_count': '$stats.passed',
