@@ -55,10 +55,10 @@ describe Student do
       {status: 'passed_with_warnings', created_at: date + 2.minutes}
     ]
   } }
-  let(:example_students) { -> (student) { Student.create!(student.merge(organization: 'example', course: 'example/example')) } }
-  let(:students) { Student.where(organization: 'example', course: 'example/example') }
-  let(:example_student_progresses) { -> (exercise) { Assignment.create! exercise.merge(organization: 'example', course: 'example/example') } }
-  let(:example_guide_student_progresses) { -> (guide_progress) { GuideProgress.create! guide_progress.merge organization: 'example', course: 'example/example' } }
+  let(:example_students) { -> (student) { Student.create!(student.merge(organization: 'example.org', course: 'example.org/example')) } }
+  let(:students) { Student.where(organization: 'example.org', course: 'example.org/example') }
+  let(:example_student_progresses) { -> (exercise) { Assignment.create! exercise.merge(organization: 'example.org', course: 'example.org/example') } }
+  let(:example_guide_student_progresses) { -> (guide_progress) { GuideProgress.create! guide_progress.merge organization: 'example.org', course: 'example.org/example' } }
 
   describe do
 
@@ -71,7 +71,7 @@ describe Student do
     before { example_student_progresses.call exercise4 }
 
     describe '#report' do
-      let(:report) { Student.report({organization: 'example', course: 'example/example'}) }
+      let(:report) { Student.report({organization: 'example.org', course: 'example.org/example'}) }
       it { expect(report.count).to eq 2 }
       it { expect(report.first).to json_like({first_name: 'Dorothy'}, except_fields) }
       it { expect(report.second).to json_like({first_name: 'John'}, except_fields) }
@@ -79,27 +79,27 @@ describe Student do
 
     context 'if no students stats processed' do
       it { expect(students.size).to eq 2 }
-      it { expect(students.first.as_json).to json_like student1.merge(organization: 'example', course: 'example/example'), except_fields }
-      it { expect(students.second.as_json).to json_like student2.merge(organization: 'example', course: 'example/example'), except_fields }
+      it { expect(students.first.as_json).to json_like student1.merge(organization: 'example.org', course: 'example.org/example'), except_fields }
+      it { expect(students.second.as_json).to json_like student2.merge(organization: 'example.org', course: 'example.org/example'), except_fields }
     end
 
     context 'if students stats processed' do
-      before { Student.update_all_stats(organization: 'example', course: 'example/example') }
+      before { Student.update_all_stats(organization: 'example.org', course: 'example.org/example') }
 
       it { expect(students.size).to eq 2 }
-      it { expect(students.second.as_json).to json_like(student2.merge(stats: {passed: 0, passed_with_warnings: 1, failed: 0}, organization: 'example', course: 'example/example'), except_fields) }
-      it { expect(students.first.as_json).to json_like(student1.merge(stats: {passed: 2, passed_with_warnings: 0, failed: 1}, organization: 'example', course: 'example/example'), except_fields) }
+      it { expect(students.second.as_json).to json_like(student2.merge(stats: {passed: 0, passed_with_warnings: 1, failed: 0}, organization: 'example.org', course: 'example.org/example'), except_fields) }
+      it { expect(students.first.as_json).to json_like(student1.merge(stats: {passed: 2, passed_with_warnings: 0, failed: 1}, organization: 'example.org', course: 'example.org/example'), except_fields) }
     end
 
     context 'delete student from students' do
 
-      let(:guides) { Guide.where organization: 'example', course: 'example/example' }
-      let(:students) { Student.where organization: 'example', course: 'example/example' }
-      let(:guide_students_progress) { GuideProgress.where(organization: 'example', course: 'example/example').as_json }
+      let(:guides) { Guide.where organization: 'example.org', course: 'example.org/example' }
+      let(:students) { Student.where organization: 'example.org', course: 'example.org/example' }
+      let(:guide_students_progress) { GuideProgress.where(organization: 'example.org', course: 'example.org/example').as_json }
       let(:exercise_student_progress) { example_student_progresses.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
 
-      before { Guide.create! guide1.merge(organization: 'example', course: 'example/example') }
-      before { Guide.create! guide2.merge(organization: 'example', course: 'example/example') }
+      before { Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/example') }
+      before { Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/example') }
 
       before { example_guide_student_progresses.call guide_student_progress1 }
       before { example_guide_student_progresses.call guide_student_progress2 }
@@ -121,12 +121,12 @@ describe Student do
 
     describe 'get /courses/:course/students' do
 
-      let(:student) { {email: 'foobar@gmail.com', first_name: 'foo', last_name: 'example/bar'} }
-      let(:student_saved) { {organization: 'example', course: 'example/foo'}.merge student }
+      let(:student) { {email: 'foobar@gmail.com', first_name: 'foo', last_name: 'example.org/bar'} }
+      let(:student_saved) { {organization: 'example.org', course: 'example.org/foo'}.merge student }
 
       context 'when guides already exists in a course' do
-        before { Student.create! student.merge(organization: 'example', course: 'example/foo') }
-        before { Student.create! student.merge(organization: 'example', course: 'example/test') }
+        before { Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
+        before { Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
 
         context 'get students with auth0 client' do
           before { header 'Authorization', build_auth_header('*') }
@@ -149,20 +149,20 @@ describe Student do
 
   describe 'get /courses/:course/student/:uid' do
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
-    let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example/foo'}} }
+    let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example.org/foo'}} }
     let(:created_at) { 'created_at' }
-    before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo' }
-    before { Student.create!(student.merge(uid: 'auth0|1', organization: 'example', course: 'example/foo')) }
+    before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+    before { Student.create!(student.merge(uid: 'auth0|1', organization: 'example.org', course: 'example.org/foo')) }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/student/auth0%7c1' }
 
     it { expect(last_response).to be_ok }
-    it { expect(last_response.body).to json_like student.merge({organization: 'example', course: 'example/foo', uid: 'auth0|1'}), except_fields }
+    it { expect(last_response.body).to json_like student.merge({organization: 'example.org', course: 'example.org/foo', uid: 'auth0|1'}), except_fields }
   end
 
   describe 'post /courses/:course/students/:student_id' do
 
-    before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', uid: 'github|123456', tenant: 'example') }
+    before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', uid: 'github|123456', tenant: 'example.org') }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/students/github%7C123456' }
 
@@ -171,7 +171,7 @@ describe Student do
   end
 
   describe 'when needs mumuki-user' do
-    let(:fetched_student) { Student.find_by(uid: 'github|123456', organization: 'example', course: 'example/example') }
+    let(:fetched_student) { Student.find_by(uid: 'github|123456', organization: 'example.org', course: 'example.org/example') }
 
 
     describe 'post /courses/:course/students/:student_id/detach' do
@@ -179,7 +179,7 @@ describe Student do
       before { example_students.call student1 }
 
       context 'should transfer student to destination and transfer all his data' do
-        before { header 'Authorization', build_auth_header('example/*') }
+        before { header 'Authorization', build_auth_header('example.org/*') }
         before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
 
         it { expect(last_response).to be_ok }
@@ -194,7 +194,7 @@ describe Student do
       before { example_students.call student1.merge(detached: true, detached_at: Time.now) }
 
       context 'should transfer student to destination and transfer all his data' do
-        before { header 'Authorization', build_auth_header('example/*') }
+        before { header 'Authorization', build_auth_header('example.org/*') }
         before { post '/courses/example/students/github%7C123456/attach', {}.to_json }
 
         it { expect(last_response).to be_ok }
@@ -209,8 +209,8 @@ describe Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo', uid: 'example/foo' }
-        before { Course.create! organization: 'example', name: 'bar', slug: 'example/bar', uid: 'example/bar' }
+        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo', uid: 'example.org/foo' }
+        before { Course.create! organization: 'example.org', name: 'bar', slug: 'example.org/bar', uid: 'example.org/bar' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
@@ -226,13 +226,13 @@ describe Student do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
-              let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
+              let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
               let(:created_at) { 'created_at' }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
-              it { expect(Student.where(organization: 'example', course: 'example/foo').count).to eq 1 }
-              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example', course: 'example/foo'), except_fields) }
+              it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
           context 'add student to a course if exists' do
@@ -266,7 +266,7 @@ describe Student do
           post '/courses/foo/students', student_json
 
           expect(last_response).to_not be_ok
-          expect(Student.where(organization: 'example', course: 'example/foo').count).to eq 0
+          expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
         end
       end
     end
@@ -276,13 +276,13 @@ describe Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Course.create! organization: 'example', name: 'foo', slug: 'example/foo', uid: 'example/foo' }
+        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo', uid: 'example.org/foo' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
 
           it { expect(last_response).to_not be_ok }
-          it { expect(Student.where(organization: 'example', course: 'example/foo').count).to eq 0 }
+          it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0 }
         end
 
         context 'when authenticated' do
@@ -292,23 +292,23 @@ describe Student do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
-              let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
+              let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
               let(:created_at) { 'created_at' }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
-              it { expect(Student.where(organization: 'example', course: 'example/foo').count).to eq 1 }
-              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example', course: 'example/foo'), except_fields) }
+              it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
             context 'and user does not exist' do
               let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
-              let(:created_course_student) { Student.find_by(organization: 'example', course: 'example/foo').as_json }
+              let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
               let(:created_at) { 'created_at' }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
-              it { expect(Student.where(organization: 'example', course: 'example/foo').count).to eq 1 }
-              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example', course: 'example/foo'), except_fields) }
+              it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
           context 'should not publish int resubmissions queue' do
@@ -343,7 +343,7 @@ describe Student do
           post '/courses/foo/students', student_json
 
           expect(last_response).to_not be_ok
-          expect(Student.where(organization: 'example', course: 'example/foo').count).to eq 0
+          expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
         end
       end
     end
@@ -355,10 +355,10 @@ describe Student do
 
       let(:except_fields) { {except: [:created_at, :updated_at]} }
 
-      let(:student1) { {uid: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar', organization: 'example', course: 'example/foo'} }
-      let(:student2) { {uid: 'jondoe@gmail.com', first_name: 'jon', last_name: 'doe', organization: 'example', course: 'example/foo'} }
-      let(:student3) { {uid: 'walter@gmail.com', first_name: 'wal', last_name: 'ter', organization: 'example', course: 'example/foo'} }
-      let(:student4) { {uid: 'zzztop@gmail.com', first_name: 'zzz', last_name: 'top', organization: 'example', course: 'example/foo', detached: true} }
+      let(:student1) { {uid: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar', organization: 'example.org', course: 'example.org/foo'} }
+      let(:student2) { {uid: 'jondoe@gmail.com', first_name: 'jon', last_name: 'doe', organization: 'example.org', course: 'example.org/foo'} }
+      let(:student3) { {uid: 'walter@gmail.com', first_name: 'wal', last_name: 'ter', organization: 'example.org', course: 'example.org/foo'} }
+      let(:student4) { {uid: 'zzztop@gmail.com', first_name: 'zzz', last_name: 'top', organization: 'example.org', course: 'example.org/foo', detached: true} }
 
       before { Student.create! student1 }
       before { Student.create! student2 }

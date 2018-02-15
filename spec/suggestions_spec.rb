@@ -28,7 +28,7 @@ describe 'suggestions' do
       before { header 'Authorization', build_auth_header('foo/bar') }
       before { get '/suggestions/mumukiproject/foo/3' }
 
-      it { expect(last_response.body).to json_like message: 'Unauthorized access to example/_ as teacher. Scope is ``' }
+      it { expect(last_response.body).to json_like message: 'Unauthorized access to example.org/_ as teacher. Scope is ``' }
     end
 
   end

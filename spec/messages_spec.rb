@@ -7,16 +7,16 @@ describe 'messages' do
 
     context 'when authenticated' do
       let(:exercise) { {eid: 2} }
-      before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: { slug: 'mumukiproject/example' }, submissions: [{sid: '3'}]}.merge organization: 'example', course: 'example/bar') }
-      before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: { slug: 'mumukiproject/test' }, submissions: [{sid: '4'}]}.merge organization: 'example', course: 'example/bar') }
+      before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '3'}]}.merge organization: 'example.org', course: 'example.org/bar') }
+      before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/test'}, submissions: [{sid: '4'}]}.merge organization: 'example.org', course: 'example.org/bar') }
       before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
                                                                                        submission_id: '3',
                                                                                        exercise_id: 2,
-                                                                                       organization: 'example'}.as_json) }
+                                                                                       organization: 'example.org'}.as_json) }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses/bar/messages', message_to_post }
 
-      let(:assignment) { Assignment.find_by(organization: 'example', course: 'example/bar', 'exercise.eid': 2, 'guide.slug': 'mumukiproject/example', 'student.uid': '1') }
+      let(:assignment) { Assignment.find_by(organization: 'example.org', course: 'example.org/bar', 'exercise.eid': 2, 'guide.slug': 'mumukiproject/example', 'student.uid': '1') }
       context 'when content' do
         let(:message) { {content: 'hola', sender: 'github|123456'} }
         it { expect(assignment.submissions.first.as_json).to json_like({sid: '3', messages: [content: "<p>hola</p>\n", sender: 'github|123456']}, {except: [:_id, :date, :created_at, :updated_at]}) }
@@ -31,12 +31,12 @@ describe 'messages' do
         context 'updates existing suggestion when used' do
           let(:message_from_suggestion_to_post) { {uid: '2', exercise_id: 2, submission_id: '5', message: message, guide_slug: 'mumukiproject/example', suggestion_id: Suggestion.last.id}.to_json }
 
-          before { Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: { slug: 'mumukiproject/example' }, submissions: [{sid: '5'}]}.merge organization: 'example', course: 'example/bar') }
+          before { Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '5'}]}.merge organization: 'example.org', course: 'example.org/bar') }
 
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
                                                                                            submission_id: '5',
                                                                                            exercise_id: 2,
-                                                                                           organization: 'example'}.as_json) }
+                                                                                           organization: 'example.org'}.as_json) }
 
           before { post '/courses/bar/messages', message_from_suggestion_to_post }
 
@@ -58,7 +58,7 @@ describe 'messages' do
       before { header 'Authorization', build_auth_header('foo/bar') }
       before { post '/courses/baz/messages', message_to_post }
 
-      it { expect(last_response.body).to json_like message: 'Unauthorized access to example/baz as teacher. Scope is ``' }
+      it { expect(last_response.body).to json_like message: 'Unauthorized access to example.org/baz as teacher. Scope is ``' }
     end
 
   end
