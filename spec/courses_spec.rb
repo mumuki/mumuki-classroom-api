@@ -15,7 +15,7 @@ describe Course do
     end
 
     context 'when there are courses' do
-      let(:course) { {name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz', organization: 'example'} }
+      let(:course) { {name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz', organization: 'example.org'} }
       before { Course.create!(course) }
       before { get '/courses' }
 
@@ -30,8 +30,8 @@ describe Course do
                     period: '2016',
                     shifts: ['morning'],
                     description: 'haskell',
-                    organization: 'example',
-                    slug: 'example/2016-K2001'} }
+                    organization: 'example.org',
+                    slug: 'example.org/2016-K2001'} }
     let(:created_uid) { Course.last.uid }
 
     context 'when is normal teacher' do
@@ -45,13 +45,13 @@ describe Course do
     end
 
     context 'when is org admin' do
-      before { header 'Authorization', build_auth_header('example/*') }
+      before { header 'Authorization', build_auth_header('example.org/*') }
       before { post '/courses', course.to_json }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_uid).to eq 'example/2016-K2001' }
+      it { expect(created_uid).to eq 'example.org/2016-K2001' }
     end
 
     context 'when is global admin' do
@@ -61,7 +61,7 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_uid).to eq 'example/2016-K2001' }
+      it { expect(created_uid).to eq 'example.org/2016-K2001' }
     end
 
     context 'when course already exists' do
@@ -115,16 +115,16 @@ describe Course do
 
   describe 'get courses/:course/progress' do
     let(:exercise_progress) { {student: {uid: '1'}, guide: {slug: 'foo/bar'}, exercise: {eid: 1}} }
-    before { Assignment.create! exercise_progress.merge(organization: 'example', course: 'example/foo') }
+    before { Assignment.create! exercise_progress.merge(organization: 'example.org', course: 'example.org/foo') }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/progress' }
-    it { expect(last_response.body).to json_like({exercise_student_progress: [exercise_progress.merge(organization: 'example', course: 'example/foo')]}, except_fields) }
+    it { expect(last_response.body).to json_like({exercise_student_progress: [exercise_progress.merge(organization: 'example.org', course: 'example.org/foo')]}, except_fields) }
   end
 
   describe 'get courses/:course/report' do
     let(:student) { {
-      organization: 'example',
-      course: 'example/foo',
+      organization: 'example.org',
+      course: 'example.org/foo',
       uid: 'foo@bar.com',
       created_at: '2016-08-01T18:39:57.000Z',
       email: 'foo@bar.com',

@@ -5,14 +5,14 @@ describe Classroom::Event::UserChanged do
   let(:uid) { 'agus@mumuki.org' }
   let(:uid2) { 'fedescarpa@mumuki.org' }
   let(:event) { user.merge(permissions: new_permissions) }
-  let(:old_permissions) { {student: 'example/foo'}.with_indifferent_access }
-  let(:new_permissions) { {student: 'example/bar', teacher: 'example/foo'}.with_indifferent_access }
+  let(:old_permissions) { {student: 'example.org/foo'}.with_indifferent_access }
+  let(:new_permissions) { {student: 'example.org/bar', teacher: 'example.org/foo'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
   let(:user2) { {uid: uid2, email: uid2, last_name: 'Scarpa', first_name: 'Federico'}.with_indifferent_access }
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   before { User.create! uid: uid, permissions: old_permissions }
-  before { Organization.create!(name: 'example') }
+  before { Organization.create!(name: 'example.org') }
 
   describe 'execute!' do
 
@@ -25,7 +25,7 @@ describe Classroom::Event::UserChanged do
       end
       before { Classroom::Event::UserChanged.execute! event }
 
-      it { expect(Organization.pluck(:name)).to include 'example' }
+      it { expect(Organization.pluck(:name)).to include 'example.org' }
       it { expect(Classroom::Event::UserChanged.changes).to be_empty }
     end
 
@@ -38,38 +38,38 @@ describe Classroom::Event::UserChanged do
       end
       before { Classroom::Event::UserChanged.execute! event }
 
-      it { expect(Organization.pluck(:name)).to include 'example' }
-      it { expect(Classroom::Event::UserChanged.changes['example'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
+      it { expect(Organization.pluck(:name)).to include 'example.org' }
+      it { expect(Classroom::Event::UserChanged.changes['example.org'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
              .to json_like(changes: [
-               {role: 'student', grant: 'example/foo', type: 'removed'},
-               {role: 'student', grant: 'example/bar', type: 'added'},
-               {role: 'teacher', grant: 'example/foo', type: 'added'}]) }
+               {role: 'student', grant: 'example.org/foo', type: 'removed'},
+               {role: 'student', grant: 'example.org/bar', type: 'added'},
+               {role: 'teacher', grant: 'example.org/foo', type: 'added'}]) }
 
     end
 
     context 'update models' do
 
-      before { Course.create! organization: 'example', slug: 'example/foo' }
-      before { Course.create! organization: 'example', slug: 'example/bar' }
-      before { Student.create! user.merge(organization: 'example', course: 'example/foo') }
+      before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
+      before { Course.create! organization: 'example.org', slug: 'example.org/bar' }
+      before { Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
       let(:event) { user2.merge(permissions: new_permissions) }
 
-      let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/foo') }
-      let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example', course: 'example/bar') }
-      let(:teacher_foo_fetched) { Teacher.find_by(uid: uid, organization: 'example', course: 'example/foo') }
+      let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
+      let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
+      let(:teacher_foo_fetched) { Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
 
       it { expect(student_foo_fetched.detached).to eq true }
       it { expect(student_foo_fetched.uid).to eq uid }
       it { expect(student_foo_fetched.first_name).to eq 'Agustín' }
 
-      it { expect(student_bar_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/bar'), except_fields }
+      it { expect(student_bar_fetched.as_json).to json_like user2.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_foo_fetched.as_json).to json_like user2.merge(organization: 'example', course: 'example/foo'), except_fields }
+      it { expect(teacher_foo_fetched.as_json).to json_like user2.merge(organization: 'example.org', course: 'example.org/foo'), except_fields }
     end
 
     context 'when there are assignments for several users, user changed event only updates the assignment for that student' do
@@ -109,23 +109,23 @@ describe Classroom::Event::UserChanged do
         expectation_results: []
       } }
       let(:agus_submission) { submission.merge({
-                                                 organization: 'example',
+                                                 organization: 'example.org',
                                                  submitter: user,
                                                  exercise: exercise,
                                                  guide: guide
                                                }) }
       let(:fede_submission) { submission.merge({
-                                                 organization: 'example',
+                                                 organization: 'example.org',
                                                  submitter: user2,
                                                  exercise: exercise,
                                                  guide: guide
                                                }) }
       let(:event2) { user2.merge(last_name: 'Otro', permissions: old_permissions) }
       before { User.create! uid: uid2, permissions: old_permissions }
-      before { Course.create! organization: 'example', slug: 'example/foo' }
-      before { Course.create! organization: 'example', slug: 'example/bar' }
-      before { Student.create! user.merge(organization: 'example', course: 'example/foo') }
-      before { Student.create! user2.merge(organization: 'example', course: 'example/foo') }
+      before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
+      before { Course.create! organization: 'example.org', slug: 'example.org/bar' }
+      before { Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Student.create! user2.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Submission.process!(agus_submission) }
       before { Submission.process!(fede_submission) }
       before { Classroom::Event::UserChanged.execute! event2 }

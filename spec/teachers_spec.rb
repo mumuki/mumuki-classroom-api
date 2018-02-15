@@ -10,11 +10,11 @@ describe Teacher do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when there is 1 teacher' do
-      before { Teacher.create! teacher.merge(organization: 'example', course: 'example/foo') }
+      before { Teacher.create! teacher.merge(organization: 'example.org', course: 'example.org/foo') }
       before { get '/courses/foo/teachers' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like({teachers: [teacher.merge(organization: 'example', course: 'example/foo')]}, except_fields) }
+      it { expect(last_response.body).to json_like({teachers: [teacher.merge(organization: 'example.org', course: 'example.org/foo')]}, except_fields) }
     end
 
   end
@@ -29,7 +29,7 @@ describe Teacher do
 
       it { expect(last_response).to be_ok }
       it { expect(Teacher.count).to eq 1 }
-      it { expect(Teacher.first.as_json).to json_like(teacher.merge(organization: 'example', course: 'example/foo', uid: 'foobar@gmail.com'), except_fields) }
+      it { expect(Teacher.first.as_json).to json_like(teacher.merge(organization: 'example.org', course: 'example.org/foo', uid: 'foobar@gmail.com'), except_fields) }
     end
 
     context 'when no permissions' do

@@ -17,9 +17,9 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (5.1.0)
-      activesupport (= 5.1.0)
-    activesupport (5.1.0)
+    activemodel (5.1.5)
+      activesupport (= 5.1.5)
+    activesupport (5.1.5)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (~> 0.7)
       minitest (~> 5.1)
@@ -47,12 +47,13 @@ GEM
     faraday (0.12.2)
       multipart-post (>= 1.2, < 3)
     hashie (3.5.6)
-    i18n (0.8.1)
+    i18n (0.9.5)
+      concurrent-ruby (~> 1.0)
     json (2.1.0)
     jwt (1.5.6)
     method_source (0.8.2)
     mini_portile2 (2.3.0)
-    minitest (5.10.2)
+    minitest (5.11.3)
     mongo (2.4.1)
       bson (>= 4.2.1, < 5.0.0)
     mongoid (6.1.0)
@@ -64,7 +65,7 @@ GEM
     mumukit-auth (7.1.0)
       jwt
       mumukit-core (~> 1.0)
-    mumukit-core (1.1.0)
+    mumukit-core (1.2.2)
       activesupport (>= 4.1)
       i18n (~> 0.7)
       rack (>= 1.5)
@@ -82,8 +83,9 @@ GEM
     mumukit-nuntius (5.0.0)
       bunny (~> 2.3)
       mumukit-core (~> 1.0)
-    mumukit-platform (0.4.0)
-      mumukit-core (~> 1.0)
+    mumukit-platform (0.11.0)
+      activemodel (>= 4.0)
+      mumukit-core (~> 1.2)
     mumukit-service (3.0.1)
       bson_ext
       mongo (~> 2.1)
@@ -164,7 +166,7 @@ GEM
     slop (3.6.0)
     thread_safe (0.3.6)
     tilt (2.0.7)
-    tzinfo (1.2.3)
+    tzinfo (1.2.5)
       thread_safe (~> 0.1)
 
 PLATFORMS
@@ -186,7 +188,7 @@ DEPENDENCIES
   mumukit-inspection (~> 1.0)
   mumukit-login (~> 4.0)
   mumukit-nuntius (~> 5.0)
-  mumukit-platform (~> 0.1)
+  mumukit-platform (~> 0.11)
   mumukit-service (~> 3.0)
   pry
   pry-byebug
@@ -202,4 +204,4 @@ DEPENDENCIES
   sinatra-rake-routes
 
 BUNDLED WITH
-   1.16.0.pre.3
+   1.16.1

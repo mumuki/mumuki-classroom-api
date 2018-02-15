@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Guide do
 
   def with_course(json)
-    {organization: 'example', course: 'example/foo'}.merge json
+    {organization: 'example.org', course: 'example.org/foo'}.merge json
   end
 
   let(:except_fields) { {except: [:created_at, :updated_at]} }
@@ -24,9 +24,9 @@ describe Guide do
     end
 
     context 'when guides already exists in a course' do
-      before { Guide.create! guide1.merge(organization: 'example', course: 'example/foo') }
-      before { Guide.create! guide2.merge(organization: 'example', course: 'example/foo') }
-      before { Guide.create! guide3.merge(organization: 'example', course: 'example/bar') }
+      before { Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Guide.create! guide3.merge(organization: 'example.org', course: 'example.org/bar') }
 
       before { header 'Authorization', build_auth_header('*') }
       before { get '/courses/foo/guides' }
@@ -44,9 +44,9 @@ describe Guide do
     end
 
     context 'when guides already exists in a course' do
-      before { Guide.create! guide1.merge(organization: 'example', course: 'example/foo') }
-      before { Guide.create! guide2.merge(organization: 'example', course: 'example/foo') }
-      before { Guide.create! guide3.merge(organization: 'example', course: 'example/bar') }
+      before { Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Guide.create! guide3.merge(organization: 'example.org', course: 'example.org/bar') }
 
       before { header 'Authorization', build_mumuki_auth_header('*') }
       before { get '/api/courses/foo/guides' }
