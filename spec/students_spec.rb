@@ -174,6 +174,18 @@ describe Student do
     it { expect(last_response.body).to eq({:status => :created}.to_json) }
   end
 
+  describe 'put /courses/:course/students/:student_id' do
+
+    before { Student.create! first_name: 'Jon', last_name: 'Din', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
+    before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+    before { header 'Authorization', build_auth_header('*') }
+    before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
+
+    it { expect(last_response).to be_ok }
+    it { expect(last_response.body).to json_eq({:status => :updated}) }
+    it { expect(Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Doe' }
+  end
+
   describe 'when needs mumuki-user' do
     let(:fetched_student) { Student.find_by(uid: 'github|123456', organization: 'example.org', course: 'example.org/example') }
 

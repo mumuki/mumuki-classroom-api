@@ -58,9 +58,9 @@ Mumukit::Platform.map_organization_routes!(self) do
     ensure_course_existence!
     ensure_student_not_exists!
 
-    json_body[:email] = json_body[:email].downcase
-    json_body[:first_name] = json_body[:first_name].downcase.titleize
-    json_body[:last_name] = json_body[:last_name].downcase.titleize
+    json_body[:email] = json_body[:email]&.downcase
+    json_body[:first_name] = json_body[:first_name]&.downcase&.titleize
+    json_body[:last_name] = json_body[:last_name]&.downcase&.titleize
 
     json = {student: json_body.merge(uid: json_body[:email]), course: {slug: course_slug}}
     uid = json[:student][:uid]
@@ -82,7 +82,9 @@ Mumukit::Platform.map_organization_routes!(self) do
     ensure_course_existence!
 
     student = Student.find_by!(with_organization_and_course uid: uid)
-    student.update_attributes! first_name: json_body[:first_name].downcase.titleize, last_name: json_body[:last_name].downcase.titleize, personal_id: json_body[:personal_id]
+    student.update_attributes! first_name: json_body[:first_name]&.downcase&.titleize,
+                               last_name: json_body[:last_name]&.downcase&.titleize,
+                               personal_id: json_body[:personal_id]
 
     {status: :updated}
   end
