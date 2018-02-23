@@ -76,4 +76,14 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     {status: :created}
   end
+
+  put '/courses/:course/students/:uid' do
+    authorize! :janitor
+    ensure_course_existence!
+
+    student = Student.find_by!(with_organization_and_course uid: uid)
+    student.update_attributes! first_name: json_body[:first_name].downcase.titleize, last_name: json_body[:last_name].downcase.titleize, personal_id: json_body[:personal_id]
+
+    {status: :updated}
+  end
 end
