@@ -13,7 +13,7 @@ gem 'bson_ext'
 gem 'bunny'
 
 gem 'mumukit-core', '~> 1.1'
-gem 'mumukit-nuntius', '~> 5.0'
+gem 'mumukit-nuntius', '~> 6.0'
 
 gem 'mumukit-auth', '~> 7.0'
 gem 'mumukit-service', '~> 3.0'
