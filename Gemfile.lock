@@ -80,7 +80,7 @@ GEM
       omniauth-auth0 (~> 1.1)
       omniauth-saml (~> 1.6)
       rack (>= 1.5)
-    mumukit-nuntius (5.0.0)
+    mumukit-nuntius (6.0.0)
       bunny (~> 2.3)
       mumukit-core (~> 1.0)
     mumukit-platform (0.11.0)
@@ -187,7 +187,7 @@ DEPENDENCIES
   mumukit-core (~> 1.1)
   mumukit-inspection (~> 1.0)
   mumukit-login (~> 4.0)
-  mumukit-nuntius (~> 5.0)
+  mumukit-nuntius (~> 6.0)
   mumukit-platform (~> 0.11)
   mumukit-service (~> 3.0)
   pry
