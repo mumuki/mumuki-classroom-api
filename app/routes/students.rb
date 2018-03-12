@@ -18,7 +18,8 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/api/courses/:course/students' do
     authorize! :teacher
-    {students: Student.where(with_organization_and_course)}
+    query_params = params.slice('uid', 'personal_id')
+    {students: Student.where(with_organization_and_course.merge query_params)}
   end
 
   get '/api/courses/:course/students/:uid' do
