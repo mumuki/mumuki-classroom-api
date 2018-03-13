@@ -121,26 +121,30 @@ describe Student do
 
     describe 'get /courses/:course/students' do
 
-      let(:student) { {email: 'foobar@gmail.com', first_name: 'foo', last_name: 'example.org/bar'} }
+      let(:student) { {email: 'foobar@gmail.com', uid: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar', personal_id: '1'} }
+      let(:student2) { {email: 'bazlol@gmail.com', uid: 'bazlol@gmail.com', first_name: 'baz', last_name: 'lol', personal_id: '2'} }
       let(:student_saved) { {organization: 'example.org', course: 'example.org/foo'}.merge student }
+      let(:student_saved2) { {organization: 'example.org', course: 'example.org/foo'}.merge student2 }
 
       context 'when guides already exists in a course' do
         before { Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
         before { Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
+        before { Student.create! student2.merge(organization: 'example.org', course: 'example.org/foo') }
+        before { Student.create! student2.merge(organization: 'example.org', course: 'example.org/test') }
 
         context 'get students with auth0 client' do
           before { header 'Authorization', build_auth_header('*') }
           before { get '/courses/foo/students' }
 
           it { expect(last_response).to be_ok }
-          it { expect(last_response.body).to json_like({students: [student_saved]}, except_fields) }
+          it { expect(last_response.body).to json_like({students: [student_saved, student_saved2]}, except_fields) }
         end
         context 'get students with auth client' do
           before { header 'Authorization', build_mumuki_auth_header('*') }
-          before { get '/api/courses/foo/students' }
+          before { get '/api/courses/foo/students?personal_id=2&uid=bazlol@gmail.com' }
 
           it { expect(last_response).to be_ok }
-          it { expect(last_response.body).to json_like({students: [student_saved]}, except_fields) }
+          it { expect(last_response.body).to json_like({students: [student_saved2]}, except_fields) }
         end
       end
 
