@@ -2,7 +2,7 @@ class User
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mumukit::Login::UserPermissionsHelpers
+  include Mumukit::Platform::User::Helpers
 
   field :uid, type: String
   field :provider, type: String
@@ -35,12 +35,11 @@ class User
     self.update! permissions: permissions.as_json
   end
 
-  def notify!
-    Mumukit::Nuntius.notify_event! 'UserChanged', {user: as_json(except: [:created_at, :updated_at])}
-  end
-
   def permissions
     Mumukit::Auth::Permissions.parse self[:permissions]
   end
 
+  def notify!
+    Mumukit::Nuntius.notify_event! 'UserChanged', user: as_platform_json
+  end
 end

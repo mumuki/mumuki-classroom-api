@@ -49,7 +49,7 @@ describe 'messages' do
       context 'when no content' do
         let(:message) { {content: nil, sender: 'github|123456'} }
         it { expect(assignment.submissions.first.as_json).to json_like({sid: '3', messages: [sender: 'github|123456']}, {except: [:_id, :date, :created_at, :updated_at]}) }
-        it { expect(assignment.threads(:ruby).as_json.first).to json_like({status: nil, content: "<pre class=\"highlight ruby\"><code>\n</code></pre>", messages: [{sender: 'github|123456'}]}, {except: [:_id, :created_at, :updated_at]}) }
+        it { expect(assignment.threads(:ruby).as_json.first).to json_like({status: nil, content: "<div class=\"highlight\"><pre class=\"highlight ruby\"><code>\n</code></pre></div>", messages: [{sender: 'github|123456'}]}, {except: [:_id, :created_at, :updated_at]}) }
       end
     end
 
