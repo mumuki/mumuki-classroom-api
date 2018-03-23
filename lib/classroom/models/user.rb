@@ -6,7 +6,6 @@ class User
 
   field :uid, type: String
   field :provider, type: String
-  field :name, type: String
   field :last_name, type: String
   field :first_name, type: String
   field :social_id, type: String
