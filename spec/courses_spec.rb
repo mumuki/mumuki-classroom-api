@@ -15,7 +15,7 @@ describe Course do
     end
 
     context 'when there are courses' do
-      let(:course) { {name: 'foo', slug: 'test/foo', uid: 'test/foo', description: 'baz', organization: 'example.org'} }
+      let(:course) { {name: 'foo', slug: 'test/foo', description: 'baz', organization: 'example.org'} }
       before { Course.create!(course) }
       before { get '/courses' }
 
@@ -32,7 +32,7 @@ describe Course do
                     description: 'haskell',
                     organization: 'example.org',
                     slug: 'example.org/2016-K2001'} }
-    let(:created_uid) { Course.last.uid }
+    let(:created_slug) { Course.last.slug }
 
     context 'when is normal teacher' do
       context 'rejects course creation' do
@@ -51,7 +51,7 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_uid).to eq 'example.org/2016-K2001' }
+      it { expect(created_slug).to eq 'example.org/2016-K2001' }
     end
 
     context 'when is global admin' do
@@ -61,7 +61,7 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_uid).to eq 'example.org/2016-K2001' }
+      it { expect(created_slug).to eq 'example.org/2016-K2001' }
     end
 
     context 'when course already exists' do

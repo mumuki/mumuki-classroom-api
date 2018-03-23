@@ -44,7 +44,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses' do
     current_user.protect! :janitor, json_body[:slug]
-    course = Course.create! with_organization(json_body.merge uid: json_body[:slug])
+    course = Course.create! with_organization(json_body)
     course.notify!
     {status: :created}
   end

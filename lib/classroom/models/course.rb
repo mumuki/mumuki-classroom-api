@@ -4,7 +4,6 @@ class Course
   include Mongoid::Timestamps
   include Mumukit::Platform::Course::Helpers
 
-  field :uid, type: String
   field :slug, type: String
   field :name, type: String
   field :code, type: String
@@ -32,7 +31,7 @@ class Course
   end
 
   def self.allowed(organization, permissions)
-    where(organization: organization).select { |course| permissions.has_permission? :teacher, course.uid }
+    where(organization: organization).select { |course| permissions.has_permission? :teacher, course.slug }
   end
 
   def self.ensure_new!(json)

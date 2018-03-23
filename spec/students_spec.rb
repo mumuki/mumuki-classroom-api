@@ -213,8 +213,8 @@ describe Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo', uid: 'example.org/foo' }
-        before { Course.create! organization: 'example.org', name: 'bar', slug: 'example.org/bar', uid: 'example.org/bar' }
+        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+        before { Course.create! organization: 'example.org', name: 'bar', slug: 'example.org/bar' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
@@ -280,7 +280,7 @@ describe Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo', uid: 'example.org/foo' }
+        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
