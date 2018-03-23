@@ -15,13 +15,14 @@ GIT
 
 GIT
   remote: git://github.com/mumuki/mumukit-platform.git
-  revision: 0e1c865d741cc22c82e84bb5472e0869ed308945
+  revision: 96a7b42a5649478a3e04865f9f20f506485aa18b
   branch: feature-unified-platform-model
   specs:
     mumukit-platform (1.2.0)
       activemodel (>= 4.0)
       mumukit-auth (~> 7.0)
       mumukit-core (~> 1.2)
+      mumukit-nuntius (~> 6.0)
 
 GEM
   remote: https://rubygems.org/
@@ -71,8 +72,8 @@ GEM
     multi_json (1.12.1)
     multi_xml (0.6.0)
     multipart-post (2.0.0)
-    mumukit-auth (7.1.0)
-      jwt
+    mumukit-auth (7.2.0)
+      jwt (~> 1.5)
       mumukit-core (~> 1.0)
     mumukit-content-type (1.3.0)
       mumukit-core (~> 1.0)
@@ -128,7 +129,7 @@ GEM
       pry (>= 0.9.11)
     public_suffix (3.0.2)
     puma (3.11.0)
-    rack (1.6.8)
+    rack (1.6.9)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.3)
