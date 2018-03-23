@@ -2,6 +2,7 @@ class Course
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  include Mumukit::Platform::Course::Helpers
 
   field :uid, type: String
   field :slug, type: String
@@ -28,10 +29,6 @@ class Course
 
   def notify_invitation!
     Mumukit::Nuntius.notify_event! 'InvitationCreated', {invitation: invitation.as_json}
-  end
-
-  def notify!
-    Mumukit::Nuntius.notify_event! 'CourseChanged', {course: self.as_json}
   end
 
   def self.allowed(organization, permissions)

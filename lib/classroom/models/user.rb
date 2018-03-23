@@ -37,8 +37,4 @@ class User
   def permissions
     Mumukit::Auth::Permissions.parse self[:permissions]
   end
-
-  def notify!
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: as_platform_json
-  end
 end
