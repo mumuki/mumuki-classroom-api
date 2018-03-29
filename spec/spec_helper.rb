@@ -21,7 +21,7 @@ RSpec.configure do |config|
   end
 end
 
-def as_json(obj, options = {})
+def spec_helper_as_json(obj, options = {})
   new_options = options.with_indifferent_access
   new_options['only'] = [*new_options['only']].map &:to_s if new_options['only']
   new_options['except'] = [*new_options['except']].map &:to_s if new_options['except']
@@ -34,40 +34,40 @@ end
 
 RSpec::Matchers.define :json_like do |expected, options={}|
   match do |actual|
-    as_json(actual, options) == as_json(expected, options)
+    spec_helper_as_json(actual, options) == spec_helper_as_json(expected, options)
   end
 
   failure_message_for_should do |actual|
     <<-EOS
-    expected: #{as_json(expected, options)} (#{expected.class})
-         got: #{as_json(actual, options)} (#{actual.class})
+    expected: #{spec_helper_as_json(expected, options)} (#{expected.class})
+         got: #{spec_helper_as_json(actual, options)} (#{actual.class})
     EOS
   end
 
   failure_message_for_should_not do |actual|
     <<-EOS
-    expected: value != #{as_json(expected, options)} (#{expected.class})
-         got:          #{as_json(actual, options)} (#{actual.class})
+    expected: value != #{spec_helper_as_json(expected, options)} (#{expected.class})
+         got:          #{spec_helper_as_json(actual, options)} (#{actual.class})
     EOS
   end
 end
 
 RSpec::Matchers.define :json_eq do |expected|
   match do |actual|
-    as_json(actual) == as_json(expected)
+    spec_helper_as_json(actual) == spec_helper_as_json(expected)
   end
 
   failure_message_for_should do |actual|
     <<-EOS
-    expected: #{as_json(expected)} (#{expected.class})
-         got: #{as_json(actual)} (#{actual.class})
+    expected: #{spec_helper_as_json(expected)} (#{expected.class})
+         got: #{spec_helper_as_json(actual)} (#{actual.class})
     EOS
   end
 
   failure_message_for_should_not do |actual|
     <<-EOS
-    expected: value != #{as_json(expected)} (#{expected.class})
-         got:          #{as_json(actual)} (#{actual.class})
+    expected: value != #{spec_helper_as_json(expected)} (#{expected.class})
+         got:          #{spec_helper_as_json(actual)} (#{actual.class})
     EOS
   end
 end

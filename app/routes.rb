@@ -57,13 +57,7 @@ helpers do
   end
 
   def login_settings
-    Mumukit::Login::Settings.new mumukit_login_methods
-  end
-
-  def mumukit_login_methods
-    Mumukit::Login::Settings::LOCK_LOGIN_METHODS
-      .select { |key, value| current_organization.login_method_present? key.to_s, value }
-      .keys
+    current_organization.login_settings
   end
 
   def exercise_student_progress_query
@@ -102,8 +96,9 @@ helpers do
     Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
   end
 
-  def set_locale!(org)
-    I18n.locale = org['locale'].include?('-') ? org['locale'].split('-').first : org['locale']
+  def set_locale!
+    locale = current_organization.locale
+    I18n.locale = locale.include?('-') ? locale.split('-').first : locale
   end
 
   def organization_json
@@ -153,7 +148,7 @@ helpers do
 end
 
 before do
-  set_locale! organization_json if organization_json
+  set_locale! if current_organization
 end
 
 require_relative './routes/pagination'

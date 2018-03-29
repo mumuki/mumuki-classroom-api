@@ -9,12 +9,7 @@ Mumukit::Nuntius::EventConsumer.handle do
   end
 
   event 'OrganizationChanged' do |payload|
-    organization = payload[:organization].except(:created_at, :updated_at)
-    Organization.find_by!(name: organization[:name]).update! organization
-  end
-
-  event 'OrganizationCreated' do |payload|
-    Organization.create! payload[:organization].except(:created_at, :updated_at)
+    Organization.import_from_json! payload[:organization].except(:created_at, :updated_at)
   end
 
   event 'ExerciseChanged' do |payload|

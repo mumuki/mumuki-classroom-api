@@ -15,7 +15,7 @@ GIT
 
 GIT
   remote: git://github.com/mumuki/mumukit-platform.git
-  revision: 96a7b42a5649478a3e04865f9f20f506485aa18b
+  revision: 25012758061bc722593708e2669ddf111a190e92
   branch: feature-unified-platform-model
   specs:
     mumukit-platform (1.2.0)
@@ -36,14 +36,14 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
-    amq-protocol (2.1.0)
+    amq-protocol (2.3.0)
     backports (3.8.0)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     bson (4.2.1)
     bson_ext (1.5.1)
-    bunny (2.6.5)
-      amq-protocol (>= 2.1.0)
+    bunny (2.9.2)
+      amq-protocol (~> 2.3.0)
     byebug (9.0.6)
     codeclimate-test-reporter (1.0.8)
       simplecov (<= 0.13)

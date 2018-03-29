@@ -7,7 +7,7 @@ describe Assignment do
   end
 
   before do
-    Organization.create!(locale: 'es', name: 'example.org')
+    Organization.create!(name: 'example.org', profile: {locale: 'es'})
   end
 
   let(:except_fields) { {except: [:created_at, :updated_at, :_id]} }
