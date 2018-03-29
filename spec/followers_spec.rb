@@ -43,7 +43,7 @@ describe Follower do
     before { post '/courses/bar/followers', follower_json }
     before { delete '/courses/bar/followers/social%7c1' }
 
-    it { expect(follower['uids']).to json_eq [] }
+    it { expect(follower['uids']).to eq [] }
   end
 
   context 'GET /courses/:course/followers' do
