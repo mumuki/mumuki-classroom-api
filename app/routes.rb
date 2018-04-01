@@ -97,8 +97,7 @@ helpers do
   end
 
   def set_locale!
-    locale = current_organization.locale
-    I18n.locale = locale.include?('-') ? locale.split('-').first : locale
+    I18n.locale = current_organization.locale
   end
 
   def organization_json
