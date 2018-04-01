@@ -2,6 +2,28 @@ require 'spec_helper'
 
 describe 'organizations' do
 
+  describe(:model) do
+    it do
+      Organization.create!(
+        profile: Mumukit::Platform::Organization::Profile.new(locale: 'es'),
+        name: 'an.es.organization')
+
+      expect(Organization.find_by(name: 'an.es.organization').profile.locale).to eq 'es'
+    end
+
+    it { Organization.create!(locale: 'es') }
+    it { Organization.create!(profile: Mumukit::Platform::Organization::Profile.new(locale: 'es')) }
+
+    it { expect(Organization.new(name: 'the.name').name).to eq 'the.name' }
+    it { expect(Organization.new(locale: 'es').locale).to eq 'es' }
+    it { expect(Organization.new(profile: {locale: 'es'}).locale).to eq 'es' }
+    it { expect(Organization.new(profile: Mumukit::Platform::Organization::Profile.new(locale: 'es')).locale).to eq 'es' }
+    it do
+      organization = Organization.new
+      expect(organization.profile).to eq organization.profile
+    end
+  end
+
   let(:organization_json) {{
     name: 'test',
     book: 'mumuki/mumuki-libro-programacion',
