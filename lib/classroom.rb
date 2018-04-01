@@ -48,11 +48,11 @@ end
 
 class Mumukit::Platform::Model
   def self.demongoize(object)
-    load object
+    parse object
   end
 
   def self.mongoize(object)
-    dump object
+    object.as_json
   end
 end
 
