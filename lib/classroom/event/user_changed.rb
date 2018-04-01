@@ -4,7 +4,7 @@ class Classroom::Event::UserChanged
     attr_accessor :changes
 
     def execute!(user_h)
-      user = user_h.compact
+      user = Mumukit::Platform::User::Helpers.slice_platform_json user_h.compact
       update_user_permissions user
       update_user_model user.except(:permissions)
     end

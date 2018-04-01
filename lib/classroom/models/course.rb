@@ -2,8 +2,8 @@ class Course
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  include Mumukit::Platform::Course::Helpers
 
-  field :uid, type: String
   field :slug, type: String
   field :name, type: String
   field :code, type: String
@@ -30,12 +30,8 @@ class Course
     Mumukit::Nuntius.notify_event! 'InvitationCreated', {invitation: invitation.as_json}
   end
 
-  def notify!
-    Mumukit::Nuntius.notify_event! 'CourseChanged', {course: self.as_json}
-  end
-
   def self.allowed(organization, permissions)
-    where(organization: organization).select { |course| permissions.has_permission? :teacher, course.uid }
+    where(organization: organization).select { |course| permissions.has_permission? :teacher, course.slug }
   end
 
   def self.ensure_new!(json)
@@ -53,10 +49,10 @@ class Course
   end
 
   def self.import_from_json!(json)
+    json = Mumukit::Platform::Course::Helpers.slice_platform_json json
     slug = json[:slug]
-    json.delete(:organization_id)
     json[:organization] = Mumukit::Auth::Slug.parse(json[:slug]).organization
-    Course.where(slug: slug).first_or_create.update_attributes(json.except(:subscription_mode))
+    Course.where(slug: slug).first_or_create.update_attributes(json)
   end
 
 end

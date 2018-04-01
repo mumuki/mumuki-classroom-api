@@ -18,8 +18,8 @@ gem 'mumukit-nuntius', '~> 6.0'
 gem 'mumukit-auth', '~> 7.0'
 gem 'mumukit-service', '~> 3.0'
 
+gem 'mumukit-platform', '~> 1.3'
 gem 'mumukit-login', '~> 5.0'
-gem 'mumukit-platform', '~> 1.1'
 
 gem 'mumukit-inspection', '~> 1.0'
 gem 'mumukit-content-type', '~> 1.3'

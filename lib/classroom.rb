@@ -46,6 +46,17 @@ Mumukit::Platform.configure do |config|
   config.web_framework = Mumukit::Platform::WebFramework::Sinatra
 end
 
+class Mumukit::Platform::Model
+  def self.demongoize(object)
+    parse object
+  end
+
+  def self.mongoize(object)
+    object.as_json
+  end
+end
+
+
 module Mumukit::Platform::OrganizationMapping::Path
   class << self
     alias_method :__organization_name__, :organization_name
