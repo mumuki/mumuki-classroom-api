@@ -2,6 +2,8 @@ class Organization
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  # Warning: if you want to update organization settings, theme or profile,
+  # you must replace them instead of mutating them
   include Mumukit::Platform::Organization::Helpers
 
   field :id, type: Integer
