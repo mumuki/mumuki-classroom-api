@@ -3,25 +3,32 @@ require 'spec_helper'
 describe 'organizations' do
 
   describe(:model) do
-    it do
+    it "supports reading organizations from database" do
       Organization.create!(
-        profile: Mumukit::Platform::Organization::Profile.new(locale: 'es'),
+        profile: {locale: 'es'},
         name: 'an.es.organization')
 
-      expect(Organization.find_by(name: 'an.es.organization').profile.locale).to eq 'es'
+      organization = Organization.find_by(name: 'an.es.organization')
+
+      expect(organization.name).to eq 'an.es.organization'
+      expect(organization.locale).to eq 'es'
+      expect(organization.profile.locale).to eq 'es'
     end
 
-    it { Organization.create!(locale: 'es') }
-    it { Organization.create!(profile: Mumukit::Platform::Organization::Profile.new(locale: 'es')) }
+    it "supports updating as in import" do
+      Organization.create!(
+        profile: {locale: 'es'},
+        name: 'an.es.organization')
 
-    it { expect(Organization.new(name: 'the.name').name).to eq 'the.name' }
-    it { expect(Organization.new(locale: 'es').locale).to eq 'es' }
-    it { expect(Organization.new(profile: {locale: 'es'}).locale).to eq 'es' }
-    it { expect(Organization.new(profile: Mumukit::Platform::Organization::Profile.new(locale: 'es')).locale).to eq 'es' }
-    it do
-      organization = Organization.new
-      expect(organization.profile).to eq organization.profile
+      Organization.find_by(name: 'an.es.organization').update_attributes(profile: {locale: 'en'})
+
+      organization = Organization.find_by(name: 'an.es.organization')
+
+      expect(organization.name).to eq 'an.es.organization'
+      expect(organization.locale).to eq 'en'
+      expect(organization.profile.locale).to eq 'en'
     end
+
   end
 
   let(:organization_json) {{
