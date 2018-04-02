@@ -30,8 +30,6 @@ Mumukit::Nuntius.configure do |c|
   c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
 end
 
-Mumukit::Nuntius.establish_connection
-
 Mumukit::Auth.configure do |_config|
 
 end
