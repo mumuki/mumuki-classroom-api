@@ -171,18 +171,19 @@ describe Student do
     before { post '/courses/foo/students/github%7C123456' }
 
     it { expect(last_response).to be_ok }
-    it { expect(last_response.body).to eq({:status => :created}.to_json) }
+    it { expect(last_response.body).to json_eq status: :created }
   end
 
   describe 'put /courses/:course/students/:student_id' do
 
-    before { Student.create! first_name: 'Jon', last_name: 'Din', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
+    before { User.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
+    before { Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
     before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
     before { header 'Authorization', build_auth_header('*') }
     before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
 
     it { expect(last_response).to be_ok }
-    it { expect(last_response.body).to json_eq({:status => :updated}) }
+    it { expect(last_response.body).to json_eq status: :updated }
     it { expect(Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Doe' }
   end
 
@@ -199,7 +200,7 @@ describe Student do
         before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
 
         it { expect(last_response).to be_ok }
-        it { expect(last_response.body).to eq({:status => :updated}.to_json) }
+        it { expect(last_response.body).to json_eq status: :updated }
         it { expect(fetched_student.detached).to eq true }
       end
 
