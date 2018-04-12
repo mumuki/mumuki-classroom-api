@@ -55,6 +55,14 @@ Mumukit::Platform.map_organization_routes!(self) do
     authorize_for! :janitor, slug
 
     Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.course
+
+    user = User.find_by!(uid: uid)
+
+    permissions = user.permissions
+    permissions.remove_permission! 'student', course_slug
+    permissions.add_permission! 'student', json_body[:slug]
+    user.upsert_permissions! permissions
+    user.notify!
     {status: :updated}
   end
 
