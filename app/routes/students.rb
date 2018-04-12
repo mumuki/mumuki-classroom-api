@@ -36,14 +36,14 @@ Mumukit::Platform.map_organization_routes!(self) do
   post '/courses/:course/students/:uid/detach' do
     authorize! :janitor
     Student.find_by!(with_organization_and_course uid: uid).detach!
-    update_and_notify_student_metadata(uid, 'remove')
+    update_and_notify_student_metadata(uid, 'remove', course_slug)
     {status: :updated}
   end
 
   post '/courses/:course/students/:uid/attach' do
     authorize! :janitor
     Student.find_by!(with_organization_and_course uid: uid).attach!
-    update_and_notify_student_metadata(uid, 'add')
+    update_and_notify_student_metadata(uid, 'add', course_slug)
     {status: :updated}
   end
 
@@ -56,13 +56,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.course
 
-    user = User.find_by!(uid: uid)
-
-    permissions = user.permissions
-    permissions.remove_permission! 'student', course_slug
-    permissions.add_permission! 'student', json_body[:slug]
-    user.upsert_permissions! permissions
-    user.notify!
+    update_and_notify_student_metadata(uid, 'update', course_slug, json_body[:slug])
     {status: :updated}
   end
 

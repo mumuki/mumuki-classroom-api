@@ -108,10 +108,10 @@ helpers do
     @current_organization ||= Organization.find_by(name: organization)
   end
 
-  def update_and_notify_student_metadata(uid, method)
+  def update_and_notify_student_metadata(uid, method, *slugs)
     user = User.find_by_uid!(uid)
     permissions = user.permissions
-    permissions.send("#{method}_permission!", 'student', course_slug)
+    permissions.send("#{method}_permission!", 'student', *slugs)
     user.upsert_permissions! permissions
     user.notify!
   end
