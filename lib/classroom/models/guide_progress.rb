@@ -29,6 +29,10 @@ class GuideProgress
       where(query).destroy
     end
 
+    def transfer_all_by!(query, new_organization, new_course)
+      where(query).set(organization: new_organization, course: new_course)
+    end
+
     def last_assignment_by(query)
       where(query).order_by('last_assignment.submission.created_at': :desc).first.try do |it|
         LastAssignment.new(guide: it.guide,

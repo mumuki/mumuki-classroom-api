@@ -55,6 +55,12 @@ class Student
     GuideProgress.attach_all_by! sub_student_query(uid)
   end
 
+  def transfer_to!(organization, course)
+    Assignment.transfer_all_by! sub_student_query(uid), organization, course
+    GuideProgress.transfer_all_by! sub_student_query(uid), organization, course
+    update_attributes! organization: organization, course: course
+  end
+
   def update_last_assignment_for
     update_attributes!(last_assignment: GuideProgress.last_assignment_by(sub_student_query uid))
   end

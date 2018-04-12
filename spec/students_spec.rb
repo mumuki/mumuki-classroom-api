@@ -175,7 +175,7 @@ describe Student do
   end
 
   describe 'when needs mumuki-user' do
-    let(:fetched_student) { Student.find_by(uid: 'github|123456', organization: 'example.org', course: 'example.org/example') }
+    let(:fetched_student) { Student.find_by(uid: 'github|123456') }
 
 
     describe 'post /courses/:course/students/:student_id/detach' do
@@ -208,6 +208,28 @@ describe Student do
       end
 
     end
+
+    describe 'post /courses/:course/students/:student_id/transfer' do
+
+      before { example_students.call student1 }
+
+      let(:fetched_guide_progresses) { GuideProgress.where(student: student1).to_a }
+      let(:fetched_assignments) { Assignment.where(student: student1).to_a }
+
+      context 'should transfer student to destination and transfer all his data' do
+        before { header 'Authorization', build_auth_header('*/*') }
+        before { post '/courses/example/students/github%7C123456/transfer', { slug: 'some_orga/some_course' }.to_json }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to eq({:status => :updated}.to_json) }
+        it { expect(fetched_student.organization).to eq 'some_orga' }
+        it { expect(fetched_student.course).to eq 'some_course' }
+        it { expect(fetched_guide_progresses.all? { |it| it.matches? organization: 'some_orga', course: 'some_orga'}).to eq true }
+        it { expect(fetched_assignments.all? { |it| it.matches? organization: 'some_orga', course: 'some_orga'}).to eq true }
+      end
+
+    end
+
     describe 'post /courses/:course/students' do
       let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
       let(:student_json) { student.to_json }

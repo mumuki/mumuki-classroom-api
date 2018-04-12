@@ -91,6 +91,10 @@ class Assignment
       where(query).destroy
     end
 
+    def transfer_all_by!(query, new_organization, new_course)
+      where(query).set(organization: new_organization, course: new_course)
+    end
+
     def empty_stats
       {passed: 0, failed: 0, passed_with_warnings: 0}
     end
