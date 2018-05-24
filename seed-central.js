@@ -2,35 +2,35 @@ use classroom;
 
 var central = {
   "name" : "central",
-  "id" : 384,
+  "id" : 38,
   "contact_email" : "issues@mumuki.org",
-  "description" : "¿Alguna vez te sucedió estar haciendo una tarea tediosa y repetitiva? ¿Te descubriste a vos mismo cometiendo errores por cansancio o distracción? ¿Te diste cuenta de que estabas perdiendo tiempo valioso en cosas que... podría hacer una máquina?\n\nTenemos una buena noticia para vos: ¡la programación puede ayudarte! Programar trata de usar nuestra creatividad e ingenio para resolver problemas y automatizar tareas con la ayuda de una computadora. \n\nY por si fuera poco, aprender a programar es fácil y entretenido. ¡Acompañanos!",
+  "description" : "Aprendé a Programar",
   "book_id" : 12,
-  "created_at" : ISODate("2016-05-01T08:08:28.399Z"),
-  "updated_at" : ISODate("2016-05-12T18:37:13.574Z"),
-  "logo_url" : "http://mumuki.io/logo-alt-large.png",
-  "private" : false,
-  "locale" : "es",
-  "lock_json" : {
-    "dict" : "es",
-    "connections" : [
+  "profile" : {
+    "logo_url" : "http://mumuki.io/logo-alt-large.png",
+    "locale" : "es",
+    "description" : "Aprendé a Programar",
+    "contact_email" : "issues@mumuki.org",
+    "terms_of_service" : null,
+    "community_link" : "https://www.facebook.com/groups/237784263357385/"
+  },
+  "theme" : {
+    "extension_javascript" : "mumuki.load(function(){\r\n    $('.row:contains(10Pines SRL)').html('<div class=\"row text-center\">  <div>    <a href=\"https://www.10pines.com\" target=\"_blank\">      <img style=\"width: 15%\" src=\"https://www.10pines.com/assets/logo-big-e5a5b783b3e0a66c43cb5750770bf91fa0cee89e0703b83c90e3e1165580d886.png\">    </a>  </div>  <div>    Contenido creado por 10Pines bajo los términos de la <a href=\"https://creativecommons.org/licenses/by-sa/4.0/\" target=\"_blank\">Licencia Creative Commons Compartir-Igual, 4.0</a>.  </div>  <hr></div>')\r\n  })",
+    "theme_stylesheet" : ""
+  },
+  "settings" : {
+    "login_methods" : [
       "facebook",
       "github",
-      "google-oauth2",
+      "google",
       "twitter",
-      "Username-Password-Authentication"
+      "user_pass"
     ],
-    "icon" : "/logo-alt.png",
-    "socialBigButtons" : false,
-    "disableResetAction" : false
+    "raise_hand_enabled" : false,
+    "public" : true,
+    "immersive" : false
   }
 };
 
-var fetchedCentral = db.organizations.findOne({name: 'central'});
-
-if (!fetchedCentral) {
-  print('Creating central organization');
-  db.organizations.insert(central);
-} else {
-  print('Central organization is created');
-}
+print('Creating central organization');
+db.organizations.update({name: 'central'}, central, { upsert: true });
