@@ -1,6 +1,6 @@
 helpers do
-  def students_query
-    with_detached_and_search with_organization_and_course
+  def students_query(query_params = {})
+    with_detached_and_search with_organization_and_course.merge(query_params)
   end
 
   def normalize_student!
@@ -14,19 +14,13 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/students' do
     authorize! :teacher
-    count, students = Sorting.aggregate(Student, students_query, paginated_params)
+    query_params = params.slice('uid', 'personal_id')
+    count, students = Sorting.aggregate(Student, students_query(query_params), paginated_params)
     {
       page: page + 1,
       total: count,
       students: students
     }
-  end
-
-  get '/api/courses/:course/students' do
-    # // TODO: Unificar con la de arriba
-    authorize! :teacher
-    query_params = params.slice('uid', 'personal_id')
-    {students: Student.where(with_organization_and_course.merge query_params)}
   end
 
   get '/courses/:course/students/:uid' do

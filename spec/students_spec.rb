@@ -126,7 +126,7 @@ describe Student do
       let(:student_saved) { {organization: 'example.org', course: 'example.org/foo'}.merge student }
       let(:student_saved2) { {organization: 'example.org', course: 'example.org/foo'}.merge student2 }
 
-      context 'when guides already exists in a course' do
+      context 'when guides already exists in a course'  do
         before { Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
         before { Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
         before { Student.create! student2.merge(organization: 'example.org', course: 'example.org/foo') }
@@ -141,7 +141,7 @@ describe Student do
         end
         context 'get students with auth client' do
           before { header 'Authorization', build_mumuki_auth_header('*') }
-          before { get '/api/courses/foo/students?personal_id=2&uid=bazlol@gmail.com' }
+          before { get '/courses/foo/students?personal_id=2&uid=bazlol@gmail.com' }
 
           it { expect(last_response).to be_ok }
           it { expect(last_response.body).to json_like({students: [student_saved2]}, except_fields) }
