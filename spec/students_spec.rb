@@ -126,7 +126,7 @@ describe Student do
       let(:student_saved) { {organization: 'example.org', course: 'example.org/foo'}.merge student }
       let(:student_saved2) { {organization: 'example.org', course: 'example.org/foo'}.merge student2 }
 
-      context 'when guides already exists in a course'  do
+      context 'when guides already exists in a course' do
         before { Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
         before { Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
         before { Student.create! student2.merge(organization: 'example.org', course: 'example.org/foo') }

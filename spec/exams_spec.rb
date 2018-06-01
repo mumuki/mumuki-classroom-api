@@ -33,6 +33,21 @@ describe Exam do
     it { expect(exam_fetched.as_json).to json_like(exam_json.merge(organization: 'example.org', course: 'example.org/foo'), except_fields) }
   end
 
+  describe 'post /api/courses/:course/exams' do
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: []}.as_json }
+    let(:exam_fetched) { Exam.find_by organization: 'example.org', course: 'example.org/foo' }
+
+    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
+    before { header 'Authorization', build_mumuki_auth_header('*') }
+    before { post '/courses/foo/exams', exam_json.to_json }
+
+    it { expect(last_response.body).to be_truthy }
+    it { expect(last_response.body).to json_like({status: 'created'}, except_fields) }
+    it { expect(Exam.count).to eq 1 }
+    it { expect(exam_fetched.eid).to be_truthy }
+    it { expect(exam_fetched.as_json).to json_like exam_json.merge(organization: 'example.org', course: 'example.org/foo'), except_fields }
+  end
+
   describe 'get /courses/:course/exams/:exam_id' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: []} }
