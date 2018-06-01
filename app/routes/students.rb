@@ -23,12 +23,13 @@ Mumukit::Platform.map_organization_routes!(self) do
   end
 
   get '/api/courses/:course/students' do
+    # // TODO: Unificar con la de arriba
     authorize! :teacher
     query_params = params.slice('uid', 'personal_id')
     {students: Student.where(with_organization_and_course.merge query_params)}
   end
 
-  get '/api/courses/:course/students/:uid' do
+  get '/courses/:course/students/:uid' do
     authorize! :teacher
     {guide_students_progress: GuideProgress.where(with_organization_and_course 'student.uid': uid).sort(created_at: :asc).as_json}
   end

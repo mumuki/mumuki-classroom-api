@@ -47,12 +47,12 @@ describe Course do
 
   end
 
-  describe 'get /api/courses/:course/students/:uid' do
+  describe 'get /courses/:course/students/:uid' do
 
     before { header 'Authorization', build_mumuki_auth_header('*') }
 
     context 'when guide_progress exist' do
-      before { get '/api/courses/k2048/students/agus@mumuki.org' }
+      before { get '/courses/k2048/students/agus@mumuki.org' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1),

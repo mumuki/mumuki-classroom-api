@@ -33,21 +33,6 @@ describe Exam do
     it { expect(exam_fetched.as_json).to json_like(exam_json.merge(organization: 'example.org', course: 'example.org/foo'), except_fields) }
   end
 
-  describe 'post /api/courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: []}.as_json }
-    let(:exam_fetched) { Exam.find_by organization: 'example.org', course: 'example.org/foo' }
-
-    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
-    before { header 'Authorization', build_mumuki_auth_header('*') }
-    before { post '/api/courses/foo/exams', exam_json.to_json }
-
-    it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_like({status: 'created'}, except_fields) }
-    it { expect(Exam.count).to eq 1 }
-    it { expect(exam_fetched.eid).to be_truthy }
-    it { expect(exam_fetched.as_json).to json_like exam_json.merge(organization: 'example.org', course: 'example.org/foo'), except_fields }
-  end
-
   describe 'get /courses/:course/exams/:exam_id' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: []} }
@@ -79,7 +64,7 @@ describe Exam do
 
   end
 
-  describe 'post /api/courses/:course/exams/:exam/students/:uid' do
+  describe 'post /courses/:course/exams/:exam/students/:uid' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']}.stringify_keys }
     let(:exam_fetched) { Exam.last }
@@ -87,7 +72,7 @@ describe Exam do
     context 'when existing exam' do
       before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
       before { header 'Authorization', build_mumuki_auth_header('*') }
-      before { post "/api/courses/foo/exams/#{exam_id}/students/agus@mumuki.org" }
+      before { post "/courses/foo/exams/#{exam_id}/students/agus@mumuki.org" }
 
       it { expect(last_response.body).to be_truthy }
       it { expect(last_response.body).to json_like({status: 'updated'}, except_fields) }
