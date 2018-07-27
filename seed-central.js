@@ -1,5 +1,4 @@
-use
-classroom;
+use classroom;
 
 var central = {
   "name": "central",
