@@ -11,6 +11,8 @@ class Exam
   field :end_time, type: String
   field :language, type: String
   field :duration, type: Integer
+  field :max_problem_submissions, type: Integer
+  field :max_choice_submissions, type: Integer
   field :start_time, type: String
   field :organization, type: String
 
