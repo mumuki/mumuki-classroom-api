@@ -97,4 +97,12 @@ describe Exam do
 
   end
 
+  describe 'exam validations' do
+    let(:exam_json) { { organization: 'example.org', course: 'example.org/foo', slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']} }
+    let(:valid_exam_json) { exam_json.merge(max_problem_submissions: 10, max_choice_submissions: 2) }
+    let(:invalid_exam_json) { exam_json.merge(max_problem_submissions: 0, max_choice_submissions: -2) }
+
+    it { expect { Exam.create! valid_exam_json }.not_to raise_error }
+    it { expect { Exam.create! invalid_exam_json }.to raise_error }
+  end
 end
