@@ -11,8 +11,12 @@ class Exam
   field :end_time, type: String
   field :language, type: String
   field :duration, type: Integer
+  field :max_problem_submissions, type: Integer
+  field :max_choice_submissions, type: Integer
   field :start_time, type: String
   field :organization, type: String
+
+  validates :max_problem_submissions, :max_choice_submissions, numericality: { greater_than_or_equal_to: 1 }, allow_nil: true
 
   create_index({organization: 1, course: 1, eid: 1}, {unique: true})
 
