@@ -37,7 +37,7 @@ describe Guide do
 
     context 'when no guides in a course yet' do
       before { header 'Authorization', build_mumuki_auth_header('*') }
-      before { get '/api/courses/foo/guides' }
+      before { get '/courses/foo/guides' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq guides: [] }
@@ -49,7 +49,7 @@ describe Guide do
       before { Guide.create! guide3.merge(organization: 'example.org', course: 'example.org/bar') }
 
       before { header 'Authorization', build_mumuki_auth_header('*') }
-      before { get '/api/courses/foo/guides' }
+      before { get '/courses/foo/guides' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_like({guides: [with_course(guide1), with_course(guide2)]}, except_fields) }

@@ -38,10 +38,6 @@ Mumukit::Platform.map_organization_routes!(self) do
     allowed_courses permissions
   end
 
-  get '/api/courses' do
-    allowed_courses permissions
-  end
-
   post '/courses' do
     current_user.protect! :janitor, json_body[:slug]
     course = Course.create! with_organization(json_body)
@@ -61,11 +57,6 @@ Mumukit::Platform.map_organization_routes!(self) do
   end
 
   get '/courses/:course/guides' do
-    authorize! :teacher
-    {guides: Guide.where(with_organization_and_course).as_json}
-  end
-
-  get '/api/courses/:course/guides' do
     authorize! :teacher
     {guides: Guide.where(with_organization_and_course).as_json}
   end

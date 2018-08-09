@@ -141,7 +141,7 @@ describe Student do
         end
         context 'get students with auth client' do
           before { header 'Authorization', build_mumuki_auth_header('*') }
-          before { get '/api/courses/foo/students?personal_id=2&uid=bazlol@gmail.com' }
+          before { get '/courses/foo/students?personal_id=2&uid=bazlol@gmail.com' }
 
           it { expect(last_response).to be_ok }
           it { expect(last_response.body).to json_like({students: [student_saved2]}, except_fields) }
