@@ -1,6 +1,13 @@
 module Sorting
   module Student
     class ByName < SortBy
+      def self.pipeline
+        [{'$addFields': {
+          'last_name': {'$toLower': '$last_name'},
+          'first_name': {'$toLower': '$first_name'}
+        }}]
+      end
+
       def self.order_by(ordering)
         {'last_name': ordering,
          'first_name': ordering}

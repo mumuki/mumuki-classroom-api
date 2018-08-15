@@ -1,19 +1,28 @@
 module Sorting
 
-  def self.aggregate(collection, query, params)
-    ordering = "#{Criteria.name}::#{params[:order_by].to_s.camelize}".constantize
-    sorting = "#{name}::#{collection.name}::By#{params[:sort_by].to_s.camelize}".constantize
-    [collection.where(query).count, collection.collection.aggregate(pipeline query, params, sorting, ordering)]
+  def self.aggregate(collection, query, params, query_criteria)
+    reporting_pipeline = Reporting.build_pipeline(collection, query, params, query_criteria, projection)
+    query = collection.collection.aggregate(pipeline params, reporting_pipeline).first
+    query_results(query)
   end
 
-  def self.pipeline(query, params, sorting, ordering)
-    pipeline = []
-    pipeline << {'$match': query}
-    pipeline.concat sorting.pipeline
-    pipeline << {'$project': projection}
-    pipeline << {'$sort': sorting.order_by(ordering)}
-    pipeline << {'$skip': params[:page] * params[:per_page]}
-    pipeline << {'$limit': params[:per_page]}
+  def self.query_results(query)
+    total = query[:total].first
+    [total.blank? ? 0 : total[:count], query[:results]]
+  end
+
+  def self.pipeline(params, pipeline)
+    paging_pipeline = []
+    paging_pipeline << {'$skip': params[:page] * params[:per_page]}
+    paging_pipeline << {'$limit': params[:per_page]}
+    pipeline << {'$facet': {
+      results: paging_pipeline,
+      total: [
+        {
+          '$count': 'count'
+        }
+      ]
+    }}
   end
 
   def self.projection

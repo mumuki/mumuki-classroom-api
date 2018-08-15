@@ -8,10 +8,4 @@ helpers do
       with_detached: with_detached
     }
   end
-
-  def with_detached_and_search(params)
-    params
-      .merge('detached': {'$exists': with_detached})
-      .merge_unless(query.empty?, '$text': {'$search': query})
-  end
 end
