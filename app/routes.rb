@@ -140,6 +140,10 @@ helpers do
     params[:q] || ''
   end
 
+  def query_criteria
+    params[:query_criteria]
+  end
+
   def order_by
     params[:order_by] || :asc
   end
@@ -165,3 +169,4 @@ require_relative './routes/permissions'
 require_relative './routes/notifications'
 require_relative './routes/suggestions'
 require_relative './routes/manual_evaluation'
+require_relative './routes/searching'

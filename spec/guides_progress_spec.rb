@@ -10,21 +10,21 @@ describe Course do
 
   let(:guide_progress1) { {
     guide: {slug: 'example.org/foo'},
-    student: {uid: 'agus@mumuki.org'},
+    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar'},
     stats: {passed: 1, passed_with_warnings: 0, failed: 0},
     last_assignment: {exercise: {eid: 2}, submission: {status: :passed}}
   } }
 
   let(:guide_progress2) { {
     guide: {slug: 'example.org/foo'},
-    student: {uid: 'jon@gmail.com'},
+    student: {uid: 'john@gmail.com', first_name: 'john', last_name: 'doe'},
     stats: {passed: 0, passed_with_warnings: 0, failed: 1},
     last_assignment: {exercise: {eid: 1}, submission: {status: :failure}}
   } }
 
   let(:guide_progress3) { {
     guide: {slug: 'example.org/bar'},
-    student: {uid: 'agus@mumuki.org'},
+    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar'},
     stats: {passed: 0, passed_with_warnings: 1, failed: 0},
     last_assignment: {exercise: {eid: 1}, submission: {status: :passed_with_warnings}}
   } }

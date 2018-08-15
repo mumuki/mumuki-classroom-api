@@ -23,3 +23,5 @@ require_relative './models/suggestion'
 require_relative './models/invitation'
 
 require_relative './models/sorting'
+require_relative './models/searching'
+require_relative './models/reporting'
