@@ -10,21 +10,21 @@ describe Course do
 
   let(:guide_progress1) { {
     guide: {slug: 'example.org/foo'},
-    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar'},
-    stats: {passed: 1, passed_with_warnings: 0, failed: 0},
+    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
+    stats: {passed: 2, passed_with_warnings: 2, failed: 0},
     last_assignment: {exercise: {eid: 2}, submission: {status: :passed}}
   } }
 
   let(:guide_progress2) { {
     guide: {slug: 'example.org/foo'},
-    student: {uid: 'john@gmail.com', first_name: 'john', last_name: 'doe'},
-    stats: {passed: 0, passed_with_warnings: 0, failed: 1},
+    student: {uid: 'john@gmail.com', first_name: 'john', last_name: 'doe', email: 'john@gmail.com'},
+    stats: {passed: 2, passed_with_warnings: 0, failed: 1},
     last_assignment: {exercise: {eid: 1}, submission: {status: :failure}}
   } }
 
   let(:guide_progress3) { {
     guide: {slug: 'example.org/bar'},
-    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar'},
+    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
     stats: {passed: 0, passed_with_warnings: 1, failed: 0},
     last_assignment: {exercise: {eid: 1}, submission: {status: :passed_with_warnings}}
   } }
@@ -45,6 +45,59 @@ describe Course do
                                                                               with_course(guide_progress2)]}, except_fields) }
     end
 
+    context 'with a student query' do
+      before { get '/courses/k2048/guides/example.org/foo?q=john' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress2)]}, except_fields) }
+    end
+
+    context 'with passed assignments query' do
+      let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {total_passed: 4}}) }
+      before { get '/courses/k2048/guides/example.org/foo?q=3&query_criteria=passed_assignments' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1_with_total)]}, except_fields) }
+    end
+
+  end
+
+  describe 'get /courses/:course/guides/:org/:repo/report' do
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when guide_progress exist' do
+      before { get '/courses/k2048/guides/example.org/foo/report' }
+
+      it do
+        expect(last_response.body).to eq <<TEST
+last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count
+bar,foo,agus@mumuki.org,2,2,0
+doe,john,john@gmail.com,2,0,1
+TEST
+      end
+    end
+
+    context 'when it is filtered by student search' do
+      before { get '/courses/k2048/guides/example.org/foo/report?q=john' }
+
+      it do
+        expect(last_response.body).to eq <<TEST
+last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count
+doe,john,john@gmail.com,2,0,1
+TEST
+      end
+    end
+
+    context 'when it is filtered by passed_assignments' do
+      before { get '/courses/k2048/guides/example.org/foo/report?q=4&query_criteria=passed_assignments' }
+
+      it do
+        expect(last_response.body).to eq <<TEST
+last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count
+bar,foo,agus@mumuki.org,2,2,0
+TEST
+      end
+    end
   end
 
   describe 'get /api/courses/:course/students/:uid' do
