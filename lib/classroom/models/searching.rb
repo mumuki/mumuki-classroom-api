@@ -1,11 +1,21 @@
 module Searching
-  class StudentFilter
-    def self.query_for(param)
-      {'$text': {'$search': param}}
+  class BaseFilter
+    def initialize(query_param)
+      @query_param = query_param
     end
 
-    def self.pipeline
+    def query
+      {}
+    end
+
+    def pipeline
       []
+    end
+  end
+
+  class StudentFilter < BaseFilter
+    def query
+      {'$text': {'$search': @query_param}}
     end
   end
 
@@ -13,8 +23,9 @@ module Searching
     StudentFilter
   end
 
-  def self.filter_for(criteria, collection)
-    filter_class_for(criteria, collection) || default_filter
+  def self.filter_for(criteria, collection, query)
+    filter_class = filter_class_for(criteria, collection) || default_filter
+    filter_class.new(query)
   end
 
   def self.filter_class_for(criteria, collection)
