@@ -52,9 +52,9 @@ describe Course do
       it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress2)]}, except_fields) }
     end
 
-    context 'with passed assignments query' do
-      let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {total_passed: 4}}) }
-      before { get '/courses/k2048/guides/example.org/foo?q=3&query_criteria=passed_assignments' }
+    context 'with not failed assignments query' do
+      let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {not_failed: 4}}) }
+      before { get '/courses/k2048/guides/example.org/foo?q=3&query_criteria=not_failed_assignments' }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1_with_total)]}, except_fields) }
@@ -88,8 +88,8 @@ TEST
       end
     end
 
-    context 'when it is filtered by passed_assignments' do
-      before { get '/courses/k2048/guides/example.org/foo/report?q=4&query_criteria=passed_assignments' }
+    context 'when it is filtered by not failed assignments' do
+      before { get '/courses/k2048/guides/example.org/foo/report?q=4&query_criteria=not_failed_assignments' }
 
       it do
         expect(last_response.body).to eq <<TEST
