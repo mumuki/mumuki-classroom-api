@@ -113,18 +113,24 @@ module Sorting
     end
 
     class ByName < SortBy
+      def self.pipeline
+        [{'$addFields': {
+          'student.last_name': {'$toLower': '$student.last_name'},
+          'student.first_name': {'$toLower': '$student.first_name'}
+        }}]
+      end
+
       def self.order_by(ordering)
         {'student.last_name': ordering,
          'student.first_name': ordering}
       end
     end
 
-    class ByProgress < TotalStatsSortBy
+    class ByProgress < SortBy
       def self.order_by(ordering)
-        {'stats.total': ordering,
-         'stats.failed': !ordering,
-         'stats.passed_with_warnings': !ordering,
-         'stats.passed': !ordering,
+        {'stats.passed': ordering,
+         'stats.passed_with_warnings': ordering,
+         'stats.failed': ordering,
          'student.last_name': ordering,
          'student.first_name': ordering}
       end

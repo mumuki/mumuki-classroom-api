@@ -1,6 +1,6 @@
 helpers do
   def students_query
-    with_detached_and_search with_organization_and_course
+    with_detached_and_search with_organization_and_course, Student
   end
 
   def normalize_student!
@@ -14,7 +14,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/students' do
     authorize! :teacher
-    count, students = Sorting.aggregate(Student, students_query, paginated_params)
+    count, students = Sorting.aggregate(Student, students_query, paginated_params, query_criteria)
     {
       page: page + 1,
       total: count,

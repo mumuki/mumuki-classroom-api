@@ -4,10 +4,10 @@ helpers do
   end
 
   def guide_progress_query
-    with_detached_and_search with_organization_and_course('guide.slug': repo_slug)
+    with_detached_and_search with_organization_and_course('guide.slug': repo_slug), GuideProgress
   end
 
-  def projection
+  def course_report_projection
     {
       '_id': 0,
       'last_name': '$last_name',
@@ -27,7 +27,19 @@ helpers do
     }
   end
 
-  def csv_with_headers(csv)
+  def guide_report_projection
+    {
+      '_id': 0,
+      'last_name': '$student.last_name',
+      'first_name': '$student.first_name',
+      'email': '$student.email',
+      'passed_count': '$stats.passed',
+      'passed_with_warnings_count': '$stats.passed_with_warnings',
+      'failed_count': '$stats.failed',
+    }
+  end
+
+  def csv_with_headers(csv, projection)
     headers = projection.symbolize_keys.except(:_id).keys.join(',')
     "#{headers}\n#{csv}"
   end
@@ -72,12 +84,19 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/guides/:organization/:repository' do
     authorize! :teacher
-    count, guide_progress = Sorting.aggregate(GuideProgress, guide_progress_query, paginated_params)
+    count, guide_progress = Sorting.aggregate(GuideProgress, guide_progress_query, paginated_params, query_criteria)
     {
       total: count,
       page: page + 1,
       guide_students_progress: guide_progress
     }
+  end
+
+  get '/courses/:course/guides/:organization/:repository/report' do
+    authorize! :teacher
+    json = Reporting.aggregate(GuideProgress, guide_progress_query, paginated_params, query_criteria, guide_report_projection).as_json
+    content_type 'application/csv'
+    csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), guide_report_projection)
   end
 
   get '/courses/:course/guides/:organization/:repository/:uid' do
@@ -91,11 +110,12 @@ Mumukit::Platform.map_organization_routes!(self) do
   end
 
   get '/courses/:course/report' do
-    aggregation = Student.where(with_organization_and_course).project(projection)
+    authorize! :teacher
+    aggregation = Student.where(with_organization_and_course).project(course_report_projection)
     pipeline_with_sort_criterion = aggregation.pipeline << {'$sort': {passed_count: -1, passed_with_warnings_count: -1, failed_count: -1, last_name: 1, first_name: 1}}
     json = Student.collection.aggregate(pipeline_with_sort_criterion).as_json
     content_type 'application/csv'
-    csv_with_headers Classroom::Reports::Formats.format_report('csv', json)
+    csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), course_report_projection)
   end
 
   get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
