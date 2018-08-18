@@ -13,10 +13,12 @@ class Exam
   field :duration, type: Integer
   field :max_problem_submissions, type: Integer
   field :max_choice_submissions, type: Integer
+  field :passing_criterion, type: Hash
   field :start_time, type: String
   field :organization, type: String
 
   validates :max_problem_submissions, :max_choice_submissions, numericality: { greater_than_or_equal_to: 1 }, allow_nil: true
+  validate :passing_criterion_is_ok
 
   create_index({organization: 1, course: 1, eid: 1}, {unique: true})
 
@@ -34,4 +36,7 @@ class Exam
     as_json(except: [:social_ids, :course, :created_at, :updated_at, :id, :_id])
   end
 
+  def passing_criterion_is_ok
+    PassingCriterion.parse passing_criterion.with_indifferent_access
+  end
 end
