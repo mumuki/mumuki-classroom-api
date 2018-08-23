@@ -84,7 +84,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/guides/:organization/:repository' do
     authorize! :teacher
-    count, guide_progress = Sorting.aggregate(GuideProgress, guide_progress_query, paginated_params, query_criteria)
+    count, guide_progress = Sorting.aggregate(GuideProgress, guide_progress_query, paginated_params)
     {
       total: count,
       page: page + 1,
@@ -94,7 +94,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/guides/:organization/:repository/report' do
     authorize! :teacher
-    json = Reporting.aggregate(GuideProgress, guide_progress_query, paginated_params, query_criteria, guide_report_projection).as_json
+    json = Reporting.aggregate(GuideProgress, guide_progress_query, paginated_params, guide_report_projection).as_json
     content_type 'application/csv'
     csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), guide_report_projection)
   end

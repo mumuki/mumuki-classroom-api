@@ -1,6 +1,27 @@
 module Searching
   module GuideProgress
-    class NotFailedAssignments < BaseFilter
+    module QueryOperands
+      include Searching::QueryOperands
+
+      def more_than(value)
+        {'$gte': value}
+      end
+
+      def less_than(value)
+        {'$lte': value}
+      end
+
+      def close_to(value)
+        more_than(value - 1).merge(less_than value + 1)
+      end
+
+      def default_query_operand
+        :more_than
+      end
+    end
+
+    class NotFailedAssignments < NumericFilter
+      include Searching::GuideProgress::QueryOperands
 
       def pipeline
         [
@@ -10,15 +31,17 @@ module Searching
           },
           {
             '$match':
-              {'stats.not_failed': {'$gte': @query_param.to_i}}
+              {'stats.not_failed': current_query_operand }
           }
         ]
       end
     end
 
-    class PassedAssignments < BaseFilter
+    class PassedAssignments < NumericFilter
+      include Searching::GuideProgress::QueryOperands
+
       def query
-        {'stats.passed': {'$gte': @query_param.to_i}}
+        {'stats.passed': current_query_operand}
       end
     end
   end

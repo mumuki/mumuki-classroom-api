@@ -1,8 +1,7 @@
 module Searching
   class BaseFilter
-    def initialize(query_param)
-      @query_param = query_param
-    end
+    include ActiveModel::Model
+    attr_accessor :query_param, :query_operand
 
     def query
       {}
@@ -15,7 +14,13 @@ module Searching
 
   class StudentFilter < BaseFilter
     def query
-      {'$text': {'$search': @query_param}}
+      {'$text': {'$search': query_param}}
+    end
+  end
+
+  class NumericFilter < BaseFilter
+    def query_param=(query_param)
+      @query_param = query_param.to_i
     end
   end
 
@@ -23,14 +28,24 @@ module Searching
     StudentFilter
   end
 
-  def self.filter_for(criteria, collection, query)
+  def self.filter_for(criteria, collection, query, query_operand)
     filter_class = filter_class_for(criteria, collection) || default_filter
-    filter_class.new(query)
+    filter_class.new(query_param: query, query_operand: query_operand)
   end
 
   def self.filter_class_for(criteria, collection)
     if criteria.present?
       "#{self}::#{collection.name}::#{criteria.camelize}".safe_constantize
+    end
+  end
+
+  module QueryOperands
+    def current_query_operand
+      send current_query_operand_method, query_param
+    end
+
+    def current_query_operand_method
+      query_operand || default_query_operand
     end
   end
 end

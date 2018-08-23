@@ -1,14 +1,14 @@
 module Reporting
 
-  def self.build_pipeline(collection, query, params, query_criteria, projection)
+  def self.build_pipeline(collection, query, params, projection)
     ordering = "#{Criteria.name}::#{params[:order_by].to_s.camelize}".constantize
     sorting = "#{Sorting.name}::#{collection.name}::By#{params[:sort_by].to_s.camelize}".constantize
-    searching = Searching.filter_for(query_criteria, collection, params[:query])
+    searching = Searching.filter_for(params[:query_criteria], collection, params[:query], params[:query_operand])
     pipeline query, sorting, ordering, searching, projection
   end
 
-  def self.aggregate(collection, query, params, query_criteria, projection)
-    pipeline = build_pipeline(collection, query, params, query_criteria, projection)
+  def self.aggregate(collection, query, params, projection)
+    pipeline = build_pipeline(collection, query, params, projection)
     collection.collection.aggregate pipeline
   end
 

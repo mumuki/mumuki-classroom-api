@@ -6,6 +6,6 @@ helpers do
   end
 
   def query_criteria_class_for(collection)
-    Searching.filter_for(query_criteria, collection, query)
+    Searching.filter_for(query_criteria, collection, query, query_operand)
   end
 end

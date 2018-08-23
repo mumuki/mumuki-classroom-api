@@ -6,7 +6,9 @@ helpers do
       order_by: order_by,
       per_page: per_page,
       with_detached: with_detached,
-      query: query
+      query: query,
+      query_criteria: query_criteria,
+      query_operand: query_operand
     }
   end
 end
