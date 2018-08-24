@@ -14,7 +14,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/students' do
     authorize! :teacher
-    count, students = Sorting.aggregate(Student, students_query, paginated_params)
+    count, students = Sorting.aggregate(Student, students_query, paginated_params, query_params)
     {
       page: page + 1,
       total: count,

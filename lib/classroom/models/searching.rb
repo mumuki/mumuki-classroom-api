@@ -1,7 +1,10 @@
 module Searching
+  VALID_PARAMS = [:query_param, :query_operand]
+
   class BaseFilter
     include ActiveModel::Model
-    attr_accessor :query_param, :query_operand
+
+    attr_accessor *VALID_PARAMS
 
     def query
       {}
@@ -28,9 +31,13 @@ module Searching
     StudentFilter
   end
 
-  def self.filter_for(criteria, collection, query, query_operand)
-    filter_class = filter_class_for(criteria, collection) || default_filter
-    filter_class.new(query_param: query, query_operand: query_operand)
+  def self.filter_for(collection, query_params)
+    filter_class = filter_class_for(query_params[:query_criteria], collection) || default_filter
+    filter_class.new(valid_params(query_params))
+  end
+
+  def self.valid_params(params)
+    params.select { |it| VALID_PARAMS.include? it }
   end
 
   def self.filter_class_for(criteria, collection)

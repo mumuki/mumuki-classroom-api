@@ -1,8 +1,8 @@
 module Sorting
 
-  def self.aggregate(collection, query, params)
-    reporting_pipeline = Reporting.build_pipeline(collection, query, params, projection)
-    query = collection.collection.aggregate(pipeline params, reporting_pipeline).first
+  def self.aggregate(collection, query, paginated_params, query_params)
+    reporting_pipeline = Reporting.build_pipeline(collection, query, paginated_params, query_params, projection)
+    query = collection.collection.aggregate(pipeline paginated_params, reporting_pipeline).first
     query_results(query)
   end
 
