@@ -144,6 +144,10 @@ helpers do
     params[:query_criteria]
   end
 
+  def query_operand
+    params[:query_operand]
+  end
+
   def order_by
     params[:order_by] || :asc
   end

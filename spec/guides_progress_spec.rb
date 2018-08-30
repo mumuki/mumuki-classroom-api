@@ -52,7 +52,7 @@ describe Course do
       it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress2)]}, except_fields) }
     end
 
-    context 'with not failed assignments query' do
+    context 'with not_failed_assignments as query criteria' do
       let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {not_failed: 4}}) }
       before { get '/courses/k2048/guides/example.org/foo?q=3&query_criteria=not_failed_assignments' }
 
@@ -60,6 +60,23 @@ describe Course do
       it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1_with_total)]}, except_fields) }
     end
 
+    context 'with not_failed_assignments as query criteria and less_than as query options' do
+      let(:guide_progress2_with_total) { guide_progress2.deep_merge({stats: {not_failed: 2}}) }
+      before { get '/courses/k2048/guides/example.org/foo?q=3&query_criteria=not_failed_assignments&query_operand=less_than' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress2_with_total)]}, except_fields) }
+    end
+
+    context 'with not_failed_assignments as query criteria and close_to as query options' do
+      let(:guide_progress2_with_total) { guide_progress2.deep_merge({stats: {not_failed: 2}}) }
+      let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {not_failed: 4}}) }
+      before { get '/courses/k2048/guides/example.org/foo?q=3&query_criteria=not_failed_assignments&query_operand=close_to' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1_with_total),
+                                                                              with_course(guide_progress2_with_total)]}, except_fields) }
+    end
   end
 
   describe 'get /courses/:course/guides/:org/:repo/report' do
