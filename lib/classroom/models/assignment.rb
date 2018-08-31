@@ -104,6 +104,16 @@ class Assignment
         .map { |assignment| assignment.with_full_messages(user) }
     end
 
+    def failed_tags_by(query, exercises)
+      passed_exercises_ids = where(query)
+                              .map { |assignment| [assignment.exercise.eid, assignment.submissions.max_by(&:created_at)] }
+                              .map { |eid , submission| eid if submission.status.to_sym == :passed }
+                              .compact
+      exercises.select { |exercise| passed_exercises_ids.include? exercise.id }
+                .pluck(:tag_list)
+                .uniq
+    end
+
     def stats_by(query)
       stats = where(query)
                 .map { |assignment| assignment.submissions.max_by(&:created_at) }
