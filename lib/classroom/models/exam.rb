@@ -17,13 +17,17 @@ class Exam
   field :start_time, type: String
   field :organization, type: String
 
-  validates :max_problem_submissions, :max_choice_submissions, numericality: { greater_than_or_equal_to: 1 }, allow_nil: true
+  validates :max_problem_submissions, :max_choice_submissions, numericality: {greater_than_or_equal_to: 1}, allow_nil: true
   validate :passing_criterion_is_ok
 
   create_index({organization: 1, course: 1, eid: 1}, {unique: true})
 
   def add_student!(uid)
     add_to_set uids: uid
+  end
+
+  def remove_student!(uid)
+    pull uids: uid
   end
 
   def notify!

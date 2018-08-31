@@ -49,6 +49,14 @@ Mumukit::Platform.map_organization_routes!(self) do
     {status: :updated}.merge(eid: exam_id)
   end
 
+  delete '/api/courses/:course/exams/:exam_id/students/:uid' do
+    authorize! :teacher
+    exam = Exam.find_by!(exam_query)
+    exam.remove_student! params[:uid]
+    exam.notify!
+    {status: :updated}.merge(eid: exam_id)
+  end
+
   get '/courses/:course/exams/:exam_id' do
     authorize! :teacher
     Exam.find_by!(exam_query).as_json
