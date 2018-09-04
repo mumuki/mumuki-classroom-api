@@ -33,6 +33,11 @@ Mumukit::Platform.map_organization_routes!(self) do
     {status: :created}.merge(eid: exam.eid)
   end
 
+  get '/courses/:course/exams/:exam_id' do
+    authorize! :teacher
+    Exam.find_by!(exam_query).as_json
+  end
+
   put '/courses/:course/exams/:exam_id' do
     authorize! :teacher
     exam = Exam.find_by!(exam_query)
@@ -41,24 +46,22 @@ Mumukit::Platform.map_organization_routes!(self) do
     {status: :updated}.merge(eid: exam_id)
   end
 
-  post '/api/courses/:course/exams/:exam_id/students/:uid' do
-    authorize! :teacher
-    exam = Exam.find_by!(exam_query)
-    exam.add_student! params[:uid]
-    exam.notify!
-    {status: :updated}.merge(eid: exam_id)
+  ['/api', ''].each do |route_prefix|
+    post "#{route_prefix}/courses/:course/exams/:exam_id/students/:uid" do
+      authorize! :teacher
+      exam = Exam.find_by!(exam_query)
+      exam.add_student! params[:uid]
+      exam.notify!
+      {status: :updated}.merge(eid: exam_id)
+    end
+
+    delete "#{route_prefix}/courses/:course/exams/:exam_id/students/:uid" do
+      authorize! :teacher
+      exam = Exam.find_by!(exam_query)
+      exam.remove_student! params[:uid]
+      exam.notify!
+      {status: :updated}.merge(eid: exam_id)
+    end
   end
 
-  delete '/api/courses/:course/exams/:exam_id/students/:uid' do
-    authorize! :teacher
-    exam = Exam.find_by!(exam_query)
-    exam.remove_student! params[:uid]
-    exam.notify!
-    {status: :updated}.merge(eid: exam_id)
-  end
-
-  get '/courses/:course/exams/:exam_id' do
-    authorize! :teacher
-    Exam.find_by!(exam_query).as_json
-  end
 end
