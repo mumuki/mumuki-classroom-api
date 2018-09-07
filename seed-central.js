@@ -35,7 +35,6 @@ var central = {
 print('Creating central organization');
 db.organizations.update({name: 'central'}, central, {upsert: true});
 
-
 function updateStudent(uid, permissions) {
   print('Creating ' + uid + ' with permissions: ' + JSON.stringify(permissions));
   db.users.update(
@@ -48,3 +47,43 @@ function updateStudent(uid, permissions) {
 updateStudent('dev.student@mumuki.org', {});
 updateStudent('dev.teacher@mumuki.org', {teacher: '*/*'});
 updateStudent('dev.owner@mumuki.org', {owner: '*/*'});
+
+function add(entity, item) {
+  print('Creating ' + entity + "' entity with id " + item.slug);
+  db[entity].update({ _id: item.slug }, Object.assign({ _id: item.slug }, item), { upsert: true });
+}
+
+add('courses', {
+  "organization" : "central",
+  "days" : [
+    "Martes"
+  ],
+  "code" : "K2000",
+  "shifts" : [
+    "Tarde"
+  ],
+  "period" : "2003",
+  "description" : "A test course",
+  "slug" : "central/2003-k2000"
+});
+
+add('guides', {
+  "organization" : "central",
+  "course" : "central/2003-k2000",
+  "slug" : "MumukiProject/mumuki-guia-fundamentos-javascript-variables-y-procedimientos",
+  "updated_at" : ISODate("2018-04-06T15:03:35.268Z"),
+  "created_at" : ISODate("2018-04-06T15:03:35.263Z"),
+  "name" : "Practica Primeros Programas",
+  "parent" : {
+    "type" : "Lesson",
+    "name" : "Practica Primeros Programas",
+    "position" : 2,
+    "chapter" : {
+      "id" : 145,
+      "name" : "Fundamentos"
+    }
+  },
+  "language" : {
+    "name" : "javascript"
+  }
+});
