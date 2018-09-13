@@ -3,7 +3,6 @@ require 'sinatra/cross_origin'
 require 'mumukit/service/routes'
 
 require_relative './session_store'
-require_relative './omniauth'
 require_relative '../lib/classroom'
 
 
@@ -14,11 +13,9 @@ configure do
   set :public_folder, 'public'
 end
 
-Mumukit::Login.configure_login_routes! self
 
 helpers do
   Mumukit::Login.configure_controller! self
-  Mumukit::Login.configure_login_controller! self
 
   def authenticate!
     halt 401 unless current_user?
@@ -54,10 +51,6 @@ helpers do
 
   def exercise_id
     params[:exercise_id].to_i
-  end
-
-  def login_settings
-    current_organization.login_settings
   end
 
   def exercise_student_progress_query
