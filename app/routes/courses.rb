@@ -7,9 +7,13 @@ helpers do
     with_detached_and_search with_organization_and_course('guide.slug': repo_slug), GuideProgress
   end
 
-  def student_assignment_query(student, assignment_query)
-    student_query = student.slice('first_name', 'last_name').transform_keys { |it| "student.#{it}" }
-    assignment_query.merge(student_query)
+  def student_query
+    with_organization_and_course('guide.slug': repo_slug)
+  end
+
+  def student_assignment_query(student)
+    student_info = student.slice('first_name', 'last_name', 'email').transform_keys { |it| "student.#{it}" }
+    student_query.merge(student_info)
   end
 
   def course_report_projection
@@ -52,7 +56,7 @@ helpers do
 
   def add_failed_tags(report_json, exercises)
     report_json.each do |student|
-      items_to_review = Assignment.items_to_review(student_assignment_query(student, guide_progress_query), exercises)
+      items_to_review = Assignment.items_to_review(student_assignment_query(student), exercises)
       student['items_to_review'] = items_to_review.join ', '
     end
   end

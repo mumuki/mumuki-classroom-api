@@ -29,9 +29,43 @@ describe Course do
     last_assignment: {exercise: {eid: 1}, submission: {status: :passed_with_warnings}}
   } }
 
+  let(:assignment1) { {
+    guide: { slug: 'example.org/foo' },
+    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
+    submissions: [ { status: 'passed'} ],
+    exercise: { eid: 1}
+  } }
+
+  let(:assignment2) { {
+    guide: { slug: 'example.org/foo' },
+    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
+    submissions: [ { status: 'failed'} ],
+    exercise: { eid: 2}
+  } }
+
+  let(:assignment3) { {
+    guide: { slug: 'example.org/foo' },
+    student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
+    submissions: [ { status: 'passed'} ],
+    exercise: { eid: 3}
+  } }
+
+  let(:empty_exercises) { {exercises: []}.to_json }
+  let(:exercises_data) { {
+    exercises: [
+      {id: 1, tag_list: %w(ex1_a ex1_b)},
+      {id: 2, tag_list: %w(ex2_a ex2_b), language: 'e2_lang'},
+      {id: 3, tag_list: %w(ex3_a ex3_b), language: 'e3_lang'}
+    ],
+    language: 'guide_language'
+  }.to_json }
+
   before { GuideProgress.create! guide_progress1.merge(organization: 'example.org', course: 'example.org/k2048') }
   before { GuideProgress.create! guide_progress2.merge(organization: 'example.org', course: 'example.org/k2048') }
   before { GuideProgress.create! guide_progress3.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Assignment.create! assignment1.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Assignment.create! assignment2.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Assignment.create! assignment3.merge(organization: 'example.org', course: 'example.org/k2048') }
 
   describe 'get /courses/:course/guides/:org/:repo' do
 
@@ -83,35 +117,47 @@ describe Course do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when guide_progress exist' do
-      before { get '/courses/k2048/guides/example.org/foo/report' }
+      before { post '/courses/k2048/guides/example.org/foo/report', empty_exercises }
 
       it do
         expect(last_response.body).to eq <<TEST
-last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count
-bar,foo,agus@mumuki.org,2,2,0
-doe,john,john@gmail.com,2,0,1
+last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count,items_to_review
+bar,foo,agus@mumuki.org,2,2,0,""
+doe,john,john@gmail.com,2,0,1,""
 TEST
       end
     end
 
     context 'when it is filtered by student search' do
-      before { get '/courses/k2048/guides/example.org/foo/report?q=john' }
+      before { post '/courses/k2048/guides/example.org/foo/report?q=john', empty_exercises }
 
       it do
         expect(last_response.body).to eq <<TEST
-last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count
-doe,john,john@gmail.com,2,0,1
+last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count,items_to_review
+doe,john,john@gmail.com,2,0,1,""
 TEST
       end
     end
 
     context 'when it is filtered by not failed assignments' do
-      before { get '/courses/k2048/guides/example.org/foo/report?q=4&query_criteria=not_failed_assignments' }
+      before { post '/courses/k2048/guides/example.org/foo/report?q=4&query_criteria=not_failed_assignments', empty_exercises }
 
       it do
         expect(last_response.body).to eq <<TEST
-last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count
-bar,foo,agus@mumuki.org,2,2,0
+last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count,items_to_review
+bar,foo,agus@mumuki.org,2,2,0,""
+TEST
+      end
+    end
+
+    context 'when exercises data is provided' do
+      before { post '/courses/k2048/guides/example.org/foo/report', exercises_data }
+
+      it do
+        expect(last_response.body).to eq <<TEST
+last_name,first_name,email,passed_count,passed_with_warnings_count,failed_count,items_to_review
+bar,foo,agus@mumuki.org,2,2,0,"ex2_a, ex2_b, e2_lang"
+doe,john,john@gmail.com,2,0,1,"ex1_a, ex1_b, guide_language, ex2_a, ex2_b, e2_lang, ex3_a, ex3_b, e3_lang"
 TEST
       end
     end
