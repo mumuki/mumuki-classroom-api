@@ -7,6 +7,15 @@ helpers do
     with_detached_and_search with_organization_and_course('guide.slug': repo_slug), GuideProgress
   end
 
+  def student_query
+    with_organization_and_course('guide.slug': repo_slug)
+  end
+
+  def student_assignment_query(student)
+    student_info = student.slice('first_name', 'last_name', 'email').transform_keys { |it| "student.#{it}" }
+    student_query.merge(student_info)
+  end
+
   def course_report_projection
     {
       '_id': 0,
@@ -36,12 +45,26 @@ helpers do
       'passed_count': '$stats.passed',
       'passed_with_warnings_count': '$stats.passed_with_warnings',
       'failed_count': '$stats.failed',
+      'items_to_review': ''
     }
   end
 
   def csv_with_headers(csv, projection)
     headers = projection.symbolize_keys.except(:_id).keys.join(',')
     "#{headers}\n#{csv}"
+  end
+
+  def add_failed_tags(report_json, exercises)
+    report_json.each do |student|
+      items_to_review = Assignment.items_to_review(student_assignment_query(student), exercises)
+      student['items_to_review'] = items_to_review.join ', '
+    end
+  end
+
+  def normalized_exercises
+    json_body[:exercises].map do |it|
+      {language: json_body[:language]}.merge(it.symbolize_keys)
+    end
   end
 end
 
@@ -92,9 +115,10 @@ Mumukit::Platform.map_organization_routes!(self) do
     }
   end
 
-  get '/courses/:course/guides/:organization/:repository/report' do
+  post '/courses/:course/guides/:organization/:repository/report' do
     authorize! :teacher
     json = Reporting.aggregate(GuideProgress, guide_progress_query, paginated_params, query_params, guide_report_projection).as_json
+    add_failed_tags json, normalized_exercises
     content_type 'application/csv'
     csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), guide_report_projection)
   end
