@@ -32,7 +32,7 @@ And then `reboot` your machine.
 #### 2. Install ruby essentials 
 
 ```bash
-sudo apt-get install autoconf curl git build-essential libssl-dev autoconf bison libreadline6 libreadline6-dev zlib1g zlib1g-dev
+sudo apt-get install autoconf curl git build-essential libssl-dev autoconf bison libreadline6 libreadline6-dev zlib1g zlib1g-dev rabbitmq-server
 ```
 
 ### 2. Install rbenv
