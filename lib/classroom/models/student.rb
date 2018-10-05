@@ -75,7 +75,7 @@ class Student
     end
 
     def last_updated_student_by(query)
-      where(query).order_by(updated_at: :desc).first
+      where(query).ne(detached: true).order_by(updated_at: :desc).first
     end
 
     def ensure_not_exists!(query)
