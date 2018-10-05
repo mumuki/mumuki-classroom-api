@@ -181,8 +181,7 @@ describe Submission do
                                                             parent: parent.delete(:chapter),
                                                             guide: guide
                                                           }) }
-
-      let(:course_student) { {course: {slug: 'example/course1'}, student: submitter} }
+      
       let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 
       let(:guide_fetched) { Guide.first.as_json }
