@@ -1,12 +1,12 @@
 namespace :resubmissions do
   task :listen do
-    Mumukit::Nuntius::Logger.info 'Listening to resubmissions'
+    Mumuki::Classroom::Nuntius.logger.info 'Listening to resubmissions'
 
-    Mumukit::Nuntius::Consumer.negligent_start! 'resubmissions' do |body|
+    Mumuki::Classroom::Nuntius.consumer.negligent_start! 'resubmissions' do |body|
       destination = body['tenant']
       uid = body['uid']
 
-      Mumukit::Nuntius::Logger.info "Processing resubmission #{uid}"
+      Mumuki::Classroom::Nuntius.logger.info "Processing resubmission #{uid}"
       FailedSubmission.reprocess! uid, destination
     end
   end

@@ -11,8 +11,5 @@ require_relative './app/routes'
 ## Essential parameters validation
 raise 'Missing secret key' unless Mumukit::Login.config.mucookie_secret_key
 
-## Status Nuntius
-Mumukit::Nuntius.establish_connection
-
 ## Start server
 run Sinatra::Application

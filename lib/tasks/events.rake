@@ -1,5 +1,5 @@
 namespace :events do
   task :listen do
-    Mumukit::Nuntius::EventConsumer.start!
+    Mumuki::Classroom::Nuntius.event_consumer.start!
   end
 end

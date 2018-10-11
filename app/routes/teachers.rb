@@ -15,6 +15,6 @@ Mumukit::Platform.map_organization_routes!(self) do
     perm.add_permission!(:teacher, course_slug)
     User.upsert_permissions! uid, perm
 
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:teacher].except(:personal_id).merge(permissions: perm)
+    Mumuki::Classroom::Nuntius.notify_event! 'UserChanged', user: json[:teacher].except(:personal_id).merge(permissions: perm)
   end
 end

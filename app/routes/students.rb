@@ -35,7 +35,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses/:course/students/:uid' do
     authorize! :janitor
-    Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
+    Mumuki::Classroom::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
     {status: :created}
   end
 
@@ -88,8 +88,8 @@ Mumukit::Platform.map_organization_routes!(self) do
     perm.add_permission!(:student, course_slug)
     User.upsert_permissions! uid, perm
 
-    Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].except(:personal_id).merge(permissions: perm)
+    Mumuki::Classroom::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
+    Mumuki::Classroom::Nuntius.notify_event! 'UserChanged', user: json[:student].except(:personal_id).merge(permissions: perm)
 
     {status: :created}
   end

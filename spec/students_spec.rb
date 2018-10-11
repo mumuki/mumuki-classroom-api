@@ -166,7 +166,7 @@ describe Student do
 
   describe 'post /courses/:course/students/:student_id' do
 
-    before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', uid: 'github|123456', tenant: 'example.org') }
+    before { expect(Mumuki::Classroom::Nuntius).to receive(:notify!).with('resubmissions', uid: 'github|123456', tenant: 'example.org') }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/students/github%7C123456' }
 
@@ -262,7 +262,7 @@ describe Student do
           before { header 'Authorization', build_auth_header('*') }
 
           context 'should publish in resubmissions queue' do
-            before { expect(Mumukit::Nuntius).to receive(:notify!) }
+            before { expect(Mumuki::Classroom::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
               let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
@@ -277,7 +277,7 @@ describe Student do
           context 'add student to a course if exists' do
             before { post '/courses/foo/students', student_json }
             context 'in same course, should fails' do
-              before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
+              before { expect(Mumuki::Classroom::Nuntius).to_not receive(:notify!) }
               before { post '/courses/foo/students', student_json }
 
               it { expect(last_response).to_not be_ok }
@@ -297,7 +297,7 @@ describe Student do
       end
 
       context 'when course does not exist' do
-        before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
+        before { expect(Mumuki::Classroom::Nuntius).to_not receive(:notify!) }
 
         it 'rejects creating a student' do
           header 'Authorization', build_auth_header('*')
@@ -328,7 +328,7 @@ describe Student do
           before { header 'Authorization', build_auth_header('*') }
 
           context 'should publish int resubmissions queue' do
-            before { expect(Mumukit::Nuntius).to receive(:notify!) }
+            before { expect(Mumuki::Classroom::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
               let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
@@ -352,7 +352,7 @@ describe Student do
           end
           context 'should not publish int resubmissions queue' do
             before { post '/courses/foo/students', student_json }
-            before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
+            before { expect(Mumuki::Classroom::Nuntius).to_not receive(:notify!) }
             context 'and user already exists by uid' do
               before { post '/courses/foo/students', student_json }
 
@@ -374,7 +374,7 @@ describe Student do
       end
 
       context 'when course does not exist' do
-        before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
+        before { expect(Mumuki::Classroom::Nuntius).to_not receive(:notify!) }
 
         it 'rejects creating a student' do
           header 'Authorization', build_auth_header('*')

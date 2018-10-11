@@ -15,6 +15,13 @@ require 'mumukit/platform'
 Mongoid.load!('./config/mongoid.yml', ENV['RACK_ENV'] || 'development')
 I18n.load_translations_path File.join(__dir__, '..', 'config', 'locales', '*.yml')
 
+
+module Mumuki
+  module Classroom
+    Nuntius = Mumukit::Nuntius::Component.new('classroom')
+  end
+end
+
 require_relative './consumer'
 require_relative './profile'
 require_relative './events'
@@ -26,7 +33,6 @@ require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 
 Mumukit::Nuntius.configure do |c|
-  c.app_name = 'classroom'
   c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
 end
 
@@ -35,6 +41,7 @@ Mumukit::Auth.configure do |_config|
 end
 
 Mumukit::Login.configure do |_config|
+
 end
 
 Mumukit::Platform.configure do |config|

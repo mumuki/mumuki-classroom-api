@@ -18,7 +18,7 @@ module WithFailedSubmissionReprocess
     begin
       reprocess_failed_submission destination, failed_submission
     rescue => e
-      Mumukit::Nuntius::Logger.warn "Resubmission failed #{e}. it was: #{failed_submission.as_json}"
+      Mumuki::Classroom::Nuntius.logger.warn "Resubmission failed #{e}. it was: #{failed_submission.as_json}"
       insert_failed_submission failed_submission, source
     end
   end

@@ -9,7 +9,7 @@ describe 'messages' do
       let(:exercise) { {eid: 2} }
       before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '3'}]}.merge organization: 'example.org', course: 'example.org/bar') }
       before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/test'}, submissions: [{sid: '4'}]}.merge organization: 'example.org', course: 'example.org/bar') }
-      before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
+      before { expect(Mumuki::Classroom::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
                                                                                        submission_id: '3',
                                                                                        exercise_id: 2,
                                                                                        organization: 'example.org'}.as_json) }
@@ -33,7 +33,7 @@ describe 'messages' do
 
           before { Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '5'}]}.merge organization: 'example.org', course: 'example.org/bar') }
 
-          before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
+          before { expect(Mumuki::Classroom::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
                                                                                            submission_id: '5',
                                                                                            exercise_id: 2,
                                                                                            organization: 'example.org'}.as_json) }

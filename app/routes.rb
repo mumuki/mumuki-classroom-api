@@ -110,7 +110,7 @@ helpers do
   end
 
   def notify_upsert_exam(exam_id)
-    Mumukit::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
+    Mumuki::Classroom::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
   end
 
   def page
