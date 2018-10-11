@@ -33,7 +33,7 @@ require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 
 Mumukit::Nuntius.configure do |c|
-  c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
+
 end
 
 Mumukit::Auth.configure do |_config|
