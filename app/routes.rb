@@ -109,6 +109,19 @@ helpers do
     user.notify!
   end
 
+  def with_possible_conflicts
+    begin
+      yield
+    rescue Mongo::Error::OperationFailure => e
+      if e.is_duplicated_key_error?
+        status 409
+        {error: 'An entity with the same slug already exists'}
+      else
+        throw e
+      end
+    end
+  end
+
   def notify_upsert_exam(exam_id)
     Mumukit::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
   end

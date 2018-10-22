@@ -83,3 +83,9 @@ class NilClass
     false
   end
 end
+
+class Mongo::Error::OperationFailure
+  def is_duplicated_key_error?
+    message.include? 'E11000'
+  end
+end

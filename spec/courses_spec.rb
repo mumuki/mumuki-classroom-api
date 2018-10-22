@@ -52,6 +52,13 @@ describe Course do
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
       it { expect(created_slug).to eq 'example.org/2016-K2001' }
+
+      context 'and when trying to create a duplicate' do
+        before { post '/courses', course.to_json }
+
+        it { expect(last_response.status).to be 409 }
+        it { expect(last_response.body).to json_eq error: 'An entity with the same slug already exists' }
+      end
     end
 
     context 'when is global admin' do
@@ -72,7 +79,6 @@ describe Course do
       it { expect(Course.count).to eq 1 }
       it { expect(last_response).to_not be_ok }
       it { expect(last_response.status).to eq 422 }
-
     end
 
     context 'create course does not create invitation link' do
