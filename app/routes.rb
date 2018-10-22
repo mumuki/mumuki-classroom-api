@@ -151,11 +151,11 @@ before do
   set_locale! if current_organization
 end
 
+require_relative './routes/errors'
 require_relative './routes/pagination'
 require_relative './routes/courses'
 require_relative './routes/guides'
 require_relative './routes/messages'
-require_relative './routes/errors'
 require_relative './routes/exams'
 require_relative './routes/followers'
 require_relative './routes/organization'

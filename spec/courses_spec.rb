@@ -72,7 +72,6 @@ describe Course do
       it { expect(Course.count).to eq 1 }
       it { expect(last_response).to_not be_ok }
       it { expect(last_response.status).to eq 422 }
-
     end
 
     context 'create course does not create invitation link' do
