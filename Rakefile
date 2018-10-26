@@ -1,13 +1,36 @@
-Dir.glob('lib/tasks/*.rake').each { |r| import r }
-
-require_relative './lib/classroom'
-
-Mongo::Logger.logger = ::Logger.new(File.join 'logs', 'rake.mongo.log')
-Mongo::Logger.logger.level = ::Logger::INFO
-
-task :routes do
-  require_relative './app/routes'
-  require 'sinatra-rake-routes'
-  # Tell SinatraRakeRoutes what your Sinatra::Base application class is called:
-  SinatraRakeRoutes.set_app_class(Sinatra::Application)
+begin
+  require 'bundler/setup'
+rescue LoadError
+  puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
+
+require 'rdoc/task'
+
+RDoc::Task.new(:rdoc) do |rdoc|
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title    = 'Mumuki::Classroom'
+  rdoc.options << '--line-numbers'
+  rdoc.rdoc_files.include('README.md')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+APP_RAKEFILE = File.expand_path("../test/dummy/Rakefile", __FILE__)
+load 'rails/tasks/engine.rake'
+
+
+load 'rails/tasks/statistics.rake'
+
+
+
+require 'bundler/gem_tasks'
+
+require 'rake/testtask'
+
+Rake::TestTask.new(:test) do |t|
+  t.libs << 'test'
+  t.pattern = 'test/**/*_test.rb'
+  t.verbose = false
+end
+
+
+task default: :test

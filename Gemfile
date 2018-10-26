@@ -1,42 +1,15 @@
 source 'https://rubygems.org'
 
-gem 'rake'
+# Declare your gem's dependencies in mumuki-classroom.gemspec.
+# Bundler will treat runtime dependencies like base dependencies, and
+# development dependencies will be added by default to the :development group.
 
-gem 'sinatra', '~> 1.4'
-gem 'sinatra-contrib', '~> 1.4'
-gem 'sinatra-cross_origin', '~> 0.3.1'
+gemspec
 
-gem 'mongo', '~> 2.1'
-gem 'mongoid', '~> 6.1'
-gem 'bson_ext'
+# Declare any dependencies that are still in development here instead of in
+# your gemspec. These might include edge Rails or gems from your path or
+# Git. Remember to move these dependencies to your gemspec before releasing
+# your gem to rubygems.org.
 
-gem 'bunny'
-
-gem 'mumukit-core', '~> 1.8'
-gem 'mumukit-nuntius', '~> 6.1'
-
-gem 'mumukit-auth', '~> 7.7'
-gem 'mumukit-service', '~> 3.0'
-
-gem 'mumukit-platform', '~> 1.3'
-gem 'mumukit-login', '~> 5.2.0'
-
-gem 'mumukit-inspection', '~> 1.0'
-gem 'mumukit-content-type', '~> 1.8'
-
-gem 'activemodel', '~> 5.0'
-gem 'activesupport', '~> 5.0'
-
-group :test, :development do
-  gem 'pry'
-  gem 'pry-remote'
-  gem 'pry-byebug' unless Gem.win_platform?
-  gem 'pry-stack_explorer'
-  gem 'binding_of_caller'
-
-  gem 'sinatra-rake-routes'
-  gem 'rspec', '~> 2.99'
-  gem 'rack-test'
-  gem 'factory_girl'
-  gem 'codeclimate-test-reporter', require: nil
-end
+# To use a debugger
+# gem 'byebug', group: [:development, :test]
