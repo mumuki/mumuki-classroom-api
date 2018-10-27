@@ -1,10 +1,5 @@
 require 'sinatra'
 require 'sinatra/cross_origin'
-require 'mumukit/service/routes'
-
-require_relative './session_store'
-require_relative '../lib/classroom'
-
 
 configure do
   enable :cross_origin
@@ -151,19 +146,19 @@ before do
   set_locale! if current_organization
 end
 
-require_relative './routes/errors'
-require_relative './routes/pagination'
-require_relative './routes/courses'
-require_relative './routes/guides'
-require_relative './routes/messages'
-require_relative './routes/exams'
-require_relative './routes/followers'
-require_relative './routes/organization'
-require_relative './routes/ping'
-require_relative './routes/teachers'
-require_relative './routes/students'
-require_relative './routes/permissions'
-require_relative './routes/notifications'
-require_relative './routes/suggestions'
-require_relative './routes/manual_evaluation'
-require_relative './routes/searching'
+require_relative './sinatra/errors'
+require_relative './sinatra/pagination'
+require_relative './sinatra/courses'
+require_relative './sinatra/guides'
+require_relative './sinatra/messages'
+require_relative './sinatra/exams'
+require_relative './sinatra/followers'
+require_relative './sinatra/organization'
+require_relative './sinatra/ping'
+require_relative './sinatra/teachers'
+require_relative './sinatra/students'
+require_relative './sinatra/permissions'
+require_relative './sinatra/notifications'
+require_relative './sinatra/suggestions'
+require_relative './sinatra/manual_evaluation'
+require_relative './sinatra/searching'
