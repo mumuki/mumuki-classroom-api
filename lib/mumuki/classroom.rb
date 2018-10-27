@@ -20,8 +20,7 @@ require 'mumukit/auth'
 require 'mumukit/login'
 require 'mumukit/platform'
 
-
-Mongoid.load!("#{Rails.root}/config/mongoid.yml", ENV['RACK_ENV'] || 'development')
+#Mongoid.load!(Rails.root.join("config", "mongoid.yml"), ENV['RACK_ENV'] || 'development')
 I18n.load_translations_path File.join(__dir__, 'config', 'locales', '*.yml')
 
 require_relative './consumer'
@@ -33,6 +32,7 @@ require_relative './classroom/reports'
 
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
+
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
@@ -78,3 +78,6 @@ module Mumukit::Platform::OrganizationMapping::Path
     end
   end
 end
+
+
+require_relative './classroom/sinatra'

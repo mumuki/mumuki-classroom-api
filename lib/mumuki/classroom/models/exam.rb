@@ -3,7 +3,7 @@ class Exam
   include Mongoid::Document
   include Mongoid::Timestamps
 
-  field :eid, type: String, default: -> { Mumukit::Service::IdGenerator.next }
+  field :eid, type: String, default: -> { SecureRandom.hex(8) }
   field :uids, type: Array
   field :name, type: String
   field :slug, type: String

@@ -15,20 +15,8 @@ test:
     default:
       database: classroom_test
       hosts:
-        - "<%=ENV['MONGO_PORT_27017_TCP_ADDR'] || 'localhost' %>:<%=ENV['MONGO_PORT_27017_TCP_PORT'] || 27017 %>"
+        - localhost:27017
       options:
         max_pool_size: 1
-  options:
-    raise_not_found_error: false
-
-production:
-  clients:
-    default:
-      database: "<%=ENV['MUMUKI_MONGODB_DATABASE']%>"
-      hosts:
-<%= (ENV['MUMUKI_MONGODB_CONNECTION_STRING'] || '').split(',').map { |it| "        - #{it}\n" }.join %>
-      options:
-        max_pool_size: 8
-        min_pool_size: 1
   options:
     raise_not_found_error: false

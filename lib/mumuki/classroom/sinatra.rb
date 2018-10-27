@@ -3,9 +3,14 @@ require 'sinatra/cross_origin'
 
 configure do
   enable :cross_origin
+  set :allow_methods, [:get, :put, :post, :options, :delete]
+  set :show_exceptions, false
+
   set :app_name, 'classroom'
   set :static, true
   set :public_folder, 'public'
+
+  use ::Rack::CommonLogger, Rails.logger
 end
 
 
@@ -30,6 +35,18 @@ helpers do
 
   def authorization_slug
     slug
+  end
+
+  def slug
+    if route_slug_parts.present?
+      Mumukit::Auth::Slug.join(*route_slug_parts)
+    elsif subject
+      Mumukit::Auth::Slug.parse(subject.slug)
+    elsif json_body
+      Mumukit::Auth::Slug.parse(json_body['slug'])
+    else
+      raise Mumukit::Auth::InvalidSlugFormatError.new('Slug not available')
+    end
   end
 
   def permissions
@@ -142,8 +159,64 @@ helpers do
 
 end
 
+
+before do
+  content_type 'application/json', 'charset' => 'utf-8'
+end
+
+after do
+  error_message = env['sinatra.error']
+  if response.body.is_a?(Array)&& response.body[0].is_a?(String)
+    if content_type != 'application/csv'
+      content_type 'text/html'
+      response.body[0] = <<HTML
+    <html>
+      <body>
+        #{response.body[0]}
+      </body>
+    </html>
+HTML
+    end
+    response.body = response.body[0]
+  elsif error_message.blank?
+    response.body = response.body.to_json
+  else
+    response.body = {message: env['sinatra.error'].message}.to_json
+  end
+end
+
+error JSON::ParserError do
+  halt 400
+end
+
+error ActiveRecord::RecordInvalid do
+  halt 400
+end
+
+error ActiveRecord::RecordNotFound do
+  halt 404
+end
+
+error Mumukit::Auth::InvalidTokenError do
+  halt 401
+end
+
+error Mumukit::Auth::UnauthorizedAccessError do
+  halt 403
+end
+
+error Mumukit::Auth::InvalidSlugFormatError do
+  halt 400
+end
+
 before do
   set_locale! if current_organization
+end
+
+options '*' do
+  response.headers['Allow'] = settings.allow_methods.map { |it| it.to_s.upcase }.join(',')
+  response.headers['Access-Control-Allow-Headers'] = 'X-Mumuki-Auth-Token, X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept, Authorization'
+  200
 end
 
 require_relative './sinatra/errors'

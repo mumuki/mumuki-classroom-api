@@ -18,7 +18,7 @@ module WithSubmissionProcess
 
   def find_submission_course!(json)
     student = Student.last_updated_student_by(organization: organization(json), uid: uid(json))
-    raise Mumukit::Service::DocumentNotFoundError unless student
+    raise "Student not found" unless student
     student.course
   end
 
