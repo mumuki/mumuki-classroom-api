@@ -68,7 +68,7 @@ describe Submission do
 
         context 'and is the first exercise submission' do
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.as_json).to json_like({guide: guide,
+          it { expect(guide_progress.first).to json_like({guide: guide,
                                                                   student: student,
                                                                   organization: 'example',
                                                                   course: 'example/course1',
@@ -82,7 +82,7 @@ describe Submission do
                                                                     submission: submission
                                                                   }}, except_fields) }
           it { expect(exercise_progress.size).to eq 1 }
-          it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
+          it { expect(exercise_progress.first).to json_like({guide: guide,
                                                                      organization: 'example',
                                                                      course: 'example/course1',
                                                                      student: student,
@@ -104,7 +104,7 @@ describe Submission do
                                                          }) }
           before { Submission.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.as_json).to json_like({guide: guide,
+          it { expect(guide_progress.first).to json_like({guide: guide,
                                                                   organization: 'example',
                                                                   course: 'example/course1',
                                                                   student: student,
@@ -118,7 +118,7 @@ describe Submission do
                                                                     submission: submission2
                                                                   }}, except_fields) }
           it { expect(exercise_progress.size).to eq 1 }
-          it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
+          it { expect(exercise_progress.first).to json_like({guide: guide,
                                                                      organization: 'example',
                                                                      course: 'example/course1',
                                                                      student: student,
@@ -142,7 +142,7 @@ describe Submission do
                                                          }) }
           before { Submission.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
-          it { expect(guide_progress.first.as_json).to json_like({guide: guide,
+          it { expect(guide_progress.first).to json_like({guide: guide,
                                                                   organization: 'example',
                                                                   course: 'example/course1',
                                                                   student: student,
@@ -156,13 +156,13 @@ describe Submission do
                                                                     submission: submission2
                                                                   }}, except_fields) }
           it { expect(exercise_progress.size).to eq 2 }
-          it { expect(exercise_progress.first.as_json).to json_like({guide: guide,
+          it { expect(exercise_progress.first).to json_like({guide: guide,
                                                                      organization: 'example',
                                                                      course: 'example/course1',
                                                                      student: student,
                                                                      exercise: exercise,
                                                                      submissions: [submission]}, except_fields) }
-          it { expect(exercise_progress.second.as_json).to json_like({guide: guide,
+          it { expect(exercise_progress.second).to json_like({guide: guide,
                                                                       organization: 'example',
                                                                       course: 'example/course1',
                                                                       student: student,
