@@ -16,7 +16,7 @@
 
 #### 1. Install Mongo 3.4
 
-[This process depends on you OS](https://docs.mongodb.com/v3.4/installation/). On ubuntu, follow these instructions:
+[This process depends on you OS](https://docs.mongodb.com/v3.4/installation/). On ubuntu, follow these instructions: 
 
 ```sh
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6  &&
@@ -27,9 +27,9 @@ apt-get autoremove -y &&
 apt-get install mongodb-org -y &&
 ```
 
-And then `reboot` your machine.
+And then `reboot` your machine.  
 
-#### 2. Install ruby essentials
+#### 2. Install ruby essentials 
 
 ```bash
 sudo apt-get install autoconf curl git build-essential libssl-dev autoconf bison libreadline6 libreadline6-dev zlib1g zlib1g-dev rabbitmq-server
