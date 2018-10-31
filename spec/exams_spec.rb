@@ -122,7 +122,7 @@ describe Exam do
       let(:invalid_exam_json) { exam_json.merge(max_problem_submissions: 0, max_choice_submissions: -2) }
 
       it { expect { Exam.create! valid_exam_json }.not_to raise_error }
-      it { expect { Exam.create! invalid_exam_json }.to raise_error }
+      it { expect { Exam.create! invalid_exam_json }.to raise_error(Mongoid::Errors::Validations) }
     end
 
     context 'passing criterion' do
@@ -137,8 +137,8 @@ describe Exam do
       it { expect { Exam.create! valid_criterion_none }.not_to raise_error }
       it { expect { Exam.create! valid_criterion_passed_exercises }.not_to raise_error }
       it { expect { Exam.create! valid_criterion_percentage }.not_to raise_error }
-      it { expect { Exam.create! invalid_criterion_type }.to raise_error }
-      it { expect { Exam.create! invalid_criterion_value }.to raise_error }
+      it { expect { Exam.create! invalid_criterion_type }.to raise_error('Invalid criterion type some_invalid_type') }
+      it { expect { Exam.create! invalid_criterion_value }.to raise_error('Invalid criterion value 105 for percentage') }
     end
   end
 end

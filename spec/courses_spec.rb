@@ -108,7 +108,7 @@ describe Course do
       let(:created) { Course.create!(course) }
       let(:invitation) { created.invitation_link! time - 10 }
 
-      it { expect { invitation }.to raise_exception }
+      it { expect { invitation }.to raise_error("Must be in future") }
     end
   end
 

@@ -1,6 +1,14 @@
 module Exam::PassingCriterion
   def self.parse(criterion)
-    raise unless "Exam::PassingCriterion::#{criterion[:type].camelize}".constantize.valid_passing_grade? criterion[:value]
+    unless parse_criterion_type(criterion[:type]).valid_passing_grade? criterion[:value]
+      raise "Invalid criterion value #{criterion[:value]} for #{criterion[:type]}"
+    end
+  end
+
+  def self.parse_criterion_type(type)
+    "Exam::PassingCriterion::#{type.camelize}".constantize
+  rescue
+    raise "Invalid criterion type #{type}"
   end
 end
 
