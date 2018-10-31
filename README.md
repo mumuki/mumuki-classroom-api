@@ -14,7 +14,7 @@
 
 #### 1. Install Mongo 3.4
 
-[This process depends on you OS](https://docs.mongodb.com/v3.4/installation/). On ubuntu, follow these instructions:
+[This process depends on you OS](https://docs.mongodb.com/v3.4/installation/). On ubuntu, follow these instructions: 
 
 ```sh
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6  &&
