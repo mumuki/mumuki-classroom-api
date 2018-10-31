@@ -1,7 +1,7 @@
 Mumukit::Platform.map_organization_routes!(self) do
   get '/notifications/unread' do
     authorize! :teacher
-    Notification.unread(organization, current_user.permissions)
+    { notifications: Notification.unread(organization, current_user.permissions) }
   end
 
   get '/notifications' do

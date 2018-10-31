@@ -11,8 +11,8 @@ describe 'notifications' do
       before {header 'Authorization', build_auth_header('example.org/*')}
       before {get '/notifications/unread'}
 
-      it {expect(last_response.body).to json_like([notification.merge(read: false)],
-                                                  except: [:created_at, :updated_at, :assignment, :assignment_id, :id])}
+      it {expect(last_response.body).to json_like({notifications: [notification.merge(read: false)]},
+                                                  {except: [:created_at, :updated_at, :assignment, :assignment_id, :id]})}
 
     end
 
