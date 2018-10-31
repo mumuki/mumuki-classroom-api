@@ -2,7 +2,15 @@ require "mumuki/classroom/engine"
 
 module Mumuki
   module Classroom
-    # Your code goes here...
+    INDEXES = []
+
+    def self.create_indexes!
+      INDEXES.each { |it| it.create_indexes }
+    end
+
+    def self.register_index!(clazz)
+      INDEXES << clazz
+    end
   end
 end
 

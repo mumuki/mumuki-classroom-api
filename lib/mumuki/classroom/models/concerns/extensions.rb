@@ -13,7 +13,7 @@ module Mongoid
     module ClassMethods
       def create_index(*args)
         index *args
-        create_indexes
+        Mumuki::Classroom.register_index! self
       end
 
       def drop_index(index_name)
