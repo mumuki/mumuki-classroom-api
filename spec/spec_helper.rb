@@ -1,7 +1,6 @@
 ENV['RACK_ENV'] = 'test'
 ENV['RAILS_ENV'] = 'test'
 
-APP_PATH = File.expand_path('../../spec/dummy/config/application', __FILE__)
 require File.expand_path("../dummy/config/environment.rb", __FILE__)
 
 require 'rspec/rails'
