@@ -61,6 +61,23 @@ describe 'messages' do
       it { expect(last_response.body).to json_like message: 'Unauthorized access to example.org/baz as teacher. Scope is ``' }
     end
 
+    describe 'threads ui' do
+      before do
+        Assignment.create!(
+          {
+            student: { uid: '1' },
+            exercise: { eid: 1 },
+            guide: { slug: 'mumukiproject/example', language: { name: 'gobstones' } },
+            submissions: [{sid: '3'}]
+          }.merge organization: 'example.org', course: 'example.org/baz')
+      end
+
+      before { header 'Authorization', build_auth_header('example.org/baz') }
+      before { get '/courses/baz/guides/mumukiproject/example/1/student/1/messages' }
+
+      it { expect(last_response.body).to include '<ol class="mu-chat">' }
+      it { expect(last_response.status).to eq 200 }
+    end
   end
 
 end
