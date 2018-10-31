@@ -7,8 +7,7 @@ require 'rspec/rails'
 require 'codeclimate-test-reporter'
 require 'mumukit/core/rspec'
 require 'rack/test'
-require 'factory_girl'
-require 'factory_girl_rails'
+require 'factory_bot_rails'
 require 'byebug'
 
 require_relative '../lib/mumuki/classroom'
@@ -21,7 +20,7 @@ RSpec.configure do |config|
   config.infer_base_class_for_anonymous_controllers = false
   config.use_transactional_fixtures = true
   config.include Rack::Test::Methods
-  config.include FactoryGirl::Syntax::Methods
+  config.include FactoryBot::Syntax::Methods
   config.infer_spec_type_from_file_location!
 
   config.before(:each) do
