@@ -44,14 +44,18 @@ describe Assignment do
       before { get '/courses/k2048/guides/example.org/foo/github%7c123456' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like({exercise_student_progress: [with_course(progress1_with_message), with_course(progress2.merge(submissions: processed_submissions))]}, except_fields) }
+      it { expect(last_response.body).to json_like(
+            {exercise_student_progress: [with_course(progress1_with_message), with_course(progress2.merge(submissions: processed_submissions))]},
+            except_fields) }
     end
 
     context '/courses/:course/guides/:organization/:repository/:student_id/:exercise_id' do
       before { get '/courses/k1024/guides/example.org/foo/github%7c123456/178' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like(with_course(progress3.merge(submissions: processed_submissions.map { |sub| sub.except :messages }, course: 'example.org/k1024')), except_fields) }
+      it { expect(last_response.body).to json_like(
+        with_course(progress3.merge(submissions: processed_submissions.map { |sub| sub.except :messages }, course: 'example.org/k1024')),
+        except_fields) }
     end
   end
 

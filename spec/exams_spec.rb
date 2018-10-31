@@ -74,7 +74,9 @@ describe Exam do
       it { expect(last_response.body).to json_like({status: 'updated'}, except_fields) }
       it { expect(Exam.count).to eq 1 }
       it { expect(exam_fetched.eid).to eq(exam_id) }
-      it { expect(exam_fetched.as_json).to json_like exam_json2.merge(organization: 'example.org', course: 'example.org/foo'), except_fields }
+      it { expect(exam_fetched).to json_like(
+              exam_json2.merge(organization: 'example.org', course: 'example.org/foo').except('eid'),
+              except_fields) }
     end
 
   end
