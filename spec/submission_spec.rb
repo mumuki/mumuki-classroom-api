@@ -54,7 +54,7 @@ describe Submission do
 
       context 'and student is no registered to a course' do
         it { expect { Submission.process!(atheneum_submission) }
-               .to raise_error(Mumukit::Service::DocumentNotFoundError) }
+               .to raise_error(ActiveRecord::RecordNotFound) }
       end
 
       context 'and student is registered to a course' do
