@@ -19,13 +19,9 @@ module Classroom
 end
 
 require 'mongoid'
-require 'rouge'
-require 'mumukit/core'
-require 'mumukit/content_type'
-require 'mumukit/inspection'
-require 'mumukit/nuntius'
-require 'mumukit/auth'
+require 'mumuki/domain'
 require 'mumukit/login'
+require 'mumukit/nuntius'
 require 'mumukit/platform'
 
 I18n.load_translations_path File.join(__dir__, 'config', 'locales', '*.yml')
@@ -44,13 +40,6 @@ require_relative './classroom/permissions_diff'
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
   c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
-end
-
-Mumukit::Auth.configure do |_config|
-
-end
-
-Mumukit::Login.configure do |_config|
 end
 
 Mumukit::Platform.configure do |config|
