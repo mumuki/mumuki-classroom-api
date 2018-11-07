@@ -31,7 +31,7 @@ class Submission
 
   def expectation_results
     self[:expectation_results]&.map do |expectation|
-      {html: Mumukit::Inspection::I18n.t(expectation), result: expectation['result']}
+      {html: Mumukit::Inspection::Expectation.parse(expectation).translate, result: expectation['result']}
     end
   end
 
