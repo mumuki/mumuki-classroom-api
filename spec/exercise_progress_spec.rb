@@ -25,12 +25,12 @@ describe Assignment do
       guide: {slug: 'example.org/foo'},
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
       exercise: {eid: 178, name: 'foo'},
-      submissions: [{status: :failed, expectation_results: [{binding: 'f', inspection: 'HasComposition', result: 'failed'}], messages: []}, {status: :passed, messages: []}]} }
+      submissions: [{status: :failed, expectation_results: [{binding: 'f', inspection: 'UsesComposition', result: 'failed'}], messages: []}, {status: :passed, messages: []}]} }
     let(:progress3) { {
       guide: {slug: 'example.org/foo'},
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
       exercise: {eid: 178, name: 'foo'},
-      submissions: [{status: :failed, expectation_results: [{binding: 'f', inspection: 'HasComposition', result: 'failed'}], messages: []}, {status: :passed, messages: []}]} }
+      submissions: [{status: :failed, expectation_results: [{binding: 'f', inspection: 'UsesComposition', result: 'failed'}], messages: []}, {status: :passed, messages: []}]} }
     let(:processed_submissions) { [{status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}], messages: []}, {status: :passed, messages: []}] }
 
 
