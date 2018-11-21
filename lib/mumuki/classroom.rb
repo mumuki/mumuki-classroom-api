@@ -1,5 +1,3 @@
-require "mumuki/classroom/engine"
-
 module Mumuki
   module Classroom
     INDEXES = []
@@ -39,12 +37,9 @@ require_relative './classroom/permissions_diff'
 
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
-  c.notification_mode = Mumukit::Nuntius::NotificationMode.from_env
 end
 
 Mumukit::Platform.configure do |config|
-  config.user_class = User
-  config.organization_class = Organization
   config.application = Mumukit::Platform.classroom_api
   config.web_framework = Mumukit::Platform::WebFramework::Sinatra
 end
@@ -59,21 +54,5 @@ class Mumukit::Platform::Model
   end
 end
 
-
-module Mumukit::Platform::OrganizationMapping::Path
-  class << self
-    alias_method :__organization_name__, :organization_name
-
-    def organization_name(request, domain)
-      name = __organization_name__(request, domain)
-      if %w(auth login logout).include? name
-        'central'
-      else
-        name
-      end
-    end
-  end
-end
-
-
 require_relative './classroom/sinatra'
+require_relative './classroom/engine'
