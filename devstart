@@ -2,24 +2,29 @@
 set -e
 
 echo ''
-echo '_________ .__                                                         _____         .__ '
-echo '\_   ___ \|  | _____    ______ _____________  ____   ____   _____    /  _  \ ______ |__|'
-echo '/    \  \/|  | \__  \  /  ___//  ___/\_  __ \/  _ \ /  _ \ /     \  /  /_\  \\____ \|  |'
-echo '\     \___|  |__/ __ \_\___ \ \___ \  |  | \(  <_> |  <_> )  Y Y  \/    |    \  |_> >  |'
-echo ' \______  /____(____  /____  >____  > |__|   \____/ \____/|__|_|  /\____|__  /   __/|__|'
-echo '        \/          \/     \/     \/                            \/         \/|__|       '
+echo '_________ .__                                                      '
+echo '\_   ___ \|  | _____    ______ _____________  ____   ____   _____  '
+echo '/    \  \/|  | \__  \  /  ___//  ___/\_  __ \/  _ \ /  _ \ /     \ '
+echo '\     \___|  |__/ __ \_\___ \ \___ \  |  | \(  <_> |  <_> )  Y Y  \'
+echo ' \______  /____(____  /____  >____  > |__|   \____/ \____/|__|_|  /'
+echo '        \/          \/     \/     \/                            \/ '
 echo ''
 
-echo "[MumukiDevstart::ClassroomApi] Installing dependencies...."
+echo "[MumukiDevstart::Classroom] Installing dependencies...."
 bundle install --quiet
 
 if ! pgrep -x "mongod" > /dev/null
 then
-  echo "[MumukiDevstart::ClassroomApi] MongoDB server not running. Starting...."
+  echo "[MumukiDevstart::Classroom] MongoDB server not running. Starting...."
   mongod 2>&1 > /dev/null &
 fi
 
 mongo < seed-central.js
 
-echo "[MumukiDevstart::ClassroomApi] Starting server...."
-bundle exec puma
+echo "[MumukiDevstart::Classroom] Starting server...."
+MUMUKI_DEV_IP=${1:-localhost}
+MUMUKI_PLATFORM_DOMAIN=$MUMUKI_DEV_IP:3002 \
+MUMUKI_ORGANIZATION_MAPPING=path \
+MUMUKI_COOKIES_DOMAIN=$MUMUKI_DEV_IP \
+SECRET_KEY_BASE=aReallyStrongKeyForDevelopment \
+  bundle exec rails s -p 3002 -b $MUMUKI_DEV_IP
