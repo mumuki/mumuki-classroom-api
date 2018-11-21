@@ -1,4 +1,4 @@
-class Classroom::Event::UserChanged
+class Mumuki::Classroom::Event::UserChanged
   class << self
 
     attr_accessor :changes

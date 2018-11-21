@@ -120,7 +120,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     json = Reporting.aggregate(GuideProgress, guide_progress_query, paginated_params, query_params, guide_report_projection).as_json
     add_failed_tags json, normalized_exercises
     content_type 'application/csv'
-    csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), guide_report_projection)
+    csv_with_headers(Mumuki::Classroom::Reports::Formats.format_report('csv', json), guide_report_projection)
   end
 
   get '/courses/:course/guides/:organization/:repository/:uid' do
@@ -139,7 +139,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     pipeline_with_sort_criterion = aggregation.pipeline << {'$sort': {passed_count: -1, passed_with_warnings_count: -1, failed_count: -1, last_name: 1, first_name: 1}}
     json = Student.collection.aggregate(pipeline_with_sort_criterion).as_json
     content_type 'application/csv'
-    csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), course_report_projection)
+    csv_with_headers(Mumuki::Classroom::Reports::Formats.format_report('csv', json), course_report_projection)
   end
 
   get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do

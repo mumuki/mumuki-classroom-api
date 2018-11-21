@@ -79,12 +79,12 @@ class Student
     end
 
     def ensure_not_exists!(query)
-      raise Classroom::StudentExistsError, 'Student already exist' if Student.where(query).exists?
+      raise Mumuki::Classroom::StudentExistsError, 'Student already exist' if Student.where(query).exists?
     end
   end
 
 end
 
-class Classroom::StudentExistsError < Exception
+class Mumuki::Classroom::StudentExistsError < Exception
 end
 

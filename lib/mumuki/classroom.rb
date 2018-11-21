@@ -13,9 +13,6 @@ module Mumuki
 end
 
 
-module Classroom
-end
-
 require 'mongoid'
 require 'mumuki/domain'
 require 'mumukit/login'
