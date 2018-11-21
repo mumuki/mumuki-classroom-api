@@ -4,4 +4,5 @@ require_relative 'application'
 # Initialize the Rails application.
 Rails.application.initialize!
 
-#Mumuki::Classroom.create_indexes!
+# Create mongo indexes
+Mumuki::Classroom.create_indexes!
