@@ -8,3 +8,4 @@ spec/dummy/tmp/
 **/nuntius.log
 coverage/**
 .byebug_history
+Gemfile.lock
