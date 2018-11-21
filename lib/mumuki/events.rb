@@ -5,7 +5,7 @@ Mumukit::Nuntius::EventConsumer.handle do
   #    * user creation and modification in laboratory
   #    * user creation and modification in classroom
   event 'UserChanged' do |payload|
-    Classroom::Event::UserChanged.execute! payload[:user].except(:created_at, :updated_at)
+    Mumuki::Classroom::Event::UserChanged.execute! payload[:user].except(:created_at, :updated_at)
   end
 
   # Emitted by course creation and modification in laboratory

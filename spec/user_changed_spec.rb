@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Classroom::Event::UserChanged do
+describe Mumuki::Classroom::Event::UserChanged do
 
   let(:uid) { 'agus@mumuki.org' }
   let(:uid2) { 'fedescarpa@mumuki.org' }
@@ -19,27 +19,27 @@ describe Classroom::Event::UserChanged do
     context 'event with no permissions attribute' do
       let(:event) { user }
       before do
-        expect(Classroom::Event::UserChanged).to_not receive(:student_added)
-        expect(Classroom::Event::UserChanged).to_not receive(:teacher_added)
-        expect(Classroom::Event::UserChanged).to_not receive(:student_removed)
+        expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:student_added)
+        expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:teacher_added)
+        expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:student_removed)
       end
-      before { Classroom::Event::UserChanged.execute! event }
+      before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       it { expect(Organization.pluck(:name)).to include 'example.org' }
-      it { expect(Classroom::Event::UserChanged.changes).to be_empty }
+      it { expect(Mumuki::Classroom::Event::UserChanged.changes).to be_empty }
     end
 
 
     context 'save new permissions' do
       before do
-        expect(Classroom::Event::UserChanged).to receive(:student_added)
-        expect(Classroom::Event::UserChanged).to receive(:teacher_added)
-        expect(Classroom::Event::UserChanged).to receive(:student_removed)
+        expect(Mumuki::Classroom::Event::UserChanged).to receive(:student_added)
+        expect(Mumuki::Classroom::Event::UserChanged).to receive(:teacher_added)
+        expect(Mumuki::Classroom::Event::UserChanged).to receive(:student_removed)
       end
-      before { Classroom::Event::UserChanged.execute! event }
+      before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       it { expect(Organization.pluck(:name)).to include 'example.org' }
-      it { expect(Classroom::Event::UserChanged.changes['example.org'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
+      it { expect(Mumuki::Classroom::Event::UserChanged.changes['example.org'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
              .to json_like(changes: [
                {role: 'student', grant: 'example.org/foo', type: 'removed'},
@@ -53,7 +53,7 @@ describe Classroom::Event::UserChanged do
       before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
       before { Course.create! organization: 'example.org', slug: 'example.org/bar' }
       before { Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Classroom::Event::UserChanged.execute! event }
+      before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
       let(:event) { user2.merge(permissions: new_permissions) }
@@ -128,7 +128,7 @@ describe Classroom::Event::UserChanged do
       before { Student.create! user2.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Submission.process!(agus_submission) }
       before { Submission.process!(fede_submission) }
-      before { Classroom::Event::UserChanged.execute! event2 }
+      before { Mumuki::Classroom::Event::UserChanged.execute! event2 }
 
       it { expect(Assignment.where('student.uid': uid).count).to eq 1 }
       it { expect(Assignment.where('student.uid': uid2).count).to eq 1 }

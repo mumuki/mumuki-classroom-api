@@ -16,14 +16,14 @@ class Teacher
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
 
   def self.exists_exception
-    Classroom::TeacherExistsError
+    Mumuki::Classroom::TeacherExistsError
   end
 
 end
 
 
-class Classroom::TeacherExistsError < StandardError
+class Mumuki::Classroom::TeacherExistsError < StandardError
 end
 
-class Classroom::TeacherNotExistsError < StandardError
+class Mumuki::Classroom::TeacherNotExistsError < StandardError
 end

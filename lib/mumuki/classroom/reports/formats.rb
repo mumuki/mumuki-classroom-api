@@ -1,4 +1,4 @@
-class Classroom::Reports::Formats
+class Mumuki::Classroom::Reports::Formats
   module Json
     def self.format_report(stats)
       stats.to_json
@@ -26,7 +26,7 @@ EOF
   end
 
   def self.format_for(key)
-    "Classroom::Reports::Formats::#{key.capitalize}".constantize
+    "Mumuki::Classroom::Reports::Formats::#{key.capitalize}".constantize
   end
 
   def self.format_report(key, stats)

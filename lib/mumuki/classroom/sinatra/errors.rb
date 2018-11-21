@@ -1,20 +1,16 @@
-error Classroom::CourseExistsError do
+error Mumuki::Classroom::CourseExistsError do
   halt 400
 end
 
-error Classroom::CourseNotExistsError do
+error Mumuki::Classroom::CourseNotExistsError do
   halt 400
 end
 
-error Classroom::OrganizationNotExistsError do
+error Mumuki::Classroom::StudentExistsError do
   halt 400
 end
 
-error Classroom::StudentExistsError do
-  halt 400
-end
-
-error Classroom::TeacherExistsError do
+error Mumuki::Classroom::TeacherExistsError do
   halt 400
 end
 

@@ -36,12 +36,12 @@ class Course
 
   def self.ensure_new!(json)
     course = json.with_indifferent_access
-    raise Classroom::CourseExistsError, "#{course[:slug]} does already exist" if already_exist? course
+    raise Mumuki::Classroom::CourseExistsError, "#{course[:slug]} does already exist" if already_exist? course
   end
 
   def self.ensure_exist!(json)
     course = json.with_indifferent_access
-    raise Classroom::CourseNotExistsError, "#{course[:slug]} does not exist" unless already_exist? course
+    raise Mumuki::Classroom::CourseNotExistsError, "#{course[:slug]} does not exist" unless already_exist? course
   end
 
   def self.already_exist?(course)
@@ -57,8 +57,8 @@ class Course
 
 end
 
-class Classroom::CourseExistsError < Exception
+class Mumuki::Classroom::CourseExistsError < Exception
 end
 
-class Classroom::CourseNotExistsError < Exception
+class Mumuki::Classroom::CourseNotExistsError < Exception
 end
