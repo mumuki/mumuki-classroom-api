@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'mumuki-domain', '~> 6.0.0'
   s.add_dependency 'mumukit-login', '~> 6.1'
-  s.add_dependency 'mumukit-nuntius', '~> 6.1'
+  s.add_dependency 'mumukit-nuntius', '~> 6.2'
 
   s.add_dependency 'mongo', '2.4.1'
   s.add_dependency 'mongoid', '6.1.0'
