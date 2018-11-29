@@ -44,5 +44,22 @@ module Searching
         {'stats.passed': current_query_operand}
       end
     end
+
+    class TotalAssignments < NumericFilter
+      include Searching::GuideProgress::QueryOperands
+
+      def pipeline
+        [
+          {
+            '$addFields':
+              {'stats.total': {'$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)}}
+          },
+          {
+            '$match':
+              {'stats.total': current_query_operand }
+          }
+        ]
+      end
+    end
   end
 end
