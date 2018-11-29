@@ -51,12 +51,37 @@ module Searching
       def pipeline
         [
           {
-            '$addFields':
-              {'stats.total': {'$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)}}
+            '$addFields': {'stats.total': {'$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)}}
           },
           {
-            '$match':
-              {'stats.total': current_query_operand }
+            '$match': {'stats.total': current_query_operand }
+          }
+        ]
+      end
+    end
+
+    class SolvedAssignmentsPercentage < NumericFilter
+      include Searching::GuideProgress::QueryOperands
+
+      def pipeline
+        [
+          {
+            '$addFields': {
+              'stats.solved_percentage': {
+                '$multiply': [
+                  {
+                    '$divide': [
+                      {'$sum': %w($stats.passed $stats.passed_with_warnings)},
+                      {'$sum': %w($stats.passed $stats.passed_with_warnings $stats.failed)}
+                    ]
+                  },
+                  100
+                ]
+              }
+            }
+          },
+          {
+            '$match': {'stats.solved_percentage': current_query_operand }
           }
         ]
       end
