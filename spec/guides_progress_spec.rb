@@ -130,9 +130,10 @@ describe Course do
     end
 
     context 'with solved_assignments_percentage as query criteria' do
+      let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {solved_percentage: 100}}) }
+      let(:guide_progress2_with_total) { guide_progress2.deep_merge({stats: {solved_percentage: 66.66666666666666}}) }
+
       context 'with more_than as query option' do
-        let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {solved_percentage: 100}}) }
-        let(:guide_progress2_with_total) { guide_progress2.deep_merge({stats: {solved_percentage: 66.66666666666666}}) }
         before { get '/courses/k2048/guides/example.org/foo?query_criteria=solved_assignments_percentage&query_operand=more_than&q=50' }
 
         it { expect(last_response).to be_ok }
@@ -140,7 +141,6 @@ describe Course do
       end
 
       context 'with less_than as query option' do
-        let(:guide_progress2_with_total) { guide_progress2.deep_merge({stats: {solved_percentage: 66.66666666666666}}) }
         before { get '/courses/k2048/guides/example.org/foo?query_criteria=solved_assignments_percentage&query_operand=less_than&q=70' }
 
         it { expect(last_response).to be_ok }
