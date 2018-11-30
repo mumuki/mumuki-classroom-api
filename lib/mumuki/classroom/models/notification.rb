@@ -1,4 +1,4 @@
-class Notification
+class Mumuki::Classroom::Notification
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -32,7 +32,7 @@ class Notification
   end
 
   def self.import_from_json!(type, assignment)
-    Notification.create! organization: assignment.organization,
+    Mumuki::Classroom::Notification.create! organization: assignment.organization,
                          course: assignment.course,
                          type: type,
                          sender: assignment.student[:uid],

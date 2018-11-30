@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe FailedSubmission do
+describe Mumuki::Classroom::FailedSubmission do
 
   let(:submitter) { {uid: 'github|123456'} }
   let(:chapter) { {id: 'guide_chapter_id', name: 'guide_chapter_name'} }
@@ -15,37 +15,37 @@ describe FailedSubmission do
 
   describe 'when resubmission is consumed' do
 
-    let(:central_count) { FailedSubmission.for('central').count }
-    let(:example_count) { FailedSubmission.for('example').count }
+    let(:central_count) { Mumuki::Classroom::FailedSubmission.for('central').count }
+    let(:example_count) { Mumuki::Classroom::FailedSubmission.for('example').count }
 
     before do
-      FailedSubmission.create! atheneum_submission.merge(organization: 'central')
-      FailedSubmission.create! atheneum_submission.merge(organization: 'central', submitter: {uid: 'github|234567'})
-      FailedSubmission.create! atheneum_submission.merge(organization: 'example')
-      FailedSubmission.create! atheneum_submission.merge(organization: 'example')
+      Mumuki::Classroom::FailedSubmission.create! atheneum_submission.merge(organization: 'central')
+      Mumuki::Classroom::FailedSubmission.create! atheneum_submission.merge(organization: 'central', submitter: {uid: 'github|234567'})
+      Mumuki::Classroom::FailedSubmission.create! atheneum_submission.merge(organization: 'example')
+      Mumuki::Classroom::FailedSubmission.create! atheneum_submission.merge(organization: 'example')
     end
 
     context 'and submission.process! works' do
-      before { expect(Submission).to receive(:process!).exactly(3).times }
-      before { expect(FailedSubmission).to_not receive(:create!) }
-      before { FailedSubmission.reprocess!(submitter[:uid], :example) }
+      before { expect(Mumuki::Classroom::Submission).to receive(:process!).exactly(3).times }
+      before { expect(Mumuki::Classroom::FailedSubmission).to_not receive(:create!) }
+      before { Mumuki::Classroom::FailedSubmission.reprocess!(submitter[:uid], :example) }
 
       it { expect(central_count).to eq(1) }
       it { expect(example_count).to eq(0) }
     end
 
     context 'and submission.process! does not work' do
-      before { allow(Submission).to receive(:process!).and_raise(StandardError) }
-      before { FailedSubmission.reprocess!('github|234567', :example) }
+      before { allow(Mumuki::Classroom::Submission).to receive(:process!).and_raise(StandardError) }
+      before { Mumuki::Classroom::FailedSubmission.reprocess!('github|234567', :example) }
 
       it { expect(central_count).to eq(2) }
       it { expect(example_count).to eq(2) }
     end
 
     context 'and submission.process! does not work one time' do
-      before { expect(Submission).to receive(:process!).once.and_raise(StandardError) }
-      before { expect(Submission).to receive(:process!).twice }
-      before { FailedSubmission.reprocess!('github|123456', :example) }
+      before { expect(Mumuki::Classroom::Submission).to receive(:process!).once.and_raise(StandardError) }
+      before { expect(Mumuki::Classroom::Submission).to receive(:process!).twice }
+      before { Mumuki::Classroom::FailedSubmission.reprocess!('github|123456', :example) }
 
       it { expect(central_count).to eq(1) }
       it { expect(example_count).to eq(1) }

@@ -1,4 +1,4 @@
-class Guide
+class Mumuki::Classroom::Guide
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -14,7 +14,7 @@ class Guide
 
   def self.delete_if_has_no_progress(organization, course_slug)
     where(organization: organization, course: course_slug).each do |guide|
-      unless GuideProgress.find_by(organization: guide.organization, course: guide.course, 'guide.slug': guide.slug)
+      unless Mumuki::Classroom::GuideProgress.find_by(organization: guide.organization, course: guide.course, 'guide.slug': guide.slug)
         guide.destroy
       end
     end

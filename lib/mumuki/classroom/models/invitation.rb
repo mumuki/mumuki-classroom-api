@@ -1,8 +1,8 @@
-class Invitation
+class Mumuki::Classroom::Invitation
 
   include Mongoid::Document
 
-  field :code, type: String, default: -> { Invitation.generate_code }
+  field :code, type: String, default: -> { Mumuki::Classroom::Invitation.generate_code }
   field :course_slug, type: String
   field :expiration_date, type: Time
   belongs_to :course

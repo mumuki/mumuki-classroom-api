@@ -6,12 +6,12 @@ namespace :messages do
       begin
         Mumukit::Nuntius::Logger.info "Processing message #{body}"
 
-        Message.import_from_json!(body).try do |assignment|
-          Notification.import_from_json! 'Message', assignment
+        Mumuki::Classroom::Message.import_from_json!(body).try do |assignment|
+          Mumuki::Classroom::Notification.import_from_json! 'Mumuki::Classroom::Message', assignment
         end
 
       rescue => e
-        Mumukit::Nuntius::Logger.warn "Message failed #{e}. body was: #{body}"
+        Mumukit::Nuntius::Logger.warn "Mumuki::Classroom::Message failed #{e}. body was: #{body}"
       end
     end
   end

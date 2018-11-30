@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe 'notifications' do
 
-  let(:assignment) {Assignment.create! organization: 'example.org', course: 'example.org/foo'}
+  let(:assignment) {Mumuki::Classroom::Assignment.create! organization: 'example.org', course: 'example.org/foo'}
   let(:notification) {{organization: 'example.org', course: 'example.org/foo', sender: 'foo@bar.com', assignment_id: assignment._id}}
 
   describe 'post /notifications/unread' do
     context 'when authenticated' do
-      before {Notification.create! notification}
+      before {Mumuki::Classroom::Notification.create! notification}
       before {header 'Authorization', build_auth_header('example.org/*')}
       before {get '/notifications/unread'}
 

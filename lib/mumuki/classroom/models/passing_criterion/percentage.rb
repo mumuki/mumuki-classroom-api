@@ -1,4 +1,4 @@
-module Exam::PassingCriterion::Percentage
+module Mumuki::Classroom::Exam::PassingCriterion::Percentage
   def self.valid_passing_grade?(value)
     value.between? 0, 100
   end

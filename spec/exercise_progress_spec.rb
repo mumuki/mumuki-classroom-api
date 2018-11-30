@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Assignment do
+describe Mumuki::Classroom::Assignment do
 
   def with_course(json)
     {organization: 'example.org', course: 'example.org/k2048'}.merge(json)
@@ -34,9 +34,9 @@ describe Assignment do
     let(:processed_submissions) { [{status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}], messages: []}, {status: :passed, messages: []}] }
 
 
-    before { Assignment.create! progress1.merge(organization: 'example.org', course: 'example.org/k2048') }
-    before { Assignment.create! progress2.merge(organization: 'example.org', course: 'example.org/k2048') }
-    before { Assignment.create! progress3.merge(organization: 'example.org', course: 'example.org/k1024') }
+    before { Mumuki::Classroom::Assignment.create! progress1.merge(organization: 'example.org', course: 'example.org/k2048') }
+    before { Mumuki::Classroom::Assignment.create! progress2.merge(organization: 'example.org', course: 'example.org/k2048') }
+    before { Mumuki::Classroom::Assignment.create! progress3.merge(organization: 'example.org', course: 'example.org/k1024') }
 
     before { header 'Authorization', build_auth_header('*') }
 

@@ -13,7 +13,7 @@ class Mumuki::Classroom::Suggestion
   before_save :update_times_used
 
   embeds_one :exercise
-  embeds_many :submissions
+  embeds_many :submissions, class_name: 'Mumuki::Classroom::Submission'
 
   create_index({'guide_slug': 1, 'exercise.eid': 1})
 

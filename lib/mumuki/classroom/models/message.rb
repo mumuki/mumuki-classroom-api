@@ -1,4 +1,4 @@
-class Message
+class Mumuki::Classroom::Message
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -24,7 +24,7 @@ class Message
   end
 
   def self.import_from_json!(json)
-    assignment = Assignment.find_by!(organization: json[:organization], 'exercise.eid': json[:exercise][:bibliotheca_id], 'student.uid': json[:sender])
+    assignment = Mumuki::Classroom::Assignment.find_by!(organization: json[:organization], 'exercise.eid': json[:exercise][:bibliotheca_id], 'student.uid': json[:sender])
     assignment.add_message!({content: json[:content], sender: json[:sender]}, json[:submission_id])
     assignment
   end

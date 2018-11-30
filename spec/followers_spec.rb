@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Follower do
+describe Mumuki::Classroom::Follower do
 
   let(:follower_json) { {uid: 'social|1'}.to_json }
-  let(:follower) { Follower.find_by(organization: 'example.org', course: 'example.org/bar', email: 'github|123456').as_json(except: [:created_at, :updated_at]) }
+  let(:follower) { Mumuki::Classroom::Follower.find_by(organization: 'example.org', course: 'example.org/bar', email: 'github|123456').as_json(except: [:created_at, :updated_at]) }
 
   describe 'POST /courses/:course/followers' do
 
@@ -33,7 +33,7 @@ describe Follower do
       before { post '/courses/baz/followers', follower_json }
 
       it { expect(last_response).to_not be_ok }
-      it { expect(Follower.find_by(organization: 'example.org', course: 'example.org/baz')).to eq nil }
+      it { expect(Mumuki::Classroom::Follower.find_by(organization: 'example.org', course: 'example.org/baz')).to eq nil }
     end
 
   end

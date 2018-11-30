@@ -1,8 +1,8 @@
-class Follower
+class Mumuki::Classroom::Follower
 
   include Mongoid::Document
   include Mongoid::Timestamps
-  
+
   field :uids, type: Array
   field :email, type: String
   field :course, type: String

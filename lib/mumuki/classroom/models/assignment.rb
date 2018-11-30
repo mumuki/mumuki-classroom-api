@@ -1,4 +1,4 @@
-class Assignment
+class Mumuki::Classroom::Assignment
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -8,7 +8,7 @@ class Assignment
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
   embeds_one :exercise
-  embeds_many :submissions
+  embeds_many :submissions, class_name: 'Mumuki::Classroom::Submission'
 
   create_index({'organization': 1, 'course': 1, 'student.uid': 1})
   create_index({'organization': 1, 'exercise.eid': 1, 'student.uid': 1})
@@ -34,7 +34,7 @@ class Assignment
   end
 
   def add_submission!(submission)
-    self.submissions << Submission.new(submission.as_json)
+    self.submissions << Mumuki::Classroom::Submission.new(submission.as_json)
     update_submissions!
   end
 

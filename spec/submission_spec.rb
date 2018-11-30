@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Submission do
+describe Mumuki::Classroom::Submission do
 
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
@@ -53,18 +53,18 @@ describe Submission do
     describe 'when new submission is consumed' do
 
       context 'and student is no registered to a course' do
-        it { expect { Submission.process!(atheneum_submission) }
+        it { expect { Mumuki::Classroom::Submission.process!(atheneum_submission) }
                .to raise_error(ActiveRecord::RecordNotFound) }
       end
 
       context 'and student is registered to a course' do
-        let(:guide_progress) { GuideProgress.where(organization: 'example', course: 'example/course1').sort(created_at: :asc).as_json }
-        let(:exercise_progress) { Assignment.where(organization: 'example', course: 'example/course1').sort(created_at: :asc).as_json }
+        let(:guide_progress) { Mumuki::Classroom::GuideProgress.where(organization: 'example', course: 'example/course1').sort(created_at: :asc).as_json }
+        let(:exercise_progress) { Mumuki::Classroom::Assignment.where(organization: 'example', course: 'example/course1').sort(created_at: :asc).as_json }
         let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 
-        before { Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
-        before { Student.create!(student.merge(organization: 'example', course: 'example/course2', detached: true)) }
-        before { Submission.process!(atheneum_submission) }
+        before { Mumuki::Classroom::Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
+        before { Mumuki::Classroom::Student.create!(student.merge(organization: 'example', course: 'example/course2', detached: true)) }
+        before { Mumuki::Classroom::Submission.process!(atheneum_submission) }
 
         context 'and is the first exercise submission' do
           it { expect(guide_progress.size).to eq 1 }
@@ -102,7 +102,7 @@ describe Submission do
                                                            exercise: exercise,
                                                            guide: guide.merge(chapter: chapter)
                                                          }) }
-          before { Submission.process!(atheneum_submission2) }
+          before { Mumuki::Classroom::Submission.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
           it { expect(guide_progress.first).to json_like({guide: guide,
                                                                   organization: 'example',
@@ -140,7 +140,7 @@ describe Submission do
                                                            exercise: exercise2,
                                                            guide: guide.merge(chapter: chapter)
                                                          }) }
-          before { Submission.process!(atheneum_submission2) }
+          before { Mumuki::Classroom::Submission.process!(atheneum_submission2) }
           it { expect(guide_progress.size).to eq 1 }
           it { expect(guide_progress.first).to json_like({guide: guide,
                                                                   organization: 'example',
@@ -181,13 +181,13 @@ describe Submission do
                                                             parent: parent.delete(:chapter),
                                                             guide: guide
                                                           }) }
-      
+
       let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 
-      let(:guide_fetched) { Guide.first.as_json }
+      let(:guide_fetched) { Mumuki::Classroom::Guide.first.as_json }
 
-      before { Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
-      before { Submission.process!(submission_without_chapter) }
+      before { Mumuki::Classroom::Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
+      before { Mumuki::Classroom::Submission.process!(submission_without_chapter) }
 
       it { expect(guide_fetched).to json_like(submission_without_chapter[:guide].merge(organization: 'example', course: 'example/course1'), except_fields) }
 

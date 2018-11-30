@@ -1,6 +1,6 @@
 require 'net/http'
 
-class Submission
+class Mumuki::Classroom::Submission
 
   extend WithSubmissionProcess
   include Mongoid::Document
@@ -17,7 +17,7 @@ class Submission
   field :comments, type: Array
   field :manual_evaluation, type: String
 
-  embeds_many :messages
+  embeds_many :messages, class_name: 'Mumuki::Classroom::Message'
 
   def evaluate_manually!(comment, status)
     self.status = status
@@ -25,7 +25,7 @@ class Submission
   end
 
   def add_message!(message)
-    self.messages << Message.new(message.as_json)
+    self.messages << Mumuki::Classroom::Message.new(message.as_json)
   end
 
   def expectation_results

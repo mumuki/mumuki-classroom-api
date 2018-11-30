@@ -1,6 +1,6 @@
 helpers do
   def students_query
-    with_detached_and_search with_organization_and_course, Student
+    with_detached_and_search with_organization_and_course, Mumuki::Classroom::Student
   end
 
   def normalize_student!
@@ -14,7 +14,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/students' do
     authorize! :teacher
-    count, students = Sorting.aggregate(Student, students_query, paginated_params, query_params)
+    count, students = Sorting.aggregate(Mumuki::Classroom::Student, students_query, paginated_params, query_params)
     {
       page: page + 1,
       total: count,
@@ -25,12 +25,12 @@ Mumukit::Platform.map_organization_routes!(self) do
   get '/api/courses/:course/students' do
     authorize! :teacher
     query_params = params.slice('uid', 'personal_id')
-    {students: Student.where(with_organization_and_course.merge query_params)}
+    {students: Mumuki::Classroom::Student.where(with_organization_and_course.merge query_params)}
   end
 
   get '/api/courses/:course/students/:uid' do
     authorize! :teacher
-    {guide_students_progress: GuideProgress.where(with_organization_and_course 'student.uid': uid).sort(created_at: :asc).as_json}
+    {guide_students_progress: Mumuki::Classroom::GuideProgress.where(with_organization_and_course 'student.uid': uid).sort(created_at: :asc).as_json}
   end
 
   post '/courses/:course/students/:uid' do
@@ -41,14 +41,14 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses/:course/students/:uid/detach' do
     authorize! :janitor
-    Student.find_by!(with_organization_and_course uid: uid).detach!
+    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).detach!
     update_and_notify_student_metadata(uid, 'remove', course_slug)
     {status: :updated}
   end
 
   post '/courses/:course/students/:uid/attach' do
     authorize! :janitor
-    Student.find_by!(with_organization_and_course uid: uid).attach!
+    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).attach!
     update_and_notify_student_metadata(uid, 'add', course_slug)
     {status: :updated}
   end
@@ -60,7 +60,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     authorize_for! :janitor, slug
 
-    Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.course
+    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.course
 
     update_and_notify_student_metadata(uid, 'update', course_slug, json_body[:slug])
     {status: :updated}
@@ -69,7 +69,7 @@ Mumukit::Platform.map_organization_routes!(self) do
   get '/courses/:course/student/:uid' do
     authorize! :teacher
 
-    Student.find_by!(with_organization_and_course uid: uid).as_json
+    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).as_json
   end
 
   post '/courses/:course/students' do
@@ -82,7 +82,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     json = {student: json_body.merge(uid: json_body[:email]), course: {slug: course_slug}}
     uid = json[:student][:uid]
 
-    Student.create!(with_organization_and_course json[:student])
+    Mumuki::Classroom::Student.create!(with_organization_and_course json[:student])
 
     perm = User.where(uid: uid).first_or_create!(json[:student].except(:first_name, :last_name, :personal_id)).permissions
     perm.add_permission!(:student, course_slug)
@@ -100,7 +100,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     normalize_student!
 
-    student = Student.find_by!(with_organization_and_course uid: uid)
+    student = Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid)
     student.update_attributes!(first_name: json_body[:first_name], last_name: json_body[:last_name], personal_id: json_body[:personal_id])
 
     user = User.find_by(uid: uid)
