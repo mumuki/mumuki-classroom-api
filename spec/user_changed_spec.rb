@@ -60,7 +60,7 @@ describe Mumuki::Classroom::Event::UserChanged do
 
       let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
       let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
-      let(:teacher_foo_fetched) { Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
+      let(:teacher_foo_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
 
       it { expect(student_foo_fetched.detached).to eq true }
       it { expect(student_foo_fetched.uid).to eq uid }

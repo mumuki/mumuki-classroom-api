@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Teacher do
+describe Mumuki::Classroom::Teacher do
 
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
@@ -10,7 +10,7 @@ describe Teacher do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'when there is 1 teacher' do
-      before { Teacher.create! teacher.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Mumuki::Classroom::Teacher.create! teacher.merge(organization: 'example.org', course: 'example.org/foo') }
       before { get '/courses/foo/teachers' }
 
       it { expect(last_response).to be_ok }
@@ -28,8 +28,8 @@ describe Teacher do
       before { post '/courses/foo/teachers', teacher.to_json }
 
       it { expect(last_response).to be_ok }
-      it { expect(Teacher.count).to eq 1 }
-      it { expect(Teacher.first.as_json).to json_like(teacher.merge(organization: 'example.org', course: 'example.org/foo', uid: 'foobar@gmail.com'), except_fields) }
+      it { expect(Mumuki::Classroom::Teacher.count).to eq 1 }
+      it { expect(Mumuki::Classroom::Teacher.first.as_json).to json_like(teacher.merge(organization: 'example.org', course: 'example.org/foo', uid: 'foobar@gmail.com'), except_fields) }
     end
 
     context 'when no permissions' do
@@ -37,7 +37,7 @@ describe Teacher do
       before { post '/courses/foo/teachers', teacher.to_json }
 
       it { expect(last_response).to_not be_ok }
-      it { expect(Teacher.count).to eq 0 }
+      it { expect(Mumuki::Classroom::Teacher.count).to eq 0 }
     end
 
   end
