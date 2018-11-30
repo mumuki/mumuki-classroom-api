@@ -111,6 +111,42 @@ describe Course do
       it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1_with_total),
                                                                               with_course(guide_progress2_with_total)]}, except_fields) }
     end
+
+    context 'with total_assignments as query criteria' do
+      context 'when it passes the filter' do
+        let(:guide_progress3_with_total) { guide_progress3.deep_merge({stats: {total: 1}}) }
+        before { get '/courses/k2048/guides/example.org/bar?query_criteria=total_assignments&query_operand=less_than&q=2' }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress3_with_total)]}, except_fields) }
+      end
+
+      context 'when it doesnt pass the filter' do
+        before { get '/courses/k2048/guides/example.org/bar?query_criteria=total_assignments&query_operand=more_than&q=4' }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_like({guide_students_progress: []}, except_fields) }
+      end
+    end
+
+    context 'with solved_assignments_percentage as query criteria' do
+      let(:guide_progress1_with_total) { guide_progress1.deep_merge({stats: {solved_percentage: 100}}) }
+      let(:guide_progress2_with_total) { guide_progress2.deep_merge({stats: {solved_percentage: 66.66666666666666}}) }
+
+      context 'with more_than as query option' do
+        before { get '/courses/k2048/guides/example.org/foo?query_criteria=solved_assignments_percentage&query_operand=more_than&q=50' }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress1_with_total), with_course(guide_progress2_with_total)]}, except_fields) }
+      end
+
+      context 'with less_than as query option' do
+        before { get '/courses/k2048/guides/example.org/foo?query_criteria=solved_assignments_percentage&query_operand=less_than&q=70' }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_like({guide_students_progress: [with_course(guide_progress2_with_total)]}, except_fields) }
+      end
+    end
   end
 
   describe 'get /courses/:course/guides/:org/:repo/report' do
