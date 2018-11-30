@@ -28,14 +28,14 @@ describe 'messages' do
         it { expect(assignment.submissions.first.as_json).to json_like({sid: '3', messages: [content: "<p>hola</p>\n", sender: 'github|123456']}, {except: [:_id, :date, :created_at, :updated_at]}) }
 
         context 'creates a new suggestion' do
-          let(:suggestion) { Suggestion.last }
+          let(:suggestion) { Mumuki::Classroom::Suggestion.last }
           it { expect(suggestion.times_used).to eq 1 }
           it { expect(suggestion.guide_slug).to eq 'mumukiproject/example' }
           it { expect(suggestion.exercise.as_json).to json_like exercise }
         end
 
         context 'updates existing suggestion when used' do
-          let(:message_from_suggestion_to_post) { {uid: '2', exercise_id: 2, submission_id: '5', message: message, guide_slug: 'mumukiproject/example', suggestion_id: Suggestion.last.id}.to_json }
+          let(:message_from_suggestion_to_post) { {uid: '2', exercise_id: 2, submission_id: '5', message: message, guide_slug: 'mumukiproject/example', suggestion_id: Mumuki::Classroom::Suggestion.last.id}.to_json }
 
           before { Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '5'}]}.merge organization: 'example.org', course: 'example.org/bar') }
 
@@ -47,8 +47,8 @@ describe 'messages' do
           before { post '/courses/bar/messages', message_from_suggestion_to_post }
 
 
-          it { expect(Suggestion.count).to eq 1 }
-          it { expect(Suggestion.last.times_used).to eq 2 }
+          it { expect(Mumuki::Classroom::Suggestion.count).to eq 1 }
+          it { expect(Mumuki::Classroom::Suggestion.last.times_used).to eq 2 }
         end
       end
 
