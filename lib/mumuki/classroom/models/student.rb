@@ -1,4 +1,4 @@
-class Student
+class Mumuki::Classroom::Student
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -16,7 +16,7 @@ class Student
   field :course, type: Mumukit::Auth::Slug
   field :detached, type: Mongoid::Boolean
   field :detached_at, type: Time
-  embeds_one :last_assignment
+  embeds_one :last_assignment, class_name: 'Mumuki::Classroom::LastAssignment'
 
   create_index({organization: 1, course: 1, uid: 1}, {unique: true})
   create_index({organization: 1, uid: 1})
@@ -28,14 +28,14 @@ class Student
   end
 
   def destroy_cascade!
-    GuideProgress.destroy_all_by!(sub_student_query uid)
-    Assignment.destroy_all_by!(sub_student_query uid)
-    Guide.delete_if_has_no_progress(organization, course)
+    Mumuki::Classroom::GuideProgress.destroy_all_by!(sub_student_query uid)
+    Mumuki::Classroom::Assignment.destroy_all_by!(sub_student_query uid)
+    Mumuki::Classroom::Guide.delete_if_has_no_progress(organization, course)
     destroy!
   end
 
   def update_all_stats
-    all_stats = Assignment.stats_by(sub_student_query uid)
+    all_stats = Mumuki::Classroom::Assignment.stats_by(sub_student_query uid)
     update_attributes!(stats: all_stats)
   end
 
@@ -45,24 +45,24 @@ class Student
 
   def detach!
     update_attributes! detached: true, detached_at: Time.now
-    Assignment.detach_all_by! sub_student_query(uid)
-    GuideProgress.detach_all_by! sub_student_query(uid)
+    Mumuki::Classroom::Assignment.detach_all_by! sub_student_query(uid)
+    Mumuki::Classroom::GuideProgress.detach_all_by! sub_student_query(uid)
   end
 
   def attach!
     unset :detached, :detached_at
-    Assignment.attach_all_by! sub_student_query(uid)
-    GuideProgress.attach_all_by! sub_student_query(uid)
+    Mumuki::Classroom::Assignment.attach_all_by! sub_student_query(uid)
+    Mumuki::Classroom::GuideProgress.attach_all_by! sub_student_query(uid)
   end
 
   def transfer_to!(organization, course)
-    Assignment.transfer_all_by! sub_student_query(uid), organization, course
-    GuideProgress.transfer_all_by! sub_student_query(uid), organization, course
+    Mumuki::Classroom::Assignment.transfer_all_by! sub_student_query(uid), organization, course
+    Mumuki::Classroom::GuideProgress.transfer_all_by! sub_student_query(uid), organization, course
     update_attributes! organization: organization, course: course
   end
 
   def update_last_assignment_for
-    update_attributes!(last_assignment: GuideProgress.last_assignment_by(sub_student_query uid))
+    update_attributes!(last_assignment: Mumuki::Classroom::GuideProgress.last_assignment_by(sub_student_query uid))
   end
 
   class << self
@@ -79,7 +79,7 @@ class Student
     end
 
     def ensure_not_exists!(query)
-      raise Mumuki::Classroom::StudentExistsError, 'Student already exist' if Student.where(query).exists?
+      raise Mumuki::Classroom::StudentExistsError, 'Mumuki::Classroom::Student already exist' if Mumuki::Classroom::Student.where(query).exists?
     end
   end
 

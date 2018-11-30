@@ -60,12 +60,12 @@ describe Course do
     language: 'guide_language'
   }.to_json }
 
-  before { GuideProgress.create! guide_progress1.merge(organization: 'example.org', course: 'example.org/k2048') }
-  before { GuideProgress.create! guide_progress2.merge(organization: 'example.org', course: 'example.org/k2048') }
-  before { GuideProgress.create! guide_progress3.merge(organization: 'example.org', course: 'example.org/k2048') }
-  before { Assignment.create! assignment1.merge(organization: 'example.org', course: 'example.org/k2048') }
-  before { Assignment.create! assignment2.merge(organization: 'example.org', course: 'example.org/k2048') }
-  before { Assignment.create! assignment3.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Mumuki::Classroom::GuideProgress.create! guide_progress1.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Mumuki::Classroom::GuideProgress.create! guide_progress2.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Mumuki::Classroom::GuideProgress.create! guide_progress3.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Mumuki::Classroom::Assignment.create! assignment1.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Mumuki::Classroom::Assignment.create! assignment2.merge(organization: 'example.org', course: 'example.org/k2048') }
+  before { Mumuki::Classroom::Assignment.create! assignment3.merge(organization: 'example.org', course: 'example.org/k2048') }
 
   describe 'get /courses/:course/guides/:org/:repo' do
 

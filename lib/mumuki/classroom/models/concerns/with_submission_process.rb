@@ -17,33 +17,33 @@ module WithSubmissionProcess
   end
 
   def find_submission_course!(json)
-    student = Student.last_updated_student_by(organization: organization(json), uid: uid(json))
-    raise ActiveRecord::RecordNotFound, "Student not found" unless student
+    student = Mumuki::Classroom::Student.last_updated_student_by(organization: organization(json), uid: uid(json))
+    raise ActiveRecord::RecordNotFound, "Mumuki::Classroom::Student not found" unless student
     student.course
   end
 
   def find_student_from(json)
-    Student.find_by(organization: organization(json), course: course_slug(json), uid: uid(json)).as_json
+    Mumuki::Classroom::Student.find_by(organization: organization(json), course: course_slug(json), uid: uid(json)).as_json
   end
 
   def update_guide(json)
     organization = organization(json)
     course_slug = course_slug(json)
     slug = guide_from(json)[:slug]
-    guide = Guide.find_or_create_by!(organization: organization, course: course_slug, slug: slug)
+    guide = Mumuki::Classroom::Guide.find_or_create_by!(organization: organization, course: course_slug, slug: slug)
     guide.update_attributes!(guide_from json)
   end
 
   def update_student_progress(json)
-    Student.find_by!(organization: organization(json), course: course_slug(json), uid: uid(json)).update_all_stats
+    Mumuki::Classroom::Student.find_by!(organization: organization(json), course: course_slug(json), uid: uid(json)).update_all_stats
   end
 
   def update_student_last_assignment(json)
-    Student.find_by!(organization: organization(json), course: course_slug(json), uid: uid(json)).update_last_assignment_for
+    Mumuki::Classroom::Student.find_by!(organization: organization(json), course: course_slug(json), uid: uid(json)).update_last_assignment_for
   end
 
   def update_assignment(json)
-    assignment = Assignment
+    assignment = Mumuki::Classroom::Assignment
                    .where(assignment_query(json))
                    .first_or_create!(assignment_without_submission_from(json))
     assignment.upsert_attributes(assignment_without_submission_from(json))
@@ -63,14 +63,14 @@ module WithSubmissionProcess
 
   def update_guide_progress(json)
     json[:stats] = student_stats_for json
-    GuideProgress
+    Mumuki::Classroom::GuideProgress
       .where(guide_progress_query(json))
       .first_or_create!(guide_progress_from json)
       .upsert_attributes(guide_progress_from json)
   end
 
   def student_stats_for(json)
-    Assignment.stats_by guide_progress_query(json)
+    Mumuki::Classroom::Assignment.stats_by guide_progress_query(json)
   end
 
   def uid(json)

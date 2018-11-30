@@ -1,4 +1,4 @@
-class FailedSubmission
+class Mumuki::Classroom::FailedSubmission
 
   extend WithFailedSubmissionReprocess
 

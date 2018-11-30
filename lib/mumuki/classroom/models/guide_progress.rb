@@ -1,4 +1,4 @@
-class GuideProgress
+class Mumuki::Classroom::GuideProgress
 
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -8,7 +8,7 @@ class GuideProgress
   field :stats, type: Hash
 
   embeds_one :guide
-  embeds_one :student
+  embeds_one :student, class_name: 'Mumuki::Classroom::Student'
   embeds_one :last_assignment
 
   create_index({'organization': 1, 'course': 1, 'student.uid': 1})
@@ -35,7 +35,7 @@ class GuideProgress
 
     def last_assignment_by(query)
       where(query).order_by('last_assignment.submission.created_at': :desc).first.try do |it|
-        LastAssignment.new(guide: it.guide,
+        Mumuki::Classroom::LastAssignment.new(guide: it.guide,
                            exercise: it.last_assignment.exercise,
                            submission: {
                              sid: it.last_assignment.submission.sid,

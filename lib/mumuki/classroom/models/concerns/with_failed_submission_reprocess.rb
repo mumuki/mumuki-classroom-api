@@ -7,7 +7,7 @@ module WithFailedSubmissionReprocess
   private
 
   def reprocess_from_organization(uid, source, destination)
-    FailedSubmission.for(source).find_by_uid(uid).each do |failed_submission|
+    Mumuki::Classroom::FailedSubmission.for(source).find_by_uid(uid).each do |failed_submission|
       delete_failed_submission failed_submission, source
       try_reprocess failed_submission, source, destination
     end
@@ -23,17 +23,17 @@ module WithFailedSubmissionReprocess
   end
 
   def insert_failed_submission(failed_submission, source)
-    FailedSubmission.create! failed_submission.as_json.merge(organization: source)
+    Mumuki::Classroom::FailedSubmission.create! failed_submission.as_json.merge(organization: source)
   end
 
   def reprocess_failed_submission(destination, it)
     json = it.as_json
     json['organization'] = destination
-    Submission.process! json
+    Mumuki::Classroom::Submission.process! json
   end
 
   def delete_failed_submission(it, source)
-    FailedSubmission.for(source).where(_id: it._id).destroy_all
+    Mumuki::Classroom::FailedSubmission.for(source).where(_id: it._id).destroy_all
   end
 
   def new_failed_submission(progress, submission)

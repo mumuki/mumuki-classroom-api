@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Student do
+describe Mumuki::Classroom::Student do
 
   before { User.upsert_permissions! 'github|123456', {} }
 
@@ -55,10 +55,10 @@ describe Student do
       {status: 'passed_with_warnings', created_at: date + 2.minutes}
     ]
   } }
-  let(:students) { Student.where(organization: 'example.org', course: 'example.org/example') }
-  let(:create_student!) { -> (student) { Student.create!(student.merge(organization: 'example.org', course: 'example.org/example')) } }
-  let(:create_assignment!) { -> (exercise) { Assignment.create! exercise.merge(organization: 'example.org', course: 'example.org/example') } }
-  let(:create_student_guide_progress!) { -> (guide_progress) { GuideProgress.create! guide_progress.merge organization: 'example.org', course: 'example.org/example' } }
+  let(:example_students) { -> (student) { Mumuki::Classroom::Student.create!(student.merge(organization: 'example.org', course: 'example.org/example')) } }
+  let(:students) { Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/example') }
+  let(:example_student_progresses) { -> (exercise) { Mumuki::Classroom::Assignment.create! exercise.merge(organization: 'example.org', course: 'example.org/example') } }
+  let(:example_guide_student_progresses) { -> (guide_progress) { Mumuki::Classroom::GuideProgress.create! guide_progress.merge organization: 'example.org', course: 'example.org/example' } }
 
   describe do
 
@@ -71,7 +71,7 @@ describe Student do
     before { create_assignment!.call exercise4 }
 
     describe '#report' do
-      let(:report) { Student.report({organization: 'example.org', course: 'example.org/example'}) }
+      let(:report) { Mumuki::Classroom::Student.report({organization: 'example.org', course: 'example.org/example'}) }
       it { expect(report.count).to eq 2 }
       it { expect(report.first).to json_like({first_name: 'Dorothy'}, except_fields) }
       it { expect(report.second).to json_like({first_name: 'John'}, except_fields) }
@@ -84,7 +84,7 @@ describe Student do
     end
 
     context 'if students stats processed' do
-      before { Student.update_all_stats(organization: 'example.org', course: 'example.org/example') }
+      before { Mumuki::Classroom::Student.update_all_stats(organization: 'example.org', course: 'example.org/example') }
 
       it { expect(students.size).to eq 2 }
       it { expect(students.second.as_json).to json_like(student2.merge(stats: {passed: 0, passed_with_warnings: 1, failed: 0}, organization: 'example.org', course: 'example.org/example'), except_fields) }
@@ -93,24 +93,24 @@ describe Student do
 
     context 'delete student from students' do
 
-      let(:guides) { Guide.where organization: 'example.org', course: 'example.org/example' }
-      let(:students) { Student.where organization: 'example.org', course: 'example.org/example' }
-      let(:guide_students_progress) { GuideProgress.where(organization: 'example.org', course: 'example.org/example').as_json }
-      let(:exercise_student_progress) { create_assignment!.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
+      let(:guides) { Mumuki::Classroom::Guide.where organization: 'example.org', course: 'example.org/example' }
+      let(:students) { Mumuki::Classroom::Student.where organization: 'example.org', course: 'example.org/example' }
+      let(:guide_students_progress) { Mumuki::Classroom::GuideProgress.where(organization: 'example.org', course: 'example.org/example').as_json }
+      let(:exercise_student_progress) { example_student_progresses.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
 
-      before { Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/example') }
-      before { Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/example') }
+      before { Mumuki::Classroom::Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/example') }
+      before { Mumuki::Classroom::Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/example') }
 
       before { create_student_guide_progress!.call guide_student_progress1 }
       before { create_student_guide_progress!.call guide_student_progress2 }
       before { create_student_guide_progress!.call guide_student_progress3 }
 
-      before { Student.find_by!(uid: 'github|123456').destroy_cascade! }
+      before { Mumuki::Classroom::Student.find_by!(uid: 'github|123456').destroy_cascade! }
 
       it { expect(guides.size).to eq 1 }
       it { expect(students.size).to eq 1 }
       it { expect(guide_students_progress.size).to eq 1 }
-      it { expect(Assignment.count).to eq 1 }
+      it { expect(Mumuki::Classroom::Assignment.count).to eq 1 }
 
 
     end
@@ -127,10 +127,10 @@ describe Student do
       let(:student_saved2) { {organization: 'example.org', course: 'example.org/foo'}.merge student2 }
 
       context 'when guides already exists in a course' do
-        before { Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
-        before { Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
-        before { Student.create! student2.merge(organization: 'example.org', course: 'example.org/foo') }
-        before { Student.create! student2.merge(organization: 'example.org', course: 'example.org/test') }
+        before { Mumuki::Classroom::Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
+        before { Mumuki::Classroom::Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
+        before { Mumuki::Classroom::Student.create! student2.merge(organization: 'example.org', course: 'example.org/foo') }
+        before { Mumuki::Classroom::Student.create! student2.merge(organization: 'example.org', course: 'example.org/test') }
 
         context 'get students with auth0 client' do
           before { header 'Authorization', build_auth_header('*') }
@@ -156,7 +156,7 @@ describe Student do
     let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example.org/foo'}} }
     let(:created_at) { 'created_at' }
     before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
-    before { Student.create!(student.merge(uid: 'auth0|1', organization: 'example.org', course: 'example.org/foo')) }
+    before { Mumuki::Classroom::Student.create!(student.merge(uid: 'auth0|1', organization: 'example.org', course: 'example.org/foo')) }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/student/auth0%7c1' }
 
@@ -177,18 +177,18 @@ describe Student do
   describe 'put /courses/:course/students/:student_id' do
 
     before { User.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
-    before { Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
+    before { Mumuki::Classroom::Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
     before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
     before { header 'Authorization', build_auth_header('*') }
     before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
 
     it { expect(last_response).to be_ok }
     it { expect(last_response.body).to json_eq status: :updated }
-    it { expect(Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Doe' }
+    it { expect(Mumuki::Classroom::Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Doe' }
   end
 
   describe 'when needs mumuki-user' do
-    let(:fetched_student) { Student.find_by(uid: 'github|123456') }
+    let(:fetched_student) { Mumuki::Classroom::Student.find_by(uid: 'github|123456') }
 
 
     describe 'post /courses/:course/students/:student_id/detach' do
@@ -223,30 +223,11 @@ describe Student do
     end
 
     describe 'post /courses/:course/students/:student_id/transfer' do
-      let(:from_student) { -> (student) { student.map {|k, v| ["student.#{k}", v] }.to_h } }
 
-      let(:guide1) { {slug: 'foo/bar', organization: 'example.org'} }
-      let(:guide2) { {slug: 'foo/bar', organization: 'some_orga'} }
-      let(:guide3) { {slug: 'foo/baz', organization: 'example.org'} }
-      let(:guide_student_progress3) { {guide: guide3, student: student1} }
+      before { example_students.call student1 }
 
-      let(:exercise3) { {
-        guide: guide3,
-        student: student1,
-        exercise: {id: 3},
-        submissions: [
-          {status: 'passed', created_at: date}
-        ]
-      } }
-
-      before { create_student!.call student1 }
-      before { create_assignment!.call exercise1 }
-      before { create_assignment!.call exercise3 }
-      before { create_student_guide_progress!.call guide_student_progress1 }
-      before { create_student_guide_progress!.call guide_student_progress3 }
-
-      let(:fetched_guide_progresses) { GuideProgress.where(from_student.call(student1)).to_a }
-      let(:fetched_assignments) { Assignment.where(from_student.call(student1)).to_a }
+      let(:fetched_guide_progresses) { Mumuki::Classroom::GuideProgress.where(student: student1).to_a }
+      let(:fetched_assignments) { Mumuki::Classroom::Assignment.where(student: student1).to_a }
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('*/*') }
@@ -281,7 +262,7 @@ describe Student do
           before { post '/courses/foo/students', student_json }
 
           it { expect(last_response).to_not be_ok }
-          it { expect(Student.count).to eq 0 }
+          it { expect(Mumuki::Classroom::Student.count).to eq 0 }
         end
 
         context 'when authenticated' do
@@ -291,12 +272,12 @@ describe Student do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
-              let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
+              let(:created_course_student) { Mumuki::Classroom::Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
               let(:created_at) { 'created_at' }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
-              it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
@@ -308,7 +289,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+              it { expect(last_response.body).to json_eq(message: 'Mumuki::Classroom::Student already exist') }
             end
             context 'in different course, should works' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -331,7 +312,7 @@ describe Student do
           post '/courses/foo/students', student_json
 
           expect(last_response).to_not be_ok
-          expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
+          expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
         end
       end
     end
@@ -347,7 +328,7 @@ describe Student do
           before { post '/courses/foo/students', student_json }
 
           it { expect(last_response).to_not be_ok }
-          it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0 }
+          it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0 }
         end
 
         context 'when authenticated' do
@@ -357,22 +338,22 @@ describe Student do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
-              let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
+              let(:created_course_student) { Mumuki::Classroom::Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
               let(:created_at) { 'created_at' }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
-              it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
             context 'and user does not exist' do
               let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
-              let(:created_course_student) { Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
+              let(:created_course_student) { Mumuki::Classroom::Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
               let(:created_at) { 'created_at' }
 
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
-              it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
@@ -384,7 +365,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+              it { expect(last_response.body).to json_eq(message: 'Mumuki::Classroom::Student already exist') }
             end
             context 'and user already exists by email' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -392,7 +373,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+              it { expect(last_response.body).to json_eq(message: 'Mumuki::Classroom::Student already exist') }
             end
           end
         end
@@ -408,7 +389,7 @@ describe Student do
           post '/courses/foo/students', student_json
 
           expect(last_response).to_not be_ok
-          expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
+          expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
         end
       end
     end
@@ -425,10 +406,10 @@ describe Student do
       let(:student3) { {uid: 'walter@gmail.com', first_name: 'wal', last_name: 'ter', organization: 'example.org', course: 'example.org/foo'} }
       let(:student4) { {uid: 'zzztop@gmail.com', first_name: 'zzz', last_name: 'top', organization: 'example.org', course: 'example.org/foo', detached: true} }
 
-      before { Student.create! student1 }
-      before { Student.create! student2 }
-      before { Student.create! student3 }
-      before { Student.create! student4 }
+      before { Mumuki::Classroom::Student.create! student1 }
+      before { Mumuki::Classroom::Student.create! student2 }
+      before { Mumuki::Classroom::Student.create! student3 }
+      before { Mumuki::Classroom::Student.create! student4 }
 
       before { header 'Authorization', build_auth_header('*') }
 

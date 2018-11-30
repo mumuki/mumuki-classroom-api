@@ -1,4 +1,4 @@
-class Exam
+class Mumuki::Classroom::Exam
 
   include Mongoid::Document
   include Mongoid::Timestamps

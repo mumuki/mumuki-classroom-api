@@ -126,7 +126,7 @@ describe Course do
 
   describe 'get courses/:course/progress' do
     let(:exercise_progress) { {student: {uid: '1'}, guide: {slug: 'foo/bar'}, exercise: {eid: 1}} }
-    before { Assignment.create! exercise_progress.merge(organization: 'example.org', course: 'example.org/foo') }
+    before { Mumuki::Classroom::Assignment.create! exercise_progress.merge(organization: 'example.org', course: 'example.org/foo') }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/progress' }
     it { expect(last_response.body).to json_like({exercise_student_progress: [exercise_progress.merge(organization: 'example.org', course: 'example.org/foo')]}, except_fields) }
@@ -149,7 +149,7 @@ describe Course do
           number: 1,
         },
         guide: {
-          name: 'Exam Test',
+          name: 'Mumuki::Classroom::Exam Test',
           slug: 'foo/bar',
           parent: {
             type: 'Exam',
@@ -174,11 +174,10 @@ describe Course do
         passed_with_warnings: 1
       }
     } }
-    let(:student) { full_student }
-    before { Student.create! student }
-    before { Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
-    before { Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2} }
-    before { Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', personal_id: '2222', stats: {failed: 27, passed: 120, passed_with_warnings: 1} }
+    before { Mumuki::Classroom::Student.create! student }
+    before { Mumuki::Classroom::Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
+    before { Mumuki::Classroom::Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2} }
+    before { Mumuki::Classroom::Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', personal_id: '2222', stats: {failed: 27, passed: 120, passed_with_warnings: 1} }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/report' }
 

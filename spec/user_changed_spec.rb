@@ -52,14 +52,14 @@ describe Mumuki::Classroom::Event::UserChanged do
 
       before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
       before { Course.create! organization: 'example.org', slug: 'example.org/bar' }
-      before { Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
       let(:event) { user2.merge(permissions: new_permissions) }
 
-      let(:student_foo_fetched) { Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
-      let(:student_bar_fetched) { Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
+      let(:student_foo_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
+      let(:student_bar_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
       let(:teacher_foo_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
 
       it { expect(student_foo_fetched.detached).to eq true }
@@ -124,16 +124,16 @@ describe Mumuki::Classroom::Event::UserChanged do
       before { User.create! uid: uid2, permissions: old_permissions }
       before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
       before { Course.create! organization: 'example.org', slug: 'example.org/bar' }
-      before { Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Student.create! user2.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Submission.process!(agus_submission) }
-      before { Submission.process!(fede_submission) }
+      before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Mumuki::Classroom::Student.create! user2.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Mumuki::Classroom::Submission.process!(agus_submission) }
+      before { Mumuki::Classroom::Submission.process!(fede_submission) }
       before { Mumuki::Classroom::Event::UserChanged.execute! event2 }
 
-      it { expect(Assignment.where('student.uid': uid).count).to eq 1 }
-      it { expect(Assignment.where('student.uid': uid2).count).to eq 1 }
-      it { expect(GuideProgress.where('student.uid': uid).count).to eq 1 }
-      it { expect(GuideProgress.where('student.uid': uid2).count).to eq 1 }
+      it { expect(Mumuki::Classroom::Assignment.where('student.uid': uid).count).to eq 1 }
+      it { expect(Mumuki::Classroom::Assignment.where('student.uid': uid2).count).to eq 1 }
+      it { expect(Mumuki::Classroom::GuideProgress.where('student.uid': uid).count).to eq 1 }
+      it { expect(Mumuki::Classroom::GuideProgress.where('student.uid': uid2).count).to eq 1 }
 
     end
 

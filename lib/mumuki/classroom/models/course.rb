@@ -12,7 +12,8 @@ class Course
   field :period, type: String
   field :description, type: String
   field :organization, type: String
-  embeds_one :invitation
+
+  embeds_one :invitation, class_name: 'Mumuki::Classroom::Invitation'
 
   create_index({organization: 1, slug: 1}, {unique: true})
 
@@ -22,7 +23,7 @@ class Course
   end
 
   def generate_invitation(expiration_date)
-    update_attribute :invitation, expiration_date: expiration_date, course_slug: slug, code: Invitation.generate_code
+    update_attribute :invitation, expiration_date: expiration_date, course_slug: slug, code: Mumuki::Classroom::Invitation.generate_code
     notify_invitation!
   end
 

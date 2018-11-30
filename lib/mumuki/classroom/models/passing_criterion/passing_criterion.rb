@@ -1,4 +1,4 @@
-module Exam::PassingCriterion
+module Mumuki::Classroom::Exam::PassingCriterion
   def self.parse(criterion)
     unless parse_criterion_type(criterion[:type]).valid_passing_grade? criterion[:value]
       raise "Invalid criterion value #{criterion[:value]} for #{criterion[:type]}"
@@ -6,7 +6,7 @@ module Exam::PassingCriterion
   end
 
   def self.parse_criterion_type(type)
-    "Exam::PassingCriterion::#{type.camelize}".constantize
+    "Mumuki::Classroom::Exam::PassingCriterion::#{type.camelize}".constantize
   rescue
     raise "Invalid criterion type #{type}"
   end

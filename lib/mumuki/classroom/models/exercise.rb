@@ -1,4 +1,4 @@
-class Exercise
+class Mumuki::Classroom::Exercise
 
   include Mongoid::Document
 

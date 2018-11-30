@@ -7,7 +7,7 @@ namespace :resubmissions do
       uid = body['uid']
 
       Mumukit::Nuntius::Logger.info "Processing resubmission #{uid}"
-      FailedSubmission.reprocess! uid, destination
+      Mumuki::Classroom::FailedSubmission.reprocess! uid, destination
     end
   end
 end

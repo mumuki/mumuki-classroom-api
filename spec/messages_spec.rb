@@ -7,8 +7,8 @@ describe 'messages' do
 
     context 'when authenticated' do
       let(:exercise) { {eid: 2} }
-      before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '3'}]}.merge organization: 'example.org', course: 'example.org/bar') }
-      before { Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/test'}, submissions: [{sid: '4'}]}.merge organization: 'example.org', course: 'example.org/bar') }
+      before { Mumuki::Classroom::Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '3'}]}.merge organization: 'example.org', course: 'example.org/bar') }
+      before { Mumuki::Classroom::Assignment.create!({student: {uid: '1'}, exercise: exercise, guide: {slug: 'mumukiproject/test'}, submissions: [{sid: '4'}]}.merge organization: 'example.org', course: 'example.org/bar') }
       before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
                                                                                        submission_id: '3',
                                                                                        exercise_id: 2,
@@ -17,7 +17,7 @@ describe 'messages' do
       before { post '/courses/bar/messages', message_to_post }
 
       let(:assignment) {
-        Assignment.find_by(
+        Mumuki::Classroom::Assignment.find_by(
           organization: 'example.org',
           course: 'example.org/bar',
           'exercise.eid': 2,
@@ -37,7 +37,7 @@ describe 'messages' do
         context 'updates existing suggestion when used' do
           let(:message_from_suggestion_to_post) { {uid: '2', exercise_id: 2, submission_id: '5', message: message, guide_slug: 'mumukiproject/example', suggestion_id: Mumuki::Classroom::Suggestion.last.id}.to_json }
 
-          before { Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '5'}]}.merge organization: 'example.org', course: 'example.org/bar') }
+          before { Mumuki::Classroom::Assignment.create!({student: {uid: '2'}, exercise: exercise, guide: {slug: 'mumukiproject/example'}, submissions: [{sid: '5'}]}.merge organization: 'example.org', course: 'example.org/bar') }
 
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('teacher-messages', {message: message,
                                                                                            submission_id: '5',
@@ -71,7 +71,7 @@ describe 'messages' do
 
     describe 'threads ui' do
       before do
-        Assignment.create!(
+        Mumuki::Classroom::Assignment.create!(
           {
             student: { uid: '1' },
             exercise: { eid: 1 },

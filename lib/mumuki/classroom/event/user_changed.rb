@@ -32,7 +32,7 @@ class Mumuki::Classroom::Event::UserChanged
     end
 
     def update_student(organization, user)
-      Student.last_updated_student_by(organization: organization, uid: user[:uid]).try do |student|
+      Mumuki::Classroom::Student.last_updated_student_by(organization: organization, uid: user[:uid]).try do |student|
         old_profile = Mumukit::Auth::Profile.extract student
         new_profile = Mumukit::Auth::Profile.extract user
         update_student! organization, student.course, new_profile.attributes if old_profile != new_profile
@@ -42,22 +42,22 @@ class Mumuki::Classroom::Event::UserChanged
 
     def update_student!(organization, course_slug, student_h)
       sub_student = student_h.transform_keys { |field| "student.#{field}".to_sym }
-      Student.find_by!(organization: organization, course: course_slug, uid: student_h[:uid]).update_attributes! student_h
-      GuideProgress.where(organization: organization, course: course_slug, 'student.uid': student_h[:uid]).update_all sub_student
-      Assignment.where(organization: organization, course: course_slug, 'student.uid': student_h[:uid]).update_all sub_student
+      Mumuki::Classroom::Student.find_by!(organization: organization, course: course_slug, uid: student_h[:uid]).update_attributes! student_h
+      Mumuki::Classroom::GuideProgress.where(organization: organization, course: course_slug, 'student.uid': student_h[:uid]).update_all sub_student
+      Mumuki::Classroom::Assignment.where(organization: organization, course: course_slug, 'student.uid': student_h[:uid]).update_all sub_student
     end
 
     def student_added(organization, user, granted_slug)
-      students = Student.where(organization: organization, course: granted_slug.to_s, uid: user[:uid])
+      students = Mumuki::Classroom::Student.where(organization: organization, course: granted_slug.to_s, uid: user[:uid])
       if students.exists?
         students.first.attach!
       else
-        Student.create! user.merge(organization: organization, course: granted_slug.to_s)
+        Mumuki::Classroom::Student.create! user.merge(organization: organization, course: granted_slug.to_s)
       end
     end
 
     def student_removed(organization, user, granted_slug)
-      student = Student.find_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
+      student = Mumuki::Classroom::Student.find_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
       student.detach!
     end
 
