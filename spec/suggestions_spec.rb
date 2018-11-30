@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'suggestions' do
 
   def create_suggestion!(data)
-    Suggestion.create!(data.merge(sender: 'github|123456', email: 'foo@mumuki.org', guide_slug: 'mumukiproject/foo'))
+    Mumuki::Classroom::Suggestion.create!(data.merge(sender: 'github|123456', email: 'foo@mumuki.org', guide_slug: 'mumukiproject/foo'))
   end
 
   describe '/suggestions/:organization/:repository/:exercise_id' do

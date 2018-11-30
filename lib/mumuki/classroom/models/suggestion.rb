@@ -1,4 +1,4 @@
-class Suggestion
+class Mumuki::Classroom::Suggestion
 
   include Mongoid::Document
   include Mongoid::Timestamps

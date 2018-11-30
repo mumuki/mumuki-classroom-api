@@ -17,7 +17,7 @@ helpers do
   end
 
   def find_or_create_suggestion(assignment)
-    suggestion_id ? Suggestion.find(suggestion_id) : Suggestion.create_from(message, assignment)
+    suggestion_id ? Mumuki::Classroom::Suggestion.find(suggestion_id) : Mumuki::Classroom::Suggestion.create_from(message, assignment)
   end
 
   def submission_id
