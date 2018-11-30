@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181022220518) do
+ActiveRecord::Schema.define(version: 20181121165956) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -51,7 +51,6 @@ ActiveRecord::Schema.define(version: 20181022220518) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string "locale", default: "en"
-    t.string "contact_email", default: "info@mumuki.org", null: false
     t.text "description"
     t.string "slug"
     t.index ["slug"], name: "index_books_on_slug", unique: true
@@ -159,7 +158,7 @@ ActiveRecord::Schema.define(version: 20181022220518) do
     t.boolean "new_expectations", default: false
     t.boolean "manual_evaluation", default: false
     t.integer "editor", default: 0, null: false
-    t.string "choices", default: [], null: false, array: true
+    t.string "choice_values", default: [], null: false, array: true
     t.text "goal"
     t.string "initial_state"
     t.string "final_state"
@@ -167,6 +166,7 @@ ActiveRecord::Schema.define(version: 20181022220518) do
     t.text "randomizations"
     t.text "free_form_editor_source"
     t.text "teacher_info"
+    t.text "choices"
     t.index ["guide_id"], name: "index_exercises_on_guide_id"
     t.index ["language_id"], name: "index_exercises_on_language_id"
   end
@@ -185,7 +185,7 @@ ActiveRecord::Schema.define(version: 20181022220518) do
     t.string "slug", default: "", null: false
     t.integer "type", default: 0, null: false
     t.text "authors"
-    t.text "contributors"
+    t.text "collaborators"
     t.string "id_format", default: "%05d"
     t.boolean "private", default: false
     t.text "teacher_info"
@@ -223,6 +223,8 @@ ActiveRecord::Schema.define(version: 20181022220518) do
     t.string "editor_html_urls", default: [], array: true
     t.string "editor_css_urls", default: [], array: true
     t.string "test_extension"
+    t.text "test_template"
+    t.boolean "feedback"
     t.index ["name"], name: "index_languages_on_name", unique: true
   end
 
@@ -255,6 +257,7 @@ ActiveRecord::Schema.define(version: 20181022220518) do
     t.text "theme", default: "{}", null: false
     t.text "profile", default: "{}", null: false
     t.index ["book_id"], name: "index_organizations_on_book_id"
+    t.index ["name"], name: "index_organizations_on_name", unique: true
   end
 
   create_table "paths", id: :serial, force: :cascade do |t|
