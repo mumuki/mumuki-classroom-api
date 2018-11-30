@@ -10,6 +10,7 @@ require 'rack/test'
 require 'factory_bot_rails'
 require 'byebug'
 
+require 'mumuki/domain/factories'
 require_relative '../lib/mumuki/classroom'
 
 ActiveRecord::Migration.maintain_test_schema!
