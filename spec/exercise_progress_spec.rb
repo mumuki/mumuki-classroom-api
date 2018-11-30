@@ -7,7 +7,7 @@ describe Mumuki::Classroom::Assignment do
   end
 
   before do
-    Organization.create!(name: 'example.org', profile: {locale: 'es'})
+    create :organization, name: 'example.org', locale: 'es'
   end
 
   let(:except_fields) { {except: [:created_at, :updated_at, :_id]} }

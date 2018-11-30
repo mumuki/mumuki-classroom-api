@@ -4,11 +4,7 @@ describe 'organizations' do
 
   describe(:model) do
     it "supports reading organizations from database" do
-      Organization.create!(
-        profile: {locale: 'es'},
-        name: 'an.es.organization')
-
-      organization = Organization.find_by(name: 'an.es.organization')
+      organization = create :organization, locale: 'es', name: 'an.es.organization'
 
       expect(organization.name).to eq 'an.es.organization'
       expect(organization.locale).to eq 'es'
@@ -16,13 +12,7 @@ describe 'organizations' do
     end
 
     it "supports updating as in import" do
-      Organization.create!(
-        profile: {locale: 'es'},
-        name: 'an.es.organization')
-
-      Organization.find_by(name: 'an.es.organization').update_attributes(profile: {locale: 'en'})
-
-      organization = Organization.find_by(name: 'an.es.organization')
+      organization = create :organization, locale: 'en', name: 'an.es.organization'
 
       expect(organization.name).to eq 'an.es.organization'
       expect(organization.locale).to eq 'en'
@@ -31,7 +21,7 @@ describe 'organizations' do
 
   end
 
-  let(:organization_json) {{
+  let(:organization_resource_h) {{
     name: 'test',
     book: 'mumuki/mumuki-libro-programacion',
     profile: {
@@ -55,12 +45,9 @@ describe 'organizations' do
 
   describe 'OrganizationCreated' do
     context 'Success' do
-      before {Organization.create! organization_json}
-      it {expect(Organization.first.as_json).to json_like(organization_json,
-                                                  except: [:created_at, :updated_at, :_id, :id])}
-
+      before { create :book, slug: 'mumuki/mumuki-libro-programacion' }
+      before { Organization.import_from_resource_h! organization_resource_h }
+      it {expect(Organization.first.to_resource_h).to json_like(organization_resource_h, except: [:created_at, :updated_at, :_id, :id])}
     end
-
   end
-
 end

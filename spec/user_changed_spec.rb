@@ -12,7 +12,7 @@ describe Mumuki::Classroom::Event::UserChanged do
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 
   before { User.create! uid: uid, permissions: old_permissions }
-  before { Organization.create!(name: 'example.org') }
+  before { create :organization, name: 'example.org' }
 
   describe 'execute!' do
 
