@@ -1,7 +1,7 @@
 Mumukit::Platform.map_organization_routes!(self) do
   get '/courses/:course/teachers' do
     authorize! :teacher
-    {teachers: Teacher.where(with_organization_and_course).as_json}
+    {teachers: Mumuki::Classroom::Teacher.where(with_organization_and_course).as_json}
   end
 
   post '/courses/:course/teachers' do
@@ -9,7 +9,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     json = with_organization_and_course teacher: json_body.merge(uid: json_body[:email])
     uid = json[:teacher][:uid]
 
-    Teacher.create!(with_organization_and_course json[:teacher])
+    Mumuki::Classroom::Teacher.create!(with_organization_and_course json[:teacher])
 
     perm = User.where(uid: uid).first_or_create!(json[:teacher].except(:first_name, :last_name, :personal_id)).permissions
     perm.add_permission!(:teacher, course_slug)

@@ -1,4 +1,4 @@
-class Teacher
+class Mumuki::Classroom::Teacher
 
   include Mongoid::Document
   include Mongoid::Timestamps

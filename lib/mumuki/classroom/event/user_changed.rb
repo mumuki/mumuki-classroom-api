@@ -62,7 +62,7 @@ class Mumuki::Classroom::Event::UserChanged
     end
 
     def teacher_added(organization, user, granted_slug)
-      teacher = Teacher.find_or_create_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
+      teacher = Mumuki::Classroom::Teacher.find_or_create_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
       teacher.update_attributes! user
     end
 
