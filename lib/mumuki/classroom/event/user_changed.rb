@@ -5,16 +5,12 @@ class Mumuki::Classroom::Event::UserChanged
 
     def execute!(user_h)
       user = Mumukit::Platform::User::Helpers.slice_platform_json user_h.compact
-      update_user_permissions user
+      set_diff_permissions user
       update_user_model user.except(:permissions)
+      User.import_from_resource_h! user # FIXME we must refactor events
     end
 
     private
-
-    def update_user_permissions(user)
-      set_diff_permissions user
-      User.where(uid: user[:uid]).first_or_create.upsert_attributes(user)
-    end
 
     def update_user_model(user)
       Organization.pluck(:name).each do |organization|

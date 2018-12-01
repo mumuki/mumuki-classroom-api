@@ -20,7 +20,6 @@ require_relative './models/suggestion'
 require_relative './models/invitation'
 
 require_relative './models/course'
-require_relative './models/user'
 
 require_relative './models/sorting'
 require_relative './models/searching'

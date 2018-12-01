@@ -13,7 +13,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     perm = User.where(uid: uid).first_or_create!(json[:teacher].except(:first_name, :last_name, :personal_id)).permissions
     perm.add_permission!(:teacher, course_slug)
-    User.upsert_permissions! uid, perm
+    Mumukit::Platform::User.upsert_permissions! uid, perm
 
     Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:teacher].except(:personal_id).merge(permissions: perm)
   end

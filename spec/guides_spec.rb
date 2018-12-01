@@ -36,7 +36,7 @@ describe Mumuki::Classroom::Guide do
     end
 
     context 'when no guides in a course yet' do
-      before { header 'Authorization', build_mumuki_auth_header('*') }
+      before { header 'Authorization', build_auth_header('*') }
       before { get '/api/courses/foo/guides' }
 
       it { expect(last_response).to be_ok }
@@ -48,7 +48,7 @@ describe Mumuki::Classroom::Guide do
       before { Mumuki::Classroom::Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Mumuki::Classroom::Guide.create! guide3.merge(organization: 'example.org', course: 'example.org/bar') }
 
-      before { header 'Authorization', build_mumuki_auth_header('*') }
+      before { header 'Authorization', build_auth_header('*') }
       before { get '/api/courses/foo/guides' }
 
       it { expect(last_response).to be_ok }

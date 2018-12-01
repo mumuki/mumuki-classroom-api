@@ -34,13 +34,8 @@ Mumukit::Auth.configure do |c|
   c.clients.default = {id: 'test-client', secret: 'thisIsATestSecret'}
 end
 
-def build_mumuki_auth_header(permissions, sub='github|123456')
-  User.upsert_permissions! sub, {owner: permissions}
-  Mumukit::Auth::Token.encode sub, {}
-end
-
 def build_auth_header(permissions, sub='github|123456')
-  User.upsert_permissions! sub, {owner: permissions}
+  Mumukit::Platform::User.upsert_permissions! sub, {owner: permissions}
   Mumukit::Auth::Token.encode sub, {}
 end
 

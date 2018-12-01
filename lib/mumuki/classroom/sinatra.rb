@@ -117,7 +117,7 @@ helpers do
     user = User.find_by_uid!(uid)
     permissions = user.permissions
     permissions.send("#{method}_permission!", 'student', *slugs)
-    user.upsert_permissions! permissions
+    user.update! permissions: permissions
     user.notify!
   end
 
