@@ -38,7 +38,7 @@ describe Mumuki::Classroom::Exam do
     let(:exam_fetched) { Mumuki::Classroom::Exam.find_by organization: 'example.org', course: 'example.org/foo' }
 
     before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
-    before { header 'Authorization', build_mumuki_auth_header('*') }
+    before { header 'Authorization', build_auth_header('*') }
     before { post '/api/courses/foo/exams', exam_json.to_json }
 
     it { expect(last_response.body).to be_truthy }
@@ -88,7 +88,7 @@ describe Mumuki::Classroom::Exam do
 
     context 'when existing exam' do
       before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
-      before { header 'Authorization', build_mumuki_auth_header('*') }
+      before { header 'Authorization', build_auth_header('*') }
       before { post "/api/courses/foo/exams/#{exam_id}/students/agus@mumuki.org" }
 
       it { expect(last_response.body).to be_truthy }
@@ -106,7 +106,7 @@ describe Mumuki::Classroom::Exam do
 
     context 'when existing exam' do
       before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
-      before { header 'Authorization', build_mumuki_auth_header('*') }
+      before { header 'Authorization', build_auth_header('*') }
       before { delete "/api/courses/foo/exams/#{exam_id}/students/agus@mumuki.org" }
 
       it { expect(last_response.body).to be_truthy }

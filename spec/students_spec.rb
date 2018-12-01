@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Mumuki::Classroom::Student do
 
-  before { User.upsert_permissions! 'github|123456', {} }
+  before { Mumukit::Platform::User.upsert_permissions! 'github|123456', {} }
 
   let(:date) { Time.now }
 
@@ -140,7 +140,7 @@ describe Mumuki::Classroom::Student do
           it { expect(last_response.body).to json_like({students: [student_saved, student_saved2]}, except_fields) }
         end
         context 'get students with auth client' do
-          before { header 'Authorization', build_mumuki_auth_header('*') }
+          before { header 'Authorization', build_auth_header('*') }
           before { get '/api/courses/foo/students?personal_id=2&uid=bazlol@gmail.com' }
 
           it { expect(last_response).to be_ok }

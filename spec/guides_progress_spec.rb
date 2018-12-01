@@ -201,7 +201,7 @@ TEST
 
   describe 'get /api/courses/:course/students/:uid' do
 
-    before { header 'Authorization', build_mumuki_auth_header('*') }
+    before { header 'Authorization', build_auth_header('*') }
 
     context 'when guide_progress exist' do
       before { get '/api/courses/k2048/students/agus@mumuki.org' }
