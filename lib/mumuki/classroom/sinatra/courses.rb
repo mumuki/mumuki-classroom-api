@@ -1,6 +1,7 @@
 helpers do
   def allowed_courses(permissions)
-    {courses: Course.allowed(organization, permissions).as_json}
+    allowed = Course.where(organization: organization).select { |course| permissions.has_permission? :teacher, course.slug }
+    {courses: allowed.as_json}
   end
 
   def guide_progress_query
@@ -92,7 +93,7 @@ Mumukit::Platform.map_organization_routes!(self) do
   post '/courses/:course/invitation' do
     authorize! :teacher
     course = Course.find_by! with_organization slug: course_slug
-    {invitation: course.invitation_link!(json_body[:expiration_date])}
+    {invitation: course.invite!(json_body[:expiration_date])}
   end
 
   get '/courses/:course/guides' do

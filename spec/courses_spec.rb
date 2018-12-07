@@ -83,7 +83,7 @@ describe Course do
     context 'create invitation link to existing course' do
       let(:time) { Time.now + 10.minutes }
       let(:created) { Course.create! course }
-      let(:invitation) { created.invitation_link! time }
+      let(:invitation) { created.invite! time }
 
       it { expect(invitation).to be_truthy }
       it { expect(invitation.expiration_date).to eq time }
@@ -94,8 +94,8 @@ describe Course do
     context 'should not create invitation link if already exists and is not expired' do
       let(:time) { Time.now + 10.minutes }
       let(:created) { Course.create!(course) }
-      let(:invitation) { created.invitation_link! time }
-      let(:invitation2) { created.invitation_link! time + 20.minutes }
+      let(:invitation) { created.invite! time }
+      let(:invitation2) { created.invite! time + 20.minutes }
 
       it { expect(invitation.code).to eq invitation2.code }
       it { expect(invitation.course_slug).to eq invitation2.course_slug }
@@ -106,7 +106,7 @@ describe Course do
       let!(:time) { Time.now }
 
       let(:created) { Course.create!(course) }
-      let(:invitation) { created.invitation_link! time - 10 }
+      let(:invitation) { created.invite! time - 10 }
 
       it { expect { invitation }.to raise_error("Must be in future") }
     end
