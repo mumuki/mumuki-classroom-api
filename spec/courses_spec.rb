@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Course do
 
+  before { create :organization, name: 'example.org' }
   let(:except_fields) { {except: [:created_at, :updated_at, :_id]} }
 
   describe 'get /courses/' do
@@ -15,12 +16,21 @@ describe Course do
     end
 
     context 'when there are courses' do
-      let(:course) { {name: 'foo', slug: 'test/foo', description: 'baz', organization: 'example.org'} }
-      before { Course.create!(course) }
+      let(:course) { {
+        name: 'foo',
+        slug: 'example.org/foo',
+        description: 'baz',
+        organization: 'example.org',
+        period: '2016',
+        shifts: %w(morning),
+        days: %w(monday wednesday)
+      } }
+
+      before { Course.import_from_resource_h!(course) }
       before { get '/courses' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like({courses: [course]}, except_fields) }
+      it { expect(last_response.body).to json_like(courses: [course]) }
     end
   end
 
@@ -36,7 +46,7 @@ describe Course do
 
     context 'when is normal teacher' do
       context 'rejects course creation' do
-        before { header 'Authorization', build_auth_header('test/my-course') }
+        before { header 'Authorization', build_auth_header('example.org/my-course') }
         before { post '/courses', course.to_json }
 
         it { expect(last_response).to_not be_ok }
@@ -65,50 +75,20 @@ describe Course do
     end
 
     context 'when course already exists' do
-      before { Course.create! course }
+      before { Course.import_from_resource_h! course }
       before { header 'Authorization', build_auth_header('*') }
       before { post '/courses', course.to_json }
 
       it { expect(Course.count).to eq 1 }
       it { expect(last_response).to_not be_ok }
-      it { expect(last_response.status).to eq 422 }
+      it { expect(last_response.body).to json_eq message: 'Validation failed: Slug has already been taken' }
+      it { expect(last_response.status).to eq 400 }
     end
 
     context 'create course does not create invitation link' do
-      let(:created) { Course.create! course }
+      let(:created) { Course.import_from_resource_h! course }
 
-      it { expect(created.invitation).to be nil }
-    end
-
-    context 'create invitation link to existing course' do
-      let(:time) { Time.now + 10.minutes }
-      let(:created) { Course.create! course }
-      let(:invitation) { created.invite! time }
-
-      it { expect(invitation).to be_truthy }
-      it { expect(invitation.expiration_date).to eq time }
-      it { expect(invitation.course_slug).to eq created.slug }
-      it { expect(invitation.code.length).to eq 6 }
-    end
-
-    context 'should not create invitation link if already exists and is not expired' do
-      let(:time) { Time.now + 10.minutes }
-      let(:created) { Course.create!(course) }
-      let(:invitation) { created.invite! time }
-      let(:invitation2) { created.invite! time + 20.minutes }
-
-      it { expect(invitation.code).to eq invitation2.code }
-      it { expect(invitation.course_slug).to eq invitation2.course_slug }
-      it { expect(invitation.expiration_date).to eq invitation2.expiration_date }
-    end
-
-    context 'should not create invitation link if expired date is in past' do
-      let!(:time) { Time.now }
-
-      let(:created) { Course.create!(course) }
-      let(:invitation) { created.invite! time - 10 }
-
-      it { expect { invitation }.to raise_error("Must be in future") }
+      it { expect(created.current_invitation).to be nil }
     end
   end
 

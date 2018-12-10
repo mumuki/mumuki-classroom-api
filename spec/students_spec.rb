@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe Mumuki::Classroom::Student do
 
+  before { create :organization, name: 'example.org' }
   before { Mumukit::Platform::User.upsert_permissions! 'github|123456', {} }
 
   let(:date) { Time.now }
@@ -155,7 +156,7 @@ describe Mumuki::Classroom::Student do
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
     let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example.org/foo'}} }
     let(:created_at) { 'created_at' }
-    before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+    before { create :course, slug: 'example.org/foo' }
     before { Mumuki::Classroom::Student.create!(student.merge(uid: 'auth0|1', organization: 'example.org', course: 'example.org/foo')) }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/courses/foo/student/auth0%7c1' }
@@ -178,7 +179,7 @@ describe Mumuki::Classroom::Student do
 
     before { User.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
     before { Mumuki::Classroom::Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
-    before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+    before { create :course, slug: 'example.org/foo' }
     before { header 'Authorization', build_auth_header('*') }
     before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
 
@@ -248,8 +249,8 @@ describe Mumuki::Classroom::Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
-        before { Course.create! organization: 'example.org', name: 'bar', slug: 'example.org/bar' }
+        before { create :course, slug: 'example.org/foo' }
+        before { create :course, slug: 'example.org/bar' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
@@ -315,7 +316,7 @@ describe Mumuki::Classroom::Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+        before { create :course, slug: 'example.org/foo' }
 
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }

@@ -1,6 +1,15 @@
 helpers do
   def allowed_courses(permissions)
-    allowed = Course.where(organization: organization).select { |course| permissions.has_permission? :teacher, course.slug }
+    allowed = Organization
+                .locate!(organization)
+                .courses
+                .select { |course| permissions.has_permission? :teacher, course.slug }
+                .map do |course|
+                  course
+                    .as_json(only: [:slug, :description, :period, :shifts, :days, :code])
+                    .replace_key!('code', 'name')
+                    .merge(organization: organization)
+                end
     {courses: allowed.as_json}
   end
 
@@ -80,7 +89,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses' do
     current_user.protect! :janitor, json_body[:slug]
-    course = Course.create! with_organization(json_body)
+    course = Course.create! with_organization(json_body).tap { |it| it['organization'] = Organization.locate!(it['organization']) }
     course.notify!
     {status: :created}
   end

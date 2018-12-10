@@ -1,9 +1,5 @@
-error Mumuki::Classroom::CourseExistsError do
-  halt 400
-end
-
-error Mumuki::Classroom::CourseNotExistsError do
-  halt 400
+error Mumuki::Domain::NotFoundError do
+  halt 404
 end
 
 error Mumuki::Classroom::StudentExistsError do

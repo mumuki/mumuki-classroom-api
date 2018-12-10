@@ -95,7 +95,7 @@ helpers do
 
   def ensure_course_existence!
     course = with_organization(slug: course_slug).with_indifferent_access
-    raise Mumuki::Classroom::CourseNotExistsError, "#{course[:slug]} does not exist" unless Couse.find_by(organization: course[:organization], slug: course[:slug]).present?
+    raise Mumuki::Domain::NotFoundError, "Course #{course[:slug]} does not exist" unless Course.find_by(slug: course[:slug]).present?
   end
 
   def ensure_student_not_exists!
