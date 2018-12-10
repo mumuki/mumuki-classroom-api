@@ -13,11 +13,11 @@ module Mumuki
 end
 
 
+require 'mumukit/platform'
 require 'mongoid'
 require 'mumuki/domain'
 require 'mumukit/login'
 require 'mumukit/nuntius'
-require 'mumukit/platform'
 
 I18n.load_translations_path File.join(__dir__, 'config', 'locales', '*.yml')
 
