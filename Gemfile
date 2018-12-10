@@ -25,3 +25,5 @@ group :development do
   gem 'binding_of_caller'
   gem 'web-console'
 end
+
+gem 'mumuki-domain', github: 'mumuki/mumuki-domain', branch: 'feature-course-invitation-relationship'
