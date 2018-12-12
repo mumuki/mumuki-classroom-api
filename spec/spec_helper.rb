@@ -40,7 +40,7 @@ def build_auth_header(permissions, sub='github|123456')
 end
 
 def app
-  Sinatra::Application
+  Mumuki::Classroom::App
 end
 
 SimpleCov.start
