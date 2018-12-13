@@ -90,19 +90,19 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     post '/courses' do
       current_user.protect! :janitor, json_body[:slug]
-      course = Course.create! with_organization(json_body).tap { |it| it['organization'] = Organization.locate!(it['organization']) }
+      course = Course.create! json_body.merge(organization: Organization.locate!(organization))
       course.notify!
       {status: :created}
     end
 
     get '/courses/:course' do
       authorize! :teacher
-      {course: Course.find_by!(with_organization slug: course_slug)}
+      {course: Course.locate!(course_slug)}
     end
 
     post '/courses/:course/invitation' do
       authorize! :teacher
-      course = Course.find_by! with_organization slug: course_slug
+      course = Course.locate! course_slug
       {invitation: course.invite!(json_body[:expiration_date])}
     end
 

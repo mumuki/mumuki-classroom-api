@@ -95,8 +95,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def ensure_course_existence!
-      course = with_organization(slug: course_slug).with_indifferent_access
-      raise Mumuki::Domain::NotFoundError, "Course #{course[:slug]} does not exist" unless Course.find_by(slug: course[:slug]).present?
+      raise Mumuki::Domain::NotFoundError, "Course #{course_slug} does not exist" unless Course.exists?(slug: course_slug)
     end
 
     def ensure_student_not_exists!
