@@ -31,7 +31,9 @@ class Mumuki::Classroom::Exam
   end
 
   def notify!
-    Mumukit::Nuntius.notify_event! 'UpsertExam', json_to_notify
+    body = json_to_notify
+    Exam.import_from_resource_h! body
+    Mumukit::Nuntius.notify_event! 'UpsertExam', body
   end
 
   private

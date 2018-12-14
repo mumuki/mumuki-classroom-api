@@ -123,7 +123,9 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def notify_upsert_exam(exam_id)
-      Mumukit::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
+      body = tenantized_json_body.except(:social_ids).merge(exam_id)
+      Exam.import_from_resource_h! body
+      Mumukit::Nuntius.notify_event! 'UpsertExam', body
     end
 
     def page
