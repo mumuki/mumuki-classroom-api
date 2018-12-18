@@ -11,8 +11,8 @@ class Mumuki::Classroom::Event::UserChanged
 
       diff_h = Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions_h).as_json
 
-      rearrange! profile: user_h.except(:permissions),
-      permissions: { new: new_permissions_h, diff: diff_h }.compact
+      rearrange!  profile: user_h.except(:permissions),
+                  permissions: { new: new_permissions_h, diff: diff_h }.compact
     end
 
     def rearrange!(rearrangement)
