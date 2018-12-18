@@ -39,13 +39,18 @@ class Mumukit::Auth::Permissions
     def as_json(options = {})
       {role: @role, grant: @grant, type: @type}.as_json options
     end
+
+    def self.parse(hash)
+      hash = hash.with_indifferent_access
+      new hash[:role], hash[:grant], hash[:type]
+    end
   end
 
   class Diff
     attr_accessor :changes
 
-    def initialize
-      @changes = []
+    def initialize(changes = [])
+      @changes = changes
     end
 
     def changes_by_organization
@@ -74,6 +79,10 @@ class Mumukit::Auth::Permissions
           it.compare_grants! role, new_permissions, old_permissions, :added
         end
       end
+    end
+
+    def self.parse(hash)
+      new hash.indifferent_get(:changes).map { |it| Change.parse it }
     end
 
     def as_json(options = {})

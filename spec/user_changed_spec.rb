@@ -23,10 +23,16 @@ describe Mumuki::Classroom::Event::UserChanged do
         expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:teacher_added)
         expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:student_removed)
       end
-      before { Mumuki::Classroom::Event::UserChanged.execute! event }
+      let!(:rearrangement) { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       it { expect(Organization.pluck(:name)).to include 'example.org' }
-      it { expect(Mumuki::Classroom::Event::UserChanged.changes).to be_empty }
+      it { expect(rearrangement).to json_eq permissions: {diff: {changes: []}},
+                                            profile: {
+                                              email: "agus@mumuki.org",
+                                              first_name: "Agustín",
+                                              last_name: "Pina",
+                                              uid: "agus@mumuki.org"
+                                            } }
     end
 
 
@@ -36,16 +42,24 @@ describe Mumuki::Classroom::Event::UserChanged do
         expect(Mumuki::Classroom::Event::UserChanged).to receive(:teacher_added)
         expect(Mumuki::Classroom::Event::UserChanged).to receive(:student_removed)
       end
-      before { Mumuki::Classroom::Event::UserChanged.execute! event }
+      let!(:rearrangement) { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       it { expect(Organization.pluck(:name)).to include 'example.org' }
-      it { expect(Mumuki::Classroom::Event::UserChanged.changes['example.org'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
-      it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
-             .to json_like(changes: [
-               {role: 'student', grant: 'example.org/foo', type: 'removed'},
-               {role: 'student', grant: 'example.org/bar', type: 'added'},
-               {role: 'teacher', grant: 'example.org/foo', type: 'added'}]) }
-
+      it { expect(rearrangement).to json_eq permissions: {
+                                              new: {student: "example.org/bar", teacher: "example.org/foo"},
+                                              diff: {
+                                                changes: [
+                                                  {role: 'student', grant: 'example.org/foo', type: 'removed'},
+                                                  {role: 'student', grant: 'example.org/bar', type: 'added'},
+                                                  {role: 'teacher', grant: 'example.org/foo', type: 'added'}]
+                                              }
+                                            },
+                                            profile: {
+                                              email: "agus@mumuki.org",
+                                              first_name: "Agustín",
+                                              last_name: "Pina",
+                                              uid: "agus@mumuki.org"
+                                            } }
     end
 
     context 'update models' do
