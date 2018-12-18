@@ -26,4 +26,4 @@ group :development do
   gem 'web-console'
 end
 
-gem 'mumuki-domain', github: 'mumuki/mumuki-domain', branch: 'feature-course-invitation-relationship'
+gem 'mumuki-domain', github: 'mumuki/mumuki-domain'
