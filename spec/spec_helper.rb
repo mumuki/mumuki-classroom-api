@@ -27,6 +27,18 @@ RSpec.configure do |config|
   config.before(:each) do
     Mongoid::Clients.default.collections.each(&:delete_many)
   end
+
+  config.before(:each) do
+    if RSpec.current_example.metadata[:organization_workspace]
+      create(:organization, name: RSpec.current_example.metadata[:organization_workspace]).switch!
+    end
+  end
+
+  config.after(:each) do
+    Mumukit::Platform::Organization.leave! if RSpec.current_example.metadata[:organization_workspace]
+  end
+
+  config.full_backtrace = true if ENV['RSPEC_FULL_BACKTRACE']
 end
 
 require 'base64'
