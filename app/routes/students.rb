@@ -2,6 +2,9 @@ helpers do
   def students_query
     with_detached_and_search with_organization_and_course, Student
   end
+  def all_students_query
+    with_detached_and_search with_organization, Student
+  end
 
   def normalize_student!
     json_body[:email] = json_body[:email]&.downcase
@@ -30,7 +33,12 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/students' do
     authorize! :teacher
-    {students: Student.where(with_organization)}
+    count, students = Sorting.aggregate(Student, all_students_query, paginated_params, query_params)
+    {
+      page: page + 1,
+      total: count,
+      students: students
+    }
   end
 
   get '/api/courses/:course/students/:uid' do
