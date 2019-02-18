@@ -15,6 +15,8 @@ class User
 
   create_index({uid: 1}, {unique: true})
 
+  validates :uid, presence: true
+
   def self.find_by_uid!(uid)
     find_by! uid: uid
   end
