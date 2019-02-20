@@ -48,10 +48,13 @@ class Classroom::Event::UserChanged
     end
 
     def student_added(organization, user, granted_slug)
+      # Acá entra cuando agregué el student a example2
+
       students = Student.where(organization: organization, course: granted_slug.to_s, uid: user[:uid])
       if students.exists?
         students.first.attach!
       else
+        # Acá hace un .create! pero no importa nada de ningún lado :/
         Student.create! user.merge(organization: organization, course: granted_slug.to_s)
       end
     end

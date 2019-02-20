@@ -137,5 +137,84 @@ describe Classroom::Event::UserChanged do
 
     end
 
+    context 'CUANDO EL ALUMNO ESTABA EN "example.org" Y SE REGISTRA EN "example2.org"', {solo: true} do
+      def create_guide(slug)
+        {
+          slug: slug,
+          name: 'guide_name',
+          parent: {
+            type: 'Lesson',
+            name: 'A lesson name',
+            position: '1',
+            chapter: {
+              id: 'guide_chapter_id',
+              name: 'guide_chapter_name'
+            }
+          },
+          language: {
+            name: 'guide_language_name',
+            devicon: 'guide_language_devicon'
+          }
+        }
+      end
+
+      before { Organization.create!(name: 'example2.org') }
+      let(:old_permissions) { {student: 'example.org/foo'}.with_indifferent_access }
+      let(:new_permissions) { {student: 'example2.org/bar'}.with_indifferent_access }
+
+      let(:example_guide) { create_guide 'example_guide' }
+      let(:shared_guide) { create_guide 'shared_guide' }
+      let(:example2_guide) { create_guide 'example2_guide' }
+
+      let(:exercise) { {
+        eid: 1,
+        name: 'exercise_name',
+        number: 1
+      } }
+      let(:submission) { {
+        sid: '1',
+        status: 'passed',
+        result: 'result',
+        content: 'find f = head.filter f',
+        feedback: 'feedback',
+        created_at: '2016-01-01 00:00:00',
+        test_results: ['test_results'],
+        submissions_count: 1,
+        expectation_results: []
+      } }
+      let(:old_submission_1) { submission.merge({
+                                                  organization: 'example.org',
+                                                  submitter: user,
+                                                  exercise: exercise,
+                                                  guide: example_guide
+                                                }) }
+      let(:old_submission_2) { submission.merge({
+                                                  organization: 'example.org',
+                                                  submitter: user,
+                                                  exercise: exercise,
+                                                  guide: shared_guide
+                                                }) }
+
+      before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
+      before { Course.create! organization: 'example2.org', slug: 'example2.org/bar' }
+      before { Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Submission.process!(old_submission_1) }
+      before { Submission.process!(old_submission_2) }
+      before { Classroom::Event::UserChanged.execute! event }
+
+      it {
+        # Acá tendría que revisar que GuideProgress.where('student.uid': uid) solo tenga 4 elementos
+        # o sea:
+        #  - para example.org y example_guide
+        #  - para example.org y shared_guide
+        #  - para example2.org y shared_guide
+        #  - para example2.org y example2_guide
+        # y que no cree un progreso para example2.org y example_guide
+        puts "PROGRESS:", GuideProgress.where('student.uid': uid)
+        # expect(GuideProgress.where('student.uid': uid).count).to eq 1
+      }
+
+    end
+
   end
 end
