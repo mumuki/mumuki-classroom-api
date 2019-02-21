@@ -55,20 +55,20 @@ describe Student do
       {status: 'passed_with_warnings', created_at: date + 2.minutes}
     ]
   } }
-  let(:example_students) { -> (student) { Student.create!(student.merge(organization: 'example.org', course: 'example.org/example')) } }
   let(:students) { Student.where(organization: 'example.org', course: 'example.org/example') }
-  let(:example_student_progresses) { -> (exercise) { Assignment.create! exercise.merge(organization: 'example.org', course: 'example.org/example') } }
-  let(:example_guide_student_progresses) { -> (guide_progress) { GuideProgress.create! guide_progress.merge organization: 'example.org', course: 'example.org/example' } }
+  let(:create_student!) { -> (student) { Student.create!(student.merge(organization: 'example.org', course: 'example.org/example')) } }
+  let(:create_assignment!) { -> (exercise) { Assignment.create! exercise.merge(organization: 'example.org', course: 'example.org/example') } }
+  let(:create_student_guide_progress!) { -> (guide_progress) { GuideProgress.create! guide_progress.merge organization: 'example.org', course: 'example.org/example' } }
 
   describe do
 
-    before { example_students.call student1 }
-    before { example_students.call student2 }
+    before { create_student!.call student1 }
+    before { create_student!.call student2 }
 
-    before { example_student_progresses.call exercise1 }
-    before { example_student_progresses.call exercise2 }
-    before { example_student_progresses.call exercise3 }
-    before { example_student_progresses.call exercise4 }
+    before { create_assignment!.call exercise1 }
+    before { create_assignment!.call exercise2 }
+    before { create_assignment!.call exercise3 }
+    before { create_assignment!.call exercise4 }
 
     describe '#report' do
       let(:report) { Student.report({organization: 'example.org', course: 'example.org/example'}) }
@@ -96,14 +96,14 @@ describe Student do
       let(:guides) { Guide.where organization: 'example.org', course: 'example.org/example' }
       let(:students) { Student.where organization: 'example.org', course: 'example.org/example' }
       let(:guide_students_progress) { GuideProgress.where(organization: 'example.org', course: 'example.org/example').as_json }
-      let(:exercise_student_progress) { example_student_progresses.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
+      let(:exercise_student_progress) { create_assignment!.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
 
       before { Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/example') }
       before { Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/example') }
 
-      before { example_guide_student_progresses.call guide_student_progress1 }
-      before { example_guide_student_progresses.call guide_student_progress2 }
-      before { example_guide_student_progresses.call guide_student_progress3 }
+      before { create_student_guide_progress!.call guide_student_progress1 }
+      before { create_student_guide_progress!.call guide_student_progress2 }
+      before { create_student_guide_progress!.call guide_student_progress3 }
 
       before { Student.find_by!(uid: 'github|123456').destroy_cascade! }
 
@@ -193,7 +193,7 @@ describe Student do
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
-      before { example_students.call student1 }
+      before { create_student!.call student1 }
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example.org/*') }
@@ -208,7 +208,7 @@ describe Student do
 
     describe 'post /courses/:course/students/:student_id/attach' do
 
-      before { example_students.call student1.merge(detached: true, detached_at: Time.now) }
+      before { create_student!.call student1.merge(detached: true, detached_at: Time.now) }
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example.org/*') }
@@ -223,11 +223,17 @@ describe Student do
     end
 
     describe 'post /courses/:course/students/:student_id/transfer' do
+      let(:from_student) { -> (student) { student.map {|k, v| ["student.#{k}", v] }.to_h } }
 
-      before { example_students.call student1 }
+      let(:guide1) { {slug: 'example.org/bar'} }
+      let(:guide2) { {slug: 'some_orga/baz'} }
+      before { create_student!.call student1 }
+      before { create_assignment!.call exercise1 }
+      before { create_student_guide_progress!.call guide_student_progress1 }
+      before { create_student_guide_progress!.call guide_student_progress2 }
 
-      let(:fetched_guide_progresses) { GuideProgress.where(student: student1).to_a }
-      let(:fetched_assignments) { Assignment.where(student: student1).to_a }
+      let(:fetched_guide_progresses) { GuideProgress.where(from_student.call(student1)).to_a }
+      let(:fetched_assignments) { Assignment.where(from_student.call(student1)).to_a }
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('*/*') }
@@ -237,8 +243,11 @@ describe Student do
         it { expect(last_response.body).to eq({:status => :updated}.to_json) }
         it { expect(fetched_student.organization).to eq 'some_orga' }
         it { expect(fetched_student.course).to eq 'some_course' }
-        it { expect(fetched_guide_progresses.all? { |it| it.matches? organization: 'some_orga', course: 'some_orga'}).to eq true }
-        it { expect(fetched_assignments.all? { |it| it.matches? organization: 'some_orga', course: 'some_orga'}).to eq true }
+
+        it { expect(fetched_guide_progresses.count).to eq 2 }
+        it { expect(fetched_guide_progresses.first.matches? organization: 'example.org', course: 'example.org/example').to eq true }
+        it { expect(fetched_guide_progresses.last.matches? organization: 'some_orga', course: 'some_course').to eq true }
+        it { expect(fetched_assignments.all? { |it| it.matches? organization: 'some_orga', course: 'some_course'}).to eq true }
       end
 
     end
