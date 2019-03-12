@@ -34,7 +34,7 @@ describe Course do
                     slug: 'example.org/2016-K2001'} }
     let(:created_slug) { Course.last.slug }
 
-    let(:orga) { Organization.create! name: 'example.org', profile: { locale: 'es' } }
+    let!(:orga) { Organization.create! name: 'example.org', profile: { locale: 'es' } }
 
     context 'when is normal teacher' do
       context 'rejects course creation' do
