@@ -34,6 +34,8 @@ describe Course do
                     slug: 'example.org/2016-K2001'} }
     let(:created_slug) { Course.last.slug }
 
+    let(:orga) { Organization.create! name: 'example.org', profile: { locale: 'es' } }
+
     context 'when is normal teacher' do
       context 'rejects course creation' do
         before { header 'Authorization', build_auth_header('test/my-course') }
@@ -109,6 +111,16 @@ describe Course do
       let(:invitation) { created.invitation_link! time - 10 }
 
       it { expect { invitation }.to raise_error("Must be in future") }
+    end
+
+    context 'should forbid creating course if organization does not exist' do
+      before { header 'Authorization', build_auth_header('*') }
+      before { orga.destroy! }
+      before { post '/courses', course.merge(organization: 'foobar').to_json }
+
+      it { expect(Course.count).to eq 0 }
+      it { expect(last_response).to_not be_ok }
+      it { expect(last_response.status).to eq 400 }
     end
   end
 
