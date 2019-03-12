@@ -25,3 +25,6 @@ class Organization
     Organization.where(name: json[:name]).first_or_create.update_attributes(json)
   end
 end
+
+class Classroom::OrganizationNotExistsError < Exception
+end

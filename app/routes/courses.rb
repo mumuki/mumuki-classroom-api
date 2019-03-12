@@ -66,6 +66,10 @@ helpers do
       {language: json_body[:language]}.merge(it.symbolize_keys)
     end
   end
+
+  def validate_organization_exists!
+    raise Classroom::OrganizationNotExistsError unless Organization.find_by name: organization
+  end
 end
 
 Mumukit::Platform.map_organization_routes!(self) do
@@ -79,6 +83,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses' do
     current_user.protect! :janitor, json_body[:slug]
+    validate_organization_exists!
     course = Course.create! with_organization(json_body)
     course.notify!
     {status: :created}
