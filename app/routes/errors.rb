@@ -6,6 +6,10 @@ error Classroom::CourseNotExistsError do
   halt 400
 end
 
+error Classroom::OrganizationNotExistsError do
+  halt 400
+end
+
 error Classroom::StudentExistsError do
   halt 400
 end
