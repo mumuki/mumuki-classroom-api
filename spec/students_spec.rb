@@ -225,12 +225,25 @@ describe Student do
     describe 'post /courses/:course/students/:student_id/transfer' do
       let(:from_student) { -> (student) { student.map {|k, v| ["student.#{k}", v] }.to_h } }
 
-      let(:guide1) { {slug: 'example.org/bar'} }
-      let(:guide2) { {slug: 'some_orga/baz'} }
+      let(:guide1) { {slug: 'foo/bar', organization: 'example.org'} }
+      let(:guide2) { {slug: 'foo/bar', organization: 'some_orga'} }
+      let(:guide3) { {slug: 'foo/baz', organization: 'example.org'} }
+      let(:guide_student_progress3) { {guide: guide3, student: student1} }
+
+      let(:exercise3) { {
+        guide: guide3,
+        student: student1,
+        exercise: {id: 3},
+        submissions: [
+          {status: 'passed', created_at: date}
+        ]
+      } }
+
       before { create_student!.call student1 }
       before { create_assignment!.call exercise1 }
+      before { create_assignment!.call exercise3 }
       before { create_student_guide_progress!.call guide_student_progress1 }
-      before { create_student_guide_progress!.call guide_student_progress2 }
+      before { create_student_guide_progress!.call guide_student_progress3 }
 
       let(:fetched_guide_progresses) { GuideProgress.where(from_student.call(student1)).to_a }
       let(:fetched_assignments) { Assignment.where(from_student.call(student1)).to_a }
@@ -239,15 +252,19 @@ describe Student do
         before { header 'Authorization', build_auth_header('*/*') }
         before { post '/courses/example/students/github%7C123456/transfer', { slug: 'some_orga/some_course' }.to_json }
 
+        let(:only_fields) { { only: [:organization, :course] } }
+
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to eq({:status => :updated}.to_json) }
         it { expect(fetched_student.organization).to eq 'some_orga' }
         it { expect(fetched_student.course).to eq 'some_course' }
 
         it { expect(fetched_guide_progresses.count).to eq 2 }
-        it { expect(fetched_guide_progresses.first.matches? organization: 'example.org', course: 'example.org/example').to eq true }
-        it { expect(fetched_guide_progresses.last.matches? organization: 'some_orga', course: 'some_course').to eq true }
-        it { expect(fetched_assignments.all? { |it| it.matches? organization: 'some_orga', course: 'some_course'}).to eq true }
+        it { expect(fetched_guide_progresses.first.as_json).to json_like({ organization: 'some_orga', course: 'some_course' }, only_fields) }
+        it { pending(fetched_guide_progresses.last.as_json).to json_like({ organization: 'example.org', course: 'example.org/example' }, only_fields) }
+        it { expect(fetched_assignments.count).to eq 2 }
+        it { expect(fetched_assignments.first.as_json).to json_like({ organization: 'some_orga', course: 'some_course' }, only_fields) }
+        it { pending(fetched_assignments.last.as_json).to json_like({organization: 'example.org', course: 'example.org/example' }, only_fields) }
       end
 
     end
