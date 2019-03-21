@@ -30,8 +30,7 @@ class GuideProgress
     end
 
     def transfer_all_by!(query, new_organization, new_course)
-      where(query.merge('guide.slug': { '$regex' => /^#{Regexp.escape(new_organization)}\// }))
-        .set(organization: new_organization, course: new_course)
+      where(query).set(organization: new_organization, course: new_course)
     end
 
     def last_assignment_by(query)
