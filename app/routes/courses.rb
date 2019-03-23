@@ -16,26 +16,6 @@ helpers do
     student_query.merge(student_info)
   end
 
-  def course_report_projection
-    {
-      '_id': 0,
-      'last_name': '$last_name',
-      'first_name': '$first_name',
-      'email': '$email',
-      'personal_id': '$personal_id',
-      'created_at': '$created_at',
-      'last_submission_date': '$last_assignment.submission.created_at',
-      'passed_count': '$stats.passed',
-      'passed_with_warnings_count': '$stats.passed_with_warnings',
-      'failed_count': '$stats.failed',
-      'last_lesson_type': '$last_assignment.guide.parent.type',
-      'last_lesson_name': '$last_assignment.guide.parent.name',
-      'last_exercise_number': '$last_assignment.exercise.number',
-      'last_exercise_name': '$last_assignment.exercise.name',
-      'last_chapter': '$last_assignment.guide.parent.chapter.name',
-    }
-  end
-
   def guide_report_projection
     {
       '_id': 0,
@@ -140,11 +120,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   get '/courses/:course/report' do
     authorize! :teacher
-    aggregation = Student.where(with_organization_and_course).project(course_report_projection)
-    pipeline_with_sort_criterion = aggregation.pipeline << {'$sort': {passed_count: -1, passed_with_warnings_count: -1, failed_count: -1, last_name: 1, first_name: 1}}
-    json = Student.collection.aggregate(pipeline_with_sort_criterion).as_json
-    content_type 'application/csv'
-    csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), course_report_projection)
+    group_report with_organization_and_course, group_report_projection
   end
 
   get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do

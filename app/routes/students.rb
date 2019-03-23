@@ -28,6 +28,11 @@ Mumukit::Platform.map_organization_routes!(self) do
     list_students with_organization
   end
 
+  get '/students/report' do
+    authorize! :teacher
+    group_report with_organization, group_report_projection.merge(course: '$course')
+  end
+
   get '/api/courses/:course/students/:uid' do
     authorize! :teacher
     {guide_students_progress: GuideProgress.where(with_organization_and_course 'student.uid': uid).sort(created_at: :asc).as_json}
