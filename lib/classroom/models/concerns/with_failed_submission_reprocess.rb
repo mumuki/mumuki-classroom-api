@@ -1,14 +1,30 @@
 module WithFailedSubmissionReprocess
 
-  def reprocess!(uid, destination)
-    reprocess_from_organization uid, destination, destination
+  ##
+  # options :: Hash
+  #   sources :: [String] - Organization names - default: destination
+  #   keep_failed_submissions :: Boolean - Do not delete the submission from failed_submission collection - default: nil
+  #   guides :: [Slug] - Guide slugs - default: nil
+  #   created_from :: Date - Submission created since - default: nil
+  #   created_to :: Date - Submission created until - default: nil
+  ##
+  def reprocess!(uid, destination, options = {})
+    opts = options.with_indifferent_access
+    sources = opts[:sources] || [destination]
+    sources.each { |source| reprocess_from_organization uid, source, destination, opts }
   end
 
   private
 
-  def reprocess_from_organization(uid, source, destination)
-    FailedSubmission.for(source).find_by_uid(uid).each do |failed_submission|
-      delete_failed_submission failed_submission, source
+  def reprocess_from_organization(uid, source, destination, options)
+    query = {
+      'submitter.uid': uid,
+      'guide.slug': {'$in': options[:guides]}.compact.presence,
+      'created_at': {'$lt': options[:created_to], '$gt': options[:created_from]}.compact.presence
+    }.compact
+
+    FailedSubmission.for(source).where(query).each do |failed_submission|
+      delete_failed_submission failed_submission, source unless options[:keep_failed_submissions]
       try_reprocess failed_submission, source, destination
     end
   end
