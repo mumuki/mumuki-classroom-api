@@ -2,7 +2,6 @@ module WithFailedSubmissionReprocess
 
   def reprocess!(uid, destination)
     reprocess_from_organization uid, destination, destination
-    reprocess_from_organization uid, :central, destination
   end
 
   private

@@ -26,11 +26,11 @@ describe FailedSubmission do
     end
 
     context 'and submission.process! works' do
-      before { expect(Submission).to receive(:process!).exactly(3).times }
+      before { expect(Submission).to receive(:process!).exactly(2).times }
       before { expect(FailedSubmission).to_not receive(:create!) }
       before { FailedSubmission.reprocess!(submitter[:uid], :example) }
 
-      it { expect(central_count).to eq(1) }
+      it { expect(central_count).to eq(2) }
       it { expect(example_count).to eq(0) }
     end
 
@@ -40,15 +40,6 @@ describe FailedSubmission do
 
       it { expect(central_count).to eq(2) }
       it { expect(example_count).to eq(2) }
-    end
-
-    context 'and submission.process! does not work one time' do
-      before { expect(Submission).to receive(:process!).once.and_raise(StandardError) }
-      before { expect(Submission).to receive(:process!).twice }
-      before { FailedSubmission.reprocess!('github|123456', :example) }
-
-      it { expect(central_count).to eq(1) }
-      it { expect(example_count).to eq(1) }
     end
 
   end
