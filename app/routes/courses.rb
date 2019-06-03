@@ -114,7 +114,7 @@ Mumukit::Platform.map_organization_routes!(self) do
   end
 
   get '/courses/:course/progress' do
-    authorize! :teacher
+    authorize! :owner
     {exercise_student_progress: Assignment.where(with_organization_and_course).as_json}
   end
 
