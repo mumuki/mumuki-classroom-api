@@ -151,6 +151,7 @@ module WithSubmissionProcess
      created_at: json[:created_at],
      test_results: json[:test_results],
      submissions_count: json[:submissions_count],
-     expectation_results: json[:expectation_results]}.compact
+     expectation_results: json[:expectation_results],
+     origin_ip: json[:origin_ip]}.compact
   end
 end

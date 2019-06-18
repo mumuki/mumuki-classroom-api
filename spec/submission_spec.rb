@@ -193,6 +193,24 @@ describe Submission do
 
     end
 
+    describe 'process submission with origin_ip' do
+      let(:submission_with_origin_ip) { submission.merge({organization: 'example',
+                                             submitter: submitter,
+                                             exercise: exercise,
+                                             parent: parent,
+                                             guide: guide,
+                                             origin_ip: '127.1.2.3'}) }
+
+      let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
+
+      let(:created_submission) { Submission.first }
+
+      before { Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
+      before { Submission.process!(submission_with_origin_ip) }
+
+      it { expect(created_submission.origin_ip).to eq(submission_with_origin_ip[:origin_ip]) }
+
+    end
   end
 
 end
