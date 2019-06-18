@@ -16,6 +16,7 @@ class Submission
   field :test_results, type: Array
   field :comments, type: Array
   field :manual_evaluation, type: String
+  field :origin_ip, type: String
 
   embeds_many :messages
 
