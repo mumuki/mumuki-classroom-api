@@ -152,6 +152,7 @@ helpers do
       'first_name': '$first_name',
       'email': '$email',
       'personal_id': '$personal_id',
+      'detached': {'$eq': ['$detached', true]},
       'created_at': '$created_at',
       'last_submission_date': '$last_assignment.submission.created_at',
       'passed_count': '$stats.passed',
