@@ -507,11 +507,11 @@ describe Student do
     before { get '/students/report' }
     it do
       expect(last_response.body).to eq <<TEST
-last_name,first_name,email,personal_id,created_at,last_submission_date,passed_count,passed_with_warnings_count,failed_count,last_lesson_type,last_lesson_name,last_exercise_number,last_exercise_name,last_chapter,course
-Bar,Foo,baz@bar.com,1212,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,2,27,Exam,Exam Test,1,Test,example.org/bar
-Bar,Bar,bar@foo.com,2222,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,1,27,Exam,Exam Test,1,Test,example.org/bar
-Bar,Foo,foo@bar.com,1234,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,117,1,27,Exam,Exam Test,1,Test,example.org/foo
-Bar,Foo,bar@baz.com,9191,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,100,2,27,Exam,Exam Test,1,Test,example.org/foo
+last_name,first_name,email,personal_id,detached,created_at,last_submission_date,passed_count,passed_with_warnings_count,failed_count,last_lesson_type,last_lesson_name,last_exercise_number,last_exercise_name,last_chapter,course
+Bar,Foo,baz@bar.com,1212,false,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,2,27,Exam,Exam Test,1,Test,example.org/bar
+Bar,Bar,bar@foo.com,2222,false,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,120,1,27,Exam,Exam Test,1,Test,example.org/bar
+Bar,Foo,foo@bar.com,1234,false,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,117,1,27,Exam,Exam Test,1,Test,example.org/foo
+Bar,Foo,bar@baz.com,9191,false,2016-08-01T18:39:57.000Z,2016-08-01T18:39:57.481Z,100,2,27,Exam,Exam Test,1,Test,example.org/foo
 TEST
     end
   end
