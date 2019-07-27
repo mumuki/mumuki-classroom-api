@@ -29,7 +29,7 @@ Mumukit::Platform.map_organization_routes!(self) do
   end
 
   get '/students/report' do
-    authorize! :teacher
+    authorize! :janitor
     group_report with_organization, group_report_projection.merge(course: '$course')
   end
 
