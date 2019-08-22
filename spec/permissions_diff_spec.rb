@@ -5,12 +5,19 @@ describe Mumukit::Auth::Permissions::Diff do
   let(:permissions) { Mumukit::Auth::Permissions.parse student: 'foo/bar:foo/baz',
                                                        teacher: 'mumuki/foo:example/*' }
   let(:diff) { Mumukit::Auth::Permissions::Diff.diff permissions, new_permissions }
-  
+
   describe Mumukit::Auth::Permissions::Change do
     context 'single grant removed' do
       let(:change) { Mumukit::Auth::Permissions::Change.new :student, 'foo/bar'.to_mumukit_grant, :removed }
 
       it { expect(change.description).to eq 'student_removed' }
+      it { expect(change.organization).to eq 'foo' }
+    end
+
+    context 'single grant added' do
+      let(:change) { Mumukit::Auth::Permissions::Change.new :admin, 'foo/bar'.to_mumukit_grant, :added }
+
+      it { expect(change.description).to eq 'admin_added' }
       it { expect(change.organization).to eq 'foo' }
     end
 
