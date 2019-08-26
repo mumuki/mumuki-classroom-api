@@ -22,7 +22,7 @@ gem 'mumukit-platform', '~> 1.3'
 gem 'mumukit-login', '~> 5.2.0'
 
 gem 'mumukit-inspection', '~> 1.0'
-gem 'mumukit-content-type', '~> 1.8'
+gem 'mumukit-content-type', '~> 1.8', '>= 1.8.0'
 
 gem 'activemodel', '~> 5.0'
 gem 'activesupport', '~> 5.0'
