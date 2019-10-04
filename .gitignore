@@ -9,3 +9,5 @@ spec/dummy/tmp/
 coverage/**
 .byebug_history
 Gemfile.lock
+.idea/
+logs/
