@@ -11,3 +11,4 @@ coverage/**
 Gemfile.lock
 .idea/
 logs/
+*.pid
