@@ -4,3 +4,5 @@
 require_relative 'config/application'
 
 Rails.application.load_tasks
+
+Mongoid.load! File.join(__dir__, 'config', 'mongoid.yml')
