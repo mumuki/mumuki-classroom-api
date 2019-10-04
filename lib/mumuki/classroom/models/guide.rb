@@ -1,6 +1,4 @@
-class Mumuki::Classroom::Guide
-
-  include Mongoid::Document
+class Mumuki::Classroom::Guide < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :slug, type: Mumukit::Auth::Slug

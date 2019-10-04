@@ -1,6 +1,4 @@
-class Mumuki::Classroom::Follower
-
-  include Mongoid::Document
+class Mumuki::Classroom::Follower < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :uids, type: Array

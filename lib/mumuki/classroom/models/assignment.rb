@@ -1,6 +1,4 @@
-class Mumuki::Classroom::Assignment
-
-  include Mongoid::Document
+class Mumuki::Classroom::Assignment < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :guide, type: Hash

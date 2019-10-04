@@ -1,6 +1,4 @@
-class Mumuki::Classroom::Suggestion
-
-  include Mongoid::Document
+class Mumuki::Classroom::Suggestion < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :sender, type: String

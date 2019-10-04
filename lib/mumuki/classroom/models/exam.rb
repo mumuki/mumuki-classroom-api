@@ -1,6 +1,4 @@
-class Mumuki::Classroom::Exam
-
-  include Mongoid::Document
+class Mumuki::Classroom::Exam < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :eid, type: String, default: -> { SecureRandom.hex(8) }

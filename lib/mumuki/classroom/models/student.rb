@@ -1,6 +1,4 @@
-class Mumuki::Classroom::Student
-
-  include Mongoid::Document
+class Mumuki::Classroom::Student < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :uid, type: String

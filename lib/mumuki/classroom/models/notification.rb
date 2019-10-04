@@ -1,6 +1,4 @@
-class Mumuki::Classroom::Notification
-
-  include Mongoid::Document
+class Mumuki::Classroom::Notification < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :organization, type: String

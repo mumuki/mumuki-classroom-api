@@ -1,6 +1,4 @@
-class Mumuki::Classroom::GuideProgress
-
-  include Mongoid::Document
+class Mumuki::Classroom::GuideProgress < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
   field :organization, type: String
