@@ -50,7 +50,7 @@ class Course
   end
 
   def self.import_from_json!(json)
-    json = Mumukit::Platform::Course::Helpers.slice_platform_json json
+    json = Mumukit::Platform::Course::Helpers.slice_resource_h json
     slug = json[:slug]
     json[:organization] = Mumukit::Auth::Slug.parse(json[:slug]).organization
     Course.where(slug: slug).first_or_create.update_attributes(json)
