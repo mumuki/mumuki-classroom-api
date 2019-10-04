@@ -1,8 +1,7 @@
-class Mumuki::Classroom::FailedSubmission
+class Mumuki::Classroom::FailedSubmission < Mumuki::Classroom::Document
 
   extend WithFailedSubmissionReprocess
 
-  include Mongoid::Document
   include Mongoid::Attributes::Dynamic
 
   field :created_at, type: Time

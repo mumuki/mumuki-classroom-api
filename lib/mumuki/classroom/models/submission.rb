@@ -1,9 +1,8 @@
 require 'net/http'
 
-class Mumuki::Classroom::Submission
+class Mumuki::Classroom::Submission < Mumuki::Classroom::Document
 
   extend WithSubmissionProcess
-  include Mongoid::Document
 
   field :sid, type: String
   field :content
