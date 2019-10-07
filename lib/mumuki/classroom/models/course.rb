@@ -1,8 +1,6 @@
 class Course
-
   include Mongoid::Document
   include Mongoid::Timestamps
-  include Mumukit::Platform::Course::Helpers
 
   field :slug, type: String
   field :name, type: String
@@ -49,12 +47,14 @@ class Course
     find_by(organization: course[:organization], slug: course[:slug]).present?
   end
 
+=begin
   def self.import_from_json!(json)
-    json = Mumukit::Platform::Course::Helpers.slice_resource_h json
+    json = Mumuki::Domain::Helpers::Course.slice_resource_h json
     slug = json[:slug]
     json[:organization] = Mumukit::Auth::Slug.parse(json[:slug]).organization
     Course.where(slug: slug).first_or_create.update_attributes(json)
   end
+=end
 
 end
 

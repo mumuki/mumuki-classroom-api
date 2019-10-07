@@ -4,7 +4,7 @@ class Mumuki::Classroom::Event::UserChanged
     attr_accessor :changes
 
     def execute!(user_h)
-      user = Mumukit::Platform::User::Helpers.slice_resource_h user_h.compact
+      user = User.slice_resource_h user_h.compact
       set_diff_permissions user
       update_user_model user.except(:permissions)
       User.import_from_resource_h! user # FIXME we must refactor events

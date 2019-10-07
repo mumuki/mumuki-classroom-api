@@ -65,7 +65,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     current_user.protect! :janitor, json_body[:slug]
     validate_organization_exists!
     course = Course.create! with_organization(json_body)
-    course.notify!
+    #course.notify!
     {status: :created}
   end
 
