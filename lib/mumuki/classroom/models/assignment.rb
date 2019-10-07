@@ -5,7 +5,7 @@ class Mumuki::Classroom::Assignment < Mumuki::Classroom::Document
   field :student, type: Hash
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
-  embeds_one :exercise
+  embeds_one :exercise, class_name: 'Mumuki::Classroom::Exercise'
   embeds_many :submissions, class_name: 'Mumuki::Classroom::Submission'
 
   create_index({'organization': 1, 'course': 1, 'student.uid': 1})
