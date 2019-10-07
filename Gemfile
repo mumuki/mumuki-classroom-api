@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-ruby '~> 2.3'
+ruby '~> 2.6'
 
 gem 'puma', '~> 3.7'
 
