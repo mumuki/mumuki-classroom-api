@@ -24,7 +24,7 @@ echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3
 sudo apt-get update &&
 apt-get remove --purge mongo* -y &&
 apt-get autoremove -y &&
-apt-get install mongodb-org -y &&
+apt-get install mongodb-org -y
 ```
 
 And then `reboot` your machine.  
