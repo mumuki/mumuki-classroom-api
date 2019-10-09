@@ -29,6 +29,11 @@ helpers do
     {organization: organization}.merge hash
   end
 
+  # FIXME only provisional
+  def with_current_organization(hash = {})
+    {organization: current_organization}.merge hash.except(:organization)
+  end
+
   def with_organization_and_course(hash = {})
     with_organization.merge(course: course_slug).merge hash
   end
@@ -94,7 +99,7 @@ helpers do
   end
 
   def ensure_course_existence!
-    Course.ensure_exist! with_organization(slug: course_slug)
+    Course.locate! course_slug
   end
 
   def ensure_student_not_exists!

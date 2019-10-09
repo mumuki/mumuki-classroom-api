@@ -17,9 +17,6 @@ require_relative './models/guide'
 require_relative './models/exam'
 require_relative './models/notification'
 require_relative './models/suggestion'
-require_relative './models/invitation'
-
-require_relative './models/course'
 
 require_relative './models/sorting'
 require_relative './models/searching'

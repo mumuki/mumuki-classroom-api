@@ -50,8 +50,8 @@ describe Mumuki::Classroom::Event::UserChanged do
 
     context 'update models' do
 
-      before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
-      before { Course.create! organization: 'example.org', slug: 'example.org/bar' }
+      let!(:course) { create(:course, slug: 'example.org/foo') }
+      let!(:course) { create(:course, slug: 'example.org/bar') }
       before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
@@ -122,8 +122,8 @@ describe Mumuki::Classroom::Event::UserChanged do
                                                }) }
       let(:event2) { user2.merge(last_name: 'Otro', permissions: old_permissions) }
       before { User.create! uid: uid2, permissions: old_permissions }
-      before { Course.create! organization: 'example.org', slug: 'example.org/foo' }
-      before { Course.create! organization: 'example.org', slug: 'example.org/bar' }
+      let!(:course) { create(:course, slug: 'example.org/foo') }
+      let!(:course) { create(:course, slug: 'example.org/bar') }
       before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Mumuki::Classroom::Student.create! user2.merge(organization: 'example.org', course: 'example.org/foo') }
       before { Mumuki::Classroom::Submission.process!(agus_submission) }

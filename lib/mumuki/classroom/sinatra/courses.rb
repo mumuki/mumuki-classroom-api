@@ -1,6 +1,6 @@
 helpers do
   def allowed_courses(permissions)
-    {courses: Course.allowed(organization, permissions).as_json}
+    {courses: Course.allowed(current_organization, permissions).as_json}
   end
 
   def guide_progress_query
@@ -63,8 +63,12 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses' do
     current_user.protect! :janitor, json_body[:slug]
+<<<<<<< HEAD
     validate_organization_exists!
     course = Course.create! with_organization(json_body)
+=======
+    Course.create! with_current_organization(json_body)
+>>>>>>> Removing course and invitation model and used updated domain
     #course.notify!
     {status: :created}
   end

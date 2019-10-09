@@ -30,7 +30,7 @@ class Mumuki::Classroom::Submission < Mumuki::Classroom::Document
 
   def expectation_results
     self[:expectation_results]&.map do |expectation|
-      {html: Mumukit::Inspection::Expectation.parse(expectation).translate, result: expectation['result']}
+      {html: Mulang::Inspection::Expectation.parse(expectation).translate, result: expectation['result']}
     end
   end
 

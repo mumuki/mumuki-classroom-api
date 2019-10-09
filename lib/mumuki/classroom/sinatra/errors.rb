@@ -1,11 +1,3 @@
-error Mumuki::Classroom::CourseExistsError do
-  halt 400
-end
-
-error Mumuki::Classroom::CourseNotExistsError do
-  halt 400
-end
-
 error Mumuki::Classroom::StudentExistsError do
   halt 400
 end

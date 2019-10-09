@@ -3,6 +3,7 @@ require 'spec_helper'
 describe Course do
 
   let(:except_fields) { {except: [:created_at, :updated_at, :_id]} }
+  let!(:organization) { create(:organization, name: 'example.org') }
 
   describe 'get /courses/' do
     before { header 'Authorization', build_auth_header('*') }
@@ -15,8 +16,7 @@ describe Course do
     end
 
     context 'when there are courses' do
-      let(:course) { {name: 'foo', slug: 'test/foo', description: 'baz', organization: 'example.org'} }
-      before { Course.create!(course) }
+      let!(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
       before { get '/courses' }
 
       it { expect(last_response).to be_ok }
@@ -25,13 +25,14 @@ describe Course do
   end
 
   describe 'post /courses' do
-    let(:course) { {code: 'K2001',
+    let(:new_course) { {code: 'K2001',
                     days: %w(monday saturday),
                     period: '2016',
                     shifts: ['morning'],
                     description: 'haskell',
                     organization: 'example.org',
                     slug: 'example.org/2016-K2001'} }
+    let(:new_course_slug) { new_course[:slug] }
     let(:created_slug) { Course.last.slug }
 
     let!(:orga) { Organization.create! name: 'example.org', profile: { locale: 'es' } }
@@ -39,7 +40,7 @@ describe Course do
     context 'when is normal teacher' do
       context 'rejects course creation' do
         before { header 'Authorization', build_auth_header('test/my-course') }
-        before { post '/courses', course.to_json }
+        before { post '/courses', new_course.to_json }
 
         it { expect(last_response).to_not be_ok }
         it { expect(Course.count).to eq 0 }
@@ -48,7 +49,7 @@ describe Course do
 
     context 'when is org admin' do
       before { header 'Authorization', build_auth_header('example.org/*') }
-      before { post '/courses', course.to_json }
+      before { post '/courses', new_course.to_json }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
@@ -58,7 +59,7 @@ describe Course do
 
     context 'when is global admin' do
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/courses', course.to_json }
+      before { post '/courses', new_course.to_json }
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
@@ -67,37 +68,37 @@ describe Course do
     end
 
     context 'when course already exists' do
-      before { Course.create! course }
+      let!(:course) { create(:course, slug: new_course_slug) }
       before { header 'Authorization', build_auth_header('*') }
-      before { post '/courses', course.to_json }
+      before { post '/courses', new_course.to_json }
 
       it { expect(Course.count).to eq 1 }
       it { expect(last_response).to_not be_ok }
-      it { expect(last_response.status).to eq 422 }
+      it { expect(last_response.status).to eq 400 } #RecordInvalid
     end
 
     context 'create course does not create invitation link' do
-      let(:created) { Course.create! course }
+      let(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
 
-      it { expect(created.invitation).to be nil }
+      it { expect(course.current_invitation).to be nil }
     end
 
     context 'create invitation link to existing course' do
-      let(:time) { Time.now + 10.minutes }
-      let(:created) { Course.create! course }
-      let(:invitation) { created.invitation_link! time }
+      let(:time) { 10.minutes.since }
+      let(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
+      let(:invitation) { course.invitation_link! time }
 
       it { expect(invitation).to be_truthy }
-      it { expect(invitation.expiration_date).to eq time }
-      it { expect(invitation.course_slug).to eq created.slug }
+      it { expect(invitation.expiration_date).to be_within(1.second).of time }
+      it { expect(invitation.course_slug).to eq course.slug }
       it { expect(invitation.code.length).to eq 6 }
     end
 
     context 'should not create invitation link if already exists and is not expired' do
-      let(:time) { Time.now + 10.minutes }
-      let(:created) { Course.create!(course) }
-      let(:invitation) { created.invitation_link! time }
-      let(:invitation2) { created.invitation_link! time + 20.minutes }
+      let(:time) { 10.minutes.since }
+      let(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
+      let(:invitation) { course.invitation_link! time }
+      let(:invitation2) { course.invitation_link! time + 20.minutes }
 
       it { expect(invitation.code).to eq invitation2.code }
       it { expect(invitation.course_slug).to eq invitation2.course_slug }
@@ -105,12 +106,12 @@ describe Course do
     end
 
     context 'should not create invitation link if expired date is in past' do
-      let!(:time) { Time.now }
+      let!(:time) { DateTime.current }
+      let(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
 
-      let(:created) { Course.create!(course) }
-      let(:invitation) { created.invitation_link! time - 10 }
+      let(:invitation) { course.invitation_link! time - 10 }
 
-      it { expect { invitation }.to raise_error("Must be in future") }
+      it { expect(invitation).to be_nil }
     end
 
     context 'should forbid creating course if organization does not exist' do
