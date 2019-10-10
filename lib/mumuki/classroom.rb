@@ -18,6 +18,7 @@ require 'mongoid'
 require 'mumuki/domain'
 require 'mumukit/login'
 require 'mumukit/nuntius'
+require 'mumukit/inspection'
 
 I18n.load_translations_path File.join(__dir__, 'config', 'locales', '*.yml')
 
@@ -30,6 +31,7 @@ require_relative './classroom/reports'
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 
+Mulang::Inspection.register_extension! Mumukit::Inspection::Css
 
 module Mumukit::Platform::User
   # FIXME remove this method
