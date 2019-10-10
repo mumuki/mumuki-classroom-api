@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'sinatra', '~> 2.0'
   s.add_dependency 'sinatra-contrib', '~> 2.0'
   s.add_dependency 'sinatra-cross_origin', '~> 0.3.1'
+  s.add_dependency 'sprockets', '~> 3.7'
 
   s.add_dependency 'mumuki-domain', '~> 7.0.0'
   s.add_dependency 'mumukit-login', '~> 7.0'
