@@ -268,6 +268,7 @@ describe Mumuki::Classroom::Student do
         end
 
         context 'when authenticated' do
+          let!(:course) { create(:course, slug: 'example.org/foo') }
           before { header 'Authorization', build_auth_header('*') }
 
           context 'should publish in resubmissions queue' do
@@ -293,7 +294,8 @@ describe Mumuki::Classroom::Student do
               it { expect(last_response.status).to eq 400 }
               it { expect(last_response.body).to json_eq(message: 'Mumuki::Classroom::Student already exist') }
             end
-            context 'in different course, should works' do
+            context 'in different course, should work' do
+              let!(:course) { create(:course, slug: 'example.org/bar') }
               before { header 'Authorization', build_auth_header('*', 'auth1') }
               before { post '/courses/bar/students', student_json }
 
@@ -336,7 +338,7 @@ describe Mumuki::Classroom::Student do
         context 'when authenticated' do
           before { header 'Authorization', build_auth_header('*') }
 
-          context 'should publish int resubmissions queue' do
+          context 'should publish in resubmissions queue' do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
@@ -359,7 +361,7 @@ describe Mumuki::Classroom::Student do
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
-          context 'should not publish int resubmissions queue' do
+          context 'should not publish in resubmissions queue' do
             before { post '/courses/foo/students', student_json }
             before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
             context 'and user already exists by uid' do
