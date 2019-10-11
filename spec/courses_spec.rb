@@ -86,7 +86,7 @@ describe Course do
     context 'create invitation link to existing course' do
       let(:time) { 10.minutes.since }
       let(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
-      let(:invitation) { course.invitation_link! time }
+      let(:invitation) { course.invite! time }
 
       it { expect(invitation).to be_truthy }
       it { expect(invitation.expiration_date).to be_within(1.second).of time }
@@ -97,19 +97,19 @@ describe Course do
     context 'should not create invitation link if already exists and is not expired' do
       let(:time) { 10.minutes.since }
       let(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
-      let(:invitation) { course.invitation_link! time }
-      let(:invitation2) { course.invitation_link! time + 20.minutes }
+      let(:invitation) { course.invite! time }
+      let(:invitation2) { course.invite! time + 20.minutes }
 
       it { expect(invitation.code).to eq invitation2.code }
       it { expect(invitation.course_slug).to eq invitation2.course_slug }
-      it { expect(invitation.expiration_date).to eq invitation2.expiration_date }
+      it { expect(invitation.expiration_date).to be_within(1.second).of invitation2.expiration_date }
     end
 
-    context 'should not create invitation link if expired date is in past' do
-      let!(:time) { DateTime.current }
+    context 'should not create invitation link if expired date is in the past' do
+      let(:time) { DateTime.current }
       let(:course) { create(:course, slug: "#{organization.name}/awesome-code") }
 
-      let(:invitation) { course.invitation_link! time - 10 }
+      let(:invitation) { course.invite!(time - 2.minutes) }
 
       it { expect(invitation).to be_nil }
     end
