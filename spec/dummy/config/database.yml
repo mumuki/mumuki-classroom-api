@@ -6,15 +6,14 @@ common: &common
   username: mumuki
   password: mumuki
 
+development:
+  <<: *common
+  database: mumuki_classroom_development
+  pool: 5
+  timeout: 5000
+
 test:
   <<: *common
   database: mumuki_classroom_test
   pool: 5
   timeout: 5000
-
-development:
-  <<: *common
-  database: mumuki_classroom_integration
-  pool: 5
-  timeout: 5000
-
