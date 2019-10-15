@@ -145,6 +145,13 @@ helpers do
     params[:order_by] || :asc
   end
 
+  def csv_projection_for(projection)
+    projection.transform_values do |val|
+      next val if val == 0
+      { '$ifNull': [val, nil] }
+    end
+  end
+
   def group_report_projection
     {
       '_id': 0,
@@ -167,6 +174,7 @@ helpers do
   end
 
   def group_report(matcher, projection)
+    projection = csv_projection_for projection
     aggregation = Student.where(matcher).project(projection)
     pipeline_with_sort_criterion = aggregation.pipeline << {'$sort': {passed_count: -1, passed_with_warnings_count: -1, failed_count: -1, last_name: 1, first_name: 1}}
     json = Student.collection.aggregate(pipeline_with_sort_criterion).as_json
