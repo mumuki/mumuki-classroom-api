@@ -64,13 +64,13 @@ describe Mumuki::Classroom::Student do
 
   describe do
 
-    before { create_student!.call student1 }
-    before { create_student!.call student2 }
+    before { example_students.call student1 }
+    before { example_students.call student2 }
 
-    before { create_assignment!.call exercise1 }
-    before { create_assignment!.call exercise2 }
-    before { create_assignment!.call exercise3 }
-    before { create_assignment!.call exercise4 }
+    before { example_student_progresses.call exercise1 }
+    before { example_student_progresses.call exercise2 }
+    before { example_student_progresses.call exercise3 }
+    before { example_student_progresses.call exercise4 }
 
     describe '#report' do
       let(:report) { Mumuki::Classroom::Student.report({organization: 'example.org', course: 'example.org/example'}) }
@@ -103,9 +103,9 @@ describe Mumuki::Classroom::Student do
       before { Mumuki::Classroom::Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/example') }
       before { Mumuki::Classroom::Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/example') }
 
-      before { create_student_guide_progress!.call guide_student_progress1 }
-      before { create_student_guide_progress!.call guide_student_progress2 }
-      before { create_student_guide_progress!.call guide_student_progress3 }
+      before { example_guide_student_progresses.call guide_student_progress1 }
+      before { example_guide_student_progresses.call guide_student_progress2 }
+      before { example_guide_student_progresses.call guide_student_progress3 }
 
       before { Mumuki::Classroom::Student.find_by!(uid: 'github|123456').destroy_cascade! }
 
@@ -195,7 +195,7 @@ describe Mumuki::Classroom::Student do
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
-      before { create_student!.call student1 }
+      before { example_students.call student1 }
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example.org/*') }
@@ -210,7 +210,7 @@ describe Mumuki::Classroom::Student do
 
     describe 'post /courses/:course/students/:student_id/attach' do
 
-      before { create_student!.call student1.merge(detached: true, detached_at: Time.now) }
+      before { example_students.call student1.merge(detached: true, detached_at: Time.now) }
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example.org/*') }
@@ -487,10 +487,10 @@ describe Mumuki::Classroom::Student do
         passed_with_warnings: 1
       }
     } }
-    before { Student.create! student }
-    before { Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
-    before { Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2}, course: 'example.org/bar' }
-    before { Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', personal_id: '2222', stats: {failed: 27, passed: 120, passed_with_warnings: 1}, course: 'example.org/bar' }
+    before { Mumuki::Classroom::Student.create! student }
+    before { Mumuki::Classroom::Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
+    before { Mumuki::Classroom::Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2}, course: 'example.org/bar' }
+    before { Mumuki::Classroom::Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', personal_id: '2222', stats: {failed: 27, passed: 120, passed_with_warnings: 1}, course: 'example.org/bar' }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/students/report' }
     it do

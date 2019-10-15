@@ -11,7 +11,7 @@ helpers do
 
   def list_students(matcher)
     authorize! :teacher
-    count, students = Sorting.aggregate(Student, with_detached_and_search(matcher, Student), paginated_params, query_params)
+    count, students = Sorting.aggregate(Mumuki::Classroom::Student, with_detached_and_search(matcher, Mumuki::Classroom::Student), paginated_params, query_params)
     { page: page + 1, total: count, students: students }
   end
 end

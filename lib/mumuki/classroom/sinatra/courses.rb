@@ -47,8 +47,8 @@ helpers do
     end
   end
 
-  def validate_organization_exists!
-    raise Classroom::OrganizationNotExistsError unless Organization.find_by name: organization
+  def ensure_organization_existence!
+    Organization.locate! organization
   end
 end
 
@@ -63,12 +63,8 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses' do
     current_user.protect! :janitor, json_body[:slug]
-<<<<<<< HEAD
-    validate_organization_exists!
-    course = Course.create! with_organization(json_body)
-=======
+    ensure_organization_existence!
     Course.create! with_current_organization(json_body)
->>>>>>> Removing course and invitation model and used updated domain
     #course.notify!
     {status: :created}
   end

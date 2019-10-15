@@ -26,7 +26,7 @@ describe Mumuki::Classroom::FailedSubmission do
     end
 
     context 'and submission.process! works' do
-      before { expect(Mumuki::Classroom::Submission).to receive(:process!).exactly(3).times }
+      before { expect(Mumuki::Classroom::Submission).to receive(:process!).exactly(2).times }
       before { expect(Mumuki::Classroom::FailedSubmission).to_not receive(:create!) }
       before { Mumuki::Classroom::FailedSubmission.reprocess!(submitter[:uid], :example) }
 
@@ -44,10 +44,10 @@ describe Mumuki::Classroom::FailedSubmission do
 
     context 'and submission.process! does not work one time' do
       before { expect(Mumuki::Classroom::Submission).to receive(:process!).once.and_raise(StandardError) }
-      before { expect(Mumuki::Classroom::Submission).to receive(:process!).twice }
+      before { expect(Mumuki::Classroom::Submission).to receive(:process!).once }
       before { Mumuki::Classroom::FailedSubmission.reprocess!('github|123456', :example) }
 
-      it { expect(central_count).to eq(1) }
+      it { expect(central_count).to eq(2) }
       it { expect(example_count).to eq(1) }
     end
 

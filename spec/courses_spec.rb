@@ -3,7 +3,8 @@ require 'spec_helper'
 describe Course do
 
   let(:except_fields) { {except: [:created_at, :updated_at, :_id]} }
-  let!(:organization) { create(:organization, name: 'example.org') }
+  let(:book) { create(:book) }
+  let!(:organization) { create(:organization, name: 'example.org', book: book) }
 
   describe 'get /courses/' do
     before { header 'Authorization', build_auth_header('*') }
@@ -34,8 +35,6 @@ describe Course do
                     slug: 'example.org/2016-K2001'} }
     let(:new_course_slug) { new_course[:slug] }
     let(:created_slug) { Course.last.slug }
-
-    let!(:orga) { Organization.create! name: 'example.org', profile: { locale: 'es' } }
 
     context 'when is normal teacher' do
       context 'rejects course creation' do
@@ -116,12 +115,12 @@ describe Course do
 
     context 'should forbid creating course if organization does not exist' do
       before { header 'Authorization', build_auth_header('*') }
-      before { orga.destroy! }
-      before { post '/courses', course.merge(organization: 'foobar').to_json }
+      before { organization.destroy! }
+      before { post '/courses', new_course.merge(organization: 'foobar').to_json }
 
       it { expect(Course.count).to eq 0 }
       it { expect(last_response).to_not be_ok }
-      it { expect(last_response.status).to eq 400 }
+      it { expect(last_response.status).to eq 404 }
     end
   end
 
@@ -150,7 +149,7 @@ describe Course do
           number: 1,
         },
         guide: {
-          name: 'Mumuki::Classroom::Exam Test',
+          name: 'Exam Test',
           slug: 'foo/bar',
           parent: {
             type: 'Exam',
@@ -174,7 +173,8 @@ describe Course do
         passed: 117,
         passed_with_warnings: 1
       }
-    } }
+    }}
+
     before { Mumuki::Classroom::Student.create! student }
     before { Mumuki::Classroom::Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
     before { Mumuki::Classroom::Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2} }
@@ -207,5 +207,4 @@ TEST
       end
     end
   end
-
 end
