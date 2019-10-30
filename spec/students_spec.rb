@@ -57,10 +57,27 @@ describe Mumuki::Classroom::Student do
       {status: 'passed_with_warnings', created_at: date + 2.minutes}
     ]
   } }
-  let(:example_students) { -> (student) { Mumuki::Classroom::Student.create!(student.merge(organization: 'example.org', course: 'example.org/example')) } }
+
+  let(:example_students) {
+    -> (student) {
+      new_student = student.merge(organization: 'example.org', course: 'example.org/example')
+      Mumuki::Classroom::Student.create! new_student
+    }
+  }
+
   let(:students) { Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/example') }
-  let(:example_student_progresses) { -> (exercise) { Mumuki::Classroom::Assignment.create! exercise.merge(organization: 'example.org', course: 'example.org/example') } }
-  let(:example_guide_student_progresses) { -> (guide_progress) { Mumuki::Classroom::GuideProgress.create! guide_progress.merge organization: 'example.org', course: 'example.org/example' } }
+
+  let(:example_student_progresses) {
+    -> (exercise) {
+      Mumuki::Classroom::Assignment.create! exercise.merge(organization: 'example.org', course: 'example.org/example')
+    }
+  }
+
+  let(:example_guide_student_progresses) {
+    -> (guide_progress) {
+      Mumuki::Classroom::GuideProgress.create! guide_progress.merge organization: 'example.org', course: 'example.org/example'
+    }
+  }
 
   describe do
 
@@ -113,8 +130,6 @@ describe Mumuki::Classroom::Student do
       it { expect(students.size).to eq 1 }
       it { expect(guide_students_progress.size).to eq 1 }
       it { expect(Mumuki::Classroom::Assignment.count).to eq 1 }
-
-
     end
 
   end
