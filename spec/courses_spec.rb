@@ -175,6 +175,8 @@ describe Course do
       }
     }}
 
+    let(:student) { full_student }
+
     before { Mumuki::Classroom::Student.create! student }
     before { Mumuki::Classroom::Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
     before { Mumuki::Classroom::Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2} }
