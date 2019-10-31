@@ -242,9 +242,13 @@ describe Mumuki::Classroom::Student do
     describe 'post /courses/:course/students/:student_id/transfer' do
 
       before { example_students.call student1 }
+      before { example_student_progresses.call exercise1 }
+      before { example_student_progresses.call exercise2 }
+      before { example_guide_student_progresses.call guide_student_progress1 }
+      before { example_guide_student_progresses.call guide_student_progress2 }
 
-      let(:fetched_guide_progresses) { Mumuki::Classroom::GuideProgress.where(student: student1).to_a }
-      let(:fetched_assignments) { Mumuki::Classroom::Assignment.where(student: student1).to_a }
+      let(:fetched_guide_progresses) { Mumuki::Classroom::GuideProgress.where('student.uid': student1[:uid]).to_a }
+      let(:fetched_assignments) { Mumuki::Classroom::Assignment.where('student.uid': student1[:uid]).to_a }
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('*/*') }
@@ -255,13 +259,13 @@ describe Mumuki::Classroom::Student do
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to eq({:status => :updated}.to_json) }
         it { expect(fetched_student.organization).to eq 'some_orga' }
-        it { expect(fetched_student.course).to eq 'some_course' }
+        it { expect(fetched_student.course).to eq 'some_orga/some_course' }
 
         it { expect(fetched_guide_progresses.count).to eq 2 }
-        it { expect(fetched_guide_progresses.first.as_json).to json_like({ organization: 'some_orga', course: 'some_course' }, only_fields) }
+        it { expect(fetched_guide_progresses.first.as_json).to json_like({ organization: 'some_orga', course: 'some_orga/some_course' }, only_fields) }
         it { pending(fetched_guide_progresses.last.as_json).to json_like({ organization: 'example.org', course: 'example.org/example' }, only_fields) }
         it { expect(fetched_assignments.count).to eq 2 }
-        it { expect(fetched_assignments.first.as_json).to json_like({ organization: 'some_orga', course: 'some_course' }, only_fields) }
+        it { expect(fetched_assignments.first.as_json).to json_like({ organization: 'some_orga', course: 'some_orga/some_course' }, only_fields) }
         it { pending(fetched_assignments.last.as_json).to json_like({organization: 'example.org', course: 'example.org/example' }, only_fields) }
       end
 
