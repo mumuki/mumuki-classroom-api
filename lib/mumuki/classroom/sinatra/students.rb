@@ -74,7 +74,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     authorize_for! :janitor, slug
 
-    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.course
+    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.to_s
 
     update_and_notify_student_metadata(uid, 'update', course_slug, json_body[:slug])
     {status: :updated}
