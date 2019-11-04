@@ -81,6 +81,13 @@ class Student
     def ensure_not_exists!(query)
       raise Classroom::StudentExistsError, 'Student already exist' if Student.where(query).exists?
     end
+
+    def detach_all_by!(uids, query)
+      where(query).in(uid: uids).update_all(detached: true, detached_at: Time.now)
+      criteria = query.merge('student.uid': {'$in': uids})
+      Assignment.detach_all_by! criteria
+      GuideProgress.detach_all_by! criteria
+    end
   end
 
 end
