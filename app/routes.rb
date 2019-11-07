@@ -102,7 +102,10 @@ helpers do
   end
 
   def update_and_notify_student_metadata(uid, method, *slugs)
-    user = User.find_by_uid!(uid)
+    update_and_notify_user_metadata(User.find_by_uid!(uid), method, *slugs)
+  end
+
+  def update_and_notify_user_metadata(user, method, *slugs)
     permissions = user.permissions
     permissions.send("#{method}_permission!", 'student', *slugs)
     user.upsert_permissions! permissions
@@ -148,7 +151,7 @@ helpers do
   def csv_projection_for(projection)
     projection.transform_values do |val|
       next val if val == 0
-      { '$ifNull': [val, nil] }
+      {'$ifNull': [val, nil]}
     end
   end
 
