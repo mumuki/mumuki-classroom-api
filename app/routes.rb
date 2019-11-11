@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'sinatra/namespace'
 require 'sinatra/cross_origin'
 require 'mumukit/service/routes'
 
