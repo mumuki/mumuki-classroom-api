@@ -101,7 +101,7 @@ describe Exam do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}}.stringify_keys }
     let(:exam_fetched) { Exam.last }
-    let(:exam_uids) { {uids: ['user_uid_1', 'user_uid_2'] } }
+    let(:exam_uids) { {uids: [1..100].map { |it| "user_uid_#{it}"} } }
     let(:uids) { exam_uids[:uids] }
 
     context 'when existing exam' do
