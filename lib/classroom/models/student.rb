@@ -79,7 +79,9 @@ class Student
     end
 
     def ensure_not_exists!(query)
-      raise Classroom::StudentExistsError, 'Student already exist' if Student.where(query).exists?
+      students = Student.where(query)
+
+      raise Classroom::StudentExistsError, {foo: "baz"}.to_json if Student.where(query).exists?
     end
 
     def detach_all_by!(uids, query)

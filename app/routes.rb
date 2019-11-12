@@ -90,6 +90,11 @@ helpers do
     Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
   end
 
+  def ensure_students_not_exists!
+    students_uids = students.map { |it| it[:email] }
+    Student.ensure_not_exists! with_organization_and_course(uid: {'$in': students_uids })
+  end
+
   def set_locale!
     I18n.locale = current_organization.locale
   end
