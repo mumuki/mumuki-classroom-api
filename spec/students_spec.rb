@@ -197,10 +197,26 @@ describe Student do
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example.org/*') }
-        before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
+        before { post '/courses/example/students/github%7C123456/detach' }
 
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to json_eq status: :updated }
+        it { expect(fetched_student.detached).to eq true }
+      end
+
+    end
+
+    describe 'post api/courses/:course/massive/students/detach' do
+
+      before { create_student!.call student1 }
+      let(:detached_uids) { {uids: ['github|123456']} }
+
+      context 'should transfer student to destination and transfer all his data' do
+        before { header 'Authorization', build_auth_header('example.org/*') }
+        before { post '/api/courses/example/massive/students/detach', detached_uids.to_json }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_eq(status: :updated, processed_count: 1, processed: detached_uids[:uids]) }
         it { expect(fetched_student.detached).to eq true }
       end
 
