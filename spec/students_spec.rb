@@ -324,7 +324,8 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+
             end
             context 'in different course, should works' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -400,7 +401,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
             context 'and user already exists by email' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -408,7 +409,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Student already exist') }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
           end
         end
@@ -427,6 +428,44 @@ describe Student do
           expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
         end
       end
+    end
+
+    describe 'post api/courses/massive/:course/students' do
+      let(:students) do
+        (1.. 120).map do |it|
+          {first_name: "first_name_#{it}", last_name: "last_name_#{it}", email: "email_#{it}@fake.com"}
+        end
+      end
+      let(:students_uids) { students.map { |it| it[:email] } }
+      let(:students_json) { {students: students}.to_json }
+
+      context 'when course exists' do
+        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+
+        context 'when authenticated' do
+          before { header 'Authorization', build_auth_header('*') }
+
+          context 'and users do not exist' do
+            before { expect(Mumukit::Nuntius).to receive(:notify!).exactly(100).times }
+            before { post 'api/courses/foo/massive/students', students_json }
+
+            it { expect(last_response).to be_ok }
+            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
+            it { expect(Student.in(uid: students_uids).count).to eq 100 }
+          end
+
+          context 'and some users do exist' do
+            before { Student.create(organization: 'example.org', course: 'example.org/foo', uid: students[99][:email]) }
+            before { post 'api/courses/foo/massive/students', students_json }
+
+            it { expect(last_response).to_not be_ok }
+            it { expect(last_response.body).to json_eq(existing_students: ["email_100@fake.com"]) }
+            it { expect(Student.in(uid: students_uids).count).to eq 1 }
+          end
+        end
+
+      end
+
     end
   end
 
