@@ -61,7 +61,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     end
 
     post '/students' do
-      #authorize! :janitor
+      authorize! :janitor
       ensure_course_existence!
       ensure_students_not_exist!
       create_students!
