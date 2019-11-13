@@ -63,7 +63,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     post '/students' do
       #authorize! :janitor
       ensure_course_existence!
-      ensure_students_not_exists!
+      ensure_students_not_exist!
       create_students!
       upsert_users!
       {status: :created, processed: students, processed_count: students.size}
