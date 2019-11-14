@@ -32,8 +32,38 @@ class User
     user.upsert_permissions! permissions
   end
 
+  def self.from_student_json(student_json)
+    new student_json.except(:first_name, :last_name, :personal_id)
+  end
+
+  def self.bulk_permissions_update(users, role, course_slug)
+    updated_users = users.map do |user|
+      user.as_bulk_permissions_update(role, course_slug)
+    end
+    User.collection.bulk_write(updated_users)
+  end
+
   def upsert_permissions!(permissions)
     self.update! permissions: permissions.as_json
+  end
+
+  def as_bulk_permissions_update(role, course_slug)
+    add_permission!(role, course_slug)
+    { update_one:
+        {
+          filter: { uid: uid },
+          update: { :'$set' => {
+            permissions: permissions.as_json
+          }}
+        }
+    }
+
+  end
+
+  def add_permission!(role, course_slug)
+    new_permissions = permissions
+    new_permissions.add_permission!(role, course_slug)
+    self.permissions = new_permissions.as_json
   end
 
   def permissions

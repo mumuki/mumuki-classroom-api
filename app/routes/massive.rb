@@ -18,18 +18,27 @@ helpers do
 
   def create_students!
     normalize_students!
-    Student.create(students.map { |student| with_organization_and_course student })
+    Student.collection.insert_many(students.map { |student| with_organization_and_course student })
   end
 
   def upsert_users!
-    students.each do |student|
-      uid = student[:uid]
-      perm = User.where(uid: uid).first_or_create!(student.except(:first_name, :last_name, :personal_id)).permissions
-      perm.add_permission!(:student, course_slug)
-      User.upsert_permissions! uid, perm
+    new_students_uids = students.map { |it| it[:uid] }
+    existing_users = User.in(uid: new_students_uids).to_a
+    new_users = new_students_uids - existing_users.map { |it| it[:uid] }
 
-      Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-      Mumukit::Nuntius.notify_event! 'UserChanged', user: student.except(:personal_id).merge(permissions: perm)
+    new_students = students.select { |it| new_users.include? it[:uid] }.map do |it|
+      User.from_student_json(it).tap do |new_user|
+        new_user.add_permission!(:student, course_slug)
+      end
+    end
+
+    User.collection.insert_many(new_students.as_json)
+
+    User.bulk_permissions_update existing_users, :student, course_slug
+
+    (new_students + existing_users).each do |it|
+      it.notify!
+      Mumukit::Nuntius.notify! 'resubmissions', uid: it.uid, tenant: tenant
     end
   end
 end
@@ -72,6 +81,13 @@ Mumukit::Platform.map_organization_routes!(self) do
     post '/students/detach' do
       authorize! :janitor
       Student.detach_all_by! uids, with_organization_and_course
+      User.in(uid: uids).each { |uid| update_and_notify_user_metadata(uid, 'remove', course_slug) }
+      {status: :updated, processed_count: uids.size, processed: uids}
+    end
+
+    post '/students/attach' do
+      authorize! :janitor
+      Student.attach_all_by! uids, with_organization_and_course
       User.in(uid: uids).each { |uid| update_and_notify_user_metadata(uid, 'add', course_slug) }
       {status: :updated, processed_count: uids.size, processed: uids}
     end

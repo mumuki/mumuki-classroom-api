@@ -90,6 +90,13 @@ class Student
       Assignment.detach_all_by! criteria
       GuideProgress.detach_all_by! criteria
     end
+
+    def attach_all_by!(uids, query)
+      where(query).in(uid: uids).unset(:detached, :detached_at)
+      criteria = query.merge('student.uid': {'$in': uids})
+      Assignment.attach_all_by! criteria
+      GuideProgress.attach_all_by! criteria
+    end
   end
 
 end

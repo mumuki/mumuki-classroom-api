@@ -459,9 +459,7 @@ describe Student do
             before do
               students_uids.take(50).map do |it|
                 user = User.create(uid: it)
-                new_perm = user.permissions
-                new_perm.add_permission! :student, 'example.org/foo2'
-                user.permissions = new_perm.as_json
+                user.add_permission! :student, 'example.org/foo2'
                 user.save!
                 Student.create(organization: 'example.org', course: 'example.org/foo2', uid: it)
               end
