@@ -313,6 +313,7 @@ describe Student do
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
               it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              pending { expect(User.where(uid: student[:email]).to_a).to eq student_json } #TODO: find out why user isn't created with all params
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
@@ -370,7 +371,7 @@ describe Student do
         context 'when authenticated' do
           before { header 'Authorization', build_auth_header('*') }
 
-          context 'should publish int resubmissions queue' do
+          context 'should publish in resubmissions queue' do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
@@ -455,6 +456,28 @@ describe Student do
           end
 
           context 'and some users do exist' do
+            before do
+              students_uids.take(50).map do |it|
+                user = User.create(uid: it)
+                new_perm = user.permissions
+                new_perm.add_permission! :student, 'example.org/foo2'
+                user.permissions = new_perm.as_json
+                user.save!
+                Student.create(organization: 'example.org', course: 'example.org/foo2', uid: it)
+              end
+            end
+            before { expect(Mumukit::Nuntius).to receive(:notify!).exactly(100).times }
+            before { post 'api/courses/foo/massive/students', students_json }
+
+            it { expect(last_response).to be_ok }
+            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
+            it { expect(Student.in(uid: students_uids).where(organization: 'example.org', course: 'example.org/foo').count).to eq 100 }
+            it { expect(User.in(uid: students_uids).count).to eq 100 }
+            it { expect(User.in(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo') }.count).to eq 100 }
+            it { expect(User.in(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo2') }.count).to eq 50 }
+          end
+
+          context 'and some students do exist' do
             before { Student.create(organization: 'example.org', course: 'example.org/foo', uid: students[99][:email]) }
             before { post 'api/courses/foo/massive/students', students_json }
 
