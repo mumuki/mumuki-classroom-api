@@ -58,7 +58,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
       count = progress.count
       guide_progress = progress.select(&:student)
-                         .map { |it| {student: it.student.uid, guide: it.guide.slug, progress: it} }
+                         .map { |it| {student: it.student.uid, guide: it.guide.slug, progress: it.as_json.except(:student, :guide)} }
 
       {
         page: page + 1,

@@ -215,7 +215,7 @@ TEST
 
   def as_massive_result(guide_student_progress)
     guide_student_progress.map do |it|
-      {student: it[:student][:uid], guide: it[:guide][:slug], progress: it}
+      {student: it[:student][:uid], guide: it[:guide][:slug], progress: it.except(:guide, :student)}
     end
   end
 
