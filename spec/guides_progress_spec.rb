@@ -213,4 +213,25 @@ TEST
 
   end
 
+  def as_massive_result(guide_student_progress)
+    guide_student_progress.map do |it|
+      {student: it[:student][:uid], guide: it[:guide][:slug], progress: it.except(:guide, :student)}
+    end
+  end
+
+  describe 'get /api/courses/:course/massive/students' do
+
+    before { header 'Authorization', build_mumuki_auth_header('*') }
+
+    context 'when guide_progress exist' do
+      before { get '/api/courses/k2048/massive/students' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_like({total_pages: 1, total_results: 3, total_page_results: 3,
+                                                    guide_students_progress:
+                                                      as_massive_result([with_course(guide_progress1), with_course(guide_progress3),
+                                                                              with_course(guide_progress2)])}, except_fields) }
+    end
+
+  end
 end

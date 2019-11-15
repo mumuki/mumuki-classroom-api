@@ -80,7 +80,7 @@ GEM
       mumukit-auth (~> 7.0)
       mumukit-core (~> 1.2)
       mumukit-nuntius (~> 6.0)
-    mumukit-service (3.0.1)
+    mumukit-service (3.0.2)
       bson_ext
       mongo (~> 2.1)
       mumukit-core (~> 1.0)
