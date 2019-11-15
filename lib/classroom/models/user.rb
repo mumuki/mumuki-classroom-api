@@ -40,7 +40,7 @@ class User
     updated_users = users.map do |user|
       user.as_bulk_permissions_update(role, course_slug)
     end
-    User.collection.bulk_write(updated_users)
+    collection.bulk_write(updated_users)
   end
 
   def upsert_permissions!(permissions)
