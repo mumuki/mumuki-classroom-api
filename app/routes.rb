@@ -122,6 +122,10 @@ helpers do
     Mumukit::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
   end
 
+  def notify_exam_students!(exam, diff)
+    Mumukit::Nuntius.notify_event! 'UpsertExamStudents', diff.merge(eid: exam.eid)
+  end
+
   def page
     (params[:page] || 1).to_i - 1
   end
