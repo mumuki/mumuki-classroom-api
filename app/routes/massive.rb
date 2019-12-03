@@ -96,7 +96,7 @@ Mumukit::Platform.map_organization_routes!(self) do
       authorize! :janitor
       exam = Exam.find_by!(exam_query)
       exam.add_students! uids
-      notify_exam_students! exam.eid, added: uids
+      notify_exam_students! exam, added: uids
       {status: :updated}.merge(eid: exam_id, processed_count: uids.size, processed: uids)
     end
   end
