@@ -1,10 +1,16 @@
+MASSIVE_BATCH_LIMIT = 100
+
 helpers do
+  def with_massive_batch_limit(elements)
+    elements.to_a.take MASSIVE_BATCH_LIMIT
+  end
+
   def uids
-    json_body[:uids].to_a.take(100)
+    with_massive_batch_limit json_body[:uids]
   end
 
   def students
-    json_body[:students].to_a.take(100)
+    with_massive_batch_limit json_body[:students]
   end
 
   def normalize_students! #TODO: refactor
@@ -49,7 +55,7 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     get '/students' do
       authorize! :janitor
-      per_page = 100
+      per_page = MASSIVE_BATCH_LIMIT
       progress = GuideProgress
                    .where(with_organization_and_course)
                    .sort('organization': :asc, 'course': :asc, 'student.uid': :asc)
