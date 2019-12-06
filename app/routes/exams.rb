@@ -50,18 +50,17 @@ Mumukit::Platform.map_organization_routes!(self) do
     post "#{route_prefix}/courses/:course/exams/:exam_id/students/:uid" do
       authorize! :teacher
       exam = Exam.find_by!(exam_query)
-      exam.add_student! params[:uid]
-      exam.notify!
+      exam.add_student! uid
+      notify_exam_students! exam, added: [uid]
       {status: :updated}.merge(eid: exam_id)
     end
 
     delete "#{route_prefix}/courses/:course/exams/:exam_id/students/:uid" do
       authorize! :teacher
       exam = Exam.find_by!(exam_query)
-      exam.remove_student! params[:uid]
-      exam.notify!
+      exam.remove_student! uid
+      notify_exam_students! exam, deleted: [uid]
       {status: :updated}.merge(eid: exam_id)
     end
   end
-
 end
