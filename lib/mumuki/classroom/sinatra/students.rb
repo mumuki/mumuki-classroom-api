@@ -1,129 +1,131 @@
-helpers do
-  def students_query
-    with_detached_and_search with_organization_and_course, Mumuki::Classroom::Student
+class Mumuki::Classroom::App < Sinatra::Application
+  helpers do
+    def students_query
+      with_detached_and_search with_organization_and_course, Mumuki::Classroom::Student
+    end
+
+    def normalize_student!
+      json_body[:email] = json_body[:email]&.downcase
+      json_body[:last_name] = json_body[:last_name]&.downcase&.titleize
+      json_body[:first_name] = json_body[:first_name]&.downcase&.titleize
+    end
+
+    def list_students(matcher)
+      authorize! :teacher
+      count, students = Sorting.aggregate(Mumuki::Classroom::Student, with_detached_and_search(matcher, Mumuki::Classroom::Student), paginated_params, query_params)
+      { page: page + 1, total: count, students: students }
+    end
   end
 
-  def normalize_student!
-    json_body[:email] = json_body[:email]&.downcase
-    json_body[:last_name] = json_body[:last_name]&.downcase&.titleize
-    json_body[:first_name] = json_body[:first_name]&.downcase&.titleize
-  end
+  Mumukit::Platform.map_organization_routes!(self) do
 
-  def list_students(matcher)
-    authorize! :teacher
-    count, students = Sorting.aggregate(Mumuki::Classroom::Student, with_detached_and_search(matcher, Mumuki::Classroom::Student), paginated_params, query_params)
-    { page: page + 1, total: count, students: students }
-  end
-end
+    get '/courses/:course/students' do
+      list_students with_organization_and_course
+    end
 
-Mumukit::Platform.map_organization_routes!(self) do
+    get '/api/courses/:course/students' do
+      authorize! :teacher
+      query_params = params.slice('uid', 'personal_id')
+      {students: Mumuki::Classroom::Student.where(with_organization_and_course.merge query_params)}
+    end
 
-  get '/courses/:course/students' do
-    list_students with_organization_and_course
-  end
+    get '/students' do
+      list_students with_organization
+    end
 
-  get '/api/courses/:course/students' do
-    authorize! :teacher
-    query_params = params.slice('uid', 'personal_id')
-    {students: Mumuki::Classroom::Student.where(with_organization_and_course.merge query_params)}
-  end
+    get '/students/report' do
+      authorize! :janitor
+      group_report with_organization, group_report_projection.merge(course: '$course')
+    end
 
-  get '/students' do
-    list_students with_organization
-  end
+    # Retrieves the progress for a student in an specific course
+    get '/api/courses/:course/students/:uid' do
+      authorize! :teacher
+      {guide_students_progress: Mumuki::Classroom::GuideProgress.where(with_organization_and_course 'student.uid': uid).sort(created_at: :asc).as_json}
+    end
 
-  get '/students/report' do
-    authorize! :janitor
-    group_report with_organization, group_report_projection.merge(course: '$course')
-  end
+    # Tries to resubmit all failed_submissions of a student to a specific tenant
+    post '/courses/:course/students/:uid' do
+      authorize! :janitor
+      Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
+      {status: :created}
+    end
 
-  # Retrieves the progress for a student in an specific course
-  get '/api/courses/:course/students/:uid' do
-    authorize! :teacher
-    {guide_students_progress: Mumuki::Classroom::GuideProgress.where(with_organization_and_course 'student.uid': uid).sort(created_at: :asc).as_json}
-  end
+    # Detaches a student of a course
+    post '/courses/:course/students/:uid/detach' do
+      authorize! :janitor
+      Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).detach!
+      update_and_notify_student_metadata(uid, 'remove', course_slug)
+      {status: :updated}
+    end
 
-  # Tries to resubmit all failed_submissions of a student to a specific tenant
-  post '/courses/:course/students/:uid' do
-    authorize! :janitor
-    Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-    {status: :created}
-  end
+    # Attaches a student to a course
+    post '/courses/:course/students/:uid/attach' do
+      authorize! :janitor
+      Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).attach!
+      update_and_notify_student_metadata(uid, 'add', course_slug)
+      {status: :updated}
+    end
 
-  # Detaches a student of a course
-  post '/courses/:course/students/:uid/detach' do
-    authorize! :janitor
-    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).detach!
-    update_and_notify_student_metadata(uid, 'remove', course_slug)
-    {status: :updated}
-  end
+    # Transfers a student to another course
+    post '/courses/:course/students/:uid/transfer' do
+      authorize! :janitor
 
-  # Attaches a student to a course
-  post '/courses/:course/students/:uid/attach' do
-    authorize! :janitor
-    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).attach!
-    update_and_notify_student_metadata(uid, 'add', course_slug)
-    {status: :updated}
-  end
+      slug = json_body[:slug].to_mumukit_slug
 
-  # Transfers a student to another course
-  post '/courses/:course/students/:uid/transfer' do
-    authorize! :janitor
+      authorize_for! :janitor, slug
 
-    slug = json_body[:slug].to_mumukit_slug
+      Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.to_s
 
-    authorize_for! :janitor, slug
+      update_and_notify_student_metadata(uid, 'update', course_slug, json_body[:slug])
+      {status: :updated}
+    end
 
-    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.to_s
+    # Retrieves info for a particular student
+    get '/courses/:course/student/:uid' do
+      authorize! :teacher
 
-    update_and_notify_student_metadata(uid, 'update', course_slug, json_body[:slug])
-    {status: :updated}
-  end
+      Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).as_json
+    end
 
-  # Retrieves info for a particular student
-  get '/courses/:course/student/:uid' do
-    authorize! :teacher
+    # Creates student and tries to resubmit all failed submissions to that student
+    post '/courses/:course/students' do
+      authorize! :janitor
+      ensure_course_existence!
+      ensure_student_not_exists!
 
-    Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).as_json
-  end
+      normalize_student!
+      json = {student: json_body.merge(uid: json_body[:email]), course: {slug: course_slug}}
+      uid = json[:student][:uid]
 
-  # Creates student and tries to resubmit all failed submissions to that student
-  post '/courses/:course/students' do
-    authorize! :janitor
-    ensure_course_existence!
-    ensure_student_not_exists!
+      Mumuki::Classroom::Student.create!(with_organization_and_course json[:student])
 
-    normalize_student!
-    json = {student: json_body.merge(uid: json_body[:email]), course: {slug: course_slug}}
-    uid = json[:student][:uid]
+      perm = User.where(uid: uid).first_or_create!(json[:student].except(:first_name, :last_name, :personal_id)).permissions
+      perm.add_permission!(:student, course_slug)
+      Mumukit::Platform::User.upsert_permissions! uid, perm
 
-    Mumuki::Classroom::Student.create!(with_organization_and_course json[:student])
+      Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
+      Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].except(:personal_id).merge(permissions: perm)
 
-    perm = User.where(uid: uid).first_or_create!(json[:student].except(:first_name, :last_name, :personal_id)).permissions
-    perm.add_permission!(:student, course_slug)
-    Mumukit::Platform::User.upsert_permissions! uid, perm
+      {status: :created}
+    end
 
-    Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].except(:personal_id).merge(permissions: perm)
+    # Updates student information
+    put '/courses/:course/students/:uid' do
+      authorize! :janitor
+      ensure_course_existence!
 
-    {status: :created}
-  end
+      normalize_student!
 
-  # Updates student information
-  put '/courses/:course/students/:uid' do
-    authorize! :janitor
-    ensure_course_existence!
+      student = Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid)
+      student.update_attributes!(first_name: json_body[:first_name], last_name: json_body[:last_name], personal_id: json_body[:personal_id])
 
-    normalize_student!
+      user = User.find_by(uid: uid)
+      user.update_attributes! first_name: json_body[:first_name], last_name: json_body[:last_name]
 
-    student = Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid)
-    student.update_attributes!(first_name: json_body[:first_name], last_name: json_body[:last_name], personal_id: json_body[:personal_id])
+      user.notify!
 
-    user = User.find_by(uid: uid)
-    user.update_attributes! first_name: json_body[:first_name], last_name: json_body[:last_name]
-
-    user.notify!
-
-    {status: :updated}
+      {status: :updated}
+    end
   end
 end

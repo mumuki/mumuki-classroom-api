@@ -26,4 +26,4 @@ group :development do
   gem 'web-console'
 end
 
-gem 'mumuki-domain', git: 'git://github.com/mumuki/mumuki-domain', ref: '477ccd111e9213135e85db611a7dba9933f702f3' 
+gem 'mumuki-domain', path: '../mumuki-domain'
