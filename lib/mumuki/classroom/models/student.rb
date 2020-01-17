@@ -77,7 +77,23 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
     end
 
     def ensure_not_exists!(query)
-      raise Mumuki::Classroom::StudentExistsError, 'Mumuki::Classroom::Student already exist' if Mumuki::Classroom::Student.where(query).exists?
+      existing_students = Student.where(query)
+      return unless existing_students.exists?
+      raise Mumuki::Classroom::StudentExistsError, {existing_students: existing_students.map(&:uid)}.to_json
+    end
+
+    def detach_all_by!(uids, query)
+      where(query).in(uid: uids).update_all(detached: true, detached_at: Time.now)
+      criteria = query.merge('student.uid': {'$in': uids})
+      Mumuki::Classroom::Assignment.detach_all_by! criteria
+      Mumuki::Classroom::GuideProgress.detach_all_by! criteria
+    end
+
+    def attach_all_by!(uids, query)
+      where(query).in(uid: uids).unset(:detached, :detached_at)
+      criteria = query.merge('student.uid': {'$in': uids})
+      Mumuki::Classroom::Assignment.attach_all_by! criteria
+      Mumuki::Classroom::GuideProgress.attach_all_by! criteria
     end
   end
 

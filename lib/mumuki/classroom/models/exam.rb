@@ -21,7 +21,11 @@ class Mumuki::Classroom::Exam < Mumuki::Classroom::Document
   create_index({organization: 1, course: 1, eid: 1}, {unique: true})
 
   def add_student!(uid)
-    add_to_set uids: uid
+    add_students! [uid]
+  end
+
+  def add_students!(uids)
+    add_to_set uids: uids
   end
 
   def remove_student!(uid)

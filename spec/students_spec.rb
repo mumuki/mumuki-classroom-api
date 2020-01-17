@@ -214,10 +214,26 @@ describe Mumuki::Classroom::Student do
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('example.org/*') }
-        before { post '/courses/example/students/github%7C123456/detach', {}.to_json }
+        before { post '/courses/example/students/github%7C123456/detach' }
 
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to json_eq status: :updated }
+        it { expect(fetched_student.detached).to eq true }
+      end
+
+    end
+
+    describe 'post api/courses/:course/massive/students/detach' do
+
+      before { create_student!.call student1 }
+      let(:detached_uids) { {uids: ['github|123456']} }
+
+      context 'should transfer student to destination and transfer all his data' do
+        before { header 'Authorization', build_auth_header('example.org/*') }
+        before { post '/api/courses/example/massive/students/detach', detached_uids.to_json }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.body).to json_eq(status: :updated, processed_count: 1, processed: detached_uids[:uids]) }
         it { expect(fetched_student.detached).to eq true }
       end
 
@@ -300,6 +316,7 @@ describe Mumuki::Classroom::Student do
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
               it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
+              pending { expect(User.where(uid: student[:email]).to_a).to eq student_json } #TODO: find out why user isn't created with all params
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
@@ -311,7 +328,7 @@ describe Mumuki::Classroom::Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Mumuki::Classroom::Student already exist') }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
             context 'in different course, should work' do
               let!(:course) { create(:course, slug: 'example.org/bar') }
@@ -388,7 +405,7 @@ describe Mumuki::Classroom::Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Mumuki::Classroom::Student already exist') }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
             context 'and user already exists by email' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -396,7 +413,7 @@ describe Mumuki::Classroom::Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(message: 'Mumuki::Classroom::Student already exist') }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
           end
         end
@@ -415,6 +432,64 @@ describe Mumuki::Classroom::Student do
           expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
         end
       end
+    end
+
+    describe 'post api/courses/massive/:course/students' do
+      let(:students) do
+        (1.. 120).map do |it|
+          {first_name: "first_name_#{it}", last_name: "last_name_#{it}", email: "email_#{it}@fake.com"}
+        end
+      end
+      let(:students_uids) { students.map { |it| it[:email] } }
+      let(:students_json) { {students: students}.to_json }
+
+      context 'when course exists' do
+        before { Course.create! organization: 'example.org', name: 'foo', slug: 'example.org/foo' }
+
+        context 'when authenticated' do
+          before { header 'Authorization', build_auth_header('*') }
+
+          context 'and users do not exist' do
+            before { expect(Mumukit::Nuntius).to receive(:notify!).exactly(100).times }
+            before { post 'api/courses/foo/massive/students', students_json }
+
+            it { expect(last_response).to be_ok }
+            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
+            it { expect(Student.in(uid: students_uids).count).to eq 100 }
+          end
+
+          context 'and some users do exist' do
+            before do
+              students_uids.take(50).map do |it|
+                user = User.create(uid: it)
+                user.add_permission! :student, 'example.org/foo2'
+                user.save!
+                Student.create(organization: 'example.org', course: 'example.org/foo2', uid: it)
+              end
+            end
+            before { expect(Mumukit::Nuntius).to receive(:notify!).exactly(100).times }
+            before { post 'api/courses/foo/massive/students', students_json }
+
+            it { expect(last_response).to be_ok }
+            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
+            it { expect(Student.in(uid: students_uids).where(organization: 'example.org', course: 'example.org/foo').count).to eq 100 }
+            it { expect(User.in(uid: students_uids).count).to eq 100 }
+            it { expect(User.in(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo') }.count).to eq 100 }
+            it { expect(User.in(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo2') }.count).to eq 50 }
+          end
+
+          context 'and some students do exist' do
+            before { Student.create(organization: 'example.org', course: 'example.org/foo', uid: students[99][:email]) }
+            before { post 'api/courses/foo/massive/students', students_json }
+
+            it { expect(last_response).to_not be_ok }
+            it { expect(last_response.body).to json_eq(existing_students: ["email_100@fake.com"]) }
+            it { expect(Student.in(uid: students_uids).count).to eq 1 }
+          end
+        end
+
+      end
+
     end
   end
 

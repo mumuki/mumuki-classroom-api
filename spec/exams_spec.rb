@@ -99,6 +99,26 @@ describe Mumuki::Classroom::Exam do
 
   end
 
+  describe 'post /api/courses/:course/massive/exams/:exam/students' do
+    let(:exam_id) { Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}}.stringify_keys }
+    let(:exam_fetched) { Exam.last }
+    let(:exam_uids) { {uids: [1..100].map { |it| "user_uid_#{it}"} } }
+    let(:uids) { exam_uids[:uids] }
+
+    context 'when existing exam' do
+      before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
+      before { header 'Authorization', build_mumuki_auth_header('*') }
+      before { post "/api/courses/foo/massive/exams/#{exam_id}/students", exam_uids.to_json }
+
+      it { expect(last_response.body).to be_truthy }
+      it { expect(last_response.body).to json_like({status: 'updated', processed_count: uids.size, processed: uids}, except_fields) }
+      it { expect(Exam.count).to eq 1 }
+      it { expect(exam_fetched.uids).to eq ['auth0|234567', 'auth0|345678'].concat(uids) }
+    end
+
+  end
+
   describe 'delete /api/courses/:course/exams/:exam/students/:uid' do
     let(:exam_id) { Mumuki::Classroom::Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'agus@mumuki.org', 'auth0|345678'], passing_criterion: {type: 'none'}}.stringify_keys }
