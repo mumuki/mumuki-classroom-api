@@ -59,15 +59,13 @@ Mumukit::Platform.map_organization_routes!(self) do
   end
 
   post '/courses/:course/students/:uid/transfer' do
-    authorize! :janitor
+    authorize! :admin
 
-    slug = json_body[:slug].to_mumukit_slug
+    destination = Mumukit::Auth::Slug.join organization, json_body[:destination]
 
-    authorize_for! :janitor, slug
+    Student.find_by!(with_organization_and_course uid: uid).transfer_to! organization, destination.to_s
 
-    Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.course
-
-    update_and_notify_student_metadata(uid, 'update', course_slug, json_body[:slug])
+    update_and_notify_student_metadata(uid, 'update', course_slug, destination.to_s)
     {status: :updated}
   end
 
