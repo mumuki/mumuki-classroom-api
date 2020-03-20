@@ -92,7 +92,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     user.save!
 
     Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: user.as_platform_json
+    notify_new_user!(user)
 
     {status: :created}
   end
