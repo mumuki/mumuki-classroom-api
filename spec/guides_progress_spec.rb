@@ -221,7 +221,7 @@ TEST
 
   describe 'get /api/courses/:course/massive/students' do
 
-    before { header 'Authorization', build_mumuki_auth_header('*') }
+    before { header 'Authorization', build_auth_header('*') }
 
     context 'when guide_progress exist' do
       before { get '/api/courses/k2048/massive/students' }

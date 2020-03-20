@@ -87,12 +87,12 @@ helpers do
   end
 
   def ensure_student_not_exists!
-    Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
+    Mumuki::Classroom::Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
   end
 
   def ensure_students_not_exist!
     students_uids = students.map { |it| it[:email] }
-    Student.ensure_not_exists! with_organization_and_course(uid: {'$in': students_uids })
+    Mumuki::Classroom::Student.ensure_not_exists! with_organization_and_course(uid: {'$in': students_uids })
   end
 
   def set_locale!
@@ -188,9 +188,9 @@ helpers do
 
   def group_report(matcher, projection)
     projection = csv_projection_for projection
-    aggregation = Student.where(matcher).project(projection)
+    aggregation = Mumuki::Classroom::Student.where(matcher).project(projection)
     pipeline_with_sort_criterion = aggregation.pipeline << {'$sort': {passed_count: -1, passed_with_warnings_count: -1, failed_count: -1, last_name: 1, first_name: 1}}
-    json = Student.collection.aggregate(pipeline_with_sort_criterion).as_json
+    json = Mumuki::Classroom::Student.collection.aggregate(pipeline_with_sort_criterion).as_json
     content_type 'application/csv'
     csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), projection)
   end

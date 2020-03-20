@@ -108,7 +108,7 @@ describe Mumuki::Classroom::Exam do
 
     context 'when existing exam' do
       before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
-      before { header 'Authorization', build_mumuki_auth_header('*') }
+      before { header 'Authorization', build_auth_header('*') }
       before { post "/api/courses/foo/massive/exams/#{exam_id}/students", exam_uids.to_json }
 
       it { expect(last_response.body).to be_truthy }

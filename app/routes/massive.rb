@@ -13,6 +13,10 @@ helpers do
     with_massive_batch_limit json_body[:students]
   end
 
+  def user_from_student_json(student_json)
+    User.new student_json.except(:first_name, :last_name, :personal_id)
+  end
+
   def normalize_students! #TODO: refactor
     students.each do |it|
       it[:email] = it[:email]&.downcase
@@ -24,27 +28,19 @@ helpers do
 
   def create_students!
     normalize_students!
-    Student.collection.insert_many(students.map { |student| with_organization_and_course student })
+    Mumuki::Classroom::Student.collection.insert_many(students.map { |student| with_organization_and_course student })
   end
 
+  #FIXME: This method now doesn't perform a bulk update as PG doesn't support it
   def upsert_users!
-    new_students_uids = students.map { |it| it[:uid] }
-    existing_users = User.in(uid: new_students_uids).to_a
-    new_users = new_students_uids - existing_users.map { |it| it[:uid] }
-
-    new_students = students.select { |it| new_users.include? it[:uid] }.map do |it|
-      User.from_student_json(it).tap do |new_user|
-        new_user.add_permission!(:student, course_slug)
+    students.each do |it|
+      user = User.find_or_initialize_by(uid: it[:uid])
+      if user.new_record?
+        user.assign_attributes user_from_student_json(:it)
       end
-    end
-
-    User.collection.insert_many(new_students.as_json)
-
-    User.bulk_permissions_update existing_users, :student, course_slug
-
-    (new_students + existing_users).each do |it|
-      it.notify!
-      Mumukit::Nuntius.notify! 'resubmissions', uid: it.uid, tenant: tenant
+      user.add_permission! :student, course_slug
+      user.save!
+      Mumukit::Nuntius.notify! 'resubmissions', uid: user.uid, tenant: tenant
     end
   end
 end
@@ -86,15 +82,15 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     post '/students/detach' do
       authorize! :janitor
-      Student.detach_all_by! uids, with_organization_and_course
-      User.in(uid: uids).each { |uid| update_and_notify_user_metadata(uid, 'remove', course_slug) }
+      Mumuki::Classroom::Student.detach_all_by! uids, with_organization_and_course
+      User.where(uid: uids).each { |uid| update_and_notify_user_metadata(uid, 'remove', course_slug) }
       {status: :updated, processed_count: uids.size, processed: uids}
     end
 
     post '/students/attach' do
       authorize! :janitor
-      Student.attach_all_by! uids, with_organization_and_course
-      User.in(uid: uids).each { |uid| update_and_notify_user_metadata(uid, 'add', course_slug) }
+      Mumuki::Classroom::Student.attach_all_by! uids, with_organization_and_course
+      User.where(uid: uids).each { |uid| update_and_notify_user_metadata(uid, 'add', course_slug) }
       {status: :updated, processed_count: uids.size, processed: uids}
     end
 

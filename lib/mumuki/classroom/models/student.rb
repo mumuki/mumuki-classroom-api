@@ -77,7 +77,7 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
     end
 
     def ensure_not_exists!(query)
-      existing_students = Student.where(query)
+      existing_students = Mumuki::Classroom::Student.where(query)
       return unless existing_students.exists?
       raise Mumuki::Classroom::StudentExistsError, {existing_students: existing_students.map(&:uid)}.to_json
     end
