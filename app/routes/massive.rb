@@ -43,7 +43,7 @@ helpers do
     User.bulk_permissions_update existing_users, :student, course_slug
 
     (new_students + existing_users).each do |it|
-      notify_new_user! it
+      notify_user! it
       Mumukit::Nuntius.notify! 'resubmissions', uid: it.uid, tenant: tenant
     end
   end

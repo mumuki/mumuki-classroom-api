@@ -92,7 +92,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     user.save!
 
     Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-    notify_new_user!(user)
+    notify_user!(user)
 
     {status: :created}
   end
