@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rake'
+gem 'rake', '>= 12.3.3'
 
 gem 'sinatra', '~> 1.4'
 gem 'sinatra-contrib', '~> 1.4'
@@ -33,7 +33,7 @@ group :test, :development do
   gem 'pry-stack_explorer'
   gem 'binding_of_caller'
 
-  gem 'sinatra-rake-routes'
+  gem 'sinatra-rake-routes', '>= 0.0.4'
   gem 'rspec', '~> 2.99'
   gem 'rack-test'
   gem 'factory_girl'
