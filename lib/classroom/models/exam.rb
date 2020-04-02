@@ -13,6 +13,7 @@ class Exam
   field :duration, type: Integer
   field :max_problem_submissions, type: Integer
   field :max_choice_submissions, type: Integer
+  field :results_hidden_for_choices, type: Mongoid::Boolean, default: false
   field :passing_criterion, type: Hash
   field :start_time, type: String
   field :organization, type: String

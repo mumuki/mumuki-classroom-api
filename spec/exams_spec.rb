@@ -5,7 +5,7 @@ describe Exam do
   let(:except_fields) { {except: [:eid, :created_at, :updated_at]} }
 
   describe 'get /courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'today', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', organization: 'example.org', course: 'example.org/foo', passing_criterion: {type: 'none'}} }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'today', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', organization: 'example.org', course: 'example.org/foo', passing_criterion: {type: 'none'}, results_hidden_for_choices: false} }
 
     before { header 'Authorization', build_auth_header('*') }
     before { Exam.create!(exam_json) }
@@ -18,7 +18,7 @@ describe Exam do
   end
 
   describe 'post /courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}}.as_json }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}, results_hidden_for_choices: true}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example.org', course: 'example.org/foo' }
 
     before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
@@ -34,7 +34,7 @@ describe Exam do
   end
 
   describe 'post /api/courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}}.as_json }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}, results_hidden_for_choices: false}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example.org', course: 'example.org/foo' }
 
     before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
@@ -50,7 +50,7 @@ describe Exam do
 
   describe 'get /courses/:course/exams/:exam_id' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}} }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}, results_hidden_for_choices: true} }
 
     before { header 'Authorization', build_auth_header('*') }
     before { get "/courses/foo/exams/#{exam_id}", exam_json.to_json }
@@ -61,7 +61,7 @@ describe Exam do
 
   describe 'put /courses/:course/exams/:exam' do
     let(:exam_id) { Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}}.as_json }
+    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}, results_hidden_for_choices: true}.as_json }
     let(:exam_json2) { exam_json.merge(uids: ['auth0|123456'], eid: exam_id).as_json }
     let(:exam_fetched) { Exam.last }
 
@@ -138,7 +138,7 @@ describe Exam do
   describe 'exam validations' do
     context 'max submissions' do
       let(:exam_json) { {organization: 'example.org', course: 'example.org/foo', slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}} }
-      let(:valid_exam_json) { exam_json.merge(max_problem_submissions: 10, max_choice_submissions: 2) }
+      let(:valid_exam_json) { exam_json.merge(results_hidden_for_choices: true, max_problem_submissions: 10, max_choice_submissions: 2) }
       let(:invalid_exam_json) { exam_json.merge(max_problem_submissions: 0, max_choice_submissions: -2) }
 
       it { expect { Exam.create! valid_exam_json }.not_to raise_error }
