@@ -138,7 +138,7 @@ describe Exam do
   describe 'exam validations' do
     context 'max submissions' do
       let(:exam_json) { {organization: 'example.org', course: 'example.org/foo', slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}} }
-      let(:valid_exam_json) { exam_json.merge(max_problem_submissions: 10, max_choice_submissions: 2) }
+      let(:valid_exam_json) { exam_json.merge(results_hidden_for_choices: true, max_problem_submissions: 10, max_choice_submissions: 2) }
       let(:invalid_exam_json) { exam_json.merge(max_problem_submissions: 0, max_choice_submissions: -2) }
 
       it { expect { Exam.create! valid_exam_json }.not_to raise_error }
