@@ -1,3 +1,13 @@
+GIT
+  remote: https://github.com/mumuki/mumukit-core.git
+  revision: 6492812a73f8f727f82e77971ac75ac6ae2c7d59
+  branch: chore-solved_submissions
+  specs:
+    mumukit-core (1.16.0)
+      activesupport (>= 4.1)
+      i18n (~> 0.7)
+      rack (>= 1.5)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -57,10 +67,6 @@ GEM
       redcarpet (~> 3.3.2)
       rouge (~> 3.1)
       sanitize (~> 5.0)
-    mumukit-core (1.16.0)
-      activesupport (>= 4.1)
-      i18n (~> 0.7)
-      rack (>= 1.5)
     mumukit-inspection (1.0.0)
       mumukit-core (~> 1.0)
     mumukit-login (5.2.0)
@@ -185,7 +191,7 @@ DEPENDENCIES
   mongoid (~> 6.1)
   mumukit-auth (~> 7.7)
   mumukit-content-type (~> 1.8)
-  mumukit-core (~> 1.8)
+  mumukit-core!
   mumukit-inspection (~> 1.0)
   mumukit-login (~> 5.2.0)
   mumukit-nuntius (~> 6.1)
