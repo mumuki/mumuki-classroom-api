@@ -12,7 +12,7 @@ gem 'bson_ext'
 
 gem 'bunny'
 
-gem 'mumukit-core', :git => 'https://github.com/mumuki/mumukit-core.git', :branch => 'chore-solved_submissions'
+gem 'mumukit-core', '~> 1.7'
 gem 'mumukit-nuntius', '~> 6.1'
 
 gem 'mumukit-auth', '~> 7.7'
