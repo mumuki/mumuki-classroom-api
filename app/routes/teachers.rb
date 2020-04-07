@@ -15,6 +15,6 @@ Mumukit::Platform.map_organization_routes!(self) do
     user.add_permission!(:teacher, course_slug)
     user.save!
 
-    notify_user!(user)
+    notify_user!(user, json_body)
   end
 end

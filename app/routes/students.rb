@@ -109,7 +109,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     user = User.find_by(uid: uid)
     user.update_attributes! first_name: json_body[:first_name], last_name: json_body[:last_name]
 
-    notify_user!(user)
+    notify_user!(user, json_body)
 
     {status: :updated}
   end
