@@ -37,5 +37,5 @@ group :test, :development do
   gem 'rspec', '~> 2.99'
   gem 'rack-test'
   gem 'factory_girl'
-  gem 'codeclimate-test-reporter', require: nil
+  gem 'codeclimate-test-reporter', '>= 1.0.8', require: nil
 end

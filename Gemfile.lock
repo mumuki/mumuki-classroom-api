@@ -19,7 +19,7 @@ GEM
     bunny (2.9.2)
       amq-protocol (~> 2.3.0)
     byebug (9.0.6)
-    codeclimate-test-reporter (1.0.8)
+    codeclimate-test-reporter (1.0.9)
       simplecov (<= 0.13)
     coderay (1.1.1)
     concurrent-ruby (1.1.5)
@@ -34,7 +34,7 @@ GEM
     hashie (3.5.7)
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
-    json (2.1.0)
+    json (2.3.0)
     jwt (1.5.6)
     method_source (0.8.2)
     mini_portile2 (2.4.0)
@@ -149,7 +149,7 @@ GEM
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
-    simplecov-html (0.10.0)
+    simplecov-html (0.10.2)
     sinatra (1.4.8)
       rack (~> 1.5)
       rack-protection (~> 1.4)
@@ -179,7 +179,7 @@ DEPENDENCIES
   binding_of_caller
   bson_ext
   bunny
-  codeclimate-test-reporter
+  codeclimate-test-reporter (>= 1.0.8)
   factory_girl
   mongo (~> 2.1)
   mongoid (~> 6.1)
@@ -204,4 +204,4 @@ DEPENDENCIES
   sinatra-rake-routes
 
 BUNDLED WITH
-   2.0.2
+   1.17.3
