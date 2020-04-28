@@ -72,6 +72,23 @@ class Assignment
     submission
   end
 
+  def notification_preview
+    as_json(
+      only: %i(course exercise guide student),
+      include: {
+        exercise: {
+          only: %i(eid name)
+        },
+        guide: {
+          only: %i(slug)
+        },
+        student: {
+          only: %i(first_name last_name image_url uid)
+        }
+      }
+    )
+  end
+
   private
 
   def update_submissions!

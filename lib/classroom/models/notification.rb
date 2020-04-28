@@ -48,7 +48,6 @@ class Notification
   end
 
   def with_assignment
-    as_json.except('assignment_id').merge(assignment: assignment, id: id.to_s)
+    as_json.except('assignment_id').merge(assignment: assignment.notification_preview, id: id.to_s)
   end
-
 end
