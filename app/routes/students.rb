@@ -82,17 +82,17 @@ Mumukit::Platform.map_organization_routes!(self) do
 
     normalize_student!
 
-    json = {student: json_body.merge(uid: json_body[:email]), course: {slug: course_slug}}
-    uid = json[:student][:uid]
+    student_json = json_body.merge(uid: json_body[:email])
+    uid = student_json[:uid]
 
-    Student.create!(with_organization_and_course json[:student])
+    Student.create!(with_organization_and_course student_json)
 
-    perm = User.where(uid: uid).first_or_create!(json[:student].except(:first_name, :last_name, :personal_id)).permissions
-    perm.add_permission!(:student, course_slug)
-    User.upsert_permissions! uid, perm
+    user = User.where(uid: uid).first_or_initialize(student_json.except(:personal_id))
+    user.add_permission!(:student, course_slug)
+    user.save!
 
     Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:student].except(:personal_id).merge(permissions: perm)
+    notify_user!(user)
 
     {status: :created}
   end
@@ -109,7 +109,7 @@ Mumukit::Platform.map_organization_routes!(self) do
     user = User.find_by(uid: uid)
     user.update_attributes! first_name: json_body[:first_name], last_name: json_body[:last_name]
 
-    user.notify!
+    notify_user!(user, json_body)
 
     {status: :updated}
   end

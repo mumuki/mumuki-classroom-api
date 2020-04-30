@@ -194,6 +194,10 @@ helpers do
     content_type 'application/csv'
     csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), projection)
   end
+
+  def notify_user!(user, user_options={})
+    Mumukit::Nuntius.notify_event! 'UserChanged', user: user.as_platform_json.merge(verified_first_name: user_options[:first_name], verified_last_name: user_options[:last_name])
+  end
 end
 
 before do

@@ -6,15 +6,15 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses/:course/teachers' do
     authorize! :headmaster
-    json = with_organization_and_course teacher: json_body.merge(uid: json_body[:email])
-    uid = json[:teacher][:uid]
+    teacher_json = json_body.merge(uid: json_body[:email])
+    uid = teacher_json[:uid]
 
-    Teacher.create!(with_organization_and_course json[:teacher])
+    Teacher.create!(with_organization_and_course teacher_json)
 
-    perm = User.where(uid: uid).first_or_create!(json[:teacher].except(:first_name, :last_name, :personal_id)).permissions
-    perm.add_permission!(:teacher, course_slug)
-    User.upsert_permissions! uid, perm
+    user = User.where(uid: uid).first_or_initialize(teacher_json.except(:personal_id))
+    user.add_permission!(:teacher, course_slug)
+    user.save!
 
-    Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:teacher].except(:personal_id).merge(permissions: perm)
+    notify_user!(user, json_body)
   end
 end
