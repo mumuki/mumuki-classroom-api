@@ -67,6 +67,25 @@ describe Course do
   before { Assignment.create! assignment2.merge(organization: 'example.org', course: 'example.org/k2048') }
   before { Assignment.create! assignment3.merge(organization: 'example.org', course: 'example.org/k2048') }
 
+  describe 'get /courses/:course/guide_progress_report' do
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when guide_progress exists' do
+      before { get '/courses/k2048/guide_progress_report' }
+
+      it { expect(last_response).to be_ok }
+      it do
+        expect(last_response.body).to eq <<TEST
+last_name,first_name,email,detached,guide_slug,passed_count,passed_with_warnings_count,failed_count
+bar,foo,agus@mumuki.org,false,example.org/foo,2,2,0
+bar,foo,agus@mumuki.org,false,example.org/bar,0,1,0
+doe,john,john@gmail.com,false,example.org/foo,2,0,1
+TEST
+        end
+    end
+
+  end
+
   describe 'get /courses/:course/guides/:org/:repo' do
 
     before { header 'Authorization', build_auth_header('*') }

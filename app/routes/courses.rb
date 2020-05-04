@@ -50,6 +50,30 @@ helpers do
   def validate_organization_exists!
     raise Classroom::OrganizationNotExistsError unless Organization.find_by name: organization
   end
+
+  def guide_progress_report(matcher, projection)
+    projection = csv_projection_for projection
+    aggregation = GuideProgress.where(matcher).project(projection)
+    pipeline_with_sort_criterion = aggregation.pipeline << {'$sort': {email: 1, passed_count: -1, passed_with_warnings_count: -1, failed_count: -1, last_name: 1, first_name: 1}}
+    json = GuideProgress.collection.aggregate(pipeline_with_sort_criterion).as_json
+    content_type 'application/csv'
+    csv_with_headers(Classroom::Reports::Formats.format_report('csv', json), projection)
+  end
+
+  def guide_progress_report_projection
+    {
+        '_id': 0,
+        'last_name': '$student.last_name',
+        'first_name': '$student.first_name',
+        'email': '$student.email',
+        'detached': {'$eq': ['$detached', true]},
+        'guide_slug': '$guide.slug',
+        'passed_count': '$stats.passed',
+        'passed_with_warnings_count': '$stats.passed_with_warnings',
+        'failed_count': '$stats.failed'
+    }
+  end
+
 end
 
 Mumukit::Platform.map_organization_routes!(self) do
@@ -121,6 +145,11 @@ Mumukit::Platform.map_organization_routes!(self) do
   get '/courses/:course/report' do
     authorize! :teacher
     group_report with_organization_and_course, group_report_projection
+  end
+
+  get '/courses/:course/guide_progress_report' do
+    authorize! :janitor
+    guide_progress_report with_organization_and_course, guide_progress_report_projection
   end
 
   get '/courses/:course/guides/:organization/:repository/:uid/:exercise_id' do
