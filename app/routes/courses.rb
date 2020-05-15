@@ -66,6 +66,7 @@ helpers do
         'last_name': '$student.last_name',
         'first_name': '$student.first_name',
         'email': '$student.email',
+        'last_submission': '$last_assignment.submission.created_at',
         'detached': {'$eq': ['$detached', true]},
         'guide_slug': '$guide.slug',
         'passed_count': '$stats.passed',
