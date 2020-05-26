@@ -24,25 +24,29 @@ helpers do
 
   def create_students!
     normalize_students!
-    Student.collection.insert_many(students.map { |student| with_organization_and_course student })
+    students_uids = students.map { |it| it[:uid] }
+    unprocessed_uids = Student.where(with_organization_and_course uid: {'$in': students_uids}).map(&:uid)
+    not_unprocessed = students.select { |s| unprocessed_uids.include? s[:uid] }
+    to_process = students.reject { |s| unprocessed_uids.include? s[:uid] }
+    Student.collection.insert_many(to_process.map { |student| with_organization_and_course student })
+    [to_process, not_unprocessed]
   end
 
-  def upsert_users!
-    new_students_uids = students.map { |it| it[:uid] }
-    existing_users = User.in(uid: new_students_uids).to_a
-    new_users = new_students_uids - existing_users.map { |it| it[:uid] }
+  def upsert_users!(processed, unprocessed)
+    unprocessed_students_uids = unprocessed.map { |it| it[:uid] }
+    existing_users = User.in(uid: unprocessed_students_uids).to_a
 
-    new_students = students.select { |it| new_users.include? it[:uid] }.map do |it|
+    new_users = processed.map do |it|
       User.from_student_json(it).tap do |new_user|
         new_user.add_permission!(:student, course_slug)
       end
     end
 
-    User.collection.insert_many(new_students.as_json)
+    User.collection.insert_many(new_users.as_json)
 
     User.bulk_permissions_update existing_users, :student, course_slug
 
-    (new_students + existing_users).each do |it|
+    (new_users + existing_users).each do |it|
       notify_user! it, students.find { |json| json[:uid] == it.uid }
       Mumukit::Nuntius.notify! 'resubmissions', uid: it.uid, tenant: tenant
     end
@@ -78,10 +82,15 @@ Mumukit::Platform.map_organization_routes!(self) do
     post '/students' do
       authorize! :janitor
       ensure_course_existence!
-      ensure_students_not_exist!
-      create_students!
-      upsert_users!
-      {status: :created, processed: students, processed_count: students.size}
+      processed, unprocessed = create_students!
+      upsert_users! processed, unprocessed
+      {
+        status: :created,
+        processed: processed,
+        processed_count: processed.size,
+        existing_students: unprocessed,
+        existing_students_count: unprocessed.size
+      }
     end
 
     post '/students/detach' do
