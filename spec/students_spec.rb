@@ -449,7 +449,8 @@ describe Student do
             before { post 'api/courses/foo/massive/students', students_json }
 
             it { expect(last_response).to be_ok }
-            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
+            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100},
+                                                       {only: [:status, :processed_count]}) }
             it { expect(Student.in(uid: students_uids).count).to eq 100 }
           end
 
@@ -466,7 +467,7 @@ describe Student do
             before { post 'api/courses/foo/massive/students', students_json }
 
             it { expect(last_response).to be_ok }
-            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
+            it { expect(last_response.body).to json_like({status: 'created', processed_count: 100}, only: [:status, :processed_count]) }
             it { expect(Student.in(uid: students_uids).where(organization: 'example.org', course: 'example.org/foo').count).to eq 100 }
             it { expect(User.in(uid: students_uids).count).to eq 100 }
             it { expect(User.in(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo') }.count).to eq 100 }
@@ -477,9 +478,10 @@ describe Student do
             before { Student.create(organization: 'example.org', course: 'example.org/foo', uid: students[99][:email]) }
             before { post 'api/courses/foo/massive/students', students_json }
 
-            it { expect(last_response).to_not be_ok }
-            it { expect(last_response.body).to json_eq(existing_students: ["email_100@fake.com"]) }
-            it { expect(Student.in(uid: students_uids).count).to eq 1 }
+            it { expect(last_response).to be_ok }
+            it { expect(last_response.body).to json_like({existing_students: [students[99]]},
+                                                         {only: [:existing_students]}) }
+            it { expect(Student.in(uid: students_uids).count).to eq 100 }
           end
         end
 
