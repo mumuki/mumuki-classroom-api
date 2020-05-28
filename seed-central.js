@@ -48,3 +48,44 @@ function updateStudent(uid, permissions) {
 updateStudent('dev.student@mumuki.org', {});
 updateStudent('dev.teacher@mumuki.org', {teacher: '*/*'});
 updateStudent('dev.owner@mumuki.org', {owner: '*/*'});
+updateStudent('admin@admin.com', {owner: '*/*'});
+
+var course = {
+  "organization": central.name,
+  "days": [
+    "Monday"
+  ],
+  "code": "k1234",
+  "shifts": [
+    "Morning"
+  ],
+  "period": "9999",
+  "description": "k1234",
+  "slug": "central/9999-k1234",
+};
+
+db.courses.update({slug: course.slug}, course, {upsert: true});
+
+var jane = {
+  "organization": central.name,
+  "course": course.slug,
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "email": "jane.doe@testing.com",
+  "personal_id": "12345678",
+  "uid": "jane.doe@testing.com",
+};
+
+var john = {
+  "organization": central.name,
+  "course": course.slug,
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@testing.com",
+  "personal_id": "23456789",
+  "uid": "john.doe@testing.com",
+};
+
+db.students.update({ uid: jane.uid }, jane, { upsert: true });
+db.students.update({ uid: john.uid }, john, { upsert: true });
+
