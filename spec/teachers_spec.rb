@@ -29,7 +29,7 @@ describe Teacher do
 
       it { expect(last_response).to be_ok }
       it { expect(Teacher.count).to eq 1 }
-      it { expect(Teacher.first.as_json).to json_like(teacher.merge(organization: 'example.org', course: 'example.org/foo', uid: 'foobar@gmail.com'), except_fields) }
+      it { expect(Teacher.first.as_json).to json_like(teacher.merge(first_name: 'Foo', last_name: 'Bar', organization: 'example.org', course: 'example.org/foo', uid: 'foobar@gmail.com'), except_fields) }
     end
 
     context 'when no permissions' do

@@ -6,7 +6,10 @@ Mumukit::Platform.map_organization_routes!(self) do
 
   post '/courses/:course/teachers' do
     authorize! :headmaster
-    teacher_json = json_body.merge(uid: json_body[:email])
+    normalize_course_member!
+
+    teacher_json = json_body
+
     uid = teacher_json[:uid]
 
     Teacher.create!(with_organization_and_course teacher_json)
