@@ -25,18 +25,19 @@ helpers do
   def create_students!
     normalize_students!
     students_uids = students.map { |it| it[:uid] }
-    unprocessed_uids = Student.where(with_organization_and_course uid: {'$in': students_uids}).map(&:uid)
-    not_unprocessed = students.select { |s| unprocessed_uids.include? s[:uid] }
-    to_process = students.reject { |s| unprocessed_uids.include? s[:uid] }
-    Student.collection.insert_many(to_process.map { |student| with_organization_and_course student })
-    [to_process, not_unprocessed]
+    existing_students_uids = Student.where(with_organization_and_course uid: {'$in': students_uids}).map(&:uid)
+    existing_students = students.select { |s| existing_students_uids.include? s[:uid] }
+    new_students = students.reject { |s| existing_students_uids.include? s[:uid] }
+    Student.collection.insert_many(new_students.map { |student| with_organization_and_course student })
+    [new_students, existing_students]
   end
 
-  def upsert_users!(processed, unprocessed)
-    unprocessed_students_uids = unprocessed.map { |it| it[:uid] }
-    existing_users = User.in(uid: unprocessed_students_uids).to_a
+  def upsert_users!
+    new_students_uids = students.map { |it| it[:uid] }
+    existing_users = User.in(uid: new_students_uids).to_a
+    new_users_uids = new_students_uids - existing_users.map { |it| it[:uid] }
 
-    new_users = processed.map do |it|
+    new_users = students.select { |it| new_users_uids.include? it[:uid] }.map do |it|
       User.from_student_json(it).tap do |new_user|
         new_user.add_permission!(:student, course_slug)
       end
@@ -83,7 +84,7 @@ Mumukit::Platform.map_organization_routes!(self) do
       authorize! :janitor
       ensure_course_existence!
       processed, unprocessed = create_students!
-      upsert_users! processed, unprocessed
+      upsert_users!
       {
         status: :created,
         processed: processed,
