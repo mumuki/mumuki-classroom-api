@@ -219,7 +219,7 @@ TEST
     end
   end
 
-  describe 'get /api/courses/:course/massive/students' do
+  pending 'get /api/courses/:course/massive/students' do
 
     before { header 'Authorization', build_auth_header('*') }
 
