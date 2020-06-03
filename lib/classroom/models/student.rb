@@ -2,6 +2,7 @@ class Student
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  extend CourseMember
 
   field :uid, type: String
   field :personal_id, type: String
@@ -78,12 +79,6 @@ class Student
       where(query).ne(detached: true).order_by(updated_at: :desc).first
     end
 
-    def ensure_not_exists!(query)
-      existing_students = Student.where(query)
-      return unless existing_students.exists?
-      raise Classroom::StudentExistsError, {existing_students: existing_students.map(&:uid)}.to_json
-    end
-
     def detach_all_by!(uids, query)
       where(query).in(uid: uids).update_all(detached: true, detached_at: Time.now)
       criteria = query.merge('student.uid': {'$in': uids})
@@ -101,6 +96,6 @@ class Student
 
 end
 
-class Classroom::StudentExistsError < Exception
+class Classroom::CourseMemberExistsError < Exception
 end
 

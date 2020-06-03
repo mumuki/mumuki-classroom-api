@@ -46,7 +46,7 @@ helpers do
 
     User.collection.insert_many(new_users.as_json)
 
-    User.bulk_permissions_update existing_users, :student, course_slug
+    User.bulk_permissions_update existing_users, role, course_slug
 
     (new_users + existing_users).each do |it|
       notify_user! it, members.find { |json| json[:uid] == it.uid }
@@ -88,8 +88,8 @@ Mumukit::Platform.map_organization_routes!(self) do
         status: :created,
         processed: processed,
         processed_count: processed.size,
-        existing_students: unprocessed,
-        existing_students_count: unprocessed.size
+        existing_members: unprocessed,
+        existing_members_count: unprocessed.size
       }
     end
 
@@ -102,8 +102,8 @@ Mumukit::Platform.map_organization_routes!(self) do
           status: :created,
           processed: processed,
           processed_count: processed.size,
-          existing_students: unprocessed,
-          existing_students_count: unprocessed.size
+          existing_members: unprocessed,
+          existing_members_count: unprocessed.size
       }
     end
 

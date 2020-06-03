@@ -7,6 +7,7 @@ Mumukit::Platform.map_organization_routes!(self) do
   post '/courses/:course/teachers' do
     authorize! :headmaster
     normalize_course_member!
+    ensure_teacher_not_exists!
 
     teacher_json = json_body
 

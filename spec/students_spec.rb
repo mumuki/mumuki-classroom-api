@@ -323,7 +323,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
 
             end
             context 'in different course, should works' do
@@ -400,7 +400,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
             end
             context 'and user already exists by email' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -408,7 +408,7 @@ describe Student do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
             end
           end
         end
@@ -479,8 +479,8 @@ describe Student do
             before { post 'api/courses/foo/massive/students', students_json }
 
             it { expect(last_response).to be_ok }
-            it { expect(last_response.body).to json_like({existing_students: [students[99]]},
-                                                         {only: [:existing_students]}) }
+            it { expect(last_response.body).to json_like({existing_members: [students[99]]},
+                                                         {only: [:existing_members]}) }
             it { expect(Student.in(uid: students_uids).count).to eq 100 }
           end
         end
