@@ -87,12 +87,11 @@ helpers do
   end
 
   def ensure_student_not_exists!
-    Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
+    Student.ensure_not_exists! with_organization_and_course uid: json_body[:uid]
   end
 
-  def ensure_students_not_exist!
-    students_uids = students.map { |it| it[:email] }
-    Student.ensure_not_exists! with_organization_and_course(uid: {'$in': students_uids })
+  def ensure_teacher_not_exists!
+    Teacher.ensure_not_exists! with_organization_and_course uid: json_body[:uid]
   end
 
   def set_locale!

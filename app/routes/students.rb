@@ -1,8 +1,9 @@
 helpers do
-  def normalize_student!
-    json_body[:email] = json_body[:email]&.downcase
-    json_body[:last_name] = json_body[:last_name]&.downcase&.titleize
-    json_body[:first_name] = json_body[:first_name]&.downcase&.titleize
+  def normalize_course_member!(member=json_body)
+    member[:email] = member[:email]&.downcase
+    member[:last_name] = member[:last_name]&.downcase&.titleize
+    member[:first_name] = member[:first_name]&.downcase&.titleize
+    member[:uid] ||= member[:email]
   end
 
   def list_students(matcher)
@@ -80,9 +81,10 @@ Mumukit::Platform.map_organization_routes!(self) do
     ensure_course_existence!
     ensure_student_not_exists!
 
-    normalize_student!
+    normalize_course_member!
 
-    student_json = json_body.merge(uid: json_body[:email])
+    student_json = json_body
+
     uid = student_json[:uid]
 
     Student.create!(with_organization_and_course student_json)
@@ -101,13 +103,13 @@ Mumukit::Platform.map_organization_routes!(self) do
     authorize! :janitor
     ensure_course_existence!
 
-    normalize_student!
+    normalize_course_member!
 
     student = Student.find_by!(with_organization_and_course uid: uid)
-    student.update_attributes!(first_name: json_body[:first_name], last_name: json_body[:last_name], personal_id: json_body[:personal_id])
+    student.update_attributes!(json_body.slice(:first_name, :last_name, :personal_id))
 
     user = User.find_by(uid: uid)
-    user.update_attributes! first_name: json_body[:first_name], last_name: json_body[:last_name]
+    user.update_attributes! json_body.slice(:first_name, :last_name)
 
     notify_user!(user, json_body)
 

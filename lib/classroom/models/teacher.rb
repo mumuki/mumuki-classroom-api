@@ -2,6 +2,7 @@ class Teacher
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  extend CourseMember
 
   field :uid, type: String
   field :first_name, type: String

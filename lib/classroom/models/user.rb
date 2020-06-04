@@ -32,7 +32,7 @@ class User
     user.upsert_permissions! permissions
   end
 
-  def self.from_student_json(student_json)
+  def self.from_course_member_json(student_json)
     new student_json.except(:first_name, :last_name, :personal_id)
   end
 
