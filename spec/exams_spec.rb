@@ -1,166 +1,219 @@
 require 'spec_helper'
 
-describe Mumuki::Classroom::Exam do
+describe Exam do
 
-  let(:except_fields) { {except: [:eid, :created_at, :updated_at]} }
+  let(:organization) { create :organization, name: 'example.org' }
+  let(:course) { create :course, slug: 'example.org/foo' }
+  let(:language) { create :language, name: 'haskell' }
+  let(:guide) { create :guide, slug: 'foo/bar', name: 'foo', language: language }
+  let(:jane) { create :user, uid: 'jane.doe@testing.com' }
+  let(:john) { create :user, uid: 'john.doe@testing.com' }
+
+  let(:start_time) { 1.month.ago.beginning_of_day }
+  let(:end_time) { 1.month.since.beginning_of_day }
+
+  let(:exam_json) { {
+    organization: organization.name,
+    course: course.slug,
+    slug: guide.slug,
+    language: guide.language.name,
+    name: guide.name,
+    start_time: start_time,
+    end_time: end_time,
+    duration: 150,
+    max_problem_submissions: 5,
+    max_choice_submissions: 1,
+    results_hidden_for_choices: false,
+    passing_criterion_type: 'none'
+  } }
+
+  let(:response) { struct JSON.parse(last_response.body) }
+
+  before { header 'Authorization', build_auth_header('*') }
 
   describe 'get /courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'today', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', organization: 'example.org', course: 'example.org/foo', passing_criterion: {type: 'none'}} }
 
-    before { header 'Authorization', build_auth_header('*') }
-    before { Mumuki::Classroom::Exam.create!(exam_json) }
+    before { Exam.import_from_resource_h! exam_json }
     before { get '/courses/foo/exams' }
 
+    let(:exam) { struct response.exams[0] }
+
     it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_like({exams: [eid: instance_of(String)]}, {only: :eid}) }
-    it { expect(last_response.body).to json_like({exams: [exam_json]}, except_fields) }
+    it { expect(response.exams.size).to eq 1 }
+    it { expect(exam.eid).to be_instance_of String }
+    it { expect(exam.organization).to eq organization.name }
+    it { expect(exam.course).to eq course.slug }
+    it { expect(exam.slug).to eq guide.slug }
+    it { expect(exam.start_time.to_datetime).to eq start_time }
+    it { expect(exam.end_time.to_datetime).to eq end_time }
+    it { expect(exam.duration).to eq 150 }
+    it { expect(exam.max_problem_submissions).to eq 5 }
+    it { expect(exam.max_choice_submissions).to eq 1 }
+    it { expect(exam.results_hidden_for_choices).to eq false }
 
   end
 
   describe 'post /courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}}.as_json }
-    let(:exam_fetched) { Mumuki::Classroom::Exam.find_by organization: 'example.org', course: 'example.org/foo' }
 
-    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
-    before { header 'Authorization', build_auth_header('*') }
-    before { post '/courses/foo/exams', exam_json.to_json }
+    let(:exams_fetched) { Exam.where organization: organization, course: course }
+    let(:exam_fetched) { exams_fetched.first }
 
-    it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_like({status: 'created'}, {except: :eid}) }
-    it { expect(Mumuki::Classroom::Exam.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
-    it { expect(exam_fetched.eid).to be_truthy }
-    it { expect(exam_fetched.eid).to be_instance_of(String) }
-    it { expect(exam_fetched.as_json).to json_like(exam_json.merge(organization: 'example.org', course: 'example.org/foo'), except_fields) }
-  end
-
-  describe 'post /api/courses/:course/exams' do
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}}.as_json }
-    let(:exam_fetched) { Mumuki::Classroom::Exam.find_by organization: 'example.org', course: 'example.org/foo' }
-
-    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
-    before { header 'Authorization', build_auth_header('*') }
-    before { post '/api/courses/foo/exams', exam_json.to_json }
-
-    it { expect(last_response.body).to be_truthy }
-    it { expect(last_response.body).to json_like({status: 'created'}, except_fields) }
-    it { expect(Mumuki::Classroom::Exam.count).to eq 1 }
-    it { expect(exam_fetched.eid).to be_truthy }
-    it { expect(exam_fetched.as_json).to json_like exam_json.merge(organization: 'example.org', course: 'example.org/foo'), except_fields }
+    ['/api', ''].each do |prefix|
+      context prefix do
+        before { post "#{prefix}/courses/foo/exams", exam_json.to_json }
+        it { expect(last_response.body).to be_truthy }
+        it { expect(response.status).to eq 'created' }
+        it { expect(response.eid).to be_instance_of(String) }
+        it { expect(exams_fetched.count).to eq 1 }
+        it { expect(exam_fetched.classroom_id).to be_instance_of(String) }
+        it { expect(exam_fetched.organization).to eq organization }
+        it { expect(exam_fetched.course).to eq course }
+        it { expect(exam_fetched.guide).to eq guide }
+        it { expect(exam_fetched.start_time).to eq start_time }
+        it { expect(exam_fetched.end_time).to eq end_time }
+        it { expect(exam_fetched.duration).to eq 150 }
+        it { expect(exam_fetched.max_problem_submissions).to eq 5 }
+        it { expect(exam_fetched.max_choice_submissions).to eq 1 }
+        it { expect(exam_fetched.results_hidden_for_choices).to eq false }
+      end
+    end
   end
 
   describe 'get /courses/:course/exams/:exam_id' do
-    let(:exam_id) { Mumuki::Classroom::Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}} }
+    let(:classroom_id) { Exam.import_from_resource_h!(exam_json).classroom_id }
 
-    before { header 'Authorization', build_auth_header('*') }
-    before { get "/courses/foo/exams/#{exam_id}", exam_json.to_json }
+    before { get "/courses/foo/exams/#{classroom_id}", exam_json.to_json }
 
-    it { expect(last_response.body).to json_like({eid: exam_id}, {only: :eid}) }
-    it { expect(last_response.body).to json_like exam_json.merge(organization: 'example.org', course: 'example.org/foo'), except_fields }
+    it { expect(response.eid).to eq classroom_id }
+    it { expect(response.organization).to eq organization.name }
+    it { expect(response.course).to eq course.slug }
+    it { expect(response.slug).to eq guide.slug }
+    it { expect(response.name).to eq guide.name }
+    it { expect(response.language).to eq language.name }
+    it { expect(response.start_time.to_datetime).to eq start_time.to_datetime }
+    it { expect(response.end_time.to_datetime).to eq end_time.to_datetime }
+    it { expect(response.duration).to eq 150 }
+    it { expect(response.max_problem_submissions).to eq 5 }
+    it { expect(response.max_choice_submissions).to eq 1 }
+    it { expect(response.results_hidden_for_choices).to eq false }
   end
 
-  describe 'put /courses/:course/exams/:exam' do
-    let(:exam_id) { Mumuki::Classroom::Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}}.as_json }
-    let(:exam_json2) { exam_json.merge(uids: ['auth0|123456'], eid: exam_id).as_json }
-    let(:exam_fetched) { Mumuki::Classroom::Exam.last }
+  describe 'put /courses/:course/exams/:exam not update users list' do
+    let(:classroom_id) { (Exam.import_from_resource_h! exam_json).classroom_id }
+    let(:exam_json2) { exam_json.merge(eid: classroom_id, max_choice_submissions: 3, uids: [jane.uid, john.uid]) }
+    let(:exam_fetched) { Exam.last }
 
     context 'when existing exam' do
-      before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
-      before { header 'Authorization', build_auth_header('*') }
-      before { put "/courses/foo/exams/#{exam_id}", exam_json2.to_json }
+      before { put "/courses/foo/exams/#{classroom_id}", exam_json2.to_json }
 
       it { expect(last_response.body).to be_truthy }
-      it { expect(last_response.body).to json_like({status: 'updated'}, except_fields) }
-      it { expect(Mumuki::Classroom::Exam.count).to eq 1 }
-      it { expect(exam_fetched.eid).to eq(exam_id) }
-      it { expect(exam_fetched).to json_like(
-                                     exam_json2.merge(organization: 'example.org', course: 'example.org/foo').except('eid'),
-                                     except_fields) }
+      it { expect(response.status).to eq 'updated' }
+      it { expect(Exam.count).to eq 1 }
+      it { expect(exam_fetched.classroom_id).to eq classroom_id }
+      it { expect(exam_fetched.organization).to eq organization }
+      it { expect(exam_fetched.course).to eq course }
+      it { expect(exam_fetched.guide).to eq guide }
+      it { expect(exam_fetched.start_time).to eq start_time }
+      it { expect(exam_fetched.end_time).to eq end_time }
+      it { expect(exam_fetched.duration).to eq 150 }
+      it { expect(exam_fetched.max_problem_submissions).to eq 5 }
+      it { expect(exam_fetched.max_choice_submissions).to eq 3 }
+      it { expect(exam_fetched.results_hidden_for_choices).to eq false }
+      it { expect(exam_fetched.users.size).to eq 0 }
     end
 
   end
 
-  describe 'post /api/courses/:course/exams/:exam/students/:uid' do
-    let(:exam_id) { Mumuki::Classroom::Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}}.stringify_keys }
-    let(:exam_fetched) { Mumuki::Classroom::Exam.last }
+  describe 'post /courses/:course/exams/:exam/students/:uid' do
+    let(:classroom_id) { (Exam.import_from_resource_h! exam_json).classroom_id }
 
-    context 'when existing exam' do
-      before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
-      before { header 'Authorization', build_auth_header('*') }
-      before { post "/api/courses/foo/exams/#{exam_id}/students/agus@mumuki.org" }
+    ['/api', ''].each do |prefix|
+      context prefix do
+        before { Exam.upsert_students! eid: classroom_id, added: [jane.uid] }
+        before { post "/api/courses/foo/exams/#{classroom_id}/students/#{john.uid}" }
 
-      it { expect(last_response.body).to be_truthy }
-      it { expect(last_response.body).to json_like({status: 'updated'}, except_fields) }
-      it { expect(Mumuki::Classroom::Exam.count).to eq 1 }
-      it { expect(exam_fetched.uids).to eq ['auth0|234567', 'auth0|345678', 'agus@mumuki.org'] }
+        it { expect(last_response.body).to be_truthy }
+        it { expect(response.status).to eq 'updated' }
+        it { expect(Exam.count).to eq 1 }
+        it { expect(Exam.last.users).to eq [jane, john] }
+      end
     end
-
   end
 
-  pending 'post /api/courses/:course/massive/exams/:exam/students' do
-    let(:exam_id) { Mumuki::Classroom::Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}}.stringify_keys }
-    let(:exam_uids) { {uids: (1..100).map { |it| "user_uid_#{it}" }} }
-    let(:exam_fetched) { Mumuki::Classroom::Exam.last }
-    let(:uids) { exam_uids[:uids] }
+  describe 'delete /courses/:course/exams/:exam/students/:uid' do
 
-    context 'when existing exam' do
-      before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
-      before { header 'Authorization', build_auth_header('*') }
-      before { post "/api/courses/foo/massive/exams/#{exam_id}/students", exam_uids.to_json }
+    let(:classroom_id) { (Exam.import_from_resource_h! exam_json).classroom_id }
 
-      it { expect(last_response.body).to be_truthy }
-      it { expect(last_response.body).to json_like({status: 'updated', processed_count: uids.size, processed: uids}, except_fields) }
-      it { expect(Mumuki::Classroom::Exam.count).to eq 1 }
-      it { expect(exam_fetched.uids).to eq ['auth0|234567', 'auth0|345678'].concat(uids) }
+    ['/api', ''].each do |prefix|
+      context prefix do
+        before { Exam.upsert_students! eid: classroom_id, added: [jane.uid, john.uid] }
+        before { delete "/api/courses/foo/exams/#{classroom_id}/students/#{john.uid}" }
+
+        it { expect(last_response.body).to be_truthy }
+        it { expect(response.status).to eq 'updated' }
+        it { expect(Exam.count).to eq 1 }
+        it { expect(Exam.last.users).to eq [jane] }
+      end
     end
-
-  end
-
-  describe 'delete /api/courses/:course/exams/:exam/students/:uid' do
-    let(:exam_id) { Mumuki::Classroom::Exam.create!(exam_json.merge organization: 'example.org', course: 'example.org/foo').eid }
-    let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'agus@mumuki.org', 'auth0|345678'], passing_criterion: {type: 'none'}}.stringify_keys }
-    let(:exam_fetched) { Mumuki::Classroom::Exam.last }
-
-    context 'when existing exam' do
-      before { expect(Mumukit::Nuntius).to receive(:notify_event!).exactly(1).times }
-      before { header 'Authorization', build_auth_header('*') }
-      before { delete "/api/courses/foo/exams/#{exam_id}/students/agus@mumuki.org" }
-
-      it { expect(last_response.body).to be_truthy }
-      it { expect(last_response.body).to json_like({status: 'updated'}, except_fields) }
-      it { expect(Mumuki::Classroom::Exam.count).to eq 1 }
-      it { expect(exam_fetched.uids).to eq ['auth0|234567', 'auth0|345678'] }
-    end
-
   end
 
   describe 'exam validations' do
     context 'max submissions' do
-      let(:exam_json) { {organization: 'example.org', course: 'example.org/foo', slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678'], passing_criterion: {type: 'none'}} }
-      let(:valid_exam_json) { exam_json.merge(max_problem_submissions: 10, max_choice_submissions: 2) }
-      let(:invalid_exam_json) { exam_json.merge(max_problem_submissions: 0, max_choice_submissions: -2) }
 
-      it { expect { Mumuki::Classroom::Exam.create! valid_exam_json }.not_to raise_error }
-      it { expect { Mumuki::Classroom::Exam.create! invalid_exam_json }.to raise_error(Mongoid::Errors::Validations) }
+      let(:valid_exam_json) { exam_json.merge(max_problem_submissions: 1, max_choice_submissions: 1) }
+      let(:invalid_exam_json1) { exam_json.merge(max_problem_submissions: 1, max_choice_submissions: -2) }
+      let(:invalid_exam_json2) { exam_json.merge(max_problem_submissions: -2, max_choice_submissions: 1) }
+
+      it { expect { Exam.import_from_resource_h! valid_exam_json }.not_to raise_error }
+      it { expect { Exam.import_from_resource_h! invalid_exam_json1 }.to raise_error(ActiveRecord::RecordInvalid) }
+      it { expect { Exam.import_from_resource_h! invalid_exam_json2 }.to raise_error(ActiveRecord::RecordInvalid) }
     end
 
     context 'passing criterion' do
-      let(:exam_json) { {organization: 'example.org', course: 'example.org/foo', slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: ['auth0|234567', 'auth0|345678']} }
-      let(:valid_criterion_none) { exam_json.merge(passing_criterion: {type: 'none'}) }
-      let(:valid_criterion_passed_exercises) { exam_json.merge(passing_criterion: {type: 'passed_exercises', value: 5}) }
-      let(:valid_criterion_percentage) { exam_json.merge(passing_criterion: {type: 'percentage', value: 10}) }
 
-      let(:invalid_criterion_type) { exam_json.merge(passing_criterion: {type: 'some_invalid_type'}) }
-      let(:invalid_criterion_value) { exam_json.merge(passing_criterion: {type: 'percentage', value: 105}) }
+      let(:valid_criterion_none) { exam_json.merge(passing_criterion_type: 'none') }
+      let(:valid_criterion_passed_exercises) { exam_json.merge(passing_criterion_type: 'passed_exercises', passing_criterion_value: 5) }
+      let(:valid_criterion_percentage) { exam_json.merge(passing_criterion_type: 'percentage', passing_criterion_value: 10) }
 
-      it { expect { Mumuki::Classroom::Exam.create! valid_criterion_none }.not_to raise_error }
-      it { expect { Mumuki::Classroom::Exam.create! valid_criterion_passed_exercises }.not_to raise_error }
-      it { expect { Mumuki::Classroom::Exam.create! valid_criterion_percentage }.not_to raise_error }
-      it { expect { Mumuki::Classroom::Exam.create! invalid_criterion_type }.to raise_error('Invalid criterion type some_invalid_type') }
-      it { expect { Mumuki::Classroom::Exam.create! invalid_criterion_value }.to raise_error('Invalid criterion value 105 for percentage') }
+      let(:invalid_criterion_type) { exam_json.merge(passing_criterion_type: 'some_invalid_type') }
+      let(:invalid_criterion_value) { exam_json.merge(passing_criterion_type: 'percentage', passing_criterion_value: 105) }
+
+      it { expect { Exam.import_from_resource_h! valid_criterion_none }.not_to raise_error }
+      it { expect { Exam.import_from_resource_h! valid_criterion_passed_exercises }.not_to raise_error }
+      it { expect { Exam.import_from_resource_h! valid_criterion_percentage }.not_to raise_error }
+      it { expect { Exam.import_from_resource_h! invalid_criterion_type }.to raise_error(ArgumentError) }
+      it { expect { Exam.import_from_resource_h! invalid_criterion_value }.to raise_error('Invalid criterion value 105 for percentage') }
     end
   end
+
+  describe 'post /api/courses/:course/massive/exams/:exam/students' do
+    let(:classroom_id) { Exam.import_from_resource_h!(exam_json).classroom_id }
+    let(:exam_uids) { {uids: (1..125).map { |it| "user_uid_#{it}@testing.com" }} }
+    let(:exam_fetched) { Exam.last }
+    let(:uids) { exam_uids[:uids] }
+    let(:new_users) { uids.map { |it| create :user, uid: it } }
+
+    context 'when existing exam' do
+
+      before { new_users }
+      before { uids.take(25).each { |it| Mumuki::Classroom::Student.create! uid: it, organization: organization.name, course: course.slug } }
+      before { Exam.upsert_students! eid: classroom_id, added: [jane.uid, john.uid] }
+      before { post "/api/courses/foo/massive/exams/#{classroom_id}/students", exam_uids.to_json }
+
+      it { expect(Exam.count).to eq 1 }
+      it { expect(exam_fetched.users.size).to eq 27 }
+      it { expect(last_response.body).to be_truthy }
+      it { expect(response.status).to eq 'updated' }
+      it { expect(response.processed).to match_array uids.take(25) }
+      it { expect(response.processed_count).to eq 25 }
+      it { expect(response.unprocessed).to match_array uids.drop(100) }
+      it { expect(response.unprocessed_count).to eq 25 }
+      it { expect(response.unprocessed_reason).to eq 'This endpoint process only first 100 elements' }
+      it { expect(response.errored_members).to match_array uids.take(100).drop(25) }
+      it { expect(response.errored_members_count).to eq 75 }
+      it { expect(response.errored_members_reason).to eq 'Students does not belong to current course' }
+    end
+
+  end
+
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190724190355) do
+ActiveRecord::Schema.define(version: 20200601203033) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -42,10 +42,18 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.text "manual_evaluation_comment"
     t.integer "attemps_count", default: 0
     t.bigint "organization_id"
+    t.datetime "submitted_at"
+    t.bigint "parent_id"
     t.index ["exercise_id"], name: "index_assignments_on_exercise_id"
     t.index ["organization_id"], name: "index_assignments_on_organization_id"
+    t.index ["parent_id"], name: "index_assignments_on_parent_id"
     t.index ["submission_id"], name: "index_assignments_on_submission_id"
     t.index ["submitter_id"], name: "index_assignments_on_submitter_id"
+  end
+
+  create_table "avatars", force: :cascade do |t|
+    t.string "image_url"
+    t.string "description"
   end
 
   create_table "books", id: :serial, force: :cascade do |t|
@@ -55,6 +63,7 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.string "locale", default: "en"
     t.text "description"
     t.string "slug"
+    t.boolean "private", default: false
     t.index ["slug"], name: "index_books_on_slug", unique: true
   end
 
@@ -133,7 +142,10 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.integer "duration"
     t.integer "max_problem_submissions"
     t.integer "max_choice_submissions"
+    t.boolean "results_hidden_for_choices", default: false
+    t.bigint "course_id"
     t.index ["classroom_id"], name: "index_exams_on_classroom_id", unique: true
+    t.index ["course_id"], name: "index_exams_on_course_id"
     t.index ["guide_id"], name: "index_exams_on_guide_id"
     t.index ["organization_id"], name: "index_exams_on_organization_id"
   end
@@ -159,10 +171,8 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.text "default_content"
     t.integer "bibliotheca_id", null: false
     t.boolean "extra_visible", default: false
-    t.boolean "new_expectations", default: false
     t.boolean "manual_evaluation", default: false
     t.integer "editor", default: 0, null: false
-    t.string "choice_values", default: [], null: false, array: true
     t.text "goal"
     t.string "initial_state"
     t.string "final_state"
@@ -172,6 +182,7 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.text "teacher_info"
     t.text "choices"
     t.text "settings"
+    t.text "custom_expectations"
     t.index ["guide_id"], name: "index_exercises_on_guide_id"
     t.index ["language_id"], name: "index_exercises_on_language_id"
   end
@@ -197,8 +208,27 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.text "sources"
     t.text "learn_more"
     t.text "settings"
+    t.text "custom_expectations"
     t.index ["name"], name: "index_guides_on_name"
     t.index ["slug"], name: "index_guides_on_slug", unique: true
+  end
+
+  create_table "indicators", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "organization_id"
+    t.bigint "parent_id"
+    t.string "content_type"
+    t.bigint "content_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "dirty_by_content_change", default: false
+    t.boolean "dirty_by_submission", default: false
+    t.integer "children_passed_count"
+    t.integer "children_count"
+    t.index ["content_type", "content_id"], name: "index_indicators_on_content_type_and_content_id"
+    t.index ["organization_id"], name: "index_indicators_on_organization_id"
+    t.index ["parent_id"], name: "index_indicators_on_parent_id"
+    t.index ["user_id"], name: "index_indicators_on_user_id"
   end
 
   create_table "invitations", id: :serial, force: :cascade do |t|
@@ -238,6 +268,7 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.boolean "layout_shows_loading_content"
     t.boolean "editor_shows_loading_content"
     t.boolean "settings", default: false
+    t.boolean "expectations"
     t.index ["name"], name: "index_languages_on_name", unique: true
   end
 
@@ -298,6 +329,7 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.datetime "updated_at"
     t.text "appendix"
     t.string "slug"
+    t.boolean "private", default: false
     t.index ["slug"], name: "index_topics_on_slug", unique: true
   end
 
@@ -340,12 +372,18 @@ ActiveRecord::Schema.define(version: 20190724190355) do
     t.datetime "last_reminded_date"
     t.date "birthdate"
     t.integer "gender"
+    t.string "verified_first_name"
+    t.string "verified_last_name"
+    t.bigint "avatar_id"
+    t.datetime "disabled_at"
+    t.index ["disabled_at"], name: "index_users_on_disabled_at"
     t.index ["last_organization_id"], name: "index_users_on_last_organization_id"
     t.index ["uid"], name: "index_users_on_uid", unique: true
   end
 
   add_foreign_key "chapters", "topics"
   add_foreign_key "complements", "guides"
+  add_foreign_key "exams", "courses"
   add_foreign_key "exams", "guides"
   add_foreign_key "lessons", "guides"
   add_foreign_key "organizations", "books"
