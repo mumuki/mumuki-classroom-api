@@ -8,7 +8,7 @@ common: &common
 
 development:
   <<: *common
-  database: mumuki_classroom_integration
+  database: academia_development
   pool: 5
   timeout: 5000
 

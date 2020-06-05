@@ -34,6 +34,11 @@ class Mumuki::Classroom::App < Sinatra::Application
       {organization: current_organization}.merge hash.except(:organization)
     end
 
+    # FIXME only provisional
+    def with_current_organization_and_course(hash = {})
+      with_current_organization.merge(course: current_course).merge hash.except(:organization, :course)
+    end
+
     def with_organization_and_course(hash = {})
       with_organization.merge(course: course_slug).merge hash
     end
@@ -115,7 +120,11 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def current_organization
-      @current_organization ||= Organization.find_by(name: organization)
+      @current_organization ||= Organization.locate!(organization).switch!
+    end
+
+    def current_course
+      @current_course ||= Course.locate!(course_slug)
     end
 
     def update_and_notify_student_metadata(uid, method, *slugs)
@@ -165,7 +174,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     def csv_projection_for(projection)
       projection.transform_values do |val|
         next val if val == 0
-        { '$ifNull': [val, nil] }
+        {'$ifNull': [val, nil]}
       end
     end
 
@@ -207,7 +216,7 @@ class Mumuki::Classroom::App < Sinatra::Application
 
   after do
     error_message = env['sinatra.error']
-    if response.body.is_a?(Array)&& response.body[0].is_a?(String)
+    if response.body.is_a?(Array) && response.body[0].is_a?(String)
       if content_type != 'application/csv'
         content_type 'text/html'
         response.body[0] = <<HTML
@@ -277,3 +286,4 @@ require_relative './sinatra/notifications'
 require_relative './sinatra/suggestions'
 require_relative './sinatra/manual_evaluation'
 require_relative './sinatra/searching'
+require_relative './sinatra/massive'
