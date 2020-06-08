@@ -79,10 +79,10 @@ Mumukit::Platform.map_organization_routes!(self) do
   post '/courses/:course/students' do
     authorize! :janitor
     ensure_course_existence!
-    ensure_student_not_exists!
 
     normalize_course_member!
 
+    ensure_student_not_exists!
     student_json = json_body
 
     uid = student_json[:uid]
