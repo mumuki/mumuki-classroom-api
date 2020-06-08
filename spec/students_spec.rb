@@ -284,7 +284,7 @@ describe Student do
     end
 
     describe 'post /courses/:course/students' do
-      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
@@ -317,7 +317,7 @@ describe Student do
           end
           context 'add student to a course if exists' do
             before { post '/courses/foo/students', student_json }
-            context 'in same course, should fails' do
+            context 'in same course, should fail' do
               before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
               before { post '/courses/foo/students', student_json }
 
@@ -326,7 +326,7 @@ describe Student do
               it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
 
             end
-            context 'in different course, should works' do
+            context 'in different course, should work' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
               before { post '/courses/bar/students', student_json }
 
