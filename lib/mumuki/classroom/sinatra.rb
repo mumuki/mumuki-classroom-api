@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'sinatra/namespace'
 require 'sinatra/cross_origin'
 
 class Mumuki::Classroom::App < Sinatra::Application
