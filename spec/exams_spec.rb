@@ -187,18 +187,20 @@ describe Exam do
   end
 
   describe 'post /api/courses/:course/massive/exams/:exam/students' do
+
     let(:classroom_id) { Exam.import_from_resource_h!(exam_json).classroom_id }
-    let(:exam_uids) { {uids: (1..125).map { |it| "user_uid_#{it}@testing.com" }} }
+    let(:exam_uids) { {uids: range.map { |it| "user_uid_#{it}@testing.com" }} }
     let(:exam_fetched) { Exam.last }
     let(:uids) { exam_uids[:uids] }
-    let(:new_users) { uids.map { |it| create :user, uid: it } }
 
-    context 'when existing exam' do
+    before { uids.map { |it| create :user, uid: it } }
+    before { Exam.upsert_students! eid: classroom_id, added: [jane.uid, john.uid] }
+    before { uids.take(students_count).each { |it| Mumuki::Classroom::Student.create! uid: it, organization: organization.name, course: course.slug } }
+    before { post "/api/courses/foo/massive/exams/#{classroom_id}/students", exam_uids.to_json }
 
-      before { new_users }
-      before { uids.take(25).each { |it| Mumuki::Classroom::Student.create! uid: it, organization: organization.name, course: course.slug } }
-      before { Exam.upsert_students! eid: classroom_id, added: [jane.uid, john.uid] }
-      before { post "/api/courses/foo/massive/exams/#{classroom_id}/students", exam_uids.to_json }
+    context 'when request exceeds batch limit and some students does not belong to course' do
+      let(:range) { (1..125) }
+      let(:students_count) { 25 }
 
       it { expect(Exam.count).to eq 1 }
       it { expect(exam_fetched.users.size).to eq 27 }
@@ -209,9 +211,45 @@ describe Exam do
       it { expect(response.unprocessed).to match_array uids.drop(100) }
       it { expect(response.unprocessed_count).to eq 25 }
       it { expect(response.unprocessed_reason).to eq 'This endpoint process only first 100 elements' }
-      it { expect(response.errored_members).to match_array uids.take(100).drop(25) }
+      it { expect(response.errored_members).to match_array uids.drop(25).take(75) }
       it { expect(response.errored_members_count).to eq 75 }
       it { expect(response.errored_members_reason).to eq 'Students does not belong to current course' }
+    end
+
+    context 'when request not exceeds batch limit and some students does not belong to course' do
+      let(:range) { (1..100) }
+      let(:students_count) { 25 }
+
+      it { expect(Exam.count).to eq 1 }
+      it { expect(exam_fetched.users.size).to eq 27 }
+      it { expect(last_response.body).to be_truthy }
+      it { expect(response.status).to eq 'updated' }
+      it { expect(response.processed).to match_array uids.take(25) }
+      it { expect(response.processed_count).to eq 25 }
+      it { expect(response.unprocessed).to be_nil }
+      it { expect(response.unprocessed_count).to be_nil }
+      it { expect(response.unprocessed_reason).to be_nil }
+      it { expect(response.errored_members).to match_array uids.drop(25).take(75) }
+      it { expect(response.errored_members_count).to eq 75 }
+      it { expect(response.errored_members_reason).to eq 'Students does not belong to current course' }
+    end
+
+    context 'when request not exceeds batch limit and all students belong to course' do
+      let(:range) { (1..100) }
+      let(:students_count) { 100 }
+
+      it { expect(Exam.count).to eq 1 }
+      it { expect(exam_fetched.users.size).to eq 102 }
+      it { expect(last_response.body).to be_truthy }
+      it { expect(response.status).to eq 'updated' }
+      it { expect(response.processed).to match_array uids }
+      it { expect(response.processed_count).to eq 100 }
+      it { expect(response.unprocessed).to be_nil }
+      it { expect(response.unprocessed_count).to be_nil }
+      it { expect(response.unprocessed_reason).to be_nil }
+      it { expect(response.errored_members).to be_nil }
+      it { expect(response.errored_members_count).to be_nil }
+      it { expect(response.errored_members_reason).to be_nil }
     end
 
   end
