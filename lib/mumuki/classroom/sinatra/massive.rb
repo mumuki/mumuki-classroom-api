@@ -15,34 +15,32 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def students
-      with_massive_batch_limit json_body[:students]
+      @students ||= json_body[:students].map { |it| to_student_basic_hash it }
+    end
+
+    def massive_students
+      @massive_students ||= with_massive_batch_limit students
     end
 
     def user_from_student_json(student_json)
-      User.new student_json.except(:first_name, :last_name, :personal_id)
+      User.whitelist_attributes student_json
     end
 
-    def normalize_students! #TODO: refactor
-      students.each do |it|
-        it[:email] = it[:email]&.downcase
-        it[:last_name] = it[:last_name]&.downcase&.titleize
-        it[:first_name] = it[:first_name]&.downcase&.titleize
-        it[:uid] = it[:email]
-      end
-    end
-
-    def create_students!
-      normalize_students!
-      Mumuki::Classroom::Student.collection.insert_many(students.map { |student| with_organization_and_course student })
+    def to_student_basic_hash(student)
+      {
+        uid: (student[:uid] || student[:email])&.downcase,
+        email: student[:email]&.downcase,
+        last_name: student[:last_name]&.downcase&.titleize,
+        first_name: student[:first_name]&.downcase&.titleize,
+        personal_id: student[:personal_id]
+      }
     end
 
     #FIXME: This method now doesn't perform a bulk update as PG doesn't support it
-    def upsert_users!
-      students.each do |it|
+    def upsert_users!(members)
+      members.each do |it|
         user = User.find_or_initialize_by(uid: it[:uid])
-        if user.new_record?
-          user.assign_attributes user_from_student_json(:it)
-        end
+        user.assign_attributes user_from_student_json(it)
         user.add_permission! :student, course_slug
         user.save!
         Mumukit::Nuntius.notify! 'resubmissions', uid: user.uid, tenant: tenant
@@ -97,11 +95,16 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       post '/students' do
         authorize! :janitor
-        ensure_course_existence!
-        ensure_students_not_exist!
-        create_students!
-        upsert_users!
-        {status: :created, processed: students, processed_count: students.size}
+        existing_students = Mumuki::Classroom::Student
+                              .where(with_organization_and_course)
+                              .in(uid: massive_students.map { |it| it[:uid] })
+                              .map { |it| to_student_basic_hash it }
+        existing_students_uids = existing_students.map { |it| it[:uid] }
+        processed = massive_students.reject { |it| existing_students_uids.include? it[:uid] }
+        Mumuki::Classroom::Student.collection.insert_many(processed.map { |student| with_organization_and_course student })
+        upsert_users! processed
+        massive_response(processed, (students - massive_students), existing_students,
+                         'Students already belong to current course', status: :created)
       end
 
       post '/students/detach' do

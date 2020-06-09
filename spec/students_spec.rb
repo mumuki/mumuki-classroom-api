@@ -79,6 +79,8 @@ describe Mumuki::Classroom::Student do
     }
   }
 
+  let(:response) { struct JSON.parse(last_response.body) }
+
   describe do
 
     before { example_students.call student1 }
@@ -434,7 +436,7 @@ describe Mumuki::Classroom::Student do
       end
     end
 
-    pending 'post api/courses/massive/:course/students' do
+    describe 'post api/courses/massive/:course/students' do
       let(:students) do
         (1..120).map do |it|
           {first_name: "first_name_#{it}", last_name: "last_name_#{it}", email: "email_#{it}@fake.com"}
@@ -442,49 +444,67 @@ describe Mumuki::Classroom::Student do
       end
       let(:students_uids) { students.map { |it| it[:email] } }
       let(:students_json) { {students: students}.to_json }
+      let(:query) { {organization: organization, course: 'example.org/foo'} }
 
       context 'when course exists' do
-        let!(:existing_course) { create(:course, organization: organization, name: 'foo', slug: 'example.org/foo') }
+        let!(:existing_course) { create(:course, {organization: organization, slug: 'example.org/foo'}) }
 
         context 'when authenticated' do
           before { header 'Authorization', build_auth_header('*') }
 
           context 'and users do not exist' do
             before { expect(Mumukit::Nuntius).to receive(:notify!).exactly(100).times }
-            before { post 'api/courses/foo/massive/students', students_json }
+            before { post '/api/courses/foo/massive/students', students_json }
 
             it { expect(last_response).to be_ok }
-            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
-            it { expect(Mumuki::Classroom::Student.where(uid: students_uids).count).to eq 100 }
+            it { expect(response.status).to eq 'created' }
+            it { expect(response.unprocessed_count).to eq 20 }
+            it { expect(response.processed_count).to eq 100 }
+            it { expect(response.errored_members_count).to eq nil }
+            it { expect(Mumuki::Classroom::Student.where(query).in(uid: students_uids).count).to eq 100 }
           end
 
           context 'and some users do exist' do
             before do
-              students_uids.take(50).map do |it|
+              students_uids.take(50).each do |it|
                 user = User.create(uid: it)
                 user.add_permission! :student, 'example.org/foo2'
                 user.save!
-                Mumuki::Classroom::Student.create(organization: 'example.org', course: 'example.org/foo2', uid: it)
+                Mumuki::Classroom::Student.create!(organization: 'example.org', course: 'example.org/foo2', uid: it)
               end
             end
             before { expect(Mumukit::Nuntius).to receive(:notify!).exactly(100).times }
-            before { post 'api/courses/foo/massive/students', students_json }
+            before { post '/api/courses/foo/massive/students', students_json }
 
             it { expect(last_response).to be_ok }
-            it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100}, except: [:processed]) }
-            it { expect(Mumuki::Classroom::Student.where(uid: students_uids).where(organization: 'example.org', course: 'example.org/foo').count).to eq 100 }
+            it { expect(response.status).to eq 'created' }
+            it { expect(response.unprocessed_count).to eq 20 }
+            it { expect(response.processed_count).to eq 100 }
+            it { expect(response.errored_members_count).to eq nil }
+            it { expect(Mumuki::Classroom::Student.where(query).in(uid: students_uids).count).to eq 100 }
             it { expect(User.where(uid: students_uids).count).to eq 100 }
             it { expect(User.where(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo') }.count).to eq 100 }
             it { expect(User.where(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo2') }.count).to eq 50 }
           end
 
           context 'and some students do exist' do
-            before { Mumuki::Classroom::Student.create(organization: 'example.org', course: 'example.org/foo', uid: students[99][:email]) }
+            before do
+              students_uids.take(50).each do |it|
+                user = User.create(uid: it)
+                user.add_permission! :student, 'example.org/foo'
+                user.save!
+                Mumuki::Classroom::Student.create(organization: 'example.org', course: 'example.org/foo', uid: it)
+              end
+            end
+            before { expect(Mumukit::Nuntius).to receive(:notify!).exactly(50).times }
             before { post 'api/courses/foo/massive/students', students_json }
 
-            it { expect(last_response).to_not be_ok }
-            it { expect(last_response.body).to json_eq(existing_students: ["email_100@fake.com"]) }
-            it { expect(Mumuki::Classroom::Student.where(uid: students_uids).count).to eq 1 }
+            it { expect(last_response).to be_ok }
+            it { expect(response.status).to eq 'created' }
+            it { expect(response.unprocessed_count).to eq 20 }
+            it { expect(response.processed_count).to eq 50 }
+            it { expect(response.errored_members_count).to eq 50 }
+            it { expect(Mumuki::Classroom::Student.where(query).in(uid: students_uids).count).to eq 100 }
           end
         end
 
