@@ -1,4 +1,66 @@
 class Mumuki::Classroom::App < Sinatra::Application
+
+  Mumukit::Platform.map_organization_routes!(self) do
+
+    namespace '/api/courses/:course/massive' do
+
+      before do
+        authorize! :janitor
+        ensure_organization_exists!
+        ensure_course_exists!
+      end
+
+      get '/students' do
+        per_page = MASSIVE_BATCH_LIMIT
+        progress = GuideProgress
+                     .where(with_organization_and_course)
+                     .sort('organization': :asc, 'course': :asc, 'student.uid': :asc)
+                     .limit(per_page)
+                     .skip(page * per_page)
+
+        count = progress.count
+        guide_progress = progress.select(&:student)
+                           .map { |it| {student: it.student.uid, guide: it.guide.slug, progress: it.as_json.except(:student, :guide)} }
+
+        {
+          page: page + 1,
+          total_pages: (count / per_page.to_f).ceil,
+          total_results: count,
+          total_page_results: [per_page, guide_progress.size].min,
+          guide_students_progress: guide_progress
+        }
+      end
+
+      post '/students' do
+        create_members! :student do |user|
+          Mumukit::Nuntius.notify! 'resubmissions', uid: user.uid, tenant: tenant
+        end
+      end
+
+      post '/teachers' do
+        create_members! :teacher
+      end
+
+      post '/students/detach' do
+        update_students! do |processed|
+          update_students_at_course! :detach, :remove, processed
+        end
+      end
+
+      post '/students/attach' do
+        update_students! do |processed|
+          update_students_at_course! :attach, :add, processed
+        end
+      end
+
+      post '/exams/:exam_id/students' do
+        update_students! do |processed|
+          Exam.upsert_students! eid: exam_id, added: processed
+        end
+      end
+    end
+  end
+
   MASSIVE_BATCH_LIMIT = 100
 
   helpers do
@@ -73,6 +135,10 @@ class Mumuki::Classroom::App < Sinatra::Application
       "This endpoint process only first #{MASSIVE_BATCH_LIMIT} elements"
     end
 
+    def students_does_not_belong_msg
+      'Students does not belong to current course'
+    end
+
     def add_massive_response_field(field, list, message, hash)
       unless list.empty?
         hash["#{field}_reason".to_sym] = message
@@ -95,67 +161,35 @@ class Mumuki::Classroom::App < Sinatra::Application
       massive_response(processed_members, (all_members - massive_members), existing_members,
                        "#{role.to_s.pluralize.titleize} already belong to current course", status: :created)
     end
-  end
 
-  Mumukit::Platform.map_organization_routes!(self) do
+    def update_students!
+      processed = students_from(massive_uids).map(&:uid)
+      yield processed if block_given?
+      massive_response processed, (uids - massive_uids), (massive_uids - processed),
+                       students_does_not_belong_msg, status: :updated
+    end
 
-    namespace '/api/courses/:course/massive' do
-
-      get '/students' do
-        authorize! :janitor
-        per_page = MASSIVE_BATCH_LIMIT
-        progress = GuideProgress
-                     .where(with_organization_and_course)
-                     .sort('organization': :asc, 'course': :asc, 'student.uid': :asc)
-                     .limit(per_page)
-                     .skip(page * per_page)
-
-        count = progress.count
-        guide_progress = progress.select(&:student)
-                           .map { |it| {student: it.student.uid, guide: it.guide.slug, progress: it.as_json.except(:student, :guide)} }
-
-        {
-          page: page + 1,
-          total_pages: (count / per_page.to_f).ceil,
-          total_results: count,
-          total_page_results: [per_page, guide_progress.size].min,
-          guide_students_progress: guide_progress
-        }
-      end
-
-      post '/students' do
-        authorize! :janitor
-        create_members! :student do |user|
-          Mumukit::Nuntius.notify! 'resubmissions', uid: user.uid, tenant: tenant
-        end
-      end
-
-      post '/teachers' do
-        authorize! :janitor
-        create_members! :teacher
-      end
-
-      post '/students/detach' do
-        authorize! :janitor
-        Mumuki::Classroom::Student.detach_all_by! massive_uids, with_organization_and_course
-        User.where(uid: massive_uids).each { |uid| update_and_notify_user_metadata(uid, 'remove', course_slug) }
-        {status: :updated, processed_count: massive_uids.size, processed: massive_uids}
-      end
-
-      post '/students/attach' do
-        authorize! :janitor
-        Mumuki::Classroom::Student.attach_all_by! massive_uids, with_organization_and_course
-        User.where(uid: massive_uids).each { |uid| update_and_notify_user_metadata(uid, 'add', course_slug) }
-        {status: :updated, processed_count: massive_uids.size, processed: massive_uids}
-      end
-
-      post '/exams/:exam_id/students' do
-        authorize! :janitor
-        processed = Mumuki::Classroom::Student.where(with_organization_and_course).in(uid: massive_uids).map(&:uid)
-        Exam.upsert_students! eid: exam_id, added: processed
-        massive_response processed, (uids - massive_uids), (massive_uids - processed),
-                         'Students does not belong to current course', status: :updated, eid: exam_id
+    def update_students_at_course!(method, action, students_uids)
+      Mumuki::Classroom::Student.send "#{method}_all_by!", students_uids, with_organization_and_course
+      User.where(uid: students_uids).each do |user|
+        user.send "#{action}_permission!", :student, course_slug
+        user.save!
       end
     end
+
+    def students_from(uids)
+      Mumuki::Classroom::Student.where(with_organization_and_course).in(uid: uids)
+    end
+
+    def ensure_course_exists!
+      Course.locate!(course_slug)
+    end
+
+    def ensure_organization_exists!
+      Organization.locate!(organization).tap &:switch!
+    end
+
   end
+
 end
+

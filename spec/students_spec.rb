@@ -437,6 +437,7 @@ describe Mumuki::Classroom::Student do
     end
 
     describe 'post api/courses/massive/:course/students' do
+      let!(:course) { create(:course, {organization: organization, slug: 'example.org/foo'}) }
       let(:students) do
         (1..120).map do |it|
           {first_name: "first_name_#{it}", last_name: "last_name_#{it}", email: "email_#{it}@fake.com"}
@@ -444,10 +445,9 @@ describe Mumuki::Classroom::Student do
       end
       let(:students_uids) { students.map { |it| it[:email] } }
       let(:students_json) { {students: students}.to_json }
-      let(:query) { {organization: organization, course: 'example.org/foo'} }
+      let(:org_and_course) { {organization: organization.name, course: 'example.org/foo'} }
 
       context 'when course exists' do
-        let!(:existing_course) { create(:course, {organization: organization, slug: 'example.org/foo'}) }
 
         context 'when authenticated' do
           before { header 'Authorization', build_auth_header('*') }
@@ -461,7 +461,7 @@ describe Mumuki::Classroom::Student do
             it { expect(response.unprocessed_count).to eq 20 }
             it { expect(response.processed_count).to eq 100 }
             it { expect(response.errored_members_count).to eq nil }
-            it { expect(Mumuki::Classroom::Student.where(query).in(uid: students_uids).count).to eq 100 }
+            it { expect(Mumuki::Classroom::Student.where(org_and_course).in(uid: students_uids).count).to eq 100 }
           end
 
           context 'and some users do exist' do
@@ -481,7 +481,7 @@ describe Mumuki::Classroom::Student do
             it { expect(response.unprocessed_count).to eq 20 }
             it { expect(response.processed_count).to eq 100 }
             it { expect(response.errored_members_count).to eq nil }
-            it { expect(Mumuki::Classroom::Student.where(query).in(uid: students_uids).count).to eq 100 }
+            it { expect(Mumuki::Classroom::Student.where(org_and_course).in(uid: students_uids).count).to eq 100 }
             it { expect(User.where(uid: students_uids).count).to eq 100 }
             it { expect(User.where(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo') }.count).to eq 100 }
             it { expect(User.where(uid: students_uids).select { |it| it.student_of? struct(slug: 'example.org/foo2') }.count).to eq 50 }
@@ -504,13 +504,96 @@ describe Mumuki::Classroom::Student do
             it { expect(response.unprocessed_count).to eq 20 }
             it { expect(response.processed_count).to eq 50 }
             it { expect(response.errored_members_count).to eq 50 }
-            it { expect(Mumuki::Classroom::Student.where(query).in(uid: students_uids).count).to eq 100 }
+            it { expect(Mumuki::Classroom::Student.where(org_and_course).in(uid: students_uids).count).to eq 100 }
           end
         end
 
       end
 
+      context '/attach' do
+
+        let(:uids) { {uids: students_uids} }
+        let(:uids_json) { uids.to_json }
+        let(:all_students) { students.map { |it| it.merge org_and_course.merge uid: it[:email], detached: true } }
+
+        before { header 'Authorization', build_auth_header('*') }
+        before { Mumuki::Classroom::Student.collection.insert_many complete_students }
+        before { post 'api/courses/foo/massive/students/attach', uids_json }
+
+        context 'process all uids' do
+          let(:complete_students) { all_students }
+
+          it { expect(last_response).to be_ok }
+          it { expect(response.status).to eq 'updated' }
+          it { expect(response.unprocessed_count).to eq 20 }
+          it { expect(response.processed_count).to eq 100 }
+          it { expect(response.errored_members_count).to eq nil }
+          it { expect(Mumuki::Classroom::Student
+                        .where(org_and_course)
+                        .in(uid: students_uids)
+                        .exists(detached: false).count).to eq 100 }
+        end
+
+        context 'process someones uids' do
+
+          let(:complete_students) { all_students.take(60) }
+
+          it { expect(last_response).to be_ok }
+          it { expect(response.status).to eq 'updated' }
+          it { expect(response.unprocessed_count).to eq 20 }
+          it { expect(response.processed_count).to eq 60 }
+          it { expect(response.errored_members_count).to eq 40 }
+          it { expect(Mumuki::Classroom::Student
+                        .where(org_and_course)
+                        .in(uid: students_uids)
+                        .exists(detached: false).count).to eq 60 }
+        end
+
+      end
+
+      context '/detach' do
+
+        let(:uids) { {uids: students_uids} }
+        let(:uids_json) { uids.to_json }
+        let(:all_students) { students.map { |it| it.merge org_and_course.merge uid: it[:email] } }
+
+        before { header 'Authorization', build_auth_header('*') }
+        before { Mumuki::Classroom::Student.collection.insert_many complete_students }
+        before { post 'api/courses/foo/massive/students/detach', uids_json }
+
+        context 'process all uids' do
+          let(:complete_students) { all_students }
+
+          it { expect(last_response).to be_ok }
+          it { expect(response.status).to eq 'updated' }
+          it { expect(response.unprocessed_count).to eq 20 }
+          it { expect(response.processed_count).to eq 100 }
+          it { expect(response.errored_members_count).to eq nil }
+          it { expect(Mumuki::Classroom::Student
+                        .where(org_and_course)
+                        .in(uid: students_uids)
+                        .exists(detached: true, detached_at: true).count).to eq 100 }
+        end
+
+        context 'process someones uids' do
+
+          let(:complete_students) { all_students.take(60) }
+
+          it { expect(last_response).to be_ok }
+          it { expect(response.status).to eq 'updated' }
+          it { expect(response.unprocessed_count).to eq 20 }
+          it { expect(response.processed_count).to eq 60 }
+          it { expect(response.errored_members_count).to eq 40 }
+          it { expect(Mumuki::Classroom::Student
+                        .where(org_and_course)
+                        .in(uid: students_uids)
+                        .exists(detached: true, detached_at: true).count).to eq 60 }
+        end
+
+      end
+
     end
+
   end
 
   describe 'students routes with params' do
