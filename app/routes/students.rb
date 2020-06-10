@@ -3,7 +3,7 @@ helpers do
     member[:email] = member[:email]&.downcase
     member[:last_name] = member[:last_name]&.downcase&.titleize
     member[:first_name] = member[:first_name]&.downcase&.titleize
-    member[:uid] ||= member[:email]
+    member[:uid] = (member[:uid]&.downcase || member[:email])
   end
 
   def list_students(matcher)
