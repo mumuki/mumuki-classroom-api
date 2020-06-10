@@ -18,32 +18,48 @@ class Mumuki::Classroom::App < Sinatra::Application
       @students ||= json_body[:students].map { |it| to_student_basic_hash it }
     end
 
+    def teachers
+      @teachers ||= json_body[:teachers].map { |it| to_teacher_basic_hash it }
+    end
+
     def massive_students
       @massive_students ||= with_massive_batch_limit students
     end
 
-    def user_from_student_json(student_json)
-      User.whitelist_attributes student_json
+    def massive_teachers
+      @massive_teachers ||= with_massive_batch_limit teachers
     end
 
-    def to_student_basic_hash(student)
+    def user_from_member_json(member_json)
+      User.whitelist_attributes member_json
+    end
+
+    def to_member_basic_hash(member)
       {
-        uid: (student[:uid] || student[:email])&.downcase,
-        email: student[:email]&.downcase,
-        last_name: student[:last_name]&.downcase&.titleize,
-        first_name: student[:first_name]&.downcase&.titleize,
-        personal_id: student[:personal_id]
+        uid: (member[:uid] || member[:email])&.downcase,
+        email: member[:email]&.downcase,
+        last_name: member[:last_name]&.downcase&.titleize,
+        first_name: member[:first_name]&.downcase&.titleize,
+        personal_id: member[:personal_id]
       }
     end
 
+    def to_student_basic_hash(student)
+      to_member_basic_hash(student).merge personal_id: student[:personal_id]
+    end
+
+    def to_teacher_basic_hash(teacher)
+      to_member_basic_hash teacher
+    end
+
     #FIXME: This method now doesn't perform a bulk update as PG doesn't support it
-    def upsert_users!(members)
+    def upsert_users!(role, members)
       members.each do |it|
         user = User.find_or_initialize_by(uid: it[:uid])
-        user.assign_attributes user_from_student_json(it)
-        user.add_permission! :student, course_slug
+        user.assign_attributes user_from_member_json(it)
+        user.add_permission! role, course_slug
         user.save!
-        Mumukit::Nuntius.notify! 'resubmissions', uid: user.uid, tenant: tenant
+        yield user if block_given?
       end
     end
 
@@ -65,6 +81,20 @@ class Mumuki::Classroom::App < Sinatra::Application
       end
     end
 
+    def create_members!(role, &block)
+      all_members = send role.to_s.pluralize
+      massive_members = send "massive_#{role.to_s.pluralize}"
+      col = "Mumuki::Classroom::#{role.to_s.titleize}".constantize
+      existing_members = col.where(with_organization_and_course)
+                           .in(uid: massive_members.map { |it| it[:uid] })
+                           .map { |it| send "to_#{role}_basic_hash", it }
+      existing_members_uids = existing_members.map { |it| it[:uid] }
+      processed_members = massive_members.reject { |it| existing_members_uids.include? it[:uid] }
+      col.collection.insert_many(processed_members.map { |member| with_organization_and_course member })
+      upsert_users! role, processed_members, &block
+      massive_response(processed_members, (all_members - massive_members), existing_members,
+                       "#{role.to_s.pluralize.titleize} already belong to current course", status: :created)
+    end
   end
 
   Mumukit::Platform.map_organization_routes!(self) do
@@ -95,16 +125,14 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       post '/students' do
         authorize! :janitor
-        existing_students = Mumuki::Classroom::Student
-                              .where(with_organization_and_course)
-                              .in(uid: massive_students.map { |it| it[:uid] })
-                              .map { |it| to_student_basic_hash it }
-        existing_students_uids = existing_students.map { |it| it[:uid] }
-        processed = massive_students.reject { |it| existing_students_uids.include? it[:uid] }
-        Mumuki::Classroom::Student.collection.insert_many(processed.map { |student| with_organization_and_course student })
-        upsert_users! processed
-        massive_response(processed, (students - massive_students), existing_students,
-                         'Students already belong to current course', status: :created)
+        create_members! :student do |user|
+          Mumukit::Nuntius.notify! 'resubmissions', uid: user.uid, tenant: tenant
+        end
+      end
+
+      post '/teachers' do
+        authorize! :janitor
+        create_members! :teacher
       end
 
       post '/students/detach' do
