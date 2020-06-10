@@ -12,16 +12,9 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       get '/students' do
         per_page = MASSIVE_BATCH_LIMIT
-        progress = GuideProgress
-                     .where(with_organization_and_course)
-                     .sort('organization': :asc, 'course': :asc, 'student.uid': :asc)
-                     .limit(per_page)
-                     .skip(page * per_page)
-
+        progress = guide_progress_at_page per_page
         count = progress.count
-        guide_progress = progress.select(&:student)
-                           .map { |it| {student: it.student.uid, guide: it.guide.slug, progress: it.as_json.except(:student, :guide)} }
-
+        guide_progress = progress.select(&:student).map { |it| as_guide_progress_response it }
         {
           page: page + 1,
           total_pages: (count / per_page.to_f).ceil,
@@ -189,7 +182,21 @@ class Mumuki::Classroom::App < Sinatra::Application
       Organization.locate!(organization).tap &:switch!
     end
 
-  end
+    def guide_progress_at_page(per_page)
+      Mumuki::Classroom::GuideProgress
+        .where(with_organization_and_course)
+        .sort('organization': :asc, 'course': :asc, 'student.uid': :asc)
+        .limit(per_page)
+        .skip(page * per_page)
+    end
 
+    def as_guide_progress_response(guide_progress)
+      {
+        student: guide_progress.student.uid,
+        guide: guide_progress.guide.slug,
+        progress: guide_progress.as_json.except(:student, :guide)
+      }
+    end
+  end
 end
 
