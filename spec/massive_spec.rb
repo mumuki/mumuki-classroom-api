@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Massive API' do
+describe 'Massive API', organization_workspace: :test do
 
   def to_member_request_hash(number)
     {first_name: "first_name_#{number}", last_name: "last_name_#{number}", email: "email_#{number}@fake.com"}
@@ -64,9 +64,9 @@ describe 'Massive API' do
 
   let(:response) { struct JSON.parse(last_response.body) }
 
-  let!(:organization) { create(:organization, name: 'example.org') }
-  let!(:course) { create(:course, {organization: organization, slug: 'example.org/foo'}) }
-  let!(:course2) { create(:course, {organization: organization, slug: 'example.org/foo2'}) }
+  let(:organization) { Organization.locate! 'example.org' }
+  let(:course) { Course.locate! 'example.org/foo' }
+  let(:course2) { Course.locate! 'example.org/foo2' }
 
   let(:students) { (1..12).map { |it| to_member_request_hash it } }
   let(:students_uids) { students.map { |it| it[:email] } }

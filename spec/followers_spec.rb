@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mumuki::Classroom::Follower do
+describe Mumuki::Classroom::Follower, organization_workspace: :test do
 
   let(:follower_json) { {uid: 'social|1'}.to_json }
   let(:follower) { Mumuki::Classroom::Follower.find_by(organization: 'example.org', course: 'example.org/bar', email: 'github|123456').as_json(except: [:created_at, :updated_at]) }

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'suggestions' do
+describe 'suggestions', organization_workspace: :test do
 
   def create_suggestion!(data)
     Mumuki::Classroom::Suggestion.create!(data.merge(sender: 'github|123456', email: 'foo@mumuki.org', guide_slug: 'mumukiproject/foo'))
@@ -20,14 +20,14 @@ describe 'suggestions' do
 
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_like(
-                                            { suggestions: [
-                                                { content: 'Check the arity of the `foo` function.',
-                                                  content_html: "<p>Check the arity of the <code>foo</code> function.</p>\n",
-                                                  times_used: 3 },
-                                                { content: 'Wrong arity.',
-                                                  content_html: "<p>Wrong arity.</p>\n",
-                                                  times_used: 1 } ] },
-                                            { only: [:content, :content_html, :times_used] }) }
+                                           {suggestions: [
+                                             {content: 'Check the arity of the `foo` function.',
+                                              content_html: "<p>Check the arity of the <code>foo</code> function.</p>\n",
+                                              times_used: 3},
+                                             {content: 'Wrong arity.',
+                                              content_html: "<p>Wrong arity.</p>\n",
+                                              times_used: 1}]},
+                                           {only: [:content, :content_html, :times_used]}) }
     end
 
     context 'reject unauthorized requests' do

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mumuki::Classroom::Teacher do
+describe Mumuki::Classroom::Teacher, organization_workspace: :test do
 
   let(:except_fields) { {except: [:created_at, :updated_at]} }
 

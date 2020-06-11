@@ -1,11 +1,10 @@
 require 'spec_helper'
 
-describe Mumuki::Classroom::Student do
+describe Mumuki::Classroom::Student, organization_workspace: :test do
 
-  #FIXME use organization namespace instead
-  let!(:organization) { create(:organization, name: 'example.org') }
   before { Mumukit::Platform::User.upsert_permissions! 'github|123456', {} }
 
+  let(:course) { Course.locate! 'example.org/foo' }
   let(:date) { Time.now }
 
   let(:except_fields) { {except: [:created_at, :updated_at, :page, :total]} }
@@ -173,7 +172,6 @@ describe Mumuki::Classroom::Student do
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
     let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example.org/foo'}} }
     let(:created_at) { 'created_at' }
-    let!(:course) { create(:course, slug: 'example.org/foo') }
     before { Mumuki::Classroom::Student.create!(student.merge(uid: 'auth0|1', organization: 'example.org', course: 'example.org/foo')) }
     before { get '/courses/foo/student/auth0%7c1' }
 
@@ -195,7 +193,6 @@ describe Mumuki::Classroom::Student do
 
     before { User.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
     before { Mumuki::Classroom::Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
-    let!(:course) { create(:course, slug: 'example.org/foo') }
     before { header 'Authorization', build_auth_header('*') }
     before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
 
@@ -276,7 +273,6 @@ describe Mumuki::Classroom::Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        let!(:course) { create(:course, slug: 'example.org/foo') }
         let!(:course) { create(:course, slug: 'example.org/bar') }
 
         context 'when not authenticated' do
@@ -287,7 +283,6 @@ describe Mumuki::Classroom::Student do
         end
 
         context 'when authenticated' do
-          let!(:course) { create(:course, slug: 'example.org/foo') }
           before { header 'Authorization', build_auth_header('*') }
 
           context 'should publish in resubmissions queue' do
@@ -333,10 +328,10 @@ describe Mumuki::Classroom::Student do
         it 'rejects creating a student' do
           header 'Authorization', build_auth_header('*')
 
-          post '/courses/foo/students', student_json
+          post '/courses/bar/students', student_json
 
           expect(last_response).to_not be_ok
-          expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
+          expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/bar').count).to eq 0
         end
       end
     end
@@ -346,8 +341,6 @@ describe Mumuki::Classroom::Student do
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
-        let!(:course) { create(:course, slug: 'example.org/foo') }
-
         context 'when not authenticated' do
           before { post '/courses/foo/students', student_json }
 
@@ -410,10 +403,10 @@ describe Mumuki::Classroom::Student do
         it 'rejects creating a student' do
           header 'Authorization', build_auth_header('*')
 
-          post '/courses/foo/students', student_json
+          post '/courses/bar/students', student_json
 
           expect(last_response).to_not be_ok
-          expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0
+          expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/bar').count).to eq 0
         end
       end
     end
