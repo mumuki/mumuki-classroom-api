@@ -89,22 +89,19 @@ class Mumuki::Classroom::App < Sinatra::Application
       User.whitelist_attributes member_json
     end
 
-    def to_member_basic_hash(member)
-      {
-        uid: (member[:uid] || member[:email])&.downcase,
-        email: member[:email]&.downcase,
-        last_name: member[:last_name]&.downcase&.titleize,
-        first_name: member[:first_name]&.downcase&.titleize,
-        personal_id: member[:personal_id]
-      }
+    def to_member_basic_hash(member = {})
+      member.as_json.merge uid: (member[:uid] || member[:email])&.downcase,
+                           email: member[:email]&.downcase,
+                           last_name: member[:last_name]&.downcase&.titleize,
+                           first_name: member[:first_name]&.downcase&.titleize
     end
 
     def to_student_basic_hash(student)
-      to_member_basic_hash(student).merge personal_id: student[:personal_id]
+      Mumuki::Classroom::Student.whitelist_attributes to_member_basic_hash student
     end
 
     def to_teacher_basic_hash(teacher)
-      to_member_basic_hash teacher
+      Mumuki::Classroom::Teacher.whitelist_attributes to_member_basic_hash teacher
     end
 
     #FIXME: This method now doesn't perform a bulk update as PG doesn't support it
