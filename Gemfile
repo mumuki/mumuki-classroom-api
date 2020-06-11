@@ -26,4 +26,4 @@ group :development do
   gem 'web-console'
 end
 
-gem 'mumuki-domain', path: '../mumuki-domain'
+gem 'mumuki-domain', github: 'mumuki/mumuki-domain', branch: 'feature-classroom-model-unification'
