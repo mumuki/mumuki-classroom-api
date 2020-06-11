@@ -244,7 +244,7 @@ describe Mumuki::Classroom::Student, organization_workspace: :test do
       before { example_guide_student_progresses.call guide_student_progress1 }
       before { example_guide_student_progresses.call guide_student_progress2 }
 
-      let(:fetched_guide_progresses) { Mumuki::Classroom::GuideProgress.where('student.uid': student1[:uid]).to_a }
+      let(:fetched_guide_progresses) { Mumuki::Classroom::GuideProgress.where('student.uid': student1[:uid]).order(created_at: :asc).to_a }
       let(:fetched_assignments) { Mumuki::Classroom::Assignment.where('student.uid': student1[:uid]).to_a }
 
       context 'should transfer student to destination and transfer all his data' do
@@ -260,10 +260,10 @@ describe Mumuki::Classroom::Student, organization_workspace: :test do
 
         it { expect(fetched_guide_progresses.count).to eq 2 }
         it { expect(fetched_guide_progresses.first.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
-        it { pending(fetched_guide_progresses.last.as_json).to json_like({organization: 'example.org', course: 'example.org/example'}, only_fields) }
+        it { expect(fetched_guide_progresses.second.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
         it { expect(fetched_assignments.count).to eq 2 }
         it { expect(fetched_assignments.first.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
-        it { pending(fetched_assignments.last.as_json).to json_like({organization: 'example.org', course: 'example.org/example'}, only_fields) }
+        it { expect(fetched_assignments.last.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
       end
 
     end
@@ -295,7 +295,7 @@ describe Mumuki::Classroom::Student, organization_workspace: :test do
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
               it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
-              pending { expect(User.where(uid: student[:email]).to_a).to eq student_json } #TODO: find out why user isn't created with all params
+              it { expect(User.locate!(student[:uid])).to json_like student, only: student.keys }
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
@@ -307,7 +307,7 @@ describe Mumuki::Classroom::Student, organization_workspace: :test do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              pending { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
             context 'in different course, should work' do
               let!(:course) { create(:course, slug: 'example.org/bar') }
@@ -382,7 +382,7 @@ describe Mumuki::Classroom::Student, organization_workspace: :test do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              pending { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
             context 'and user already exists by email' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -390,7 +390,7 @@ describe Mumuki::Classroom::Student, organization_workspace: :test do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              pending { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
             end
           end
         end
