@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'messages' do
+describe 'messages', organization_workspace: :test do
 
   describe 'post /courses/:course/messages' do
     let(:message_to_post) { {uid: '1', exercise_id: 2, submission_id: '3', message: message, guide_slug: 'mumukiproject/example'}.to_json }
@@ -56,8 +56,8 @@ describe 'messages' do
         let(:message) { {content: nil, sender: 'github|123456'} }
         it { expect(assignment.submissions.first).to json_like({sid: '3', messages: [sender: 'github|123456']}, {except: [:_id, :date, :created_at, :updated_at]}) }
         it { expect(assignment.threads(:ruby).first).to json_like(
-          {status: nil, content: "<div class=\"highlight\"><pre class=\"highlight ruby\"><code>\n</code></pre></div>", messages: [{sender: 'github|123456'}]},
-          {except: [:_id, :created_at, :updated_at]}) }
+                                                          {status: nil, content: "<div class=\"highlight\"><pre class=\"highlight ruby\"><code>\n</code></pre></div>", messages: [{sender: 'github|123456'}]},
+                                                          {except: [:_id, :created_at, :updated_at]}) }
       end
     end
 
@@ -73,9 +73,9 @@ describe 'messages' do
       before do
         Mumuki::Classroom::Assignment.create!(
           {
-            student: { uid: '1' },
-            exercise: { eid: 1 },
-            guide: { slug: 'mumukiproject/example', language: { name: 'gobstones' } },
+            student: {uid: '1'},
+            exercise: {eid: 1},
+            guide: {slug: 'mumukiproject/example', language: {name: 'gobstones'}},
             submissions: [{sid: '3'}]
           }.merge organization: 'example.org', course: 'example.org/baz')
       end

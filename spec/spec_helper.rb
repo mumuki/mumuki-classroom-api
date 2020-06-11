@@ -27,6 +27,14 @@ RSpec.configure do |config|
   config.before(:each) do
     Mongoid::Clients.default.collections.each(&:delete_many)
   end
+
+  config.before(:each) do
+    if RSpec.current_example.metadata[:organization_workspace] == :test
+      organization = create(:organization, name: 'example.org').tap &:switch!
+      create :course, organization: organization, slug: 'example.org/foo'
+      create :course, organization: organization, slug: 'example.org/foo2'
+    end
+  end
 end
 
 require 'base64'
@@ -34,7 +42,7 @@ Mumukit::Auth.configure do |c|
   c.clients.default = {id: 'test-client', secret: 'thisIsATestSecret'}
 end
 
-def build_auth_header(permissions, sub='github|123456')
+def build_auth_header(permissions, sub = 'github|123456')
   Mumukit::Platform::User.upsert_permissions! sub, {owner: permissions}
   Mumukit::Auth::Token.encode sub, {}
 end

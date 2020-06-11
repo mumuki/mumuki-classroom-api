@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mumuki::Classroom::Guide do
+describe Mumuki::Classroom::Guide, organization_workspace: :test do
 
   def with_course(json)
     {organization: 'example.org', course: 'example.org/foo'}.merge json
