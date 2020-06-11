@@ -232,7 +232,12 @@ HTML
     elsif error_message.blank?
       response.body = response.body.to_json
     else
-      response.body = {message: env['sinatra.error'].message}.to_json
+      begin
+        json = JSON.parse(error_message.message)
+        response.body = json.to_json
+      rescue
+        response.body = {message: error_message.message}.to_json
+      end
     end
   end
 
