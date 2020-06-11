@@ -5,6 +5,7 @@ rvm:
 - 2.6.3
 services:
 - mongodb
+- postgresql
 before_script:
 - psql -c 'create database travis_ci_test;' -U postgres
 - cp spec/dummy/config/database.travis.yml spec/dummy/config/database.yml
