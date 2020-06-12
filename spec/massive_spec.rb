@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Massive API', organization_workspace: :test do
+describe 'Massive API', workspaces: [:organization, :courses] do
 
   def to_member_request_hash(number)
     {first_name: "first_name_#{number}", last_name: "last_name_#{number}", email: "email_#{number}@fake.com"}

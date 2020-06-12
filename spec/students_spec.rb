@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mumuki::Classroom::Student, organization_workspace: :test do
+describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
   before { Mumukit::Platform::User.upsert_permissions! 'github|123456', {} }
 

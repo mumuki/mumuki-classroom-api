@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'suggestions', organization_workspace: :test do
+describe 'suggestions', workspaces: [:organization] do
 
   def create_suggestion!(data)
     Mumuki::Classroom::Suggestion.create!(data.merge(sender: 'github|123456', email: 'foo@mumuki.org', guide_slug: 'mumukiproject/foo'))
