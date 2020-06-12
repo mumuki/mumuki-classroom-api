@@ -81,16 +81,6 @@ class Mumuki::Classroom::App < Sinatra::Application
       {invitation: course.invite!(json_body[:expiration_date])}
     end
 
-    get '/courses/:course/guides' do
-      authorize! :teacher
-      {guides: Mumuki::Classroom::Guide.where(with_organization_and_course).as_json}
-    end
-
-    get '/api/courses/:course/guides' do
-      authorize! :teacher
-      {guides: Mumuki::Classroom::Guide.where(with_organization_and_course).as_json}
-    end
-
     get '/courses/:course/guides/:organization/:repository' do
       authorize! :teacher
       count, guide_progress = Sorting.aggregate(Mumuki::Classroom::GuideProgress, guide_progress_query, paginated_params, query_params)
