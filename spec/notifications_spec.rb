@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'notifications', organization_workspace: :test do
+describe 'notifications', workspaces: [:organization] do
 
   let(:assignment) { Mumuki::Classroom::Assignment.create! organization: 'example.org', course: 'example.org/foo' }
   let(:notification) { {organization: 'example.org', course: 'example.org/foo', sender: 'foo@bar.com', assignment_id: assignment._id} }

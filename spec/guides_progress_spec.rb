@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Course, organization_workspace: :test do
+describe Course, workspaces: [:organization] do
 
   def with_course(json)
     {organization: 'example.org', course: 'example.org/k2048'}.merge json
