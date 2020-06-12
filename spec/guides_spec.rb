@@ -1,60 +1,51 @@
 require 'spec_helper'
 
-describe Mumuki::Classroom::Guide, workspaces: [:organization] do
+describe Guide, workspaces: [:organization, :courses] do
 
-  def with_course(json)
-    {organization: 'example.org', course: 'example.org/foo'}.merge json
+  let(:response) { JSON.parse last_response.body, object_class: OpenStruct }
+
+  describe 'GET http://localmumuki.io/:organization/courses/:course/guides' do
+    before { header 'Authorization', build_auth_header('*') }
+    before { get '/courses/foo/guides' }
+
+    it { expect(last_response).to be_ok }
+    it { expect(response.guides.count).to eq 4 }
+    it { expect(response.guides.first.slug).to eq 'original/guide1' }
+    it { expect(response.guides.second.slug).to eq 'original/guide2' }
+    it { expect(response.guides.third.slug).to eq 'original/guide3' }
+    it { expect(response.guides.last.slug).to eq 'original/guide4' }
   end
 
-  let(:except_fields) { {except: [:created_at, :updated_at]} }
 
-  describe 'get /courses/:course/guides' do
-    let(:haskell) { {name: 'haskell', devicon: 'haskell'} }
+  describe 'GET http://localmumuki.io/:organization/api/courses/:course/guides' do
+    before { header 'Authorization', build_auth_header('*') }
+    before { get '/api/courses/foo/guides' }
 
-    let(:guide1) { {slug: 'pdep-utn/bar', name: 'Bar', language: haskell} }
-    let(:guide2) { {slug: 'pdep-utn/foo', name: 'Foo', language: haskell} }
-    let(:guide3) { {slug: 'pdep-utn/baz', name: 'Baz', language: haskell} }
+    it { expect(last_response).to be_ok }
+    it { expect(response.guides.count).to eq 4 }
+    it { expect(response.guides.first.slug).to eq 'original/guide1' }
+    it { expect(response.guides.second.slug).to eq 'original/guide2' }
+    it { expect(response.guides.third.slug).to eq 'original/guide3' }
+    it { expect(response.guides.last.slug).to eq 'original/guide4' }
+  end
 
-    context 'when no guides in a course yet' do
-      before { header 'Authorization', build_auth_header('*') }
-      before { get '/courses/foo/guides' }
+  describe 'GET http://localmumuki.io/guides/:organization/:repository' do
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when guide has usage in current organization' do
+      before { get '/guides/original/guide1' }
 
       it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq guides: [] }
+      it { expect(response.guide.slug).to eq 'original/guide1' }
     end
 
-    context 'when guides already exists in a course' do
-      before { Mumuki::Classroom::Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Mumuki::Classroom::Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Mumuki::Classroom::Guide.create! guide3.merge(organization: 'example.org', course: 'example.org/bar') }
+    context 'when guide has not got usage in current organization' do
+      before { create :guide, slug: 'foo/bar' }
+      before { get '/guides/foo/bar' }
 
-      before { header 'Authorization', build_auth_header('*') }
-      before { get '/courses/foo/guides' }
-
-      it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like({guides: [with_course(guide1), with_course(guide2)]}, except_fields) }
-    end
-
-    context 'when no guides in a course yet' do
-      before { header 'Authorization', build_auth_header('*') }
-      before { get '/api/courses/foo/guides' }
-
-      it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_eq guides: [] }
-    end
-
-    context 'when guides already exists in a course' do
-      before { Mumuki::Classroom::Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Mumuki::Classroom::Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Mumuki::Classroom::Guide.create! guide3.merge(organization: 'example.org', course: 'example.org/bar') }
-
-      before { header 'Authorization', build_auth_header('*') }
-      before { get '/api/courses/foo/guides' }
-
-      it { expect(last_response).to be_ok }
-      it { expect(last_response.body).to json_like({guides: [with_course(guide1), with_course(guide2)]}, except_fields) }
+      it { expect(last_response).to_not be_ok }
+      it { expect(response.message).to eq "Couldn't find Guide with slug: foo/bar" }
     end
 
   end
-
 end
