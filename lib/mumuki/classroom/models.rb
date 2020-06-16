@@ -13,7 +13,6 @@ require_relative './models/assignment'
 require_relative './models/follower'
 require_relative './models/student'
 require_relative './models/teacher'
-require_relative './models/guide'
 require_relative './models/notification'
 require_relative './models/suggestion'
 

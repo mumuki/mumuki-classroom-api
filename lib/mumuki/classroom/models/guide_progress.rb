@@ -4,8 +4,8 @@ class Mumuki::Classroom::GuideProgress < Mumuki::Classroom::Document
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
   field :stats, type: Hash
+  field :guide, type: Hash
 
-  embeds_one :guide
   embeds_one :student, class_name: 'Mumuki::Classroom::Student'
   embeds_one :last_assignment
 
