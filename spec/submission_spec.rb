@@ -173,26 +173,6 @@ describe Mumuki::Classroom::Submission do
 
     end
 
-    describe 'process submission without chapter' do
-      let(:submission_without_chapter) { submission.merge({
-                                                            organization: 'example',
-                                                            submitter: submitter,
-                                                            exercise: exercise,
-                                                            parent: parent.delete(:chapter),
-                                                            guide: guide
-                                                          }) }
-
-      let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
-
-      let(:guide_fetched) { Mumuki::Classroom::Guide.first.as_json }
-
-      before { Mumuki::Classroom::Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
-      before { Mumuki::Classroom::Submission.process!(submission_without_chapter) }
-
-      it { expect(guide_fetched).to json_like(submission_without_chapter[:guide].merge(organization: 'example', course: 'example/course1'), except_fields) }
-
-    end
-
     describe 'process submission with origin_ip' do
       let(:submission_with_origin_ip) { submission.merge({organization: 'example',
                                              submitter: submitter,

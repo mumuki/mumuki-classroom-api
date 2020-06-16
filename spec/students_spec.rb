@@ -111,13 +111,9 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
     context 'delete student from students' do
 
-      let(:guides) { Mumuki::Classroom::Guide.where organization: 'example.org', course: 'example.org/example' }
       let(:students) { Mumuki::Classroom::Student.where organization: 'example.org', course: 'example.org/example' }
       let(:guide_students_progress) { Mumuki::Classroom::GuideProgress.where(organization: 'example.org', course: 'example.org/example').as_json }
       let(:exercise_student_progress) { example_student_progresses.all.as_json.deep_symbolize_keys[:exercise_student_progress] }
-
-      before { Mumuki::Classroom::Guide.create! guide1.merge(organization: 'example.org', course: 'example.org/example') }
-      before { Mumuki::Classroom::Guide.create! guide2.merge(organization: 'example.org', course: 'example.org/example') }
 
       before { example_guide_student_progresses.call guide_student_progress1 }
       before { example_guide_student_progresses.call guide_student_progress2 }
@@ -125,7 +121,6 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
       before { Mumuki::Classroom::Student.find_by!(uid: 'github|123456').destroy_cascade! }
 
-      it { expect(guides.size).to eq 1 }
       it { expect(students.size).to eq 1 }
       it { expect(guide_students_progress.size).to eq 1 }
       it { expect(Mumuki::Classroom::Assignment.count).to eq 1 }

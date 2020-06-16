@@ -5,7 +5,6 @@ module WithSubmissionProcess
     json[:course] = find_submission_course! json
     json[:student] = find_student_from json
 
-    update_guide json
     update_assignment json
     update_guide_progress json
     update_student_progress json
@@ -24,14 +23,6 @@ module WithSubmissionProcess
 
   def find_student_from(json)
     Mumuki::Classroom::Student.find_by(organization: organization(json), course: course_slug(json), uid: uid(json)).as_json
-  end
-
-  def update_guide(json)
-    organization = organization(json)
-    course_slug = course_slug(json)
-    slug = guide_from(json)[:slug]
-    guide = Mumuki::Classroom::Guide.find_or_create_by!(organization: organization, course: course_slug, slug: slug)
-    guide.update_attributes!(guide_from json)
   end
 
   def update_student_progress(json)
