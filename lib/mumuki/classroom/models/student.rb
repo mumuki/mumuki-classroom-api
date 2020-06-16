@@ -28,7 +28,6 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
   def destroy_cascade!
     Mumuki::Classroom::GuideProgress.destroy_all_by!(sub_student_query uid)
     Mumuki::Classroom::Assignment.destroy_all_by!(sub_student_query uid)
-    Mumuki::Classroom::Guide.delete_if_has_no_progress(organization, course)
     destroy!
   end
 
