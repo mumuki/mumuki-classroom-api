@@ -79,7 +79,7 @@ describe 'Massive API', workspaces: [:organization, :courses] do
   let(:uids) { {uids: students_uids} }
   let(:uids_json) { uids.to_json }
 
-  let(:language) { create :language, name: 'haskell' }
+  let(:language) { Language.for_name 'haskell' }
 
   let(:guide) { create :guide, slug: 'foo/bar', name: 'bar', language: language }
   let(:guide2) { create :guide, slug: 'foo/baz', name: 'baz', language: language }
