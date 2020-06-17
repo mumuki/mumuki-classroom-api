@@ -5,6 +5,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     namespace '/api/courses/:course/massive' do
 
       before do
+        next if request.options?
         authorize! :janitor
         ensure_organization_exists!
         ensure_course_exists!
