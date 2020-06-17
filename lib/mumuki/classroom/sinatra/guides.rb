@@ -33,24 +33,42 @@ class Mumuki::Classroom::App < Sinatra::Application
       [:id, :created_at, :updated_at, :language_id, :guide_id, :topic_id, :book_id]
     end
 
+    def guide_as_json_opts
+      {except: except_fields, include: {language: {only: [:name, :devicon]}}}
+    end
+
     def guide_container_as_json_opts
       {except: except_fields, include: {guide: guide_as_json_opts}}
     end
 
-    def guide_as_json_opts
-      {except: except_fields, include: {language: {only: [:name, :devicon]}}}
+    def chapter_as_json_opts
+      {except: except_fields, include: {lessons: guide_container_as_json_opts}, methods: :name}
     end
 
     def guide_needed_fields(guide)
       guide.as_json guide_as_json_opts
     end
 
-    def guide_container_needed_fields(container)
-      container.as_json guide_container_as_json_opts
+    def with_guide_progress_count(containers)
+      containers.each do |container|
+        container.tap do |it|
+          it['guide']['students'] = Mumuki::Classroom::GuideProgress
+                                      .where(with_organization_and_course 'guide.slug': it['guide']['slug'])
+                                      .count
+        end
+      end
     end
 
-    def chapter_needed_fields(chapter)
-      chapter.as_json(except: except_fields, include: {lessons: guide_container_as_json_opts}, methods: :name)
+    def guide_container_needed_fields(containers)
+      with_guide_progress_count containers.as_json(guide_container_as_json_opts)
+    end
+
+    def chapter_needed_fields(chapters)
+      chapters.as_json(chapter_as_json_opts).tap do |chs|
+        chs.each do |chapter|
+          with_guide_progress_count(chapter['lessons'])
+        end
+      end
     end
 
     # TODO: Extract to domain

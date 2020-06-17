@@ -20,6 +20,7 @@ describe Guide, workspaces: [:organization, :courses, :complements, :exams] do
       it { expect(response.chapters.second.lessons.count).to eq 2 }
       it { expect(response.chapters.first.lessons.first.number).to eq 1 }
       it { expect(response.chapters.first.lessons.first.guide.slug).to eq 'original/guide1' }
+      it { expect(response.chapters.first.lessons.first.guide.students).to eq 0 }
       it { expect(response.chapters.first.lessons.first.guide.language.name).to eq 'gobstones' }
       it { expect(response.chapters.first.lessons.second.number).to eq 2 }
       it { expect(response.chapters.first.lessons.second.guide.slug).to eq 'original/guide2' }
