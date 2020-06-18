@@ -4,12 +4,12 @@ describe Mumuki::Classroom::Event::UserChanged do
 
   let(:uid) { 'agus@mumuki.org' }
   let(:uid2) { 'fedescarpa@mumuki.org' }
-  let(:event) { user.merge(permissions: new_permissions) }
+  let(:event) { user.merge(old_permissions: old_permissions, new_permissions: new_permissions) }
   let(:old_permissions) { {student: 'example.org/foo'}.with_indifferent_access }
   let(:new_permissions) { {student: 'example.org/bar', teacher: 'example.org/foo'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
   let(:user2) { {uid: uid2, email: uid2, last_name: 'Scarpa', first_name: 'Federico'}.with_indifferent_access }
-  let(:except_fields) { {except: [:created_at, :updated_at]} }
+  let(:except_fields) { {except: [:created_at, :updated_at, :email, :social_id, :last_name, :image_url]} }
 
   before { User.create! uid: uid, permissions: old_permissions }
   before { create :organization, name: 'example.org' }
@@ -56,7 +56,7 @@ describe Mumuki::Classroom::Event::UserChanged do
       before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
-      let(:event) { user2.merge(permissions: new_permissions) }
+      let(:event) { user2.merge(old_permissions: old_permissions, new_permissions: new_permissions) }
 
       let(:student_foo_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
       let(:student_bar_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
