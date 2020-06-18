@@ -13,9 +13,9 @@ describe 'suggestions', workspaces: [:organization] do
     before { create_suggestion!(content: 'Check the arity of the `foo` function.', exercise: {eid: 3}, submissions: [{sid: 1}, {sid: 2}, {sid: 3}]) }
     before { create_suggestion!(content: 'Delegate!', exercise: {eid: 2}) }
 
-    before { header 'Authorization', build_auth_header('*') }
 
     context 'when authenticated' do
+      before { header 'Authorization', build_auth_header('*') }
       before { get '/suggestions/mumukiproject/foo/3' }
 
       it { expect(last_response).to be_ok }

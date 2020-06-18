@@ -2,8 +2,6 @@ require 'spec_helper'
 
 describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
-  before { Mumukit::Platform::User.upsert_permissions! 'github|123456', {} }
-
   let(:course) { Course.locate! 'example.org/foo' }
   let(:date) { Time.now }
 
