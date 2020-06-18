@@ -51,6 +51,13 @@ class Mumuki::Classroom::App < Sinatra::Application
     def ensure_organization_existence!
       Organization.locate! organization
     end
+
+    def with_last_invitation(course)
+      course.as_json(except: [:created_at, :updated_at, :id], methods: [:current_invitation]).tap do |it|
+        it['invitation'] = it['current_invitation']
+        it.except! 'current_invitation'
+      end
+    end
   end
 
   Mumukit::Platform.map_organization_routes!(self) do
@@ -66,13 +73,12 @@ class Mumuki::Classroom::App < Sinatra::Application
       current_user.protect! :janitor, json_body[:slug]
       ensure_organization_existence!
       Course.create! with_current_organization(json_body)
-      #course.notify!
       {status: :created}
     end
 
     get '/courses/:course' do
       authorize! :teacher
-      {course: Course.locate!(course_slug)}
+      {course: with_last_invitation(Course.locate!(course_slug))}
     end
 
     post '/courses/:course/invitation' do
