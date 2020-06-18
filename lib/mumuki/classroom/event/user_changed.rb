@@ -7,7 +7,6 @@ class Mumuki::Classroom::Event::UserChanged
       user = User.slice_resource_h user_h.compact
       set_diff_permissions user
       update_user_model user.except(:permissions)
-      User.import_from_resource_h! user # FIXME we must refactor events
     end
 
     private
@@ -23,7 +22,7 @@ class Mumuki::Classroom::Event::UserChanged
     end
 
     def set_diff_permissions(user)
-      permissions = User.find_or_create_by!(uid: user[:uid]).permissions
+      permissions = User.locate!(user[:uid]).permissions
       self.changes = Mumukit::Auth::Permissions::Diff.diff(permissions, user[:permissions]).changes_by_organization
     end
 
