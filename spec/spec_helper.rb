@@ -37,8 +37,8 @@ Mumukit::Auth.configure do |c|
 end
 
 def build_auth_header(permissions, sub = 'github|123456')
-  Mumukit::Platform::User.upsert_permissions! sub, {owner: permissions}
-  Mumukit::Auth::Token.encode sub, {}
+  user = User.where(uid: sub).first_or_create! permissions: Mumukit::Auth::Permissions.parse(owner: permissions)
+  Mumukit::Auth::Token.encode user.uid, {}
 end
 
 def app

@@ -8,15 +8,8 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses/:course/teachers' do
       authorize! :headmaster
       json = with_organization_and_course teacher: json_body.merge(uid: json_body[:email])
-      uid = json[:teacher][:uid]
-
-      Mumuki::Classroom::Teacher.create!(with_organization_and_course json[:teacher])
-
-      perm = User.where(uid: uid).first_or_create!(json[:teacher].except(:first_name, :last_name, :personal_id)).permissions
-      perm.add_permission!(:teacher, course_slug)
-      Mumukit::Platform::User.upsert_permissions! uid, perm
-
-      Mumukit::Nuntius.notify_event! 'UserChanged', user: json[:teacher].except(:personal_id).merge(permissions: perm)
+      Mumuki::Classroom::Teacher.create! with_organization_and_course(to_teacher_basic_hash json[:teacher])
+      upsert_users! :teacher, [json[:teacher]]
     end
   end
 end

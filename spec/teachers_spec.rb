@@ -23,7 +23,7 @@ describe Mumuki::Classroom::Teacher, workspaces: [:organization] do
 
   describe 'post /courses/:course/teachers' do
 
-    let(:teacher) { {email: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar'} }
+    let(:teacher) { {email: 'foobar@gmail.com', first_name: 'Foo', last_name: 'Bar'} }
 
     context 'when success' do
       before { header 'Authorization', build_auth_header('*') }
