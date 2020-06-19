@@ -1,32 +1,32 @@
 development:
+  options:
+    raise_not_found_error: false
   clients:
     default:
       database: classroom
-      hosts:
-        - localhost:27017
       options:
         max_pool_size: 8
         min_pool_size: 1
-  options:
-    raise_not_found_error: false
+      hosts:
+        - localhost:27017
 
 test:
+  options:
+    raise_not_found_error: false
   clients:
     default:
       database: classroom_test
-      hosts:
-        - localhost:27017
       options:
         max_pool_size: 1
-  options:
-    raise_not_found_error: false
+      hosts:
+        - localhost:27017
 
 production:
+  options:
+    raise_not_found_error: false
   clients:
     default:
       database: "<%=ENV['MUMUKI_MONGODB_DATABASE']%>"
-      hosts:
-  <%= (ENV['MUMUKI_MONGODB_CONNECTION_STRING'] || '').split(',').map { |it| "        - #{it}\n" }.join %>
       options:
         user: "<%=ENV['MUMUKI_MONGODB_USER']%>"
         password: "<%=ENV['MUMUKI_MONGODB_PASSWORD']%>"
@@ -34,5 +34,5 @@ production:
           - readWrite
         max_pool_size: 8
         min_pool_size: 1
-  options:
-    raise_not_found_error: false
+      hosts:
+  <%= (ENV['MUMUKI_MONGODB_CONNECTION_STRING'] || '').split(',').map { |it| "        - #{it}\n" }.join %>
