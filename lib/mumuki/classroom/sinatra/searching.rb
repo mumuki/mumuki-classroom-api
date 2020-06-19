@@ -1,8 +1,9 @@
 class Mumuki::Classroom::App < Sinatra::Application
   helpers do
-    def with_detached_and_search(params, collection)
-      params
+    def with_detached_and_search(hash, collection)
+      hash
         .merge('detached': {'$exists': with_detached})
+        .merge_if(params[:students] == 'follow', followers_criteria(collection))
         .merge_unless(query_params[:query_param].empty?, query_criteria_class_for(collection).query)
     end
 
@@ -16,6 +17,11 @@ class Mumuki::Classroom::App < Sinatra::Application
         query_criteria: query_criteria,
         query_operand: query_operand
       }
+    end
+
+    def followers_criteria(collection)
+      uids = Mumuki::Classroom::Follower.find_by(with_organization_and_course email: current_user_uid)&.uids || []
+      {collection.uid_field.to_sym => {'$in': uids}}
     end
   end
 end

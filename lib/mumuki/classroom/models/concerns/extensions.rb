@@ -44,6 +44,11 @@ class Hash
     return merge hash unless criterion
     self
   end
+
+  def merge_if(criterion, hash)
+    return merge hash if criterion
+    self
+  end
 end
 
 
