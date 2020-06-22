@@ -19,6 +19,10 @@ class Mumuki::Classroom::Submission < Mumuki::Classroom::Document
 
   embeds_many :messages, class_name: 'Mumuki::Classroom::Message'
 
+  embedded_in :assignment, class_name: 'Mumuki::Classroom::Assignment'
+  embedded_in :suggestion, class_name: 'Mumuki::Classroom::Suggestion'
+  embedded_in :last_assignment, class_name: 'Mumuki::Classroom::LastAssignment'
+
   def evaluate_manually!(comment, status)
     self.status = status
     self.manual_evaluation = comment

@@ -25,10 +25,10 @@ class Mumuki::Classroom::Assignment < Mumuki::Classroom::Document
   end
 
   def add_message!(message, sid)
-    submission = submission(sid)
-    submission.add_message! message
-    update_submissions!
-    submission
+    submission(sid).tap do |it|
+      it.add_message! message
+      update_submissions!
+    end
   end
 
   def add_submission!(submission)
@@ -104,13 +104,12 @@ class Mumuki::Classroom::Assignment < Mumuki::Classroom::Document
 
     def items_to_review(query, exercises)
       passed_exercises_ids = where(query)
-                              .map { |assignment| [assignment.exercise.eid, assignment.submissions.max_by(&:created_at)] }
-                              .map { |eid , submission| eid if submission.status.passed? }
-                              .compact
+                               .map { |assignment| [assignment.exercise.eid, assignment.submissions.max_by(&:created_at)] }
+                               .map { |eid, submission| eid if submission.status.passed? }
       exercises.reject { |exercise| passed_exercises_ids.include? exercise[:id] }
-                .pluck(:tag_list, :language)
-                .flatten
-                .uniq
+        .pluck(:tag_list, :language)
+        .flatten
+        .uniq
     end
 
     def stats_by(query)
