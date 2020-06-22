@@ -183,7 +183,7 @@ describe Mumuki::Classroom::Submission do
 
       let(:student) { {uid: 'github|123456', first_name: 'Jon', last_name: 'Doe', image_url: 'http://mumuki.io/logo.png', email: 'jondoe@gmail.com', name: 'jondoe'} }
 
-      let(:created_submission) { Mumuki::Classroom::Submission.first }
+      let(:created_submission) { Mumuki::Classroom::Assignment.last.submissions.last }
 
       before { Mumuki::Classroom::Student.create!(student.merge(organization: 'example', course: 'example/course1')) }
       before { Mumuki::Classroom::Submission.process!(submission_with_origin_ip) }

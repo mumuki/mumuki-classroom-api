@@ -7,6 +7,8 @@ class Mumuki::Classroom::Message < Mumuki::Classroom::Document
   field :type, type: String
   field :date, type: String
 
+  embedded_in :submission, class_name: 'Mumuki::Classroom::Submission'
+
   def content
     Mumukit::ContentType::Markdown.to_html(self[:content])
   end

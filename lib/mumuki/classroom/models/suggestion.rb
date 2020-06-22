@@ -16,8 +16,7 @@ class Mumuki::Classroom::Suggestion < Mumuki::Classroom::Document
   create_index({'guide_slug': 1, 'exercise.eid': 1})
 
   def add_submission!(submission)
-    self.submissions << submission
-    update_attributes! submissions: submissions
+    update_attributes! submissions: submissions + [submission]
   end
 
   def content_html
