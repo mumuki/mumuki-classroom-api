@@ -42,7 +42,7 @@ class Mumuki::Classroom::Assignment < Mumuki::Classroom::Document
 
   def notify_manual_evaluation!(sid)
     assignment = {submission_id: sid}.merge(submission(sid).as_json only: [:status, :manual_evaluation])
-    Mumukit::Nuntius.notify_event! 'AssignmentManuallyEvaluated', assignment: assignment
+    Mumukit::Nuntius.notify_event!('AssignmentManuallyEvaluated', {assignment: assignment}, {sender: :classroom})
   end
 
   def json_to_notify(message, sid)
