@@ -27,3 +27,4 @@ group :development do
 end
 
 gem 'mumuki-domain', github: 'mumuki/mumuki-domain', branch: 'use-classroom-as-gem'
+gem 'mumukit-nuntius', github: 'mumuki/mumukit-nuntius', branch: 'use-classroom-as-gem'
