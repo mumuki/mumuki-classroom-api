@@ -1,6 +1,6 @@
 namespace :classroom do
   namespace :submissions do
-    task :listen do
+    task listen: :environment do
       Mumukit::Nuntius::Logger.info 'Listening to submissions'
 
       Mumukit::Nuntius::Consumer.negligent_start! 'submissions' do |body|
