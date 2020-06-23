@@ -1,6 +1,6 @@
 namespace :classroom do
   namespace :messages do
-    task :listen do
+    task listen: :environment do
       Mumukit::Nuntius::Logger.info 'Listening to student messages'
 
       Mumukit::Nuntius::Consumer.negligent_start! 'student-messages' do |body|
