@@ -132,16 +132,10 @@ class Mumuki::Classroom::App < Sinatra::Application
       @current_course ||= Course.locate!(course_slug)
     end
 
-    def update_and_notify_student_metadata(uid, method, *slugs)
-      user = User.find_by_uid!(uid)
-      permissions = user.permissions
-      permissions.send("#{method}_permission!", 'student', *slugs)
-      user.update! permissions: permissions
-      user.notify!
-    end
-
-    def notify_upsert_exam(exam_id)
-      Mumukit::Nuntius.notify_event! 'UpsertExam', tenantized_json_body.except(:social_ids).merge(exam_id)
+    def update_user_permissions!(uid, method, *slugs)
+      user = User.locate!(uid)
+      user.send("#{method}_permission!", :student, *slugs)
+      user.save!
     end
 
     def page
