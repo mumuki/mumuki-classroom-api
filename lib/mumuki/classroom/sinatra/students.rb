@@ -56,7 +56,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses/:course/students/:uid/detach' do
       authorize! :janitor
       Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).detach!
-      update_and_notify_student_metadata(uid, 'remove', course_slug)
+      update_user_permissions!(uid, 'remove', course_slug)
       {status: :updated}
     end
 
@@ -64,7 +64,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses/:course/students/:uid/attach' do
       authorize! :janitor
       Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).attach!
-      update_and_notify_student_metadata(uid, 'add', course_slug)
+      update_user_permissions!(uid, 'add', course_slug)
       {status: :updated}
     end
 
@@ -78,7 +78,7 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.to_s
 
-      update_and_notify_student_metadata(uid, 'update', course_slug, json_body[:slug])
+      update_user_permissions!(uid, 'update', course_slug, slug.to_s)
       {status: :updated}
     end
 
@@ -120,8 +120,6 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       user = User.find_by(uid: uid)
       user.update_attributes! first_name: json_body[:first_name], last_name: json_body[:last_name]
-
-      user.notify!
 
       {status: :updated}
     end
