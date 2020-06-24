@@ -190,7 +190,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     def as_guide_progress_response(guide_progress)
       {
         student: guide_progress.student.uid,
-        guide: guide_progress.guide[:slug],
+        guide: guide_progress.slug,
         progress: guide_progress.as_json.except(:student, :guide)
       }
     end

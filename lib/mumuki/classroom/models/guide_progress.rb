@@ -14,6 +14,10 @@ class Mumuki::Classroom::GuideProgress < Mumuki::Classroom::Document
   create_index({'guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
   create_index({'student.first_name': 'text', 'student.last_name': 'text', 'student.email': 'text'})
 
+  def slug
+    guide[:slug]
+  end
+
   class << self
     def detach_all_by!(query)
       where(query).set(detached: true)
@@ -34,12 +38,12 @@ class Mumuki::Classroom::GuideProgress < Mumuki::Classroom::Document
     def last_assignment_by(query)
       where(query).order_by('last_assignment.submission.created_at': :desc).first.try do |it|
         Mumuki::Classroom::LastAssignment.new(guide: it.guide,
-                           exercise: it.last_assignment.exercise,
-                           submission: {
-                             sid: it.last_assignment.submission.sid,
-                             status: it.last_assignment.submission.status,
-                             created_at: it.last_assignment.submission.created_at,
-                           })
+                                              exercise: it.last_assignment.exercise,
+                                              submission: {
+                                                sid: it.last_assignment.submission.sid,
+                                                status: it.last_assignment.submission.status,
+                                                created_at: it.last_assignment.submission.created_at,
+                                              })
       end
     end
   end

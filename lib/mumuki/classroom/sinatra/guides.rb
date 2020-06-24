@@ -17,6 +17,7 @@ class Mumuki::Classroom::App < Sinatra::Application
   end
 
   helpers do
+    # TODO: Use JSON Builder
     def get_current_guides
       authorize! :teacher
       ensure_organization_exists!
@@ -52,6 +53,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       chapter.as_json(except: except_fields, include: {lessons: guide_container_as_json_opts}, methods: :name)
     end
 
+    # TODO: Extract to domain
     def validate_usage!(guide)
       raise ActiveRecord::RecordNotFound, "Couldn't find #{Guide.name} with #{Guide.sync_key_id_field}: #{guide.slug}" unless guide.usage_in_organization
     end
