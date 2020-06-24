@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe Exam do
+describe Exam, workspaces: [:organization, :courses] do
 
-  let(:organization) { create :organization, name: 'example.org' }
-  let(:course) { create :course, slug: 'example.org/foo' }
-  let(:language) { create :language, name: 'haskell' }
+  let(:organization) { Organization.locate! 'example.org' }
+  let(:course) { Course.locate! 'example.org/foo' }
+  let(:language) { Language.for_name 'haskell' }
   let(:guide) { create :guide, slug: 'foo/bar', name: 'foo', language: language }
   let(:jane) { create :user, uid: 'jane.doe@testing.com' }
   let(:john) { create :user, uid: 'john.doe@testing.com' }
