@@ -52,7 +52,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     def with_guide_progress_count(containers)
       containers.each do |container|
         container.tap do |it|
-          it['guide']['students'] = Mumuki::Classroom::GuideProgress
+          it['guide']['students_count'] = Mumuki::Classroom::GuideProgress
                                       .where(with_organization_and_course 'guide.slug': it['guide']['slug'])
                                       .count
         end
