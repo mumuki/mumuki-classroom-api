@@ -12,6 +12,7 @@ require 'byebug'
 
 require 'mumuki/domain/factories'
 require_relative '../lib/mumuki/classroom'
+require_relative './spec_workspace'
 
 ActiveRecord::Migration.maintain_test_schema!
 
@@ -27,14 +28,7 @@ RSpec.configure do |config|
   config.before(:each) do
     Mongoid::Clients.default.collections.each(&:delete_many)
   end
-
-  config.before(:each) do
-    if RSpec.current_example.metadata[:organization_workspace] == :test
-      organization = create(:organization, name: 'example.org').tap &:switch!
-      create :course, organization: organization, slug: 'example.org/foo'
-      create :course, organization: organization, slug: 'example.org/foo2'
-    end
-  end
+  initialize_workspaces config
 end
 
 require 'base64'

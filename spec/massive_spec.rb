@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Massive API', organization_workspace: :test do
+describe 'Massive API', workspaces: [:organization, :courses] do
 
   def to_member_request_hash(number)
     {first_name: "first_name_#{number}", last_name: "last_name_#{number}", email: "email_#{number}@fake.com"}
@@ -79,7 +79,7 @@ describe 'Massive API', organization_workspace: :test do
   let(:uids) { {uids: students_uids} }
   let(:uids_json) { uids.to_json }
 
-  let(:language) { create :language, name: 'haskell' }
+  let(:language) { Language.for_name 'haskell' }
 
   let(:guide) { create :guide, slug: 'foo/bar', name: 'bar', language: language }
   let(:guide2) { create :guide, slug: 'foo/baz', name: 'baz', language: language }

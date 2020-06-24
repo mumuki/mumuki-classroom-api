@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'messages', organization_workspace: :test do
+describe 'messages', workspaces: [:organization] do
 
   describe 'post /courses/:course/messages' do
     let(:message_to_post) { {uid: '1', exercise_id: 2, submission_id: '3', message: message, guide_slug: 'mumukiproject/example'}.to_json }
