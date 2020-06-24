@@ -20,6 +20,7 @@ describe Guide, workspaces: [:organization, :courses, :complements, :exams] do
       it { expect(response.chapters.second.lessons.count).to eq 2 }
       it { expect(response.chapters.first.lessons.first.number).to eq 1 }
       it { expect(response.chapters.first.lessons.first.guide.slug).to eq 'original/guide1' }
+      it { expect(response.chapters.first.lessons.first.guide.students_count).to eq 0 }
       it { expect(response.chapters.first.lessons.first.guide.language.name).to eq 'gobstones' }
       it { expect(response.chapters.first.lessons.second.number).to eq 2 }
       it { expect(response.chapters.first.lessons.second.guide.slug).to eq 'original/guide2' }
@@ -62,6 +63,7 @@ describe Guide, workspaces: [:organization, :courses, :complements, :exams] do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'retrive chapters from current organization book' do
+      before { Mumuki::Classroom::GuideProgress.create! guide: {slug: 'original/guide1'}, course: 'example.org/foo', organization: 'example.org' }
       before { get '/api/courses/foo/guides' }
 
       it { expect(last_response).to be_ok }
@@ -74,6 +76,7 @@ describe Guide, workspaces: [:organization, :courses, :complements, :exams] do
       it { expect(response.chapters.second.lessons.count).to eq 2 }
       it { expect(response.chapters.first.lessons.first.number).to eq 1 }
       it { expect(response.chapters.first.lessons.first.guide.slug).to eq 'original/guide1' }
+      it { expect(response.chapters.first.lessons.first.guide.students_count).to eq 1 }
       it { expect(response.chapters.first.lessons.first.guide.language.name).to eq 'gobstones' }
       it { expect(response.chapters.first.lessons.second.number).to eq 2 }
       it { expect(response.chapters.first.lessons.second.guide.slug).to eq 'original/guide2' }
