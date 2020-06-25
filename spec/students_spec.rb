@@ -134,12 +134,15 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
       let(:student2) { {email: 'bazlol@gmail.com', uid: 'bazlol@gmail.com', first_name: 'baz', last_name: 'lol', personal_id: '2'} }
       let(:student_saved) { {organization: 'example.org', course: 'example.org/foo'}.merge student }
       let(:student_saved2) { {organization: 'example.org', course: 'example.org/foo'}.merge student2 }
+      let(:follower) { {organization: 'example.org', course: 'example.org/foo',
+                        email: 'a.teacher@gmail.com', uids: [student[:uid]]} }
 
       context 'when guides already exists in a course' do
         before { Mumuki::Classroom::Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
         before { Mumuki::Classroom::Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
         before { Mumuki::Classroom::Student.create! student2.merge(organization: 'example.org', course: 'example.org/foo') }
         before { Mumuki::Classroom::Student.create! student2.merge(organization: 'example.org', course: 'example.org/test') }
+        before { Mumuki::Classroom::Follower.create! follower }
 
         context 'get students with auth0 client' do
           before { header 'Authorization', build_auth_header('*') }
@@ -154,6 +157,20 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
           it { expect(last_response).to be_ok }
           it { expect(last_response.body).to json_like({students: [student_saved2]}, except_fields) }
+        end
+        context 'get all students' do
+          before { header 'Authorization', build_auth_header('*', 'a.teacher@gmail.com') }
+          before { get '/courses/foo/students?students=all' }
+
+          it { expect(last_response).to be_ok }
+          it { expect(last_response.body).to json_like({students: [student_saved, student_saved2]}, except_fields) }
+        end
+        context 'get following students with auth client' do
+          before { header 'Authorization', build_auth_header('*', 'a.teacher@gmail.com') }
+          before { get '/courses/foo/students?students=follow' }
+
+          it { expect(last_response).to be_ok }
+          it { expect(last_response.body).to json_like({students: [student_saved]}, except_fields) }
         end
       end
 

@@ -82,6 +82,10 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
       Mumuki::Classroom::Assignment.attach_all_by! criteria
       Mumuki::Classroom::GuideProgress.attach_all_by! criteria
     end
+
+    def uid_field
+      :uid
+    end
   end
 
 end

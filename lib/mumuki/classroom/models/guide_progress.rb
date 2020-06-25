@@ -46,6 +46,10 @@ class Mumuki::Classroom::GuideProgress < Mumuki::Classroom::Document
                                               })
       end
     end
+
+    def uid_field
+      'student.uid'.to_sym
+    end
   end
 
 end
