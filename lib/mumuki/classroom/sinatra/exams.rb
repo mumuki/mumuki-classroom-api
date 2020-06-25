@@ -8,8 +8,14 @@ class Mumuki::Classroom::App < Sinatra::Application
       {classroom_id: exam_id}
     end
 
+    def exam_from_classroom_json(json)
+      exam = json.with_indifferent_access
+      Exam.adapt_json_values exam
+      Exam.whitelist_attributes exam
+    end
+
     def exam_body
-      Exam.from_classroom_json with_current_organization_and_course(json_body)
+      exam_from_classroom_json with_current_organization_and_course(json_body)
     end
 
   end
