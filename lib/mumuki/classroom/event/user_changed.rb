@@ -29,7 +29,7 @@ class Mumuki::Classroom::Event::UserChanged
       if students.exists?
         students.first.attach!
       else
-        student = Mumuki::Classroom::Student.whitelist_attributes User.locate!(uid).to_resource_h
+        student = Mumuki::Classroom::Student.attributes_from_user uid
         Mumuki::Classroom::Student.create! student.merge(organization: organization, course: granted_slug.to_s)
       end
     end
@@ -40,8 +40,9 @@ class Mumuki::Classroom::Event::UserChanged
     end
 
     def teacher_added(organization, user, granted_slug)
-      teacher = Mumuki::Classroom::Teacher.find_or_create_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
-      teacher.update_attributes!(Mumuki::Classroom::Teacher.whitelist_attributes User.locate!(user[:uid]).to_resource_h)
+      uid = user[:uid]
+      teacher = Mumuki::Classroom::Teacher.find_or_create_by!(organization: organization, course: granted_slug.to_s, uid: uid)
+      teacher.update_attributes!(Mumuki::Classroom::Teacher.attributes_from_user(uid))
     end
 
   end

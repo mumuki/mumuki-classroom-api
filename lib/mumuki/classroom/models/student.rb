@@ -1,22 +1,12 @@
 class Mumuki::Classroom::Student < Mumuki::Classroom::Document
-  include Mongoid::Timestamps
+  include CourseMember
 
-  field :uid, type: String
   field :personal_id, type: String
-  field :first_name, type: String
-  field :last_name, type: String
-  field :name, type: String
-  field :email, type: String
-  field :image_url, type: String
-  field :social_id, type: String
   field :stats, type: Hash
-  field :organization, type: String
-  field :course, type: Mumukit::Auth::Slug
   field :detached, type: Mongoid::Boolean
   field :detached_at, type: Time
   embeds_one :last_assignment, class_name: 'Mumuki::Classroom::LastAssignment'
 
-  create_index({organization: 1, course: 1, uid: 1}, {unique: true})
   create_index({organization: 1, uid: 1})
   create_index({'last_assignment.guide.slug': 1, 'last_assignment.exercise.eid': 1}, {name: 'ExBibIdIndex'})
   create_index({first_name: 'text', last_name: 'text', email: 'text', personal_id: 'text'})
@@ -79,12 +69,6 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
       where(query).ne(detached: true).order_by(updated_at: :desc).first
     end
 
-    def ensure_not_exists!(query)
-      existing_students = Mumuki::Classroom::Student.where(query)
-      return unless existing_students.exists?
-      raise Mumuki::Classroom::StudentExistsError, {existing_students: existing_students.map(&:uid)}.to_json
-    end
-
     def detach_all_by!(uids, query)
       where(query).in(uid: uids).update_all(detached: true, detached_at: Time.now)
       criteria = query.merge('student.uid': {'$in': uids})
@@ -100,8 +84,5 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
     end
   end
 
-end
-
-class Mumuki::Classroom::StudentExistsError < Exception
 end
 
