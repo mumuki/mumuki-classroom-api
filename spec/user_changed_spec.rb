@@ -5,8 +5,8 @@ describe Mumuki::Classroom::Event::UserChanged do
   let(:uid) { 'agus@mumuki.org' }
   let(:uid2) { 'fedescarpa@mumuki.org' }
   let(:event) { user.merge(old_permissions: old_permissions, new_permissions: new_permissions) }
-  let(:old_permissions) { {student: 'example.org/foo'}.with_indifferent_access }
-  let(:new_permissions) { {student: 'example.org/bar', teacher: 'example.org/foo'}.with_indifferent_access }
+  let(:old_permissions) { {student: 'example.org/foo', teacher: 'example.org/foo'}.with_indifferent_access }
+  let(:new_permissions) { {student: 'example.org/bar', teacher: 'example.org/bar'}.with_indifferent_access }
   let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
   let(:user2) { {uid: uid2, email: uid2, last_name: 'Scarpa', first_name: 'Federico'}.with_indifferent_access }
   let(:except_fields) { {except: [:created_at, :updated_at, :email, :social_id, :last_name, :image_url]} }
@@ -22,6 +22,7 @@ describe Mumuki::Classroom::Event::UserChanged do
         expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:student_added)
         expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:teacher_added)
         expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:student_removed)
+        expect(Mumuki::Classroom::Event::UserChanged).to_not receive(:teacher_removed)
       end
       before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
@@ -35,16 +36,18 @@ describe Mumuki::Classroom::Event::UserChanged do
         expect(Mumuki::Classroom::Event::UserChanged).to receive(:student_added)
         expect(Mumuki::Classroom::Event::UserChanged).to receive(:teacher_added)
         expect(Mumuki::Classroom::Event::UserChanged).to receive(:student_removed)
+        expect(Mumuki::Classroom::Event::UserChanged).to receive(:teacher_removed)
       end
       before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       it { expect(Organization.pluck(:name)).to include 'example.org' }
-      it { expect(Mumuki::Classroom::Event::UserChanged.changes['example.org'].map(&:description)).to eq %w(student_removed student_added teacher_added) }
+      it { expect(Mumuki::Classroom::Event::UserChanged.changes['example.org'].map(&:description)).to eq %w(student_removed student_added teacher_removed teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
              .to json_like(changes: [
                {role: 'student', grant: 'example.org/foo', type: 'removed'},
                {role: 'student', grant: 'example.org/bar', type: 'added'},
-               {role: 'teacher', grant: 'example.org/foo', type: 'added'}]) }
+               {role: 'teacher', grant: 'example.org/foo', type: 'removed'},
+               {role: 'teacher', grant: 'example.org/bar', type: 'added'}]) }
 
     end
 
@@ -53,6 +56,8 @@ describe Mumuki::Classroom::Event::UserChanged do
       let!(:course) { create(:course, slug: 'example.org/foo') }
       let!(:course) { create(:course, slug: 'example.org/bar') }
       before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
+      before { Mumuki::Classroom::Teacher.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
+
       before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
       let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
@@ -61,6 +66,7 @@ describe Mumuki::Classroom::Event::UserChanged do
       let(:student_foo_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
       let(:student_bar_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
       let(:teacher_foo_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
+      let(:teacher_bar_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
 
       it { expect(student_foo_fetched.detached).to eq true }
       it { expect(student_foo_fetched.uid).to eq uid }
@@ -69,7 +75,7 @@ describe Mumuki::Classroom::Event::UserChanged do
       it { expect(student_bar_fetched.as_json).to json_like user2.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_foo_fetched.as_json).to json_like user2.merge(organization: 'example.org', course: 'example.org/foo'), except_fields }
+      it { expect(teacher_bar_fetched.as_json).to json_like user2.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
     end
 
     context 'when there are assignments for several users, user changed event only updates the assignment for that student' do
