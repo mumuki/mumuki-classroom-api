@@ -33,13 +33,6 @@ require_relative './classroom/permissions_diff'
 
 Mulang::Inspection.register_extension! Mumukit::Inspection::Css
 
-module Mumukit::Platform::User
-  # FIXME remove this method
-  def self.upsert_permissions!(uid, permissions)
-    Mumukit::Platform.user_class.where(uid: uid).update_or_create!(permissions: permissions)
-  end
-end
-
 Mumukit::Nuntius.configure do |c|
   c.app_name = 'classroom'
 end

@@ -2,8 +2,6 @@ require 'spec_helper'
 
 describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
-  before { Mumukit::Platform::User.upsert_permissions! 'github|123456', {} }
-
   let(:course) { Course.locate! 'example.org/foo' }
   let(:date) { Time.now }
 
@@ -302,7 +300,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
             end
             context 'in different course, should work' do
               let!(:course) { create(:course, slug: 'example.org/bar') }
@@ -377,7 +375,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
             end
             context 'and user already exists by email' do
               before { header 'Authorization', build_auth_header('*', 'auth1') }
@@ -385,7 +383,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
               it { expect(last_response).to_not be_ok }
               it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_students: [student[:email]]) }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
             end
           end
         end

@@ -1,9 +1,5 @@
 class Mumuki::Classroom::App < Sinatra::Application
-  error Mumuki::Classroom::StudentExistsError do
-    halt 400
-  end
-
-  error Mumuki::Classroom::TeacherExistsError do
+  error Mumuki::Classroom::CourseMemberExistsError do
     halt 400
   end
 
