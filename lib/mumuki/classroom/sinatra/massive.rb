@@ -105,15 +105,17 @@ class Mumuki::Classroom::App < Sinatra::Application
       Mumuki::Classroom::Teacher.whitelist_attributes to_member_basic_hash teacher
     end
 
+    def upsert_user!(role, member)
+      user = User.find_or_initialize_by(uid: member[:uid])
+      user.assign_attributes user_from_member_json(member)
+      user.add_permission! role, course_slug
+      user.save!
+      yield user if block_given?
+    end
+
     #FIXME: This method now doesn't perform a bulk update as PG doesn't support it
-    def upsert_users!(role, members)
-      members.each do |it|
-        user = User.find_or_initialize_by(uid: it[:uid])
-        user.assign_attributes user_from_member_json(it)
-        user.add_permission! role, course_slug
-        user.save!
-        yield user if block_given?
-      end
+    def upsert_users!(role, members, &block)
+      members.each { |it| upsert_user! role, it, &block }
     end
 
     def massive_response(processed, unprocessed, errored, errored_msg, hash = {})

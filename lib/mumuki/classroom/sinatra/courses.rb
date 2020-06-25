@@ -52,6 +52,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       Organization.locate! organization
     end
 
+    # TODO: Use JSON Builder
     def with_last_invitation(course)
       course.as_json(except: [:created_at, :updated_at, :id], methods: [:current_invitation]).tap do |it|
         it['invitation'] = it['current_invitation']
