@@ -20,7 +20,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def followers_criteria(collection)
-      uids = Mumuki::Classroom::Follower.find_by(with_organization_and_course email: current_user_uid)&.uids || []
+      uids = Mumuki::Classroom::Follower.find_by(with_organization_and_course email: current_user_uid)&.uids.to_a
       {collection.uid_field.to_sym => {'$in': uids}}
     end
   end
