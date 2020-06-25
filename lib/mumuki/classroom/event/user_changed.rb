@@ -45,5 +45,10 @@ class Mumuki::Classroom::Event::UserChanged
       teacher.update_attributes!(Mumuki::Classroom::Teacher.attributes_from_user(uid))
     end
 
+    def teacher_removed(organization, user, granted_slug)
+      teacher = Mumuki::Classroom::Teacher.find_by!(organization: organization, course: granted_slug.to_s, uid: user[:uid])
+      teacher.destroy!
+    end
+
   end
 end
