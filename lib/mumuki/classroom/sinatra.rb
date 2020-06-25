@@ -112,6 +112,10 @@ class Mumuki::Classroom::App < Sinatra::Application
       Mumuki::Classroom::Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
     end
 
+    def ensure_teacher_not_exists!
+      Mumuki::Classroom::Teacher.ensure_not_exists! with_organization_and_course uid: json_body[:email]
+    end
+
     def set_locale!
       I18n.locale = current_organization.locale
     end
