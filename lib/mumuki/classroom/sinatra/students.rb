@@ -97,9 +97,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       uid = student_json[:uid]
       student = Mumuki::Classroom::Student.create!(with_organization_and_course student_json)
 
-      user = User.where(uid: uid).first_or_create!(student.as_user)
-      user.add_permission! :student, course_slug
-      user.save!
+      upsert_user! :student, student.as_user
 
       Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
 
@@ -111,13 +109,10 @@ class Mumuki::Classroom::App < Sinatra::Application
       authorize! :janitor
       ensure_course_existence!
 
-      normalize_student!
-
       student = Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid)
-      student.update_attributes!(first_name: json_body[:first_name], last_name: json_body[:last_name], personal_id: json_body[:personal_id])
+      student.update! Mumuki::Classroom::Student.normalized_attributes_from_json(json_body).except(:uid)
 
-      user = User.find_by(uid: uid)
-      user.update_attributes! first_name: json_body[:first_name], last_name: json_body[:last_name]
+      upsert_user! :student, student.as_user
 
       {status: :updated}
     end

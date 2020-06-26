@@ -123,12 +123,18 @@ describe 'Massive API', workspaces: [:organization, :courses] do
   let(:start_time) { 1.month.ago.beginning_of_day }
   let(:end_time) { 1.month.since.beginning_of_day }
 
+  shared_examples 'with verified names for users' do
+    it { expect(modified_users.all? { |us| us.verified_first_name == us.first_name }).to be true }
+    it { expect(modified_users.all? { |us| us.verified_last_name == us.last_name }).to be true }
+  end
+
   describe 'when authenticated' do
     before { header 'Authorization', build_auth_header('*') }
 
     context 'Teachers API' do
 
       context 'POST http://localmumuki.io/:organization/api/courses/:course/massive/teachers' do
+        let(:modified_users) { User.where(uid: students_uids) }
 
         context 'when teachers and users does not exist' do
           before { post '/api/courses/foo/massive/teachers', teachers_json }
@@ -142,6 +148,7 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(teachers_from(course, teachers_uids).count).to eq 10 }
           it { expect(teachers_users_count_from course, teachers_uids).to eq 10 }
           it { expect(teachers_users_count_from course2, teachers_uids).to eq 0 }
+          it_behaves_like 'with verified names for users'
         end
 
         context 'when none teachers exists in course but some of them already exist as users' do
@@ -157,9 +164,11 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(teachers_from(course, teachers_uids).count).to eq 10 }
           it { expect(teachers_users_count_from course, teachers_uids).to eq 10 }
           it { expect(teachers_users_count_from course2, teachers_uids).to eq 5 }
+          it_behaves_like 'with verified names for users'
         end
 
         context 'when some teachers exists in course and some of them already exist as users' do
+          let(:modified_users) { User.where(uid: students_uids.take(5)) }
           before { create_teachers_in course, teachers_uids.take(5) }
           before { post 'api/courses/foo/massive/teachers', teachers_json }
 
@@ -172,6 +181,7 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(teachers_from(course, teachers_uids).count).to eq 10 }
           it { expect(teachers_users_count_from course, teachers_uids).to eq 10 }
           it { expect(teachers_users_count_from course2, teachers_uids).to eq 0 }
+          it_behaves_like 'with verified names for users'
         end
       end
     end
@@ -213,6 +223,7 @@ describe 'Massive API', workspaces: [:organization, :courses] do
       end
 
       context 'POST http://localmumuki.io/:organization/api/courses/:course/massive/students' do
+        let(:modified_users) { User.where(uid: students_uids) }
 
         context 'when students and users does not exist' do
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(10).times }
@@ -227,9 +238,10 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(students_from(course, students_uids).count).to eq 10 }
           it { expect(students_users_count_from course, students_uids).to eq 10 }
           it { expect(students_users_count_from course2, students_uids).to eq 0 }
+          it_behaves_like 'with verified names for users'
         end
 
-        context 'when none students exists in course but some of them already exist as users' do
+        context "when students don't exist in course but some of them already exist as users" do
           before { create_students_in course2, students_uids.take(5) }
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(10).times }
           before { post '/api/courses/foo/massive/students', students_json }
@@ -243,9 +255,11 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(students_from(course, students_uids).count).to eq 10 }
           it { expect(students_users_count_from course, students_uids).to eq 10 }
           it { expect(students_users_count_from course2, students_uids).to eq 5 }
+          it_behaves_like 'with verified names for users'
         end
 
-        context 'when some students exists in course and some of them already exist as users' do
+        context 'when some students exist in course and some of them already exist as users' do
+          let(:modified_users) { User.where(uid: students_uids.take(5)) }
           before { create_students_in course, students_uids.take(5) }
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(5).times }
           before { post 'api/courses/foo/massive/students', students_json }
@@ -259,6 +273,7 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(students_from(course, students_uids).count).to eq 10 }
           it { expect(students_users_count_from course, students_uids).to eq 10 }
           it { expect(students_users_count_from course2, students_uids).to eq 0 }
+          it_behaves_like 'with verified names for users'
         end
       end
 

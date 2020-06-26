@@ -17,6 +17,10 @@ module CourseMember
     create_index({organization: 1, course: 1, uid: 1}, {unique: true})
   end
 
+  def as_user(verified: true)
+    member_json = as_json.merge_if(verified, validated_first_name: first_name, validated_last_name: last_name)
+    User.whitelist_attributes member_json
+  end
 
   class_methods do
     def ensure_not_exists!(query)

@@ -190,6 +190,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
   end
 
   describe 'post /courses/:course/students/:student_id' do
+    let(:created_user) { User.locate! 'github|123456' }
 
     before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', uid: 'github|123456', tenant: 'example.org') }
     before { header 'Authorization', build_auth_header('*') }
@@ -197,9 +198,12 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
     it { expect(last_response).to be_ok }
     it { expect(last_response.body).to json_eq status: :created }
+    it { expect(created_user.first_name).to eq created_user.verified_first_name }
+    it { expect(created_user.last_name).to eq created_user.verified_last_name }
   end
 
   describe 'put /courses/:course/students/:student_id' do
+    let(:updated_user) { User.locate! 'jondoe@gmail.com' }
 
     before { User.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
     before { Mumuki::Classroom::Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
@@ -209,6 +213,8 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
     it { expect(last_response).to be_ok }
     it { expect(last_response.body).to json_eq status: :updated }
     it { expect(Mumuki::Classroom::Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Doe' }
+    it { expect(updated_user.first_name).to eq updated_user.verified_first_name }
+    it { expect(updated_user.last_name).to eq updated_user.verified_last_name }
   end
 
   describe 'when needs mumuki-user' do

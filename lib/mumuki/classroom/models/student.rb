@@ -52,10 +52,6 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
     update_attributes!(last_assignment: Mumuki::Classroom::GuideProgress.last_assignment_by(sub_student_query uid))
   end
 
-  def as_user
-    User.whitelist_attributes self.as_json.merge validated_first_name: first_name, validated_last_name: last_name
-  end
-
   class << self
     def report(criteria, &block)
       where(criteria).select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
