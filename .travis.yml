@@ -3,6 +3,8 @@ cache: bundler
 sudo: false
 rvm:
 - 2.6.3
+before_install:
+- gem install -v 2.0.2 bundler
 services:
 - mongodb
 - postgresql
