@@ -259,21 +259,19 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
       context 'should transfer student to destination and transfer all his data' do
         before { header 'Authorization', build_auth_header('*/*') }
-        before { post '/courses/example/students/github%7C123456/transfer', {slug: 'some_orga/some_course'}.to_json }
+        before { post '/courses/example/students/github%7C123456/transfer', {destination: 'some_course'}.to_json }
 
         let(:only_fields) { {only: [:organization, :course]} }
 
         it { expect(last_response).to be_ok }
         it { expect(last_response.body).to eq({:status => :updated}.to_json) }
-        it { expect(fetched_student.organization).to eq 'some_orga' }
-        it { expect(fetched_student.course).to eq 'some_orga/some_course' }
+        it { expect(fetched_student.organization).to eq 'example.org' }
+        it { expect(fetched_student.course).to eq 'example.org/some_course' }
 
         it { expect(fetched_guide_progresses.count).to eq 2 }
-        it { expect(fetched_guide_progresses.first.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
-        it { expect(fetched_guide_progresses.second.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
+        it { expect(fetched_guide_progresses.first.as_json).to json_like({organization: 'example.org', course: 'example.org/some_course'}, only_fields) }
         it { expect(fetched_assignments.count).to eq 2 }
-        it { expect(fetched_assignments.first.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
-        it { expect(fetched_assignments.last.as_json).to json_like({organization: 'some_orga', course: 'some_orga/some_course'}, only_fields) }
+        it { expect(fetched_assignments.first.as_json).to json_like({organization: 'example.org', course: 'example.org/some_course'}, only_fields) }
       end
 
     end

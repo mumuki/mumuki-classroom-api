@@ -70,15 +70,13 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     # Transfers a student to another course
     post '/courses/:course/students/:uid/transfer' do
-      authorize! :janitor
+      authorize! :admin
 
-      slug = json_body[:slug].to_mumukit_slug
+      destination = Mumukit::Auth::Slug.join organization, json_body[:destination]
 
-      authorize_for! :janitor, slug
+      Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to!  organization, destination.to_s
 
-      Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to! slug.organization, slug.to_s
-
-      update_user_permissions!(uid, 'update', course_slug, slug.to_s)
+      update_user_permissions!(uid, 'update', course_slug, destination.to_s)
       {status: :updated}
     end
 
