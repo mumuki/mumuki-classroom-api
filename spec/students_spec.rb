@@ -313,6 +313,7 @@ describe Student do
               it { expect(Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
               pending { expect(User.where(uid: student[:email]).to_a).to eq student_json } #TODO: find out why user isn't created with all params
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
+
             end
           end
           context 'add student to a course if exists' do
@@ -452,6 +453,7 @@ describe Student do
             it { expect(last_response.body).to json_eq({status: 'created', processed_count: 100},
                                                        {only: [:status, :processed_count]}) }
             it { expect(Student.in(uid: students_uids).count).to eq 100 }
+            it { expect(Student.in(uid: students_uids).last.created_at).to_not be nil }
           end
 
           context 'and some users do exist' do
