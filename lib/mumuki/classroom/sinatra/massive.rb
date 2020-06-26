@@ -71,11 +71,15 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def students
-      @students ||= json_body[:students].map { |it| to_student_basic_hash it }
+      @students ||= json_body[:students].map do |it|
+        Mumuki::Classroom::Student.normalized_attributes_from_json it
+      end
     end
 
     def teachers
-      @teachers ||= json_body[:teachers].map { |it| to_teacher_basic_hash it }
+      @teachers ||= json_body[:teachers].map do |it|
+        Mumuki::Classroom::Teacher.normalized_attributes_from_json it
+      end
     end
 
     def massive_students
@@ -88,21 +92,6 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     def user_from_member_json(member_json)
       User.whitelist_attributes member_json
-    end
-
-    def to_member_basic_hash(member = {})
-      member.as_json.merge uid: (member[:uid] || member[:email])&.downcase,
-                           email: member[:email]&.downcase,
-                           last_name: member[:last_name]&.downcase&.titleize,
-                           first_name: member[:first_name]&.downcase&.titleize
-    end
-
-    def to_student_basic_hash(student)
-      Mumuki::Classroom::Student.whitelist_attributes to_member_basic_hash student
-    end
-
-    def to_teacher_basic_hash(teacher)
-      Mumuki::Classroom::Teacher.whitelist_attributes to_member_basic_hash teacher
     end
 
     def upsert_user!(role, member)
@@ -146,7 +135,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       col = "Mumuki::Classroom::#{role.to_s.titleize}".constantize
       existing_members = col.where(with_organization_and_course)
                            .in(uid: massive_members.map { |it| it[:uid] })
-                           .map { |it| send "to_#{role}_basic_hash", it }
+                           .map { |it| col.normalized_attributes_from_json(it) }
       existing_members_uids = existing_members.map { |it| it[:uid] }
       processed_members = massive_members.reject { |it| existing_members_uids.include? it[:uid] }
       col.collection.insert_many(processed_members.map { |member| with_organization_and_course member })

@@ -93,9 +93,9 @@ class Mumuki::Classroom::App < Sinatra::Application
       ensure_course_existence!
       ensure_student_not_exists!
 
-      json = {student: to_student_basic_hash(json_body)}
-      uid = json[:student][:uid]
-      student = Mumuki::Classroom::Student.create!(with_organization_and_course json[:student])
+      student_json = Mumuki::Classroom::Student.normalized_attributes_from_json(json_body)
+      uid = student_json[:uid]
+      student = Mumuki::Classroom::Student.create!(with_organization_and_course student_json)
 
       user = User.where(uid: uid).first_or_create!(student.as_user)
       user.add_permission! :student, course_slug

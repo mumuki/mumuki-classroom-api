@@ -8,9 +8,10 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses/:course/teachers' do
       authorize! :headmaster
       ensure_teacher_not_exists!
-      json = with_organization_and_course teacher: json_body.merge(uid: json_body[:email])
-      Mumuki::Classroom::Teacher.create! with_organization_and_course(to_teacher_basic_hash json[:teacher])
-      upsert_user! :teacher, json[:teacher]
+      teacher_json = Mumuki::Classroom::Teacher.normalized_attributes_from_json json_body
+
+      Mumuki::Classroom::Teacher.create! with_organization_and_course(teacher_json)
+      upsert_user! :teacher, teacher_json
     end
   end
 end
