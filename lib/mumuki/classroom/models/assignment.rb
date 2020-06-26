@@ -105,11 +105,15 @@ class Mumuki::Classroom::Assignment < Mumuki::Classroom::Document
     def items_to_review(query, exercises)
       passed_exercises_ids = where(query)
                                .map { |assignment| [assignment.exercise.eid, assignment.submissions.max_by(&:created_at)] }
-                               .map { |eid, submission| eid if submission.status.passed? }
+                               .map { |eid, submission| eid if solved?(submission.status) }
       exercises.reject { |exercise| passed_exercises_ids.include? exercise[:id] }
         .pluck(:tag_list, :language)
         .flatten
         .uniq
+    end
+
+    def solved?(status)
+      status.passed? || status.skipped?
     end
 
     def stats_by(query)
