@@ -283,7 +283,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
     end
 
     describe 'post /courses/:course/students' do
-      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo'} }
+      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
       let(:student_json) { student.to_json }
 
       context 'when course exists' do
@@ -309,7 +309,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
               it { expect(last_response).to be_ok }
               it { expect(last_response.body).to json_eq status: 'created' }
               it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
-              it { expect(User.locate!(student[:uid])).to json_like student, only: student.keys }
+              it { expect(User.find_by(uid: student[:email])).to json_like student, only: student.keys }
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
