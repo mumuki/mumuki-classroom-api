@@ -129,19 +129,34 @@ class Mumuki::Classroom::App < Sinatra::Application
       end
     end
 
+    def members_for(role)
+      send role.to_s.pluralize
+    end
+
+    def massive_members_for(role)
+      send "massive_#{role.to_s.pluralize}"
+    end
+
+    def unprocessed_members_for(role)
+      members_for(role) - massive_members_for(role)
+    end
+
     def create_members!(role, &block)
-      all_members = send role.to_s.pluralize
-      massive_members = send "massive_#{role.to_s.pluralize}"
-      col = "Mumuki::Classroom::#{role.to_s.titleize}".constantize
-      existing_members = col.where(with_organization_and_course)
-                           .in(uid: massive_members.map { |it| it[:uid] })
-                           .map { |it| col.normalized_attributes_from_json(it) }
+      members_collection = collection_for role
+      massive_members = massive_members_for role
+      existing_members = existing_members_in_course(members_collection, massive_members)
       existing_members_uids = existing_members.map { |it| it[:uid] }
       processed_members = massive_members.reject { |it| existing_members_uids.include? it[:uid] }
-      col.collection.insert_many(processed_members.map { |member| with_organization_and_course member })
+      members_collection.collection.insert_many(processed_members.map { |member| with_organization_and_course member })
       upsert_users! role, processed_members, &block
-      massive_response(processed_members, (all_members - massive_members), existing_members,
+      massive_response(processed_members, unprocessed_members_for(role), existing_members,
                        "#{role.to_s.pluralize.titleize} already belong to current course", status: :created)
+    end
+
+    def existing_members_in_course(col, massive_members)
+      col.where(with_organization_and_course)
+        .in(uid: massive_members.map { |it| it[:uid] })
+        .map { |it| col.normalized_attributes_from_json(it) }
     end
 
     def update_students!
