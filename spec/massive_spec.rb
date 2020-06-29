@@ -148,6 +148,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(teachers_from(course, teachers_uids).count).to eq 10 }
           it { expect(teachers_users_count_from course, teachers_uids).to eq 10 }
           it { expect(teachers_users_count_from course2, teachers_uids).to eq 0 }
+          it { expect(teachers_from(course, teachers_uids).first.created_at).to be_an ActiveSupport::TimeWithZone }
+          it { expect(teachers_from(course, teachers_uids).first.updated_at).to be_an ActiveSupport::TimeWithZone }
           it_behaves_like 'with verified names for users'
         end
 
@@ -164,6 +166,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(teachers_from(course, teachers_uids).count).to eq 10 }
           it { expect(teachers_users_count_from course, teachers_uids).to eq 10 }
           it { expect(teachers_users_count_from course2, teachers_uids).to eq 5 }
+          it { expect(teachers_from(course, teachers_uids).first.created_at).to be_an ActiveSupport::TimeWithZone }
+          it { expect(teachers_from(course, teachers_uids).first.updated_at).to be_an ActiveSupport::TimeWithZone }
           it_behaves_like 'with verified names for users'
         end
 
@@ -181,6 +185,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(teachers_from(course, teachers_uids).count).to eq 10 }
           it { expect(teachers_users_count_from course, teachers_uids).to eq 10 }
           it { expect(teachers_users_count_from course2, teachers_uids).to eq 0 }
+          it { expect(teachers_from(course, teachers_uids).first.created_at).to be_an ActiveSupport::TimeWithZone }
+          it { expect(teachers_from(course, teachers_uids).first.updated_at).to be_an ActiveSupport::TimeWithZone }
           it_behaves_like 'with verified names for users'
         end
       end
@@ -238,6 +244,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(students_from(course, students_uids).count).to eq 10 }
           it { expect(students_users_count_from course, students_uids).to eq 10 }
           it { expect(students_users_count_from course2, students_uids).to eq 0 }
+          it { expect(students_from(course, students_uids).first.created_at).to be_an ActiveSupport::TimeWithZone }
+          it { expect(students_from(course, students_uids).first.updated_at).to be_an ActiveSupport::TimeWithZone }
           it_behaves_like 'with verified names for users'
         end
 
@@ -255,6 +263,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(students_from(course, students_uids).count).to eq 10 }
           it { expect(students_users_count_from course, students_uids).to eq 10 }
           it { expect(students_users_count_from course2, students_uids).to eq 5 }
+          it { expect(students_from(course, students_uids).first.created_at).to be_an ActiveSupport::TimeWithZone }
+          it { expect(students_from(course, students_uids).first.updated_at).to be_an ActiveSupport::TimeWithZone }
           it_behaves_like 'with verified names for users'
         end
 
@@ -273,6 +283,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it { expect(students_from(course, students_uids).count).to eq 10 }
           it { expect(students_users_count_from course, students_uids).to eq 10 }
           it { expect(students_users_count_from course2, students_uids).to eq 0 }
+          it { expect(students_from(course, students_uids).first.created_at).to be_an ActiveSupport::TimeWithZone }
+          it { expect(students_from(course, students_uids).first.updated_at).to be_an ActiveSupport::TimeWithZone }
           it_behaves_like 'with verified names for users'
         end
       end

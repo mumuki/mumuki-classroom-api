@@ -28,6 +28,7 @@ require_relative './events'
 require_relative './classroom/models'
 require_relative './classroom/reports'
 
+require_relative './classroom/collection'
 require_relative './classroom/event'
 require_relative './classroom/permissions_diff'
 
