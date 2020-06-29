@@ -432,7 +432,7 @@ describe Student do
 
     describe 'post api/courses/massive/:course/students' do
       let(:students) do
-        (1.. 120).map do |it|
+        (1..120).map do |it|
           {first_name: "first_name_#{it}", last_name: "last_name_#{it}", email: "email_#{it}@fake.com"}
         end
       end
@@ -454,6 +454,7 @@ describe Student do
                                                        {only: [:status, :processed_count]}) }
             it { expect(Student.in(uid: students_uids).count).to eq 100 }
             it { expect(Student.in(uid: students_uids).last.created_at).to_not be nil }
+            it { expect(Student.in(uid: students_uids).last.updated_at).to_not be nil }
           end
 
           context 'and some users do exist' do
