@@ -108,12 +108,20 @@ class Mumuki::Classroom::App < Sinatra::Application
       Course.locate! course_slug
     end
 
-    def ensure_student_not_exists!
-      Mumuki::Classroom::Student.ensure_not_exists! with_organization_and_course uid: json_body[:email]
+    def ensure_member_not_exists!(member_json, member_collection)
+      member_collection.ensure_not_exists! with_organization_and_course uid: member_json[:uid]
     end
 
-    def ensure_teacher_not_exists!
-      Mumuki::Classroom::Teacher.ensure_not_exists! with_organization_and_course uid: json_body[:email]
+    def create_course_member!(role)
+      member_collection = "Mumuki::Classroom::#{role.to_s.titleize}".constantize
+
+      member_json = member_collection.normalized_attributes_from_json(json_body)
+      ensure_member_not_exists! member_json, member_collection
+      member = member_collection.create!(with_organization_and_course member_json)
+
+      upsert_user! role, member.as_user
+
+      member_json
     end
 
     def set_locale!

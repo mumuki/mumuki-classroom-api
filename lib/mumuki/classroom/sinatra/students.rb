@@ -91,15 +91,10 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses/:course/students' do
       authorize! :janitor
       ensure_course_existence!
-      ensure_student_not_exists!
 
-      student_json = Mumuki::Classroom::Student.normalized_attributes_from_json(json_body)
-      uid = student_json[:uid]
-      student = Mumuki::Classroom::Student.create!(with_organization_and_course student_json)
+      student_json = create_course_member! :student
 
-      upsert_user! :student, student.as_user
-
-      Mumukit::Nuntius.notify! 'resubmissions', uid: uid, tenant: tenant
+      Mumukit::Nuntius.notify! 'resubmissions', uid: student_json[:uid], tenant: tenant
 
       {status: :created}
     end
