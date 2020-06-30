@@ -21,7 +21,7 @@ describe Exam do
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}, results_hidden_for_choices: true}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example.org', course: 'example.org/foo' }
 
-    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
+    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'course' => 'example.org/foo', 'eid' => kind_of(String))) }
     before { header 'Authorization', build_auth_header('*') }
     before { post '/courses/foo/exams', exam_json.to_json }
 
@@ -37,7 +37,7 @@ describe Exam do
     let(:exam_json) { {slug: 'foo/bar', start_time: 'tomorrow', end_time: 'tomorrow', duration: 150, language: 'haskell', name: 'foo', uids: [], passing_criterion: {type: 'none'}, results_hidden_for_choices: false}.as_json }
     let(:exam_fetched) { Exam.find_by organization: 'example.org', course: 'example.org/foo' }
 
-    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'eid' => kind_of(String))) }
+    before { expect(Mumukit::Nuntius).to receive(:notify_event!).with('UpsertExam', exam_json.merge('organization' => 'example.org', 'course' => 'example.org/foo', 'eid' => kind_of(String))) }
     before { header 'Authorization', build_mumuki_auth_header('*') }
     before { post '/api/courses/foo/exams', exam_json.to_json }
 

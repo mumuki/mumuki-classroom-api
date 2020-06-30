@@ -42,7 +42,7 @@ class Exam
   private
 
   def json_to_notify
-    as_json(except: [:social_ids, :course, :created_at, :updated_at, :id, :_id])
+    as_json(except: [:social_ids, :created_at, :updated_at, :id, :_id])
   end
 
   def passing_criterion_is_ok
