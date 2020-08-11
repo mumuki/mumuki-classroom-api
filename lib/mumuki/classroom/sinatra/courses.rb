@@ -1,7 +1,7 @@
 class Mumuki::Classroom::App < Sinatra::Application
   helpers do
-    def allowed_courses(permissions)
-      {courses: Course.allowed(current_organization, permissions).as_json}
+    def allowed_courses
+      {courses: Course.allowed_for(current_user).as_json}
     end
 
     def guide_progress_query
@@ -86,11 +86,11 @@ class Mumuki::Classroom::App < Sinatra::Application
 
   Mumukit::Platform.map_organization_routes!(self) do
     get '/courses' do
-      allowed_courses permissions
+      allowed_courses
     end
 
     get '/api/courses' do
-      allowed_courses permissions
+      allowed_courses
     end
 
     post '/courses' do
