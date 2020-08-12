@@ -23,7 +23,6 @@ require 'mumukit/inspection'
 I18n.load_translations_path File.join(__dir__, 'config', 'locales', '*.yml')
 
 require_relative './profile'
-require_relative './events'
 
 require_relative './classroom/models'
 require_relative './classroom/reports'
