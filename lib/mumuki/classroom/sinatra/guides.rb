@@ -23,9 +23,9 @@ class Mumuki::Classroom::App < Sinatra::Application
       ensure_organization_exists!
       ensure_course_exists!
       {
-        chapters: chapter_needed_fields(current_organization.book.chapters),
-        complements: guide_container_needed_fields(current_organization.book.complements),
-        exams: guide_container_needed_fields(current_organization.exams.where(course: current_course))
+        chapters: chapter_needed_fields(current_organization.book.chapters.includes(topic: {lessons: {guide: :language}})),
+        complements: guide_container_needed_fields(current_organization.book.complements.includes(guide: :language)),
+        exams: guide_container_needed_fields(current_organization.exams.where(course: current_course).includes(guide: :language))
       }
     end
 
