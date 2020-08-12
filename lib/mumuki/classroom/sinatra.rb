@@ -93,7 +93,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def course_slug
-      @course_slug ||= Mumukit::Auth::Slug.join_s(tenant, course)
+      @course_slug ||= Mumukit::Auth::Slug.join_s(*route_slug_parts)
     end
 
     def repo_slug
