@@ -249,6 +249,16 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it_behaves_like 'with verified names for users'
         end
 
+        context 'when students and users does not exist' do
+          let(:students) { [1,1,2,2,3,3,4,4,5,5,6,6].map { |it| to_member_request_hash it } }
+
+          before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(5).times }
+          before { post '/api/courses/foo/massive/students', students_json }
+
+          it { expect(last_response).to be_ok }
+          it { expect(response.status).to eq 'created' }
+        end
+
         context "when students don't exist in course but some of them already exist as users" do
           before { create_students_in course2, students_uids.take(5) }
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(10).times }
