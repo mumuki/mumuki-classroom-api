@@ -20,7 +20,7 @@ require 'mumukit/login'
 require 'mumukit/nuntius'
 require 'mumukit/inspection'
 
-I18n.load_translations_path File.join(__dir__, 'config', 'locales', '*.yml')
+I18n.load_translations_path File.join(__dir__, 'classroom', 'locales', '*.yml')
 
 require_relative './profile'
 
