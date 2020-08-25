@@ -18,13 +18,21 @@ class Mumuki::Classroom::App < Sinatra::Application
       exam_from_classroom_json with_current_organization_and_course(json_body)
     end
 
+    def exam_as_json_response(exam)
+      exam.as_json
+          .merge(eid: exam.classroom_id, name: exam.guide.name, language: exam.guide.language.name,
+                 slug: exam.guide.slug, uids: exam.users.map(&:uid), course: exam.course.slug,
+                 organization: exam.organization.name, passing_criterion: exam.passing_criterion.as_json)
+          .except(:classroom_id, :guide_id, :course_id, :organization_id,
+                  :passing_criterion_type, :passing_criterion_value)
+    end
   end
 
   Mumukit::Platform.map_organization_routes!(self) do
     get '/courses/:course/exams/:exam_id' do
       authorize! :teacher
       exam = Exam.find_by!(exam_query)
-      exam.as_classroom_json
+      exam_as_json_response exam
     end
 
     put '/courses/:course/exams/:exam_id' do
@@ -37,7 +45,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     ['/api', ''].each do |route_prefix|
       get "#{route_prefix}/courses/:course/exams" do
         authorize! :teacher
-        {exams: Exam.where(with_current_organization_and_course).map(&:as_classroom_json)}
+        {exams: Exam.where(with_current_organization_and_course).map { |it| exam_as_json_response(it) }}
       end
 
       post "#{route_prefix}/courses/:course/exams" do
