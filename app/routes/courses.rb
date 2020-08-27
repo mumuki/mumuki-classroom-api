@@ -100,7 +100,7 @@ Mumukit::Platform.map_organization_routes!(self) do
   end
 
   post '/courses/:course/invitation' do
-    authorize! :teacher
+    authorize! :janitor
     course = Course.find_by! with_organization slug: course_slug
     {invitation: course.invitation_link!(json_body[:expiration_date])}
   end
