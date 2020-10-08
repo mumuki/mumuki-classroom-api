@@ -16,9 +16,13 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
   end
 
   def destroy_cascade!
+    destroy_progress!
+    destroy!
+  end
+
+  def destroy_progress!
     Mumuki::Classroom::GuideProgress.destroy_all_by!(sub_student_query uid)
     Mumuki::Classroom::Assignment.destroy_all_by!(sub_student_query uid)
-    destroy!
   end
 
   def update_all_stats

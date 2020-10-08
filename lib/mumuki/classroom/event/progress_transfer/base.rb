@@ -9,6 +9,7 @@ class Mumuki::Classroom::Event::ProgressTransfer::Base
   def execute!
     raise ActiveRecord::RecordNotFound, "Mumuki::Classroom::Student not found" unless old_student && new_student
 
+    new_student.destroy_progress!
     destination_organization.switch!
 
     indicator.assignments.each do |assignment|
