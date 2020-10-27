@@ -14,6 +14,8 @@ require 'mumuki/domain/factories'
 require_relative '../lib/mumuki/classroom'
 require_relative './spec_workspace'
 
+require_relative 'factories/student_factory'
+
 ActiveRecord::Migration.maintain_test_schema!
 
 Mongo::Logger.logger.level = ::Logger::INFO
