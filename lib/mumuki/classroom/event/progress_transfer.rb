@@ -10,15 +10,11 @@ class Mumuki::Classroom::Event::ProgressTransfer
   end
 
   def source_organization
-    Organization.find body[:from]
-  end
-
-  def item_class
-    body[:item_type].constantize
+    Organization.locate! body[:from]
   end
 
   def progress_item
-    item_class.find(body[:item_id])
+    Indicator.find(body[:item_id])
   end
 
   def transfer_type
