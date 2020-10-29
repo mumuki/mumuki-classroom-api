@@ -15,7 +15,7 @@ class Mumuki::Classroom::Event::ProgressTransfer::Base
 
     indicator.assignments.each do |assignment|
       # TODO what if classroom_assignment does not exist?
-      transfer_sibling_for(assignment).update! organization: destination_organization.name,
+      transfer_sibling_for(assignment)&.update! organization: destination_organization.name,
                                                 course: new_course,
                                                 guide: guide_h
     end
