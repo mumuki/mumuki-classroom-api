@@ -21,8 +21,16 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
   end
 
   def destroy_progress!
-    Mumuki::Classroom::GuideProgress.destroy_all_by!(sub_student_query uid)
-    Mumuki::Classroom::Assignment.destroy_all_by!(sub_student_query uid)
+    destroy_progress_for_query!(sub_student_query uid)
+  end
+
+  def destroy_progress_for_guide!(guide)
+    destroy_progress_for_query!(sub_student_query(uid).merge 'guide.slug': guide.slug)
+  end
+
+  def destroy_progress_for_query!(query)
+    Mumuki::Classroom::GuideProgress.destroy_all_by!(query)
+    Mumuki::Classroom::Assignment.destroy_all_by!(query)
   end
 
   def update_all_stats
