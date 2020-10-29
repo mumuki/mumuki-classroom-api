@@ -6,11 +6,15 @@ class Mumuki::Classroom::Event::ProgressTransfer
   end
 
   def execute!
-    transfer_type.new(progress_item, source_organization).execute!
+    transfer_type.new(progress_item, source_organization, destination_organization).execute!
   end
 
   def source_organization
     Organization.locate! body[:from]
+  end
+
+  def destination_organization
+    Organization.locate! body[:to]
   end
 
   def progress_item

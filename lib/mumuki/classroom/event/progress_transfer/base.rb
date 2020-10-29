@@ -1,9 +1,10 @@
 class Mumuki::Classroom::Event::ProgressTransfer::Base
   attr_reader :indicator, :source_organization
 
-  def initialize(indicator, source_organization)
+  def initialize(indicator, source_organization, destination_organization)
     @indicator = indicator
     @source_organization = source_organization
+    @destination_organization = destination_organization
   end
 
   def execute!
@@ -32,7 +33,7 @@ class Mumuki::Classroom::Event::ProgressTransfer::Base
   end
 
   def destination_organization
-    @destination_organization ||= indicator.organization
+    @destination_organization
   end
 
   def transfer_guide_progress!
