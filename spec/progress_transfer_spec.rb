@@ -36,7 +36,7 @@ describe Mumuki::Classroom::Event::ProgressTransfer do
   end
 
   def event_for(source_organization, transfer_type)
-    { from: source_organization.name, transfer_type: transfer_type }
+    { from: source_organization.name, to: destination_organization.name, transfer_type: transfer_type }
   end
 
   before do
