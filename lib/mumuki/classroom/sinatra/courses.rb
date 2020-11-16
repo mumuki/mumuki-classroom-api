@@ -106,7 +106,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     post '/courses/:course/invitation' do
-      authorize! :teacher
+      authorize! :janitor
       course = Course.locate! course_slug
       {invitation: course.invite!(json_body[:expiration_date])}
     end
