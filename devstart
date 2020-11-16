@@ -19,8 +19,6 @@ then
   mongod 2>&1 > /dev/null &
 fi
 
-mongo < seed-central.js
-
 echo "[MumukiDevstart::Classroom] Starting server...."
 MUMUKI_DEV_IP=${1:-localhost}
 MUMUKI_PLATFORM_DOMAIN=$MUMUKI_DEV_IP:3002 \
