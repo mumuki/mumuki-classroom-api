@@ -12,27 +12,27 @@ describe Course, workspaces: [:organization] do
     guide: {slug: 'example.org/foo'},
     student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
     stats: {passed: 2, passed_with_warnings: 2, failed: 0},
-    last_assignment: {exercise: {eid: 2}, submission: {status: :passed}}
+    last_assignment: {exercise: {eid: 2}, submission: {status: :passed, created_at: '2019-03-03T18:39:57.000Z'}}
   } }
 
   let(:guide_progress2) { {
     guide: {slug: 'example.org/foo'},
     student: {uid: 'john@gmail.com', first_name: 'john', last_name: 'doe', email: 'john@gmail.com'},
     stats: {passed: 2, passed_with_warnings: 0, failed: 1},
-    last_assignment: {exercise: {eid: 1}, submission: {status: :failure}}
+    last_assignment: {exercise: {eid: 1}, submission: {status: :failure, created_at: '2019-03-03T18:39:57.000Z'}}
   } }
 
   let(:guide_progress3) { {
     guide: {slug: 'example.org/bar'},
     student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
     stats: {passed: 0, passed_with_warnings: 1, failed: 0},
-    last_assignment: {exercise: {eid: 1}, submission: {status: :passed_with_warnings}}
+    last_assignment: {exercise: {eid: 1}, submission: {status: :passed_with_warnings, created_at: '2019-03-03T18:39:57.000Z'}}
   } }
 
   let(:assignment1) { {
     guide: {slug: 'example.org/foo'},
     student: {uid: 'agus@mumuki.org', first_name: 'foo', last_name: 'bar', email: 'agus@mumuki.org'},
-    submissions: [{status: 'passed'}],
+    submissions: [{status: 'passed', created_at: '2019-03-03T18:39:57.000Z'}],
     exercise: {eid: 1}
   } }
 
@@ -76,10 +76,10 @@ describe Course, workspaces: [:organization] do
       it { expect(last_response).to be_ok }
       it do
         expect(last_response.body).to eq <<TEST
-last_name,first_name,email,detached,guide_slug,passed_count,passed_with_warnings_count,failed_count
-bar,foo,agus@mumuki.org,false,example.org/foo,2,2,0
-bar,foo,agus@mumuki.org,false,example.org/bar,0,1,0
-doe,john,john@gmail.com,false,example.org/foo,2,0,1
+last_name,first_name,email,last_submission,detached,guide_slug,passed_count,passed_with_warnings_count,failed_count
+bar,foo,agus@mumuki.org,2019-03-03T18:39:57.000Z,false,example.org/foo,2,2,0
+bar,foo,agus@mumuki.org,2019-03-03T18:39:57.000Z,false,example.org/bar,0,1,0
+doe,john,john@gmail.com,2019-03-03T18:39:57.000Z,false,example.org/foo,2,0,1
 TEST
       end
     end
