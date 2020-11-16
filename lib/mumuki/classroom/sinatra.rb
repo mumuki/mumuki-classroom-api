@@ -51,8 +51,6 @@ class Mumuki::Classroom::App < Sinatra::Application
     def slug
       if route_slug_parts.present?
         Mumukit::Auth::Slug.join(*route_slug_parts)
-      elsif subject
-        Mumukit::Auth::Slug.parse(subject.slug)
       elsif json_body
         Mumukit::Auth::Slug.parse(json_body['slug'])
       else
