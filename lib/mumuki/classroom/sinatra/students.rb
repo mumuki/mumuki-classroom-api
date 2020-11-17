@@ -1,9 +1,5 @@
 class Mumuki::Classroom::App < Sinatra::Application
   helpers do
-    def students_query
-      with_detached_and_search with_organization_and_course, Mumuki::Classroom::Student
-    end
-
     def normalize_student!
       json_body[:email] = json_body[:email]&.downcase
       json_body[:last_name] = json_body[:last_name]&.downcase&.titleize
