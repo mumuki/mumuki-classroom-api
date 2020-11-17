@@ -27,7 +27,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'mumukit-login', '~> 7.0'
   s.add_dependency 'mumukit-nuntius', '~> 6.2'
   s.add_dependency 'mumukit-inspection', '~> 5.0'
-  s.add_dependency 'mumukit-service', '~> 3.0.2'
 
   s.add_dependency 'mongoid', '~> 7.0'
   s.add_dependency 'bson_ext', '1.5.1'
