@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200605161350) do
+ActiveRecord::Schema.define(version: 20201027152806) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -44,6 +44,8 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.bigint "organization_id"
     t.datetime "submitted_at"
     t.bigint "parent_id"
+    t.integer "top_submission_status"
+    t.boolean "misplaced"
     t.index ["exercise_id"], name: "index_assignments_on_exercise_id"
     t.index ["organization_id"], name: "index_assignments_on_organization_id"
     t.index ["parent_id"], name: "index_assignments_on_parent_id"
@@ -54,6 +56,7 @@ ActiveRecord::Schema.define(version: 20200605161350) do
   create_table "avatars", force: :cascade do |t|
     t.string "image_url"
     t.string "description"
+    t.integer "target_audience", default: 0
   end
 
   create_table "books", id: :serial, force: :cascade do |t|
@@ -64,6 +67,7 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.text "description"
     t.string "slug"
     t.boolean "private", default: false
+    t.bigint "medal_id"
     t.index ["slug"], name: "index_books_on_slug", unique: true
   end
 
@@ -117,9 +121,17 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.text "manual_evaluation_comment"
     t.integer "upvotes_count", default: 0
     t.bigint "organization_id"
+    t.integer "messages_count", default: 0
+    t.integer "validated_messages_count", default: 0
+    t.boolean "requires_moderator_response", default: true
+    t.string "last_moderator_access_by_id"
+    t.datetime "last_moderator_access_at"
+    t.bigint "status_updated_by_id"
+    t.datetime "status_updated_at"
     t.index ["initiator_id"], name: "index_discussions_on_initiator_id"
     t.index ["item_type", "item_id"], name: "index_discussions_on_item_type_and_item_id"
     t.index ["organization_id"], name: "index_discussions_on_organization_id"
+    t.index ["status_updated_by_id"], name: "index_discussions_on_status_updated_by_id"
   end
 
   create_table "exam_authorizations", force: :cascade do |t|
@@ -144,7 +156,7 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.integer "max_choice_submissions"
     t.boolean "results_hidden_for_choices", default: false
     t.bigint "course_id"
-    t.integer "passing_criterion_type"
+    t.integer "passing_criterion_type", default: 0
     t.integer "passing_criterion_value"
     t.index ["classroom_id"], name: "index_exams_on_classroom_id", unique: true
     t.index ["course_id"], name: "index_exams_on_course_id"
@@ -211,6 +223,7 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.text "learn_more"
     t.text "settings"
     t.text "custom_expectations"
+    t.bigint "medal_id"
     t.index ["name"], name: "index_guides_on_name"
     t.index ["slug"], name: "index_guides_on_slug", unique: true
   end
@@ -227,6 +240,7 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.boolean "dirty_by_submission", default: false
     t.integer "children_passed_count"
     t.integer "children_count"
+    t.boolean "once_completed"
     t.index ["content_type", "content_id"], name: "index_indicators_on_content_type_and_content_id"
     t.index ["organization_id"], name: "index_indicators_on_organization_id"
     t.index ["parent_id"], name: "index_indicators_on_parent_id"
@@ -282,6 +296,11 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.integer "topic_id"
   end
 
+  create_table "medals", force: :cascade do |t|
+    t.string "image_url"
+    t.string "description"
+  end
+
   create_table "messages", id: :serial, force: :cascade do |t|
     t.string "submission_id"
     t.text "content"
@@ -292,6 +311,7 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.boolean "read", default: false
     t.integer "discussion_id"
     t.boolean "approved", default: false
+    t.boolean "not_actually_a_question", default: false
   end
 
   create_table "organizations", id: :serial, force: :cascade do |t|
@@ -302,6 +322,13 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.text "settings", default: "{}", null: false
     t.text "theme", default: "{}", null: false
     t.text "profile", default: "{}", null: false
+    t.integer "progressive_display_lookahead"
+    t.integer "target_audience", default: 0
+    t.boolean "incognito_mode_enabled"
+    t.text "display_name"
+    t.text "display_description"
+    t.boolean "wins_page"
+    t.boolean "immersible"
     t.index ["book_id"], name: "index_organizations_on_book_id"
     t.index ["name"], name: "index_organizations_on_name", unique: true
   end
@@ -323,6 +350,15 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
+  create_table "terms", force: :cascade do |t|
+    t.string "locale"
+    t.string "scope"
+    t.text "content"
+    t.text "header"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "topics", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "locale"
@@ -332,6 +368,7 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.text "appendix"
     t.string "slug"
     t.boolean "private", default: false
+    t.bigint "medal_id"
     t.index ["slug"], name: "index_topics_on_slug", unique: true
   end
 
@@ -356,6 +393,14 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.index ["parent_item_type", "parent_item_id"], name: "index_usages_on_parent_item_type_and_parent_item_id"
   end
 
+  create_table "user_stats", force: :cascade do |t|
+    t.integer "exp", default: 0
+    t.bigint "user_id"
+    t.bigint "organization_id"
+    t.index ["organization_id"], name: "index_user_stats_on_organization_id"
+    t.index ["user_id"], name: "index_user_stats_on_user_id"
+  end
+
   create_table "users", id: :serial, force: :cascade do |t|
     t.string "provider"
     t.string "social_id"
@@ -378,6 +423,17 @@ ActiveRecord::Schema.define(version: 20200605161350) do
     t.string "verified_last_name"
     t.bigint "avatar_id"
     t.datetime "disabled_at"
+    t.boolean "trusted_for_forum"
+    t.string "avatar_type", default: "Avatar"
+    t.datetime "headmaster_terms_accepted_at"
+    t.datetime "janitor_terms_accepted_at"
+    t.datetime "moderator_terms_accepted_at"
+    t.datetime "student_terms_accepted_at"
+    t.datetime "teacher_terms_accepted_at"
+    t.datetime "privacy_terms_accepted_at"
+    t.datetime "legal_terms_accepted_at"
+    t.datetime "forum_terms_accepted_at"
+    t.index ["avatar_type", "avatar_id"], name: "index_users_on_avatar_type_and_avatar_id"
     t.index ["disabled_at"], name: "index_users_on_disabled_at"
     t.index ["last_organization_id"], name: "index_users_on_last_organization_id"
     t.index ["uid"], name: "index_users_on_uid", unique: true
@@ -385,7 +441,6 @@ ActiveRecord::Schema.define(version: 20200605161350) do
 
   add_foreign_key "chapters", "topics"
   add_foreign_key "complements", "guides"
-  add_foreign_key "exams", "courses"
   add_foreign_key "exams", "guides"
   add_foreign_key "lessons", "guides"
   add_foreign_key "organizations", "books"
