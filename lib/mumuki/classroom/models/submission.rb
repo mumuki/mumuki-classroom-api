@@ -34,7 +34,7 @@ class Mumuki::Classroom::Submission < Mumuki::Classroom::Document
 
   def expectation_results
     self[:expectation_results]&.map do |expectation|
-      {html: Mulang::Expectation.parse(expectation).translate, result: expectation['result']}
+      {html: Mulang::Expectation.parse(expectation).translate, result: expectation['result']} # TODO translate with keywords
     end
   end
 
