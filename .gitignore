@@ -5,7 +5,7 @@ spec/dummy/db/*.sqlite3
 spec/dummy/db/*.sqlite3-journal
 spec/dummy/log/*.log
 spec/dummy/tmp/
-**/nuntius.log
+nuntius.log
 coverage/**
 .byebug_history
 Gemfile.lock
