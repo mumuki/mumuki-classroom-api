@@ -25,8 +25,7 @@ module CourseMember
   class_methods do
     def ensure_not_exists!(query)
       existing_members = where(query)
-      return unless existing_members.exists?
-      raise Mumuki::Classroom::CourseMemberExistsError, {existing_members: existing_members.map(&:uid)}.to_json
+      raise Mumuki::Classroom::CourseMemberExistsError, {existing_members: existing_members.map(&:uid)}.to_json if existing_members.exists?
     end
 
     def attributes_from_uid(uid)
