@@ -42,7 +42,7 @@ module Searching
 
   def self.filter_class_for(criteria, collection)
     if criteria.present?
-      "#{self}::#{collection.name.demodulize}::#{criteria.camelize}".safe_constantize
+      "#{self}::#{collection.model_name}::#{criteria.camelize}".safe_constantize
     end
   end
 

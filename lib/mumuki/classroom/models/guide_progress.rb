@@ -1,6 +1,8 @@
 class Mumuki::Classroom::GuideProgress < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
+  demodulized_model_name
+
   field :organization, type: String
   field :course, type: Mumukit::Auth::Slug
   field :stats, type: Hash
