@@ -15,3 +15,12 @@ script:
 - bundle exec rake db:schema:load
 - bundle exec rake
 env: RACK_ENV=test
+deploy:
+  provider: rubygems
+  api_key:
+    secure: KcISLUQ1IY/Sb6u4ouFuzEa2U3pKbBbUwekG59XRIzO/51FWMNXy3H2pprwhm00kw8PN9r+ebucJ4dN4rLEs09Z6xk9HuebJV8e7qJHc7C1sa0EBq3oag4UctJv+ZoxQQP8dXjNop9RCRs70w5DQjNe5mGH4yVRPojDcsyQVwrHy6BltAgN2SzabmcFTyrPGaEmTnKNmWlc2xMRLc+B2J5s6DwHfwKs3i4arjtmPJbKYAA3InDooWewTRvOxx2cTpXyDcAoErCb8zriWUx6EP5Y4bVvXrFWYaZepNujtU4WaGtI98JBOUfYBfHV0tHQ22z0xhxOlPn1GhgZpltj28qvKcGJBkSLRo/g/iFxCxMhzR4oVyUm41Fpq7jBc7gcLJa3+FWyNqZ1iTQxCi5YREk+/CgUBpZQ0d0PB3FFhSIeTzKVemvq82Bxf3s5iSe+w+ZcsqIPpVubjhuLc/XKz5uEUBntlrth7v0pLYu898olI2Fin5EqTya51p7PeWnbSU7ICLRb8rbv5KwYpHE3NPIXk33RNa+hctVwbLqyvRoiBUwIJe2Z77BEul+hJDdyNcSUmTS+zsfnqnNVLDh6DCKJ8c6gDZTsmtJYj4CWF0gmUSxGDSu2EuSgfDhhI2/uDQJxKdV4jxJIWh5pj5aLpvbOIUApFGJf7Evufa6ussQs=
+  gem: mumuki-classroom
+  on:
+    tags: true
+    repo: mumuki/mumuki-classroom-api
+  skip_cleanup: 'true'
