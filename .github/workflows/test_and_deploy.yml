@@ -19,6 +19,10 @@ jobs:
           POSTGRES_DB: mumuki_classroom_test
           POSTGRES_USER: mumuki
           POSTGRES_PASSWORD: mumuki
+      mongo:
+        ports:
+        - 27017:27017
+        image: mongo:3.4.10
     steps:
     - uses: actions/checkout@v2
     - name: Set up Ruby
