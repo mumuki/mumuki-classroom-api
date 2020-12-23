@@ -16,6 +16,8 @@ describe Mumuki::Classroom::Event::ProgressTransfer do
   let!(:source_student) { create(:student, organization: source_organization.name, uid: user.uid) }
   let!(:destination_student) { create(:student, organization: destination_organization.name, uid: user.uid) }
 
+  before { stub_runner! status: :failed  }
+
   def submit_solution!(exercise, user, content, status)
     assignment = exercise.submit_solution!(user, { content: content }).tap { |it| it.update! status: status }
     Mumuki::Classroom::Submission.process! assignment.to_resource_h
