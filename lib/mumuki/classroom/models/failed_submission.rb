@@ -4,7 +4,7 @@ class Mumuki::Classroom::FailedSubmission < Mumuki::Classroom::Document
 
   include Mongoid::Attributes::Dynamic
 
-  field :created_at, type: Time
+  include Mongoid::Timestamps::Created
 
   create_index 'organization': 1, 'submitter.uid': 1
   create_index({'guide.slug': 1, 'exercise.eid': 1}, {name: 'ExBibIdIndex'})
