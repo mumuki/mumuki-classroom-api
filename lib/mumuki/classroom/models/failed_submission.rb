@@ -13,4 +13,7 @@ class Mumuki::Classroom::FailedSubmission < Mumuki::Classroom::Document
   scope :find_by_uid, -> (uid) { where 'submitter.uid': uid }
 
 
+  def as_assignment_submission
+    as_json(only: %i(sid status result content feedback created_at test_results submissions_count expectation_results origin_ip)).compact
+  end
 end

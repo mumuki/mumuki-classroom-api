@@ -22,7 +22,7 @@ module WithSubmissionProcess
   end
 
   def find_student_from(json)
-    Mumuki::Classroom::Student.find_by(organization: organization(json), course: course_slug(json), uid: uid(json)).as_json
+    Mumuki::Classroom::Student.find_by(organization: organization(json), course: course_slug(json), uid: uid(json))
   end
 
   def update_student_progress(json)
@@ -99,15 +99,7 @@ module WithSubmissionProcess
   end
 
   def student_from(json)
-    student = json[:student]
-
-    {uid: student[:uid],
-     name: student[:name],
-     email: student[:email],
-     image_url: student[:image_url],
-     social_id: student[:social_id],
-     last_name: student[:last_name],
-     first_name: student[:first_name]}.compact
+    json[:student].as_submission_json
   end
 
   def guide_from(json)
@@ -134,15 +126,6 @@ module WithSubmissionProcess
   end
 
   def submission_from(json)
-    {sid: json[:sid],
-     status: json[:status],
-     result: json[:result],
-     content: json[:content],
-     feedback: json[:feedback],
-     created_at: json[:created_at],
-     test_results: json[:test_results],
-     submissions_count: json[:submissions_count],
-     expectation_results: json[:expectation_results],
-     origin_ip: json[:origin_ip]}.compact
+    Mumuki::Classroom::FailedSubmission.new(json).as_assignment_submission
   end
 end

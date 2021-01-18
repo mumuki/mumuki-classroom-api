@@ -64,6 +64,10 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
     update_attributes!(last_assignment: Mumuki::Classroom::GuideProgress.last_assignment_by(sub_student_query uid))
   end
 
+  def as_submission_json
+    as_json(only: %i(uid name email image_url social_id last_name first_name)).compact
+  end
+
   class << self
     def report(criteria, &block)
       where(criteria).select(&block).as_json(only: [:first_name, :last_name, :email, :created_at, :detached_at])
