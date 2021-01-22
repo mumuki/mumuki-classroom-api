@@ -16,9 +16,21 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
   end
 
   def destroy_cascade!
-    Mumuki::Classroom::GuideProgress.destroy_all_by!(sub_student_query uid)
-    Mumuki::Classroom::Assignment.destroy_all_by!(sub_student_query uid)
+    destroy_progress!
     destroy!
+  end
+
+  def destroy_progress!
+    destroy_progress_for_query!(sub_student_query uid)
+  end
+
+  def destroy_progress_for_guide!(guide)
+    destroy_progress_for_query!(sub_student_query(uid).merge 'guide.slug': guide.slug)
+  end
+
+  def destroy_progress_for_query!(query)
+    Mumuki::Classroom::GuideProgress.destroy_all_by!(query)
+    Mumuki::Classroom::Assignment.destroy_all_by!(query)
   end
 
   def update_all_stats
@@ -50,6 +62,10 @@ class Mumuki::Classroom::Student < Mumuki::Classroom::Document
 
   def update_last_assignment_for
     update_attributes!(last_assignment: Mumuki::Classroom::GuideProgress.last_assignment_by(sub_student_query uid))
+  end
+
+  def as_submission_json
+    as_json(only: %i(uid name email image_url social_id last_name first_name)).compact
   end
 
   class << self

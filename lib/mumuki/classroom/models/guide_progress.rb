@@ -52,6 +52,10 @@ class Mumuki::Classroom::GuideProgress < Mumuki::Classroom::Document
     def uid_field
       'student.uid'.to_sym
     end
+
+    def progresses_for(progress_item, student)
+      where(organization: progress_item.organization, course: student.course, slug: progress_item.content.slug, 'student.uid': student.uid)
+    end
   end
 
 end

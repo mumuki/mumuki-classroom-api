@@ -143,6 +143,9 @@ class Mumuki::Classroom::Assignment < Mumuki::Classroom::Document
       stats[:failed] += stats.delete(:errored) || 0
       stats.slice(*empty_stats.keys)
     end
-  end
 
+    def classroom_sibling_for(assignment, organization)
+      find_by(organization: organization, 'student.uid': assignment.user.uid, 'exercise.eid': assignment.exercise.bibliotheca_id)
+    end
+  end
 end
