@@ -31,7 +31,7 @@ describe Mumuki::Classroom::Assignment do
       student: {name: 'jondoe', email: 'jondoe@gmail.com', uid: 'github|123456'},
       exercise: {eid: 178, name: 'foo'},
       submissions: [{status: :failed, expectation_results: [{binding: 'f', inspection: 'UsesComposition', result: 'failed'}], messages: []}, {status: :passed, messages: []}]} }
-    let(:processed_submissions) { [{status: :failed, expectation_results: [{html: '<strong>f</strong> debe usar composición', result: 'failed'}], messages: []}, {status: :passed, messages: []}] }
+    let(:processed_submissions) { [{status: :failed, expectation_results: [{html: '<code>f</code> debe usar composición', result: 'failed'}], messages: []}, {status: :passed, messages: []}] }
 
 
     before { Mumuki::Classroom::Assignment.create! progress1.merge(organization: 'example.org', course: 'example.org/k2048') }
