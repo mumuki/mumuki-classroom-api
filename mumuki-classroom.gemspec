@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'sinatra-cross_origin', '~> 0.3.1'
   s.add_dependency 'sprockets', '~> 3.7'
 
-  s.add_dependency 'mumuki-domain', '~> 8.5.0'
+  s.add_dependency 'mumuki-domain', '~> 8.6.0'
   s.add_dependency 'mumukit-login', '~> 7.0'
   s.add_dependency 'mumukit-nuntius', '~> 6.5'
   s.add_dependency 'mumukit-inspection', '~> 6.0'
