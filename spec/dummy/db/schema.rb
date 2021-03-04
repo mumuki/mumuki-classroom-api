@@ -71,6 +71,29 @@ ActiveRecord::Schema.define(version: 20210119190204) do
     t.index ["slug"], name: "index_books_on_slug", unique: true
   end
 
+  create_table "certificate_programs", force: :cascade do |t|
+    t.string "title"
+    t.string "template_html_erb"
+    t.text "description"
+    t.string "background_image_url"
+    t.bigint "organization_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_certificate_programs_on_organization_id"
+  end
+
+  create_table "certificates", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "certificate_program_id"
+    t.datetime "start_date"
+    t.datetime "end_date"
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["certificate_program_id"], name: "index_certificates_on_certificate_program_id"
+    t.index ["user_id"], name: "index_certificates_on_user_id"
+  end
+
   create_table "chapters", id: :serial, force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -482,6 +505,7 @@ ActiveRecord::Schema.define(version: 20210119190204) do
     t.datetime "legal_terms_accepted_at"
     t.datetime "forum_terms_accepted_at"
     t.boolean "banned_from_forum"
+    t.boolean "uppercase_mode"
     t.index ["avatar_type", "avatar_id"], name: "index_users_on_avatar_type_and_avatar_id"
     t.index ["disabled_at"], name: "index_users_on_disabled_at"
     t.index ["last_organization_id"], name: "index_users_on_last_organization_id"
