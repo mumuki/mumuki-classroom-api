@@ -3,8 +3,44 @@ require 'spec_helper'
 describe Mumuki::Classroom::Teacher, workspaces: [:organization] do
 
   let(:except_fields) { {except: [:created_at, :updated_at]} }
-
   let(:response) { struct JSON.parse(last_response.body) }
+
+  describe 'get /teachers' do
+    let(:john) do
+      {
+        email: 'john@gmail.com',
+        first_name: 'John',
+        last_name: 'John',
+        uid: 'auth0|1',
+        organization: 'example.org',
+        course: 'example.org/2020-K2020'
+      }
+    end
+
+    let(:mary) do
+      {
+        email: 'mary@gmail.com',
+        first_name: 'Mary',
+        last_name: 'Mary',
+        uid: 'auth0|1',
+        organization: 'example.org',
+        course: 'example.org/2021-K2020'
+      }
+    end
+    before { header 'Authorization', build_auth_header('*') }
+
+    context 'when there are teachers at multiple courses' do
+      before do
+        Mumuki::Classroom::Teacher.create! john
+        Mumuki::Classroom::Teacher.create! mary
+      end
+      before { get '/teachers' }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_like({teachers: [john, mary]}, except_fields) }
+    end
+
+  end
 
   describe 'get /courses/:course/teachers' do
 
