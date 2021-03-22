@@ -2,7 +2,7 @@ module Sorting
 
   def self.aggregate(collection, query, paginated_params, query_params)
     reporting_pipeline = Reporting.build_pipeline(collection, query, paginated_params, query_params, projection)
-    query = collection.collection.aggregate(pipeline paginated_params, reporting_pipeline).first
+    query = collection.collection.aggregate(pipeline(paginated_params, reporting_pipeline), allow_disk_use: true).first # Must allow disk use for sorting large collections by non-index
     query_results(query)
   end
 
