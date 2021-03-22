@@ -17,8 +17,8 @@ module Reporting
     main_pipeline << {'$match': query}
     main_pipeline.concat searching.pipeline
     main_pipeline.concat sorting.pipeline
-    main_pipeline << {'$project': projection}
     main_pipeline << {'$sort': sorting.order_by(ordering)}
+    main_pipeline << {'$project': projection}
   end
 
 end
