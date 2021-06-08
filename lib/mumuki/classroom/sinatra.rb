@@ -143,6 +143,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     def update_user_permissions!(uid, method, *slugs)
       user = User.locate!(uid)
       user.send("#{method}_permission!", :student, *slugs)
+      yield user if block_given?
       user.save!
     end
 

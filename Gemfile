@@ -25,3 +25,5 @@ group :development do
   gem 'binding_of_caller'
   gem 'web-console'
 end
+#
+gem 'mumuki-domain', path: '/home/federico/Projects/mumuki/mumuki-domain'
