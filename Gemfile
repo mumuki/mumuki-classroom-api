@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'mumuki-domain', github: 'mumuki/mumuki-domain', branch: 'add-with_pg_retry-to-application-record'
+
 ruby '~> 2.6'
 
 gem 'puma', '~> 3.7'
