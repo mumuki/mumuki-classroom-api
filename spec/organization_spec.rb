@@ -30,7 +30,8 @@ describe 'organizations' do
       description: '¡Hola! Aprendamos sobre las bases de la programación',
       community_link: 'https://community.com',
       contact_email: 'info@mumuki.org',
-      locale: 'es'
+      locale: 'es',
+      time_zone: 'Los Angeles',
     },
     theme: {
       theme_stylesheet: 'stylesheets/test-1.css',
