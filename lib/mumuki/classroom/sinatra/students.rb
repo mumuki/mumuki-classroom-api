@@ -52,7 +52,9 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses/:course/students/:uid/detach' do
       authorize! :janitor
       Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).detach!
-      update_user_permissions!(uid, 'remove', course_slug)
+      update_user_permissions!(uid, 'remove', course_slug) do |user|
+        user.make_ex_student_of! course_slug if user.solved_any_exercises?
+      end
       {status: :updated}
     end
 
