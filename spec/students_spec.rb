@@ -219,19 +219,36 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
   describe 'when needs mumuki-user' do
     let(:fetched_student) { Mumuki::Classroom::Student.find_by(uid: 'github|123456') }
-
+    let(:user) { User.locate! 'github|123456' }
+    let(:janitor) { User.create uid: 'janitor@mumuki.org', permissions: { janitor: '*/*' } }
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
-      before { example_students.call student1 }
+      before { User.create! example_students.call(student1).as_user }
 
-      context 'should transfer student to destination and transfer all his data' do
-        before { header 'Authorization', build_auth_header('example.org/*') }
-        before { post '/courses/example/students/github%7C123456/detach' }
+      context 'should be detached' do
+        before { header 'Authorization', build_auth_header('example.org/*', janitor.uid) }
 
-        it { expect(last_response).to be_ok }
-        it { expect(last_response.body).to json_eq status: :updated }
-        it { expect(fetched_student.detached).to eq true }
+        context 'user solved any exercises' do
+          before { post '/courses/example/students/github%7C123456/detach' }
+          it { expect(last_response).to be_ok }
+          it { expect(last_response.body).to json_eq status: :updated }
+          it { expect(fetched_student.detached).to eq true }
+          it { expect(fetched_student.detached_at).not_to be nil }
+          it { expect(user.reload.student_of? 'example.org/example').to eq false }
+          it { expect(user.reload.ex_student_of? 'example.org/example').to eq false }
+        end
+
+        context 'user doesn\'t solve any exercises' do
+          before { create :assignment, submitter: user, organization: Organization.locate!('example.org') }
+          before { post '/courses/example/students/github%7C123456/detach' }
+          it { expect(last_response).to be_ok }
+          it { expect(last_response.body).to json_eq status: :updated }
+          it { expect(fetched_student.detached).to eq true }
+          it { expect(fetched_student.detached_at).not_to be nil }
+          it { expect(user.reload.student_of? 'example.org/example').to eq false }
+          it { expect(user.reload.ex_student_of? 'example.org/example').to eq true }
+        end
       end
 
     end
