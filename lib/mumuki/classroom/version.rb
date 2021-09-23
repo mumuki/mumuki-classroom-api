@@ -1,5 +1,5 @@
 module Mumuki
   module Classroom
-    VERSION = '9.16.0'
+    VERSION = '9.17.0'
   end
 end
