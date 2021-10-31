@@ -4,7 +4,7 @@ class Mumuki::Classroom::Event::UserChanged
     attr_accessor :changes
 
     def execute!(user_h)
-      set_diff_permissions user_h
+      set_permissions_diff user_h
       update_user_model user_h
     end
 
@@ -19,7 +19,7 @@ class Mumuki::Classroom::Event::UserChanged
       end
     end
 
-    def set_diff_permissions(user)
+    def set_permissions_diff(user)
       self.changes = Mumukit::Auth::Permissions::Diff.diff(user[:old_permissions], user[:new_permissions]).changes_by_organization
     end
 
