@@ -1,6 +1,8 @@
 module CourseMember
   extend ActiveSupport::Concern
 
+  MANDATORY_FIELDS = %w(uid first_name last_name email)
+
   included do
     include Mongoid::Timestamps
 
@@ -15,6 +17,9 @@ module CourseMember
     field :course, type: Mumukit::Auth::Slug
 
     create_index({organization: 1, course: 1, uid: 1}, {unique: true})
+
+    validates_presence_of(*MANDATORY_FIELDS)
+    validates :email, email: true
   end
 
   def as_user(verified: true)
@@ -23,6 +28,10 @@ module CourseMember
   end
 
   class_methods do
+    def valid_attributes?(json)
+      MANDATORY_FIELDS.all? { |it| json[it].present? } && EmailValidator.valid?(json[:email])
+    end
+
     def ensure_not_exists!(query)
       existing_members = where(query)
       raise Mumuki::Classroom::CourseMemberExistsError, {existing_members: existing_members.map(&:uid)}.to_json if existing_members.exists?
