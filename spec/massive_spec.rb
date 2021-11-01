@@ -29,9 +29,14 @@ describe 'Massive API', workspaces: [:organization, :courses] do
   def create_students_in(course, uids, student = {})
     uids.each do |it|
       User.new(uid: it).tap { |u| u.add_permission! :student, course.slug }.save!
-      Mumuki::Classroom::Student.create!(
-        {organization: course.organization.name, course: course.slug, uid: it}.merge(student)
-      )
+      Mumuki::Classroom::Student.create!({
+        organization: course.organization.name,
+        course: course.slug,
+        uid: it,
+        first_name: Faker::Name.first_name,
+        last_name: Faker::Name.last_name,
+        email: Faker::Internet.email
+      }.merge(student))
     end
   end
 
@@ -414,7 +419,16 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
         before { uids.map { |it| create :user, uid: it } }
         before { Exam.upsert_students! eid: classroom_id, added: [jane.uid, john.uid] }
-        before { uids.take(students_count).each { |it| Mumuki::Classroom::Student.create! uid: it, organization: organization.name, course: course.slug } }
+        before do
+          uids.take(students_count).each do |it|
+            Mumuki::Classroom::Student.create! uid: it,
+                                               first_name: Faker::Name.first_name,
+                                               last_name: Faker::Name.last_name,
+                                               email: Faker::Internet.email,
+                                               organization: organization.name,
+                                               course: course.slug
+          end
+        end
         before { post "/api/courses/foo/massive/exams/#{classroom_id}/students", exam_uids.to_json }
 
         context 'when request exceeds batch limit and some students does not belong to course' do

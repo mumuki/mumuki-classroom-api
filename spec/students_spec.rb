@@ -7,8 +7,8 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
   let(:except_fields) { {except: [:created_at, :updated_at, :page, :total]} }
 
-  let(:student1) { {uid: 'github|123456', first_name: 'Dorothy'} }
-  let(:student2) { {uid: 'twitter|123456', first_name: 'John'} }
+  let(:student1) { {uid: 'github|123456', first_name: 'Dorothy', last_name: 'Doe', email: 'dorodoe@mail.com'} }
+  let(:student2) { {uid: 'twitter|123456', first_name: 'John', last_name: 'Doe', email: 'jdoe@mail.com'} }
 
   let(:guide1) { {slug: 'foo/bar'} }
   let(:guide2) { {slug: 'bar/baz'} }
@@ -205,7 +205,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
   describe 'put /courses/:course/students/:student_id' do
     let(:updated_user) { User.locate! 'jondoe@gmail.com' }
 
-    before { User.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
+    before { create :user, first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
     before { Mumuki::Classroom::Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
     before { header 'Authorization', build_auth_header('*') }
     before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
@@ -220,11 +220,11 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
   describe 'when needs mumuki-user' do
     let(:fetched_student) { Mumuki::Classroom::Student.find_by(uid: 'github|123456') }
     let(:user) { User.locate! 'github|123456' }
-    let(:janitor) { User.create uid: 'janitor@mumuki.org', permissions: { janitor: '*/*' } }
+    let(:janitor) { create :user, uid: 'janitor@mumuki.org', permissions: { janitor: '*/*' } }
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
-      before { User.create! example_students.call(student1).as_user }
+      before { create :user, example_students.call(student1).as_user }
 
       context 'should be detached' do
         before { header 'Authorization', build_auth_header('example.org/*', janitor.uid) }
