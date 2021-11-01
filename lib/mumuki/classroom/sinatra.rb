@@ -256,6 +256,10 @@ HTML
     halt 400
   end
 
+  error Mongoid::Errors::Validations do
+    halt 400
+  end
+
   error ActiveRecord::RecordNotFound do
     halt 404
   end
