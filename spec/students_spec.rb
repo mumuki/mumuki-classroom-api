@@ -208,13 +208,26 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
     before { create :user, first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
     before { Mumuki::Classroom::Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
     before { header 'Authorization', build_auth_header('*') }
-    before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
 
-    it { expect(last_response).to be_ok }
-    it { expect(last_response.body).to json_eq status: :updated }
-    it { expect(Mumuki::Classroom::Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Doe' }
-    it { expect(updated_user.first_name).to eq updated_user.verified_first_name }
-    it { expect(updated_user.last_name).to eq updated_user.verified_last_name }
+    context "when passing complete data" do
+      before { put '/courses/foo/students/jondoe@gmail.com', {first_name: 'John', last_name: 'Doe', email: 'jondoe@gmail.com'}.to_json }
+
+      it { expect(last_response).to be_ok }
+      it { expect(last_response.body).to json_eq status: :updated }
+      it { expect(Mumuki::Classroom::Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Doe' }
+      it { expect(updated_user.first_name).to eq updated_user.verified_first_name }
+      it { expect(updated_user.last_name).to eq updated_user.verified_last_name }
+    end
+
+    context "when passing incomplete data" do
+      before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
+
+      it { expect(last_response).to_not be_ok }
+      it { expect(last_response.body['message']).to include("First name can't be blank, Email can't be blank") }
+      it { expect(Mumuki::Classroom::Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Din' }
+      it { expect(updated_user.first_name).to eq 'Jon' }
+      it { expect(updated_user.last_name).to eq 'Din' }
+    end
   end
 
   describe 'when needs mumuki-user' do
@@ -449,10 +462,47 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
       let(:except_fields) { {except: [:created_at, :updated_at]} }
 
-      let(:student1) { {uid: 'foobar@gmail.com', first_name: 'foo', last_name: 'bar', organization: 'example.org', course: 'example.org/foo'} }
-      let(:student2) { {uid: 'jondoe@gmail.com', first_name: 'jon', last_name: 'doe', organization: 'example.org', course: 'example.org/foo'} }
-      let(:student3) { {uid: 'walter@gmail.com', first_name: 'wal', last_name: 'ter', organization: 'example.org', course: 'example.org/foo'} }
-      let(:student4) { {uid: 'zzztop@gmail.com', first_name: 'zzz', last_name: 'top', organization: 'example.org', course: 'example.org/foo', detached: true} }
+      let(:student1) do
+        {
+          uid: 'foobar@gmail.com',
+          email: 'foobar@gmail.com',
+          first_name: 'foo',
+          last_name: 'bar',
+          organization: 'example.org',
+          course: 'example.org/foo'
+        }
+      end
+      let(:student2) do
+        {
+          uid: 'jondoe@gmail.com',
+          email: 'jondoe@gmail.com',
+          first_name: 'jon',
+          last_name: 'doe',
+          organization: 'example.org',
+          course: 'example.org/foo'
+        }
+      end
+      let(:student3) do
+        {
+          uid: 'walter@gmail.com',
+          email: 'walter@gmail.com',
+          first_name: 'wal',
+          last_name: 'ter',
+          organization: 'example.org',
+          course: 'example.org/foo'
+        }
+      end
+      let(:student4) do
+        {
+          uid: 'zzztop@gmail.com',
+          email: 'zzztop@gmail.com',
+          first_name: 'zzz',
+          last_name: 'top',
+          organization: 'example.org',
+          course: 'example.org/foo',
+          detached: true
+        }
+      end
 
       before { Mumuki::Classroom::Student.create! student1 }
       before { Mumuki::Classroom::Student.create! student2 }
