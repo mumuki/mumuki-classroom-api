@@ -37,13 +37,13 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       post '/students/detach' do
         update_students! do |processed|
-          update_students_at_course! :detach, :remove, processed
+          update_students_permissions_at_course! :detach, :remove, processed
         end
       end
 
       post '/students/attach' do
         update_students! do |processed|
-          update_students_at_course! :attach, :add, processed
+          update_students_permissions_at_course! :attach, :add, processed
         end
       end
 
@@ -166,7 +166,7 @@ class Mumuki::Classroom::App < Sinatra::Application
                        students_does_not_belong_msg, status: :updated
     end
 
-    def update_students_at_course!(method, action, students_uids)
+    def update_students_permissions_at_course!(method, action, students_uids)
       Mumuki::Classroom::Student.send "#{method}_all_by!", students_uids, with_organization_and_course
       User.where(uid: students_uids).each do |user|
         user.send "#{action}_permission!", :student, course_slug
