@@ -58,7 +58,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
   let(:example_students) {
     -> (student) {
       new_student = student.merge(organization: 'example.org', course: 'example.org/example')
-      Mumuki::Classroom::Student.create! new_student
+      create :student, new_student
     }
   }
 
@@ -138,10 +138,10 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
                         email: 'a.teacher@gmail.com', uids: [student[:uid]]} }
 
       context 'when guides already exists in a course' do
-        before { Mumuki::Classroom::Student.create! student.merge(organization: 'example.org', course: 'example.org/foo') }
-        before { Mumuki::Classroom::Student.create! student.merge(organization: 'example.org', course: 'example.org/test') }
-        before { Mumuki::Classroom::Student.create! student2.merge(organization: 'example.org', course: 'example.org/foo') }
-        before { Mumuki::Classroom::Student.create! student2.merge(organization: 'example.org', course: 'example.org/test') }
+        before { create :student, student.merge(organization: 'example.org', course: 'example.org/foo') }
+        before { create :student, student.merge(organization: 'example.org', course: 'example.org/test') }
+        before { create :student, student2.merge(organization: 'example.org', course: 'example.org/foo') }
+        before { create :student, student2.merge(organization: 'example.org', course: 'example.org/test') }
         before { Mumuki::Classroom::Follower.create! follower }
 
         context 'get students with auth0 client' do
@@ -182,7 +182,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
     let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
     let(:json) { {student: student.merge(uid: 'auth0|1'), course: {slug: 'example.org/foo'}} }
     let(:created_at) { 'created_at' }
-    before { Mumuki::Classroom::Student.create!(student.merge(uid: 'auth0|1', organization: 'example.org', course: 'example.org/foo')) }
+    before { create :student, student.merge(uid: 'auth0|1', organization: 'example.org', course: 'example.org/foo') }
     before { get '/courses/foo/student/auth0%7c1' }
 
     it { expect(last_response).to be_ok }
@@ -198,15 +198,15 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
     it { expect(last_response).to be_ok }
     it { expect(last_response.body).to json_eq status: :created }
-    it { expect(created_user.first_name).to eq created_user.verified_first_name }
-    it { expect(created_user.last_name).to eq created_user.verified_last_name }
+    it { expect(created_user.first_name).to_not be nil }
+    it { expect(created_user.last_name).to_not be nil }
   end
 
   describe 'put /courses/:course/students/:student_id' do
     let(:updated_user) { User.locate! 'jondoe@gmail.com' }
 
     before { create :user, first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', permissions: {student: 'example.org/*'} }
-    before { Mumuki::Classroom::Student.create! first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
+    before { create :student, first_name: 'Jon', last_name: 'Din', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', organization: 'example.org', course: 'example.org/foo' }
     before { header 'Authorization', build_auth_header('*') }
 
     context "when passing complete data" do
@@ -504,10 +504,10 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
         }
       end
 
-      before { Mumuki::Classroom::Student.create! student1 }
-      before { Mumuki::Classroom::Student.create! student2 }
-      before { Mumuki::Classroom::Student.create! student3 }
-      before { Mumuki::Classroom::Student.create! student4 }
+      before { create :student, student1 }
+      before { create :student, student2 }
+      before { create :student, student3 }
+      before { create :student, student4 }
 
       before { header 'Authorization', build_auth_header('*') }
 
@@ -581,10 +581,10 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
         passed_with_warnings: 1
       }
     } }
-    before { Mumuki::Classroom::Student.create! student }
-    before { Mumuki::Classroom::Student.create! student.merge uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2} }
-    before { Mumuki::Classroom::Student.create! student.merge uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2}, course: 'example.org/bar' }
-    before { Mumuki::Classroom::Student.create! student.merge first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', personal_id: '2222', stats: {failed: 27, passed: 120, passed_with_warnings: 1}, course: 'example.org/bar' }
+    before { create :student, student }
+    before { create :student, student.merge(uid: 'bar@baz.com', email: 'bar@baz.com', personal_id: '9191', stats: {failed: 27, passed: 100, passed_with_warnings: 2}) }
+    before { create :student, student.merge(uid: 'baz@bar.com', email: 'baz@bar.com', personal_id: '1212', stats: {failed: 27, passed: 120, passed_with_warnings: 2}, course: 'example.org/bar') }
+    before { create :student, student.merge(first_name: 'Bar', uid: 'bar@foo.com', email: 'bar@foo.com', personal_id: '2222', stats: {failed: 27, passed: 120, passed_with_warnings: 1}, course: 'example.org/bar') }
     before { header 'Authorization', build_auth_header('*') }
     before { get '/students/report' }
     it do
