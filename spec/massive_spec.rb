@@ -28,24 +28,28 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
   def create_students_in(course, uids, student = {})
     uids.each do |it|
-      User.new(uid: it).tap { |u| u.add_permission! :student, course.slug }.save!
+      user = create(:user, uid: it, permissions: {student: course.slug})
       Mumuki::Classroom::Student.create!({
         organization: course.organization.name,
         course: course.slug,
         uid: it,
-        first_name: Faker::Name.first_name,
-        last_name: Faker::Name.last_name,
-        email: Faker::Internet.email
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email
       }.merge(student))
     end
   end
 
   def create_teachers_in(course, uids)
     uids.each do |it|
-      User.new(uid: it).tap { |u| u.add_permission! :teacher, course.slug }.save!
+      user = create(:user, uid: it, permissions: {teacher: course.slug})
       Mumuki::Classroom::Teacher.create!(
-        {organization: course.organization.name, course: course.slug, uid: it}
-      )
+        organization: course.organization.name,
+        course: course.slug,
+        uid: it,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email)
     end
   end
 
@@ -129,8 +133,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
   let(:end_time) { 1.month.since.beginning_of_day }
 
   shared_examples 'with verified names for users' do
-    it { expect(modified_users.all? { |us| us.verified_first_name == us.first_name }).to be true }
-    it { expect(modified_users.all? { |us| us.verified_last_name == us.last_name }).to be true }
+    it { expect(modified_users.map(&:verified_last_name)).to eq modified_users.map(&:last_name) }
+    it { expect(modified_users.map(&:verified_first_name)).to eq modified_users.map(&:first_name) }
   end
 
   describe 'when authenticated' do

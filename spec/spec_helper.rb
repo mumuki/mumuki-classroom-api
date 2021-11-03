@@ -39,7 +39,12 @@ Mumukit::Auth.configure do |c|
 end
 
 def build_auth_header(permissions, sub = 'github|123456')
-  user = User.where(uid: sub).first_or_create! permissions: Mumukit::Auth::Permissions.parse(owner: permissions)
+  user = User
+          .where(uid: sub)
+          .first_or_create! first_name: Faker::Name.first_name,
+                            last_name: Faker::Name.last_name,
+                            email: Faker::Internet.email,
+                            permissions: Mumukit::Auth::Permissions.parse(owner: permissions)
   Mumukit::Auth::Token.encode user.uid, {}
 end
 

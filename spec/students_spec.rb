@@ -89,8 +89,8 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
     describe '#report' do
       let(:report) { Mumuki::Classroom::Student.report({organization: 'example.org', course: 'example.org/example'}) }
       it { expect(report.count).to eq 2 }
-      it { expect(report.first).to json_like({first_name: 'Dorothy'}, except_fields) }
-      it { expect(report.second).to json_like({first_name: 'John'}, except_fields) }
+      it { expect(report.first).to json_like({first_name: 'Dorothy', email: "dorodoe@mail.com", last_name: "Doe"}, except_fields) }
+      it { expect(report.second).to json_like({first_name: 'John', email: "jdoe@mail.com", last_name: "Doe"}, except_fields) }
     end
 
     context 'if no students stats processed' do
@@ -233,7 +233,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
   describe 'when needs mumuki-user' do
     let(:fetched_student) { Mumuki::Classroom::Student.find_by(uid: 'github|123456') }
     let(:user) { User.locate! 'github|123456' }
-    let(:janitor) { create :user, uid: 'janitor@mumuki.org', permissions: { janitor: '*/*' } }
+    let(:janitor) { create :user, uid: 'janitor@mumuki.org', email: 'janitor@mumuki.org', permissions: { janitor: '*/*' } }
 
     describe 'post /courses/:course/students/:student_id/detach' do
 
