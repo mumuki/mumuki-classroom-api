@@ -223,7 +223,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
       before { put '/courses/foo/students/jondoe@gmail.com', {last_name: 'Doe'}.to_json }
 
       it { expect(last_response).to_not be_ok }
-      it { expect(last_response.body['message']).to include("First name can't be blank, Email can't be blank") }
+      it { expect(last_response.body).to json_eq(message: "The following errors were found: First name can't be blank, Email can't be blank, Email is invalid") }
       it { expect(Mumuki::Classroom::Student.find_by(uid: 'jondoe@gmail.com').last_name).to eq 'Din' }
       it { expect(updated_user.first_name).to eq 'Jon' }
       it { expect(updated_user.last_name).to eq 'Din' }

@@ -243,7 +243,12 @@ HTML
         json = JSON.parse(error_message.message)
         response.body = json.to_json
       rescue
-        response.body = {message: error_message.message}.to_json
+        if error_message.is_a?(Mongoid::Errors::MongoidError)
+          message_text = error_message.summary
+        else
+          message_text = error_message.message
+        end
+        response.body = {message: message_text}.to_json
       end
     end
   end
