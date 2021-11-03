@@ -170,7 +170,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       Mumuki::Classroom::Student.send "#{method}_all_by!", students_uids, with_organization_and_course
       User.where(uid: students_uids).each do |user|
         user.send "#{action}_permission!", :student, course_slug
-        user.save!
+        user.save! validate: false
       end
     end
 
