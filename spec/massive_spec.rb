@@ -260,7 +260,26 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it_behaves_like 'with verified names for users'
         end
 
-        context 'when students and users does not exist' do
+        context 'when students and users does not exist and some of them are invalid' do
+          let(:students) do
+            [
+              to_member_request_hash(1),
+              {},
+              to_member_request_hash(2),
+              {uid: "http_email_3@fake.com"}
+            ]
+          end
+
+          before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(2).times }
+          before { post '/api/courses/foo/massive/students', students_json }
+
+          it { expect(last_response).to be_ok }
+          it { expect(response.status).to eq 'created' }
+          it { expect(response.processed_count).to eq 2 }
+          it { expect(response.errored_members_count).to eq 2 }
+        end
+
+        context 'when students and users does not exist and there are repeated members' do
           let(:students) { [1,1,2,2,3,3,4,4,5,5,6,6].map { |it| to_member_request_hash it } }
 
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(5).times }
@@ -268,6 +287,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
           it { expect(last_response).to be_ok }
           it { expect(response.status).to eq 'created' }
+          it { expect(response.processed_count).to eq 5 }
+          it { expect(response.errored_members_count).to eq nil }
         end
 
         context "when students don't exist in course but some of them already exist as users" do

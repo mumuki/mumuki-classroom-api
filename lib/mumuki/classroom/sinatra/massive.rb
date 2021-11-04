@@ -143,20 +143,39 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     def create_members!(role, &block)
       members_collection = collection_for role
-      massive_members = massive_members_for role
-      existing_members = existing_members_in_course(members_collection, massive_members)
-      existing_members_uids = existing_members.map { |it| it[:uid] }
-      processed_members = massive_members.reject { |it| existing_members_uids.include? it[:uid] }.uniq { |it| it[:uid]}
-      members_collection.collection.insert_many(processed_members.map { |member| with_organization_and_course member })
-      upsert_users! role, processed_members, &block
-      massive_response(processed_members, unprocessed_members_for(role), existing_members,
+
+      existing_members, non_existent_members = partion_existing_members_in_course(
+        members_collection,
+        massive_members_for(role))
+
+      valid_members, invalid_members = non_existent_members.partition do |member|
+        members_collection.valid_attributes? member
+      end
+
+      errored_members = existing_members + invalid_members
+
+      members_collection
+        .collection
+        .insert_many(valid_members.map { |member| with_organization_and_course member })
+      upsert_users! role, valid_members, &block
+
+      massive_response(valid_members, unprocessed_members_for(role), errored_members,
                        "#{role.to_s.pluralize.titleize} already belong to current course", status: :created)
     end
 
-    def existing_members_in_course(col, massive_members)
-      col.where(with_organization_and_course)
+    def partion_existing_members_in_course(collection, massive_members)
+      existing_members = existing_members_in_course(collection, massive_members)
+      existing_members_uids = existing_members.map { |it| it[:uid] }
+      [
+        existing_members,
+        massive_members.reject { |it| existing_members_uids.include? it[:uid] }.uniq { |it| it[:uid] }
+      ]
+    end
+
+    def existing_members_in_course(collection, massive_members)
+      collection.where(with_organization_and_course)
         .in(uid: massive_members.map { |it| it[:uid] })
-        .map { |it| col.normalized_attributes_from_json(it) }
+        .map { |it| collection.normalized_attributes_from_json(it) }
     end
 
     def update_students!
