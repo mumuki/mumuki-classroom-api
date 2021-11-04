@@ -425,12 +425,7 @@ describe 'Massive API', workspaces: [:organization, :courses] do
         before { Exam.upsert_students! eid: classroom_id, added: [jane.uid, john.uid] }
         before do
           uids.take(students_count).each do |it|
-            Mumuki::Classroom::Student.create! uid: it,
-                                               first_name: Faker::Name.first_name,
-                                               last_name: Faker::Name.last_name,
-                                               email: Faker::Internet.email,
-                                               organization: organization.name,
-                                               course: course.slug
+            create :student, uid: it, organization: organization.name, course: course.slug
           end
         end
         before { post "/api/courses/foo/massive/exams/#{classroom_id}/students", exam_uids.to_json }
