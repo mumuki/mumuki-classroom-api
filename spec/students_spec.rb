@@ -328,7 +328,48 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
         context 'when authenticated' do
           before { header 'Authorization', build_auth_header('*') }
 
-          context 'should publish in resubmissions queue' do
+          describe 'adds student to a course if exists' do
+            before { post '/courses/foo/students', student_json }
+            context 'in same course, should fails' do
+              before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
+              before { post '/courses/foo/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
+            end
+            context 'in different course, should work' do
+              let!(:course) { create(:course, slug: 'example.org/bar') }
+              before { header 'Authorization', build_auth_header('*', 'auth1') }
+              before { post '/courses/bar/students', student_json }
+
+              it { expect(last_response).to be_ok }
+              it { expect(last_response.status).to eq 200 }
+              it { expect(last_response.body).to json_eq(status: 'created') }
+            end
+            context 'when first_name is incomplete' do
+              let(:student) { {last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', personal_id: '1234'} }
+              let!(:course) { create(:course, slug: 'example.org/bar') }
+              before { header 'Authorization', build_auth_header('*', 'auth1') }
+              before { post '/courses/bar/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(message: "The following errors were found: First name can't be blank") }
+            end
+            context 'when email is wrong' do
+              let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe', uid: 'jondoe@gmail.com', image_url: 'http://foo', personal_id: '1234'} }
+              let!(:course) { create(:course, slug: 'example.org/bar') }
+              before { header 'Authorization', build_auth_header('*', 'auth1') }
+              before { post '/courses/bar/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(message: "The following errors were found: Email is invalid") }
+            end
+          end
+
+          context 'when publishes in resubmissions queue' do
             before { expect(Mumukit::Nuntius).to receive(:notify!) }
             before { post '/courses/foo/students', student_json }
             context 'and user does not exist' do
@@ -351,27 +392,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
             end
           end
-          context 'add student to a course if exists' do
-            before { post '/courses/foo/students', student_json }
-            context 'in same course, should fails' do
-              before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
-              before { post '/courses/foo/students', student_json }
-
-              it { expect(last_response).to_not be_ok }
-              it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
-            end
-            context 'in different course, should work' do
-              let!(:course) { create(:course, slug: 'example.org/bar') }
-              before { header 'Authorization', build_auth_header('*', 'auth1') }
-              before { post '/courses/bar/students', student_json }
-
-              it { expect(last_response).to be_ok }
-              it { expect(last_response.status).to eq 200 }
-              it { expect(last_response.body).to json_eq(status: 'created') }
-            end
-          end
-          context 'should not publish in resubmissions queue' do
+          context 'when does not publish in resubmissions queue' do
             before { post '/courses/foo/students', student_json }
             before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
             context 'and user already exists by uid' do
