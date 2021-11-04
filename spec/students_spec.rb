@@ -313,74 +313,6 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
     end
 
     describe 'post /courses/:course/students' do
-      let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', image_url: 'http://foo'} }
-      let(:student_json) { student.to_json }
-
-      context 'when course exists' do
-        let!(:course) { create(:course, slug: 'example.org/bar') }
-
-        context 'when not authenticated' do
-          before { post '/courses/foo/students', student_json }
-
-          it { expect(last_response).to_not be_ok }
-          it { expect(Mumuki::Classroom::Student.count).to eq 0 }
-        end
-
-        context 'when authenticated' do
-          before { header 'Authorization', build_auth_header('*') }
-
-          context 'should publish in resubmissions queue' do
-            before { expect(Mumukit::Nuntius).to receive(:notify!) }
-            before { post '/courses/foo/students', student_json }
-            context 'and user does not exist' do
-              let(:created_course_student) { Mumuki::Classroom::Student.find_by(organization: 'example.org', course: 'example.org/foo').as_json }
-              let(:created_at) { 'created_at' }
-
-              it { expect(last_response).to be_ok }
-              it { expect(last_response.body).to json_eq status: 'created' }
-              it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
-              it { expect(User.find_by(uid: student[:email])).to json_like student, only: student.keys }
-              it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
-            end
-          end
-          context 'add student to a course if exists' do
-            before { post '/courses/foo/students', student_json }
-            context 'in same course, should fails' do
-              before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
-              before { post '/courses/foo/students', student_json }
-
-              it { expect(last_response).to_not be_ok }
-              it { expect(last_response.status).to eq 400 }
-              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
-            end
-            context 'in different course, should work' do
-              let!(:course) { create(:course, slug: 'example.org/bar') }
-              before { header 'Authorization', build_auth_header('*', 'auth1') }
-              before { post '/courses/bar/students', student_json }
-
-              it { expect(last_response).to be_ok }
-              it { expect(last_response.status).to eq 200 }
-              it { expect(last_response.body).to json_eq(status: 'created') }
-            end
-          end
-        end
-      end
-
-      context 'when course does not exist' do
-        before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
-
-        it 'rejects creating a student' do
-          header 'Authorization', build_auth_header('*')
-
-          post '/courses/bar/students', student_json
-
-          expect(last_response).to_not be_ok
-          expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/bar').count).to eq 0
-        end
-      end
-    end
-
-    describe 'post /courses/:course/students' do
       let(:student) { {first_name: 'Jon', last_name: 'Doe', email: 'jondoe@gmail.com', uid: 'jondoe@gmail.com', image_url: 'http://foo', personal_id: '1234'} }
       let(:student_json) { student.to_json }
 
@@ -389,6 +321,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
           before { post '/courses/foo/students', student_json }
 
           it { expect(last_response).to_not be_ok }
+          it { expect(Mumuki::Classroom::Student.count).to eq 0 }
           it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 0 }
         end
 
@@ -416,6 +349,26 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
               it { expect(last_response.body).to json_eq status: 'created' }
               it { expect(Mumuki::Classroom::Student.where(organization: 'example.org', course: 'example.org/foo').count).to eq 1 }
               it { expect(created_course_student).to json_like(student.merge(uid: 'jondoe@gmail.com', organization: 'example.org', course: 'example.org/foo'), except_fields) }
+            end
+          end
+          context 'add student to a course if exists' do
+            before { post '/courses/foo/students', student_json }
+            context 'in same course, should fails' do
+              before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
+              before { post '/courses/foo/students', student_json }
+
+              it { expect(last_response).to_not be_ok }
+              it { expect(last_response.status).to eq 400 }
+              it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
+            end
+            context 'in different course, should work' do
+              let!(:course) { create(:course, slug: 'example.org/bar') }
+              before { header 'Authorization', build_auth_header('*', 'auth1') }
+              before { post '/courses/bar/students', student_json }
+
+              it { expect(last_response).to be_ok }
+              it { expect(last_response.status).to eq 200 }
+              it { expect(last_response.body).to json_eq(status: 'created') }
             end
           end
           context 'should not publish in resubmissions queue' do
