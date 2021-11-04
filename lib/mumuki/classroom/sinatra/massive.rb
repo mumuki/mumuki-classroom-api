@@ -98,7 +98,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       user = User.find_or_initialize_by(uid: member[:uid])
       user.assign_attributes user_from_member_json(member)
       user.add_permission! role, course_slug
-      user.verify_name!
+      user.verify_name! force: true
       yield user if block_given?
     end
 

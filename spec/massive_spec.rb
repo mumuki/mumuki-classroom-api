@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'Massive API', workspaces: [:organization, :courses] do
 
   def to_member_request_hash(number)
-    {first_name: "first_name_#{number}", last_name: "last_name_#{number}", email: "email_#{number}@fake.com"}
+    {first_name: "http_first_name_#{number}", last_name: "http_last_name#{number}", email: "http_email_#{number}@fake.com"}
   end
 
   def to_guide_progress(guide, uid, stats, eid, status)
@@ -28,8 +28,9 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
   def create_students_in(course, uids, student = {})
     uids.each do |it|
-      user = create(:user, uid: it, permissions: {student: course.slug})
-      Mumuki::Classroom::Student.create!({
+      user = build(:user, uid: it, permissions: {student: course.slug})
+      user.verify_name!
+      create(:student, {
         organization: course.organization.name,
         course: course.slug,
         uid: it,
@@ -42,7 +43,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
   def create_teachers_in(course, uids)
     uids.each do |it|
-      user = create(:user, uid: it, permissions: {teacher: course.slug})
+      user = build(:user, uid: it, permissions: {teacher: course.slug})
+      user.verify_name!
       Mumuki::Classroom::Teacher.create!(
         organization: course.organization.name,
         course: course.slug,
