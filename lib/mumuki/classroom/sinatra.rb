@@ -126,7 +126,9 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       member_collection.normalized_attributes_from_json(json_body).tap do |member_json|
         ensure_member_not_exists! member_json, member_collection
-        member = member_collection.create!(with_organization_and_course member_json)
+        member = member_collection.find_or_initialize_by(with_organization_and_course uid: member_json[:uid])
+        member.assign_attributes member_json
+        member.save!
         upsert_user! role, member.as_user
       end
     end
