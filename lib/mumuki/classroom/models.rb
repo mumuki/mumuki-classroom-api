@@ -17,6 +17,8 @@ require_relative './models/teacher'
 require_relative './models/notification'
 require_relative './models/suggestion'
 require_relative './models/certificate'
+require_relative './models/exam_authorization'
+require_relative './models/exam_authorization_request'
 
 require_relative './models/sorting'
 require_relative './models/searching'

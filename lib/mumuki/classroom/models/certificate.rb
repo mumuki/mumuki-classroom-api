@@ -1,10 +1,10 @@
 class Mumuki::Classroom::Certificate < Mumuki::Classroom::Document
   include Mongoid::Timestamps
 
+  field :pg_id, type: Integer
   field :code, type: String
-  field :certificate_program_id, type: Integer
-  field :user, type: Hash
-
-  create_index({'user.uid': 1})
-  create_index({'certificate_program_id': 1})
+  field :certificate_program, type: Hash
+  field :student, type: Hash
+  field :started_at, type: Time
+  field :ended_at, type: Time
 end
