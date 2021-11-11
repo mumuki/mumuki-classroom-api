@@ -6,8 +6,8 @@ describe Exam, workspaces: [:organization, :courses] do
   let(:course) { Course.locate! 'example.org/foo' }
   let(:language) { Language.for_name 'haskell' }
   let(:guide) { create :guide, slug: 'foo/bar', name: 'foo', language: language }
-  let(:jane) { create :user, uid: 'jane.doe@testing.com' }
-  let(:john) { create :user, uid: 'john.doe@testing.com' }
+  let(:jane) { create :user, uid: 'jane.doe@testing.com', email: 'jane.doe@testing.com' }
+  let(:john) { create :user, uid: 'john.doe@testing.com', email: 'john.doe@testing.com' }
 
   let(:start_time) { 1.month.ago.beginning_of_day }
   let(:end_time) { 1.month.since.beginning_of_day }

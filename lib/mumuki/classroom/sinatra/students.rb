@@ -1,11 +1,5 @@
 class Mumuki::Classroom::App < Sinatra::Application
   helpers do
-    def normalize_student!
-      json_body[:email] = json_body[:email]&.downcase
-      json_body[:last_name] = json_body[:last_name]&.downcase&.titleize
-      json_body[:first_name] = json_body[:first_name]&.downcase&.titleize
-    end
-
     def list_students(matcher)
       authorize! :teacher
       count, students = Sorting.aggregate(Mumuki::Classroom::Student, with_detached_and_search(matcher, Mumuki::Classroom::Student), paginated_params, query_params)

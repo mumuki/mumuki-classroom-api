@@ -37,13 +37,13 @@ class Mumuki::Classroom::App < Sinatra::Application
 
       post '/students/detach' do
         update_students! do |processed|
-          update_students_at_course! :detach, :remove, processed
+          update_students_permissions_at_course! :detach, :remove, processed
         end
       end
 
       post '/students/attach' do
         update_students! do |processed|
-          update_students_at_course! :attach, :add, processed
+          update_students_permissions_at_course! :attach, :add, processed
         end
       end
 
@@ -98,7 +98,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       user = User.find_or_initialize_by(uid: member[:uid])
       user.assign_attributes user_from_member_json(member)
       user.add_permission! role, course_slug
-      user.verify_name!
+      user.verify_name! force: true
       yield user if block_given?
     end
 
@@ -143,20 +143,39 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     def create_members!(role, &block)
       members_collection = collection_for role
-      massive_members = massive_members_for role
-      existing_members = existing_members_in_course(members_collection, massive_members)
-      existing_members_uids = existing_members.map { |it| it[:uid] }
-      processed_members = massive_members.reject { |it| existing_members_uids.include? it[:uid] }.uniq { |it| it[:uid]}
-      members_collection.collection.insert_many(processed_members.map { |member| with_organization_and_course member })
-      upsert_users! role, processed_members, &block
-      massive_response(processed_members, unprocessed_members_for(role), existing_members,
+
+      existing_members, non_existent_members = partion_existing_members_in_course(
+        members_collection,
+        massive_members_for(role))
+
+      valid_members, invalid_members = non_existent_members.partition do |member|
+        members_collection.valid_attributes? member
+      end
+
+      errored_members = existing_members + invalid_members
+
+      members_collection
+        .collection
+        .insert_many(valid_members.map { |member| with_organization_and_course member })
+      upsert_users! role, valid_members, &block
+
+      massive_response(valid_members, unprocessed_members_for(role), errored_members,
                        "#{role.to_s.pluralize.titleize} already belong to current course", status: :created)
     end
 
-    def existing_members_in_course(col, massive_members)
-      col.where(with_organization_and_course)
+    def partion_existing_members_in_course(collection, massive_members)
+      existing_members = existing_members_in_course(collection, massive_members)
+      existing_members_uids = existing_members.map { |it| it[:uid] }
+      [
+        existing_members,
+        massive_members.reject { |it| existing_members_uids.include? it[:uid] }.uniq { |it| it[:uid] }
+      ]
+    end
+
+    def existing_members_in_course(collection, massive_members)
+      collection.where(with_organization_and_course)
         .in(uid: massive_members.map { |it| it[:uid] })
-        .map { |it| col.normalized_attributes_from_json(it) }
+        .map { |it| collection.normalized_attributes_from_json(it) }
     end
 
     def update_students!
@@ -166,7 +185,7 @@ class Mumuki::Classroom::App < Sinatra::Application
                        students_does_not_belong_msg, status: :updated
     end
 
-    def update_students_at_course!(method, action, students_uids)
+    def update_students_permissions_at_course!(method, action, students_uids)
       Mumuki::Classroom::Student.send "#{method}_all_by!", students_uids, with_organization_and_course
       User.where(uid: students_uids).each do |user|
         user.send "#{action}_permission!", :student, course_slug

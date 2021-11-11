@@ -3,15 +3,15 @@ require 'spec_helper'
 describe Mumuki::Classroom::Event::UserChanged do
 
   let(:uid) { 'agus@mumuki.org' }
-  let(:uid2) { 'fedescarpa@mumuki.org' }
-  let(:event) { user.merge(old_permissions: old_permissions, new_permissions: new_permissions) }
+
   let(:old_permissions) { {student: 'example.org/foo', teacher: 'example.org/foo'}.with_indifferent_access }
   let(:new_permissions) { {student: 'example.org/bar', teacher: 'example.org/bar'}.with_indifferent_access }
-  let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
-  let(:user2) { {uid: uid2, email: uid2, last_name: 'Scarpa', first_name: 'Federico'}.with_indifferent_access }
-  let(:except_fields) { {except: [:created_at, :updated_at, :email, :social_id, :last_name, :image_url]} }
 
-  before { User.create! uid: uid, permissions: old_permissions }
+  let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
+
+  let(:event) { user.merge(old_permissions: old_permissions, new_permissions: new_permissions) }
+
+  before { create :user, user.merge(permissions: old_permissions) }
   before { create :organization, name: 'example.org' }
 
   describe 'execute!' do
@@ -60,8 +60,13 @@ describe Mumuki::Classroom::Event::UserChanged do
 
       before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
-      let(:user2) { user.merge(social_id: 'foo').except(:first_name) }
-      let(:event) { user2.merge(old_permissions: old_permissions, new_permissions: new_permissions) }
+      let(:event) do
+        user
+          .except(:first_name)
+          .merge(social_id: 'foo', old_permissions: old_permissions, new_permissions: new_permissions)
+      end
+
+      let(:except_fields) { {except: [:created_at, :updated_at, :social_id, :image_url]} }
 
       let(:student_foo_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
       let(:student_bar_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
@@ -72,10 +77,10 @@ describe Mumuki::Classroom::Event::UserChanged do
       it { expect(student_foo_fetched.uid).to eq uid }
       it { expect(student_foo_fetched.first_name).to eq 'Agustín' }
 
-      it { expect(student_bar_fetched.as_json).to json_like user2.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
+      it { expect(student_bar_fetched.as_json).to json_like user.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
       it { expect(student_bar_fetched.detached).to eq nil }
 
-      it { expect(teacher_bar_fetched.as_json).to json_like user2.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
+      it { expect(teacher_bar_fetched.as_json).to json_like user.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
     end
 
     context 'when there are assignments for several users, user changed event only updates the assignment for that student' do
@@ -126,8 +131,10 @@ describe Mumuki::Classroom::Event::UserChanged do
                                                  exercise: exercise,
                                                  guide: guide
                                                }) }
+      let(:uid2) { 'fedescarpa@mumuki.org' }
+      let(:user2) { {uid: uid2, email: uid2, last_name: 'Scarpa', first_name: 'Federico'}.with_indifferent_access }
       let(:event2) { user2.merge(last_name: 'Otro', permissions: old_permissions) }
-      before { User.create! uid: uid2, permissions: old_permissions }
+      before { create :user, uid: uid2, permissions: old_permissions }
       let!(:course) { create(:course, slug: 'example.org/foo') }
       let!(:course) { create(:course, slug: 'example.org/bar') }
       before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'Massive API', workspaces: [:organization, :courses] do
 
   def to_member_request_hash(number)
-    {first_name: "first_name_#{number}", last_name: "last_name_#{number}", email: "email_#{number}@fake.com"}
+    {first_name: "http_first_name_#{number}", last_name: "http_last_name#{number}", email: "http_email_#{number}@fake.com"}
   end
 
   def to_guide_progress(guide, uid, stats, eid, status)
@@ -28,19 +28,30 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
   def create_students_in(course, uids, student = {})
     uids.each do |it|
-      User.new(uid: it).tap { |u| u.add_permission! :student, course.slug }.save!
-      Mumuki::Classroom::Student.create!(
-        {organization: course.organization.name, course: course.slug, uid: it}.merge(student)
-      )
+      user = build(:user, uid: it, permissions: {student: course.slug})
+      user.verify_name!
+      create(:student, {
+        organization: course.organization.name,
+        course: course.slug,
+        uid: it,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email
+      }.merge(student))
     end
   end
 
   def create_teachers_in(course, uids)
     uids.each do |it|
-      User.new(uid: it).tap { |u| u.add_permission! :teacher, course.slug }.save!
+      user = build(:user, uid: it, permissions: {teacher: course.slug})
+      user.verify_name!
       Mumuki::Classroom::Teacher.create!(
-        {organization: course.organization.name, course: course.slug, uid: it}
-      )
+        organization: course.organization.name,
+        course: course.slug,
+        uid: it,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email)
     end
   end
 
@@ -124,8 +135,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
   let(:end_time) { 1.month.since.beginning_of_day }
 
   shared_examples 'with verified names for users' do
-    it { expect(modified_users.all? { |us| us.verified_first_name == us.first_name }).to be true }
-    it { expect(modified_users.all? { |us| us.verified_last_name == us.last_name }).to be true }
+    it { expect(modified_users.map(&:verified_last_name)).to eq modified_users.map(&:last_name) }
+    it { expect(modified_users.map(&:verified_first_name)).to eq modified_users.map(&:first_name) }
   end
 
   describe 'when authenticated' do
@@ -249,7 +260,26 @@ describe 'Massive API', workspaces: [:organization, :courses] do
           it_behaves_like 'with verified names for users'
         end
 
-        context 'when students and users does not exist' do
+        context 'when students and users does not exist and some of them are invalid' do
+          let(:students) do
+            [
+              to_member_request_hash(1),
+              {},
+              to_member_request_hash(2),
+              {uid: "http_email_3@fake.com"}
+            ]
+          end
+
+          before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(2).times }
+          before { post '/api/courses/foo/massive/students', students_json }
+
+          it { expect(last_response).to be_ok }
+          it { expect(response.status).to eq 'created' }
+          it { expect(response.processed_count).to eq 2 }
+          it { expect(response.errored_members_count).to eq 2 }
+        end
+
+        context 'when students and users does not exist and there are repeated members' do
           let(:students) { [1,1,2,2,3,3,4,4,5,5,6,6].map { |it| to_member_request_hash it } }
 
           before { expect(Mumukit::Nuntius).to receive(:notify!).with('resubmissions', hash_including(:uid, :tenant)).exactly(5).times }
@@ -257,6 +287,8 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
           it { expect(last_response).to be_ok }
           it { expect(response.status).to eq 'created' }
+          it { expect(response.processed_count).to eq 5 }
+          it { expect(response.errored_members_count).to eq nil }
         end
 
         context "when students don't exist in course but some of them already exist as users" do
@@ -414,7 +446,11 @@ describe 'Massive API', workspaces: [:organization, :courses] do
 
         before { uids.map { |it| create :user, uid: it } }
         before { Exam.upsert_students! eid: classroom_id, added: [jane.uid, john.uid] }
-        before { uids.take(students_count).each { |it| Mumuki::Classroom::Student.create! uid: it, organization: organization.name, course: course.slug } }
+        before do
+          uids.take(students_count).each do |it|
+            create :student, uid: it, organization: organization.name, course: course.slug
+          end
+        end
         before { post "/api/courses/foo/massive/exams/#{classroom_id}/students", exam_uids.to_json }
 
         context 'when request exceeds batch limit and some students does not belong to course' do
