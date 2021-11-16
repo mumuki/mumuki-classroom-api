@@ -98,6 +98,7 @@ class Mumuki::Classroom::App < Sinatra::Application
       authorize! :janitor
       ensure_organization_existence!
       Course.create! with_current_organization(json_body)
+                      .merge(slug: json_body[:slug].to_mumukit_slug.normalize.to_s)
       {status: :created}
     end
 

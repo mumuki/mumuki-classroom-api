@@ -50,9 +50,9 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     def slug
       if route_slug_parts.present?
-        Mumukit::Auth::Slug.join(*route_slug_parts)
+        Mumukit::Auth::Slug.join(*route_slug_parts).normalize
       elsif json_body
-        Mumukit::Auth::Slug.parse(json_body['slug'])
+        json_body['slug'].to_mumukit_slug.normalize
       else
         raise Mumukit::Auth::InvalidSlugFormatError.new('Slug not available')
       end
@@ -91,11 +91,11 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
 
     def course_slug
-      @course_slug ||= Mumukit::Auth::Slug.join_s(*route_slug_parts)
+      @course_slug ||= Mumukit::Auth::Slug.join(*route_slug_parts).normalize.to_s
     end
 
     def repo_slug
-      @repo_slug ||= Mumukit::Auth::Slug.join_s(params[:organization], params[:repository])
+      @repo_slug ||= Mumukit::Auth::Slug.join(params[:organization], params[:repository]).normalize.to_s
     end
 
     def tenantized_json_body

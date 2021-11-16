@@ -26,7 +26,7 @@ describe Course do
   end
 
   describe 'post /courses' do
-    let(:slug) { 'example.org/2016-K2001' }
+    let(:slug) { 'example.org/2016-k2001' }
     let(:new_course) { {code: 'K2001',
                     days: %w(monday saturday),
                     period: '2016',
@@ -54,7 +54,7 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_slug).to eq 'example.org/2016-K2001' }
+      it { expect(created_slug).to eq 'example.org/2016-k2001' }
     end
 
     context 'when is global admin' do
@@ -64,7 +64,7 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_slug).to eq 'example.org/2016-K2001' }
+      it { expect(created_slug).to eq 'example.org/2016-k2001' }
     end
 
     context 'when slug is ill-formed' do
@@ -85,7 +85,21 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_slug).to eq 'example.org/2021-2Q' }
+      it { expect(created_slug).to eq 'example.org/2021-2q' }
+
+      context 'when it is fetched by its unnormalized, uppercase form' do
+        before { get '/courses/2021-2Q'  }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.status).to eq 200 }
+      end
+
+      context 'when it is fetched by its unnormalized, urlencoded form' do
+        before { get '/courses/2021%202Q'  }
+
+        it { expect(last_response).to be_ok }
+        it { expect(last_response.status).to eq 200 }
+      end
     end
 
     context 'when course already exists' do

@@ -64,7 +64,7 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses/:course/students/:uid/transfer' do
       authorize! :admin
 
-      destination = Mumukit::Auth::Slug.join organization, json_body[:destination]
+      destination = Mumukit::Auth::Slug.join(organization, json_body[:destination]).normalize
 
       Mumuki::Classroom::Student.find_by!(with_organization_and_course uid: uid).transfer_to!  organization, destination.to_s
 
