@@ -97,7 +97,6 @@ class Mumuki::Classroom::App < Sinatra::Application
     post '/courses' do
       authorize! :janitor
       ensure_organization_existence!
-      ensure_normalized_slug! json_body[:slug]
       Course.create! with_current_organization(json_body)
       {status: :created}
     end

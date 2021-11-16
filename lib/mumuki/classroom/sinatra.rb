@@ -102,13 +102,6 @@ class Mumuki::Classroom::App < Sinatra::Application
       json_body.merge(tenant: tenant)
     end
 
-    def ensure_normalized_slug!(slug)
-      slug = slug.to_mumukit_slug
-      if !slug.normalize.eql? slug
-        raise Mumukit::Auth::InvalidSlugFormatError, 'Only normalized slugs should be used to create a course'
-      end
-    end
-
     def ensure_course_existence!
       Course.locate! course_slug
     end
