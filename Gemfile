@@ -25,3 +25,7 @@ group :development do
   gem 'binding_of_caller'
   gem 'web-console'
 end
+
+
+gem 'mumukit-auth', github: 'mumuki/mumukit-auth', branch: 'cc73f15069b90b28fa6db5ef694d7414e292fc2f'
+gem 'mumuki-domain', github: 'mumuki/mumuki-domain', branch: 'feature-permissions-compact'
