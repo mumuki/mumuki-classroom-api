@@ -104,7 +104,7 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     def ensure_normalized_slug!(slug)
       slug = slug.to_mumukit_slug
-      if !slug.normalize.eql? slug
+      unless slug.normalized?
         raise Mumukit::Auth::InvalidSlugFormatError, 'Only normalized slugs should be used to create a course'
       end
     end

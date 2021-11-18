@@ -27,5 +27,5 @@ group :development do
 end
 
 
-gem 'mumukit-auth', github: 'mumuki/mumukit-auth', branch: 'cc73f15069b90b28fa6db5ef694d7414e292fc2f'
+gem 'mumukit-auth', github: 'mumuki/mumukit-auth', branch: 'feature-improved-normalization-methods'
 gem 'mumuki-domain', github: 'mumuki/mumuki-domain', branch: 'feature-permissions-compact'
