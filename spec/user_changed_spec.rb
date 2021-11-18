@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe Mumuki::Classroom::Event::UserChanged do
 
-  let(:uid) { 'agus@mumuki.org' }
+  let(:uid) { 'john@doe.com' }
 
-  let(:old_permissions) { {student: 'example.org/foo', teacher: 'example.org/foo'}.with_indifferent_access }
-  let(:new_permissions) { {student: 'example.org/bar', teacher: 'example.org/bar'}.with_indifferent_access }
+  let(:old_permissions) { {student: 'example.org/old-students', teacher: 'example.org/old-teachers'}.with_indifferent_access }
+  let(:new_permissions) { {student: 'example.org/new-students', teacher: 'example.org/new-teachers'}.with_indifferent_access }
 
-  let(:user) { {uid: uid, email: uid, last_name: 'Pina', first_name: 'Agustín'}.with_indifferent_access }
+  let(:user) { {uid: uid, email: uid, last_name: 'Doe', first_name: 'John'}.with_indifferent_access }
 
   let(:event) { user.merge(old_permissions: old_permissions, new_permissions: new_permissions) }
 
@@ -44,110 +44,119 @@ describe Mumuki::Classroom::Event::UserChanged do
       it { expect(Mumuki::Classroom::Event::UserChanged.changes['example.org'].map(&:description)).to eq %w(student_removed student_added teacher_removed teacher_added) }
       it { expect(Mumukit::Auth::Permissions::Diff.diff(old_permissions, new_permissions).as_json)
              .to json_like(changes: [
-               {role: 'student', grant: 'example.org/foo', type: 'removed'},
-               {role: 'student', grant: 'example.org/bar', type: 'added'},
-               {role: 'teacher', grant: 'example.org/foo', type: 'removed'},
-               {role: 'teacher', grant: 'example.org/bar', type: 'added'}]) }
+               {role: 'student', grant: 'example.org/old-students', type: 'removed'},
+               {role: 'student', grant: 'example.org/new-students', type: 'added'},
+               {role: 'teacher', grant: 'example.org/old-teachers', type: 'removed'},
+               {role: 'teacher', grant: 'example.org/new-teachers', type: 'added'}]) }
 
     end
 
-    context 'update models' do
-
-      let!(:course) { create(:course, slug: 'example.org/foo') }
-      let!(:course) { create(:course, slug: 'example.org/bar') }
-      before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Mumuki::Classroom::Teacher.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
-
-      before { Mumuki::Classroom::Event::UserChanged.execute! event }
-
-      let(:event) do
-        user
-          .except(:first_name)
-          .merge(social_id: 'foo', old_permissions: old_permissions, new_permissions: new_permissions)
+    context 'when courses exist' do
+      before do
+        create(:course, slug: 'example.org/old-students')
+        create(:course, slug: 'example.org/new-students')
+        create(:course, slug: 'example.org/old-teachers')
+        create(:course, slug: 'example.org/new-teachers')
       end
 
-      let(:except_fields) { {except: [:created_at, :updated_at, :social_id, :image_url]} }
+      context 'update models' do
+        before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/old-students') }
+        before { Mumuki::Classroom::Teacher.create! user.merge(organization: 'example.org', course: 'example.org/old-teachers') }
 
-      let(:student_foo_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
-      let(:student_bar_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
-      let(:teacher_foo_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/foo') }
-      let(:teacher_bar_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/bar') }
+        before { Mumuki::Classroom::Event::UserChanged.execute! event }
 
-      it { expect(student_foo_fetched.detached).to eq true }
-      it { expect(student_foo_fetched.uid).to eq uid }
-      it { expect(student_foo_fetched.first_name).to eq 'Agustín' }
+        let(:event) do
+          user
+            .except(:first_name)
+            .merge(social_id: 'foo', old_permissions: old_permissions, new_permissions: new_permissions)
+        end
 
-      it { expect(student_bar_fetched.as_json).to json_like user.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
-      it { expect(student_bar_fetched.detached).to eq nil }
+        let(:except_fields) { {except: [:created_at, :updated_at, :social_id, :image_url]} }
 
-      it { expect(teacher_bar_fetched.as_json).to json_like user.merge(organization: 'example.org', course: 'example.org/bar'), except_fields }
-    end
+        let(:student_foo_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/old-students') }
+        let(:student_bar_fetched) { Mumuki::Classroom::Student.find_by(uid: uid, organization: 'example.org', course: 'example.org/new-students') }
+        let(:teacher_foo_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/old-teachers') }
+        let(:teacher_bar_fetched) { Mumuki::Classroom::Teacher.find_by(uid: uid, organization: 'example.org', course: 'example.org/new-teachers') }
 
-    context 'when there are assignments for several users, user changed event only updates the assignment for that student' do
-      let(:chapter) { {
-        id: 'guide_chapter_id',
-        name: 'guide_chapter_name'
-      } }
-      let(:parent) { {
-        type: 'Lesson',
-        name: 'A lesson name',
-        position: '1',
-        chapter: chapter
-      } }
-      let(:guide) { {
-        slug: 'guide_slug',
-        name: 'guide_name',
-        parent: parent,
-        language: {
-          name: 'guide_language_name',
-          devicon: 'guide_language_devicon'
-        }
-      } }
-      let(:exercise) { {
-        eid: 1,
-        name: 'exercise_name',
-        number: 1
-      } }
-      let(:submission) { {
-        sid: '1',
-        status: 'passed',
-        result: 'result',
-        content: 'find f = head.filter f',
-        feedback: 'feedback',
-        created_at: '2016-01-01 00:00:00',
-        test_results: ['test_results'],
-        submissions_count: 1,
-        expectation_results: []
-      } }
-      let(:agus_submission) { submission.merge({
-                                                 organization: 'example.org',
-                                                 submitter: user,
-                                                 exercise: exercise,
-                                                 guide: guide
-                                               }) }
-      let(:fede_submission) { submission.merge({
-                                                 organization: 'example.org',
-                                                 submitter: user2,
-                                                 exercise: exercise,
-                                                 guide: guide
-                                               }) }
-      let(:uid2) { 'fedescarpa@mumuki.org' }
-      let(:user2) { {uid: uid2, email: uid2, last_name: 'Scarpa', first_name: 'Federico'}.with_indifferent_access }
-      let(:event2) { user2.merge(last_name: 'Otro', permissions: old_permissions) }
-      before { create :user, uid: uid2, permissions: old_permissions }
-      let!(:course) { create(:course, slug: 'example.org/foo') }
-      let!(:course) { create(:course, slug: 'example.org/bar') }
-      before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Mumuki::Classroom::Student.create! user2.merge(organization: 'example.org', course: 'example.org/foo') }
-      before { Mumuki::Classroom::Submission.process!(agus_submission) }
-      before { Mumuki::Classroom::Submission.process!(fede_submission) }
-      before { Mumuki::Classroom::Event::UserChanged.execute! event2 }
+        it { expect(student_foo_fetched.detached).to eq true }
+        it { expect(student_foo_fetched.uid).to eq uid }
+        it { expect(student_foo_fetched.first_name).to eq 'John' }
 
-      it { expect(Mumuki::Classroom::Assignment.where('student.uid': uid).count).to eq 1 }
-      it { expect(Mumuki::Classroom::Assignment.where('student.uid': uid2).count).to eq 1 }
-      it { expect(Mumuki::Classroom::GuideProgress.where('student.uid': uid).count).to eq 1 }
-      it { expect(Mumuki::Classroom::GuideProgress.where('student.uid': uid2).count).to eq 1 }
+        it { expect(student_bar_fetched.as_json).to json_like user.merge(organization: 'example.org', course: 'example.org/new-students'), except_fields }
+        it { expect(student_bar_fetched.detached).to eq nil }
 
+        it { expect(teacher_bar_fetched.as_json).to json_like user.merge(organization: 'example.org', course: 'example.org/new-teachers'), except_fields }
+      end
+
+      context 'when there are assignments for several users, user changed event only updates the assignment for that student' do
+        let(:chapter) { {
+          id: 'guide_chapter_id',
+          name: 'guide_chapter_name'
+        } }
+        let(:parent) { {
+          type: 'Lesson',
+          name: 'A lesson name',
+          position: '1',
+          chapter: chapter
+        } }
+        let(:guide) { {
+          slug: 'guide_slug',
+          name: 'guide_name',
+          parent: parent,
+          language: {
+            name: 'guide_language_name',
+            devicon: 'guide_language_devicon'
+          }
+        } }
+        let(:exercise) { {
+          eid: 1,
+          name: 'exercise_name',
+          number: 1
+        } }
+        let(:submission) { {
+          sid: '1',
+          status: 'passed',
+          result: 'result',
+          content: 'find f = head.filter f',
+          feedback: 'feedback',
+          created_at: '2016-01-01 00:00:00',
+          test_results: ['test_results'],
+          submissions_count: 1,
+          expectation_results: []
+        } }
+        let(:john_submission) do
+          submission.merge({
+            organization: 'example.org',
+            submitter: user,
+            exercise: exercise,
+            guide: guide
+          })
+        end
+        let(:mary_submission) do
+          submission.merge({
+            organization: 'example.org',
+            submitter: mary_h,
+            exercise: exercise,
+            guide: guide
+          })
+        end
+        let(:mary_uid) { 'mary@doe.com' }
+        let(:mary_h) { {uid: mary_uid, email: mary_uid, last_name: 'Doe', first_name: 'Mary'}.with_indifferent_access }
+        let(:mary_event) { mary_h.merge(last_name: 'Marie', permissions: old_permissions) }
+        before { create :user, uid: mary_uid, permissions: old_permissions }
+
+        before { Mumuki::Classroom::Student.create! user.merge(organization: 'example.org', course: 'example.org/old-students') }
+        before { Mumuki::Classroom::Student.create! mary_h.merge(organization: 'example.org', course: 'example.org/old-students') }
+        before { Mumuki::Classroom::Submission.process!(john_submission) }
+        before { Mumuki::Classroom::Submission.process!(mary_submission) }
+        before { Mumuki::Classroom::Event::UserChanged.execute! mary_event }
+
+        it { expect(Mumuki::Classroom::Assignment.where('student.uid': uid).count).to eq 1 }
+        it { expect(Mumuki::Classroom::Assignment.where('student.uid': mary_uid).count).to eq 1 }
+        it { expect(Mumuki::Classroom::GuideProgress.where('student.uid': uid).count).to eq 1 }
+        it { expect(Mumuki::Classroom::GuideProgress.where('student.uid': mary_uid).count).to eq 1 }
+
+      end
     end
 
   end
