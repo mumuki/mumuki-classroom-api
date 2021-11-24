@@ -32,9 +32,9 @@ module CourseMember
       MANDATORY_FIELDS.all? { |it| json[it].present? } && EmailValidator.valid?(json[:email])
     end
 
-    def ensure_not_exists!(query)
-      existing_members = where(query)
-      raise Mumuki::Classroom::CourseMemberExistsError, {existing_members: existing_members.map(&:uid)}.to_json if existing_members.exists?
+    def ensure_not_attached!(query)
+      existing_members = where(query).where.not(detached: true)
+      raise Mumuki::Classroom::CourseMemberAlreadyAttachedError, {existing_members: existing_members.map(&:uid)}.to_json if existing_members.exists?
     end
 
     def attributes_from_uid(uid)
@@ -58,5 +58,5 @@ module CourseMember
   end
 end
 
-class Mumuki::Classroom::CourseMemberExistsError < Exception
+class Mumuki::Classroom::CourseMemberAlreadyAttachedError < Exception
 end

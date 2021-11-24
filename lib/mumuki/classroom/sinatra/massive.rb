@@ -174,6 +174,7 @@ class Mumuki::Classroom::App < Sinatra::Application
 
     def existing_members_in_course(collection, massive_members)
       collection.where(with_organization_and_course)
+        .where(detached: false)
         .in(uid: massive_members.map { |it| it[:uid] })
         .map { |it| collection.normalized_attributes_from_json(it) }
     end
@@ -222,4 +223,3 @@ class Mumuki::Classroom::App < Sinatra::Application
     end
   end
 end
-

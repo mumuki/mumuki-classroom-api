@@ -26,13 +26,14 @@ describe Course do
   end
 
   describe 'post /courses' do
+    let(:slug) { 'example.org/2016-k2001' }
     let(:new_course) { {code: 'K2001',
                     days: %w(monday saturday),
                     period: '2016',
                     shifts: ['morning'],
                     description: 'haskell',
                     organization: 'example.org',
-                    slug: 'example.org/2016-K2001'} }
+                    slug: slug} }
     let(:new_course_slug) { new_course[:slug] }
     let(:created_slug) { Course.last.slug }
 
@@ -53,7 +54,7 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_slug).to eq 'example.org/2016-K2001' }
+      it { expect(created_slug).to eq 'example.org/2016-k2001' }
     end
 
     context 'when is global admin' do
@@ -63,7 +64,27 @@ describe Course do
       it { expect(last_response).to be_ok }
       it { expect(last_response.body).to json_eq status: 'created' }
       it { expect(Course.count).to eq 1 }
-      it { expect(created_slug).to eq 'example.org/2016-K2001' }
+      it { expect(created_slug).to eq 'example.org/2016-k2001' }
+    end
+
+    context 'when slug is ill-formed' do
+      let(:slug) { 'example.org-2021-2Q' }
+      before { header 'Authorization', build_auth_header('*') }
+      before { post '/courses', new_course.to_json }
+
+      it { expect(last_response).to_not be_ok }
+      it { expect(last_response.body).to json_eq message: 'Invalid slug: example.org-2021-2Q. It must be in first/second format' }
+      it { expect(Course.count).to eq 0 }
+    end
+
+    context 'when slug is not normalized' do
+      let(:slug) { 'example.org/2021 2Q' }
+      before { header 'Authorization', build_auth_header('*') }
+      before { post '/courses', new_course.to_json }
+
+      it { expect(last_response).to_not be_ok }
+      it { expect(last_response.body).to json_eq message: 'Only normalized slugs should be used to create a course' }
+      it { expect(Course.count).to eq 0 }
     end
 
     context 'when course already exists' do
