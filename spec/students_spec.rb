@@ -330,7 +330,7 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
 
           describe 'adds student to a course if exists' do
             before { post '/courses/foo/students', student_json }
-            context 'in same course, should fails' do
+            context 'in same course, should fail' do
               before { expect(Mumukit::Nuntius).to_not receive(:notify!) }
               before { post '/courses/foo/students', student_json }
 
@@ -338,6 +338,23 @@ describe Mumuki::Classroom::Student, workspaces: [:organization, :courses] do
               it { expect(last_response.status).to eq 400 }
               it { expect(last_response.body).to json_eq(existing_members: [student[:email]]) }
             end
+
+            context 'in same course but detached, should fails' do
+              let(:fetched_student) { Mumuki::Classroom::Student.find_by(uid: student[:uid]) }
+              let(:fetched_user) { User.locate! student[:uid] }
+
+              before { expect(Mumukit::Nuntius).to receive(:notify!) }
+              before { post "/courses/foo/students/#{student[:uid]}/detach" }
+              before { post '/courses/foo/students', student_json }
+
+              it { expect(last_response).to be_ok }
+              it { expect(last_response.status).to eq 200 }
+
+              it { expect(fetched_student.detached).to be true }
+              it { expect(fetched_student.detached_at).to_not be nil }
+              it { expect(fetched_user.student_of? 'example.org/foo').to be true }
+            end
+
             context 'in different course, should work' do
               let!(:course) { create(:course, slug: 'example.org/bar') }
               before { header 'Authorization', build_auth_header('*', 'auth1') }
