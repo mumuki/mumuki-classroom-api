@@ -33,7 +33,7 @@ module CourseMember
     end
 
     def ensure_not_exists!(query)
-      existing_members = where(query).where(detached: false)
+      existing_members = where(query).where.not(detached: true)
       raise Mumuki::Classroom::CourseMemberExistsError, {existing_members: existing_members.map(&:uid)}.to_json if existing_members.exists?
     end
 
