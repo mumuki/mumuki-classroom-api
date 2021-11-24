@@ -1,5 +1,5 @@
 class Mumuki::Classroom::App < Sinatra::Application
-  error Mumuki::Classroom::CourseMemberExistsError do
+  error Mumuki::Classroom::CourseMemberAlreadyAttachedError do
     halt 400
   end
 

@@ -113,10 +113,6 @@ class Mumuki::Classroom::App < Sinatra::Application
       Course.locate! course_slug
     end
 
-    def ensure_member_not_exists!(member_json, member_collection)
-      member_collection.ensure_not_exists! with_organization_and_course uid: member_json[:uid]
-    end
-
     def collection_for(role)
       "Mumuki::Classroom::#{role.to_s.titleize}".constantize
     end
@@ -125,8 +121,8 @@ class Mumuki::Classroom::App < Sinatra::Application
       member_collection = collection_for role
 
       member_collection.normalized_attributes_from_json(json_body).tap do |member_json|
-        ensure_member_not_exists! member_json, member_collection
-        member = member_collection.find_or_initialize_by(with_organization_and_course uid: member_json[:uid])
+        member_collection.ensure_not_attached! with_organization_and_course(uid: member_json[:uid])
+        member = member_collection.find_or_initialize_by with_organization_and_course(uid: member_json[:uid])
         member.assign_attributes member_json
         member.save!
         upsert_user! role, member.as_user
